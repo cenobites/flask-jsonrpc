@@ -7,7 +7,7 @@ A basic JSON-RPC implementation for your Flask-powered sites based on [django-js
 Running
 *******
 
-'''
+::
     
     $ pip install Flask
     $ python run_test.py
@@ -17,7 +17,8 @@ Running
 Testing
 *******
 
-'''
+::
+
     $ curl -i -X POST -d '{"jsonrpc": "2.0", "method": "App.index", "params": {}, "id": "1"}' http://localhost:5000/api
     HTTP/1.0 200 OK
     Content-Type: application/json
@@ -36,7 +37,7 @@ Dependecies
 ***********
 
 * Python 2.7 or later (http://www.python.org)
-* Flask 1.4.1 or later (http://www.djangoproject.org)
+* Flask 0.9 or later (http://www.djangoproject.org)
 
 
 Project Information
