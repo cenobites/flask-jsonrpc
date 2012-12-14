@@ -98,9 +98,13 @@ class JSONRPCSite(object):
     def register(self, name, method):
         self.urls[unicode(name)] = method
 
-    def extract_id_request(self, raw_data):
+    def extract_id_request(self, immutable_multi_dict):
+        raw_data = None
+        if not immutable_multi_dict is None and immutable_multi_dict.keys():
+            raw_data = immutable_multi_dict.keys()[0]
         if not raw_data is None and raw_data.find('id') != -1:
-            find_id = re.findall(r'["|\']id["|\']:["|\'](.+?)["|\']', raw_data, re.U)
+            find_id = re.findall(r'["|\']id["|\']:["|\'](.+?)["|\']', 
+                                 raw_data.replace(' ', ''), re.U)
             return find_id[0] if find_id else None
         return None
     
@@ -132,9 +136,9 @@ class JSONRPCSite(object):
         version = version_hint
         response = self.empty_response(version=version)
         apply_version = {
-            '2.0': lambda f, r, p: f(r, **encode_kw(p)) if type(p) is dict else f(r, *p),
-            '1.1': lambda f, r, p: f(r, *encode_arg11(p), **encode_kw(encode_kw11(p))),
-            '1.0': lambda f, r, p: f(r, *p)
+            '2.0': lambda f, r, p: f(**encode_kw(p)) if type(p) is dict else f(*p),
+            '1.1': lambda f, r, p: f(*encode_arg11(p), **encode_kw(encode_kw11(p))),
+            '1.0': lambda f, r, p: f(*p)
         }
         
         try:
@@ -222,15 +226,15 @@ class JSONRPCSite(object):
                 raise RequestPostError
             else:
                 try:
-                    D = json.loads(request.data)
+                    D = json.loads(request.form.keys()[0])
                 except:
                     raise InvalidRequestError
             
             if type(D) is list:
-                response = [self.response_dict(request, d, is_batch=True, json_encoder=json.JSONEncoder)[0] for d in D]
+                response = [self.response_dict(request, d, is_batch=True)[0] for d in D]
                 status = 200
             else:
-                response, status = self.response_dict(request, D, json_encoder=json.JSONEncoder)
+                response, status = self.response_dict(request, D)
                 if response is None and (not u'id' in D or D[u'id'] is None): # a notification
                     response_json = jsonify('')
                     response_json.status = status
@@ -251,7 +255,7 @@ class JSONRPCSite(object):
             status = other_error.status
         
         # extract id the request
-        json_request_id = self.extract_id_request(request.data)
+        json_request_id = self.extract_id_request(request.form)
         response['id'] = json_request_id
 
         return response

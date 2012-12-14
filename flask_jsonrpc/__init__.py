@@ -146,7 +146,8 @@ class JSONRPC(object):
             self.app = None
 
     def init_app(self, app):
-        app.add_url_rule(self.rule + '/<method>', '', _site_api, methods=['POST'])
+        app.add_url_rule(self.rule, '', _site_api, methods=['POST'])
+        app.add_url_rule(self.rule + '/<method>', '', _site_api, methods=['GET'])
             
     def method(self, name, authenticated=False, safe=False, validate=False, **options):
         def decorator(f):
