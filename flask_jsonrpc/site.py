@@ -124,7 +124,7 @@ class JSONRPCSite(object):
             method = unicode(method)
             if method in self.urls and getattr(self.urls[method], 'json_safe', False):
                 D = {
-                    'params': encode_get_params(request.GET.lists()),
+                    'params': encode_get_params(request.args.lists()),
                     'method': method,
                     'id': 'jsonrpc',
                     'version': '1.1'
