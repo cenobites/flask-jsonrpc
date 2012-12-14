@@ -1,0 +1,17 @@
+syntax: glob
+*~
+*.pyc
+*.pyo
+*.swp
+*-swp
+*.out
+*.log
+*.bak
+*.orig
+*.db
+*.pydevproject
+*.project
+*.settings
+*.directory
+__pycache__
+src/**/build/*
