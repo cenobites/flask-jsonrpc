@@ -9,7 +9,8 @@ from functools import wraps
 
 from flask import json, jsonify, current_app, got_request_exception
 
-from flask_jsonrpc.types import Object, Number, Boolean, String, Array, Nil, Any
+from flask_jsonrpc.helpers import extract_raw_data_request
+from flask_jsonrpc.types import Object, Array, Any
 from flask_jsonrpc.exceptions import (Error, ParseError, InvalidRequestError, 
                                       MethodNotFoundError, InvalidParamsError, 
                                       ServerError, RequestPostError,
@@ -107,15 +108,6 @@ class JSONRPCSite(object):
                 return g1 if g1 else g2 
         return None
     
-    def extract_raw_data_request(self, request):
-        if request.method == 'GET':
-            return request.query_string
-        elif request.method == 'POST':
-            if request.data:
-                return request.data
-            return request.form.keys()[0]
-        return ''
-    
     def empty_response(self, version='1.0'):
         resp = {'id': None}
         if version == '1.1':
@@ -152,7 +144,7 @@ class JSONRPCSite(object):
         try:
             # params: An Array or Object, that holds the actual parameter values 
             # for the invocation of the procedure. Can be omitted if empty.
-            if 'params' not in D:
+            if 'params' not in D or not D['params']:
                  D['params'] = []
             if 'method' not in D or 'params' not in D:
                 raise InvalidParamsError('Request requires str:"method" and list:"params"')
@@ -223,7 +215,7 @@ class JSONRPCSite(object):
         # in case we do something json doesn't like, we always get back valid 
         # json-rpc response
         response = self.empty_response()
-        raw_data = self.extract_raw_data_request(request)
+        raw_data = extract_raw_data_request(request)
         
         try:
             if request.method == 'GET':
@@ -245,9 +237,8 @@ class JSONRPCSite(object):
             else:
                 response, status = self.response_dict(request, D)
                 if response is None and (not u'id' in D or D[u'id'] is None): # a notification
-                    response = {}
-                    response['status'] = status
-                    return response
+                    response = ''
+                    return response, status
         except Error, e:
             #got_request_exception.send(sender=self.__class__, request=request)
 
@@ -267,7 +258,7 @@ class JSONRPCSite(object):
         json_request_id = self.extract_id_request(raw_data)
         response['id'] = json_request_id
 
-        return response
+        return response, status
     
     def procedure_desc(self, key):
         M = self.urls[key]

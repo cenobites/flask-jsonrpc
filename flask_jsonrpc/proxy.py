@@ -7,7 +7,7 @@ import StringIO
 
 from flask import json, current_app
 
-from flask_jsonrpc.types import Object, Number, Boolean, String, Array, Nil, Any
+from flask_jsonrpc.types import Object, Any
 
 
 class ServiceProxy(object):

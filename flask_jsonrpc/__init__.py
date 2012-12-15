@@ -8,10 +8,11 @@ from functools import wraps
 
 from collections import OrderedDict
 
-from flask import request, jsonify
+from flask import current_app, request, jsonify
 
 from flask_jsonrpc.site import jsonrpc_site
-from flask_jsonrpc.types import Object, Number, Boolean, String, Array, Nil, Any
+from flask_jsonrpc.helpers import jsonify_status_code, extract_raw_data_request
+from flask_jsonrpc.types import Object, Number, Boolean, String, Array, Nil, Any, Type
 from flask_jsonrpc.exceptions import (Error, ParseError, InvalidRequestError, 
                                       MethodNotFoundError, InvalidParamsError, 
                                       ServerError, RequestPostError,
@@ -130,14 +131,18 @@ def _inject_args(sig, types):
     return sig
 
 def _site_api(method=''):
-    response_dict = default_site.dispatch(request, method)
-    return jsonify(response_dict)
+    response_dict, status_code = default_site.dispatch(request, method)
+    if current_app.config['DEBUG']:
+        print('\n ++ data request')
+        print('>> request: {}'.format(extract_raw_data_request(request)))
+        print('<< response: {}, {}'.format(status_code, response_dict))
+    return jsonify_status_code(status_code, response_dict), status_code
 
 
 class JSONRPC(object):
     
-    def __init__(self, app=None, rule='/api', site=default_site):
-        self.rule = rule
+    def __init__(self, app=None, service_url='/api', site=default_site):
+        self.service_url = service_url
         self.site = site
         if app is not None:
             self.app = app
@@ -146,8 +151,8 @@ class JSONRPC(object):
             self.app = None
 
     def init_app(self, app):
-        app.add_url_rule(self.rule, '', _site_api, methods=['POST'])
-        app.add_url_rule(self.rule + '/<method>', '', _site_api, methods=['GET'])
+        app.add_url_rule(self.service_url, '', _site_api, methods=['POST'])
+        app.add_url_rule(self.service_url + '/<method>', '', _site_api, methods=['GET'])
             
     def method(self, name, authenticated=False, safe=False, validate=False, **options):
         def decorator(f):
