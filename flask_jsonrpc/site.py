@@ -98,15 +98,19 @@ class JSONRPCSite(object):
     def register(self, name, method):
         self.urls[unicode(name)] = method
 
-    def extract_id_request(self, immutable_multi_dict):
-        raw_data = None
-        if not immutable_multi_dict is None and immutable_multi_dict.keys():
-            raw_data = immutable_multi_dict.keys()[0]
+    def extract_id_request(self, raw_data):
         if not raw_data is None and raw_data.find('id') != -1:
-            find_id = re.findall(r'["|\']id["|\']:["|\'](.+?)["|\']', 
+            find_id = re.findall(r'["|\']id["|\']:([0-9])|["|\']id["|\']:["|\'](.+?)["|\']', 
                                  raw_data.replace(' ', ''), re.U)
-            return find_id[0] if find_id else None
+            if find_id:
+                g1, g2 = find_id[0]
+                return g1 if g1 else g2 
         return None
+    
+    def extract_raw_data_request(self, request):
+        if request.data:
+            return request.data
+        return request.form.keys()[0]
     
     def empty_response(self, version='2.0'):
         resp = {'id': None}
@@ -215,6 +219,7 @@ class JSONRPCSite(object):
         # in case we do something json doesn't like, we always get back valid 
         # json-rpc response
         response = self.empty_response()
+        raw_data = self.extract_raw_data_request(request)
         
         try:
             if request.method == 'GET':
@@ -226,7 +231,7 @@ class JSONRPCSite(object):
                 raise RequestPostError
             else:
                 try:
-                    D = json.loads(request.form.keys()[0])
+                    D = json.loads(raw_data)
                 except:
                     raise InvalidRequestError
             
@@ -255,7 +260,7 @@ class JSONRPCSite(object):
             status = other_error.status
         
         # extract id the request
-        json_request_id = self.extract_id_request(request.form)
+        json_request_id = self.extract_id_request(raw_data)
         response['id'] = json_request_id
 
         return response
