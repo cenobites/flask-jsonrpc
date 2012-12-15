@@ -24,3 +24,6 @@ def extract_raw_data_request(request):
             #return '&'.join(['{}={}'.format(k,v) for k,v in request.form.to_dict().items()])
             return request.form.to_dict().keys()[0]
     return ''
+
+def log_exception(sender, exception, **extra):
+    sender.logger.debug('Got exception during processing: %s', exception)

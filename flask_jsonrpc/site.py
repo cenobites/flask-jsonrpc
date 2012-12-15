@@ -9,7 +9,7 @@ from functools import wraps
 
 from flask import json, jsonify, current_app, got_request_exception
 
-from flask_jsonrpc.helpers import extract_raw_data_request
+from flask_jsonrpc.helpers import extract_raw_data_request, log_exception
 from flask_jsonrpc.types import Object, Array, Any
 from flask_jsonrpc.exceptions import (Error, ParseError, InvalidRequestError, 
                                       MethodNotFoundError, InvalidParamsError, 
@@ -188,14 +188,16 @@ class JSONRPCSite(object):
             status = 200
         
         except Error, e:
-            #got_request_exception.connect(sender=self.__class__, request=request)
+            #got_request_exception.connect(log_exception, current_app._get_current_object())
+            
             response['error'] = e.json_rpc_format
             if version in ('1.1', '2.0') and 'result' in response:
                 response.pop('result')
             status = e.status
         except Exception, e:
             # exception missed by others
-            #got_request_exception.connect(sender=self.__class__, request=request)
+            #got_request_exception.connect(log_exception, current_app._get_current_object())
+            
             other_error = OtherError(e)
             response['error'] = other_error.json_rpc_format
             status = other_error.status
@@ -240,13 +242,13 @@ class JSONRPCSite(object):
                     response = ''
                     return response, status
         except Error, e:
-            #got_request_exception.send(sender=self.__class__, request=request)
+            #got_request_exception.connect(log_exception, current_app._get_current_object())
 
             response['error'] = e.json_rpc_format
             status = e.status
         except Exception, e:
             # exception missed by others
-            #got_request_exception.send(sender=self.__class__, request=request)            
+            #got_request_exception.connect(log_exception, current_app._get_current_object())            
 
             other_error = OtherError(e)
 
