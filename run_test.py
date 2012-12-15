@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) 2012, Cenobit Technologies, Inc. http://cenobit.es/
 # All rights reserved.
-from flask import Flask, g, request, session
+from flask import Flask
 from flask_jsonrpc import JSONRPC
 
 app = Flask(__name__)
@@ -14,4 +14,4 @@ def index():
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', debug=0)
+    app.run(host='0.0.0.0', debug=True)
