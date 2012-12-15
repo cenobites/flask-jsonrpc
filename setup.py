@@ -18,7 +18,7 @@ from setuptools import setup
 
 setup(
     name='Flask-JSONRPC',
-    version='1.0',
+    version='0.1',
     url='http://example.com/flask-sqlite3/',
     license='New BSD License',
     author='Nycholas de Oliveira e Oliveira',
