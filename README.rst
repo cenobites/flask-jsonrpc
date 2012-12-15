@@ -3,19 +3,56 @@ Flask JSON-RPC
 
 A basic JSON-RPC implementation for your Flask-powered sites based on `django-json-rpc <https://github.com/samuraisam/django-json-rpc>`_.
 
+Adding Flask JSON-RPC to your application
+*****************************************
 
-Running
-*******
+1. Installation
+
+::
+
+    $ pip install Flask-JSONRPC
+
+or
+
+::
+
+    $ git clone git://github.com/cenobites/flask-jsonrpc.git
+    $ cd flask-jsonrpc
+    $ python setup.py install
+
+
+2. Getting Started
+
+Create your application and initialize the Flask-JSONRPC.
+
+::
+
+    from flask import Flask
+    from flask_jsonrpc import JSONRPC
+
+    app = Flask(__name__)
+    jsonrpc = JSONRPC(app, '/api')
+
+Write JSON-RPC methods.
+
+::
+
+    @jsonrpc.method('App.index')
+    def index():
+        return 'Welcome to Flask JSON-RPC'
+
+All code of Example `run.py <https://github.com/cenobites/flask-jsonrpc/blob/master/run.py>`_.
+
+
+3. Running
 
 ::
     
-    $ pip install Flask
     $ python run.py
      * Running on http://0.0.0.0:5000/
      
 
-Testing
-*******
+4. Testing
 
 ::
 
