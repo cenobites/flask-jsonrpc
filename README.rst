@@ -49,7 +49,7 @@ Dependecies
 ***********
 
 * Python 2.7 or later (http://www.python.org)
-* Flask 0.9 or later (http://www.djangoproject.org)
+* Flask 0.9 or later (http://flask.pocoo.org)
 
 
 Project Information

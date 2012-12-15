@@ -91,7 +91,7 @@ class JSONRPCSite(object):
     def __init__(self):
         self.urls = {}
         self.uuid = str(uuid1())
-        self.version = '2.0'
+        self.version = '1.0'
         self.name = 'Flask-JSONRPC'
         self.register('system.describe', self.describe)
         
@@ -108,11 +108,15 @@ class JSONRPCSite(object):
         return None
     
     def extract_raw_data_request(self, request):
-        if request.data:
-            return request.data
-        return request.form.keys()[0]
+        if request.method == 'GET':
+            return request.query_string
+        elif request.method == 'POST':
+            if request.data:
+                return request.data
+            return request.form.keys()[0]
+        return ''
     
-    def empty_response(self, version='2.0'):
+    def empty_response(self, version='1.0'):
         resp = {'id': None}
         if version == '1.1':
             resp['version'] = version
@@ -128,7 +132,7 @@ class JSONRPCSite(object):
             method = unicode(method)
             if method in self.urls and getattr(self.urls[method], 'json_safe', False):
                 D = {
-                    'params': encode_get_params(request.args.lists()),
+                    'params': request.args.to_dict(),
                     'method': method,
                     'id': 'jsonrpc',
                     'version': '1.1'
@@ -241,9 +245,9 @@ class JSONRPCSite(object):
             else:
                 response, status = self.response_dict(request, D)
                 if response is None and (not u'id' in D or D[u'id'] is None): # a notification
-                    response_json = jsonify('')
-                    response_json.status = status
-                    return response_json
+                    response = {}
+                    response['status'] = status
+                    return response
         except Error, e:
             #got_request_exception.send(sender=self.__class__, request=request)
 
