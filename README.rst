@@ -10,7 +10,7 @@ Running
 ::
     
     $ pip install Flask
-    $ python run_test.py
+    $ python run.py
      * Running on http://0.0.0.0:5000/
      
 
