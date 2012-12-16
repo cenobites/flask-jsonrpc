@@ -3,16 +3,16 @@
 # All rights reserved.
 import re
 import StringIO
-from inspect import getargspec
 from functools import wraps
+from inspect import getargspec
 
 from collections import OrderedDict
 
 from flask import current_app, request, jsonify
 
 from flask_jsonrpc.site import jsonrpc_site
-from flask_jsonrpc.helpers import jsonify_status_code, extract_raw_data_request
 from flask_jsonrpc.types import Object, Number, Boolean, String, Array, Nil, Any, Type
+from flask_jsonrpc.helpers import jsonify_status_code, extract_raw_data_request, authenticate
 from flask_jsonrpc.exceptions import (Error, ParseError, InvalidRequestError, 
                                       MethodNotFoundError, InvalidParamsError, 
                                       ServerError, RequestPostError,
@@ -141,8 +141,9 @@ def _site_api(method=''):
 
 class JSONRPC(object):
     
-    def __init__(self, app=None, service_url='/api', site=default_site):
+    def __init__(self, app=None, service_url='/api', auth_backend=authenticate, site=default_site):
         self.service_url = service_url
+        self.auth_backend = auth_backend
         self.site = site
         if app is not None:
             self.app = app
@@ -163,7 +164,10 @@ class JSONRPC(object):
             arg_names = getargspec(f)[0][1:]
             X = {'name': name, 'arg_names': arg_names}
             if authenticated:
-                raise Exception('Not implement')
+                # TODO: this is an assumption
+                X['arg_names'] = ['username', 'password'] + X['arg_names']
+                X['name'] = _inject_args(X['name'], ('String', 'String'))
+                _f = self.auth_backend(f, authenticated)
             else:
                 _f = f
             method, arg_types, return_type = _parse_sig(X['name'], X['arg_names'], validate)
