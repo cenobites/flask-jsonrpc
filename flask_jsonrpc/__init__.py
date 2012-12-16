@@ -149,11 +149,15 @@ class JSONRPC(object):
             self.init_app(self.app)
         else:
             self.app = None
-
+            
     def init_app(self, app):
         app.add_url_rule(self.service_url, '', _site_api, methods=['POST'])
         app.add_url_rule(self.service_url + '/<method>', '', _site_api, methods=['GET'])
-            
+        
+    def register_blueprint(self, blueprint):
+        blueprint.add_url_rule(self.service_url, '', _site_api, methods=['POST'])
+        blueprint.add_url_rule(self.service_url + '/<method>', '', _site_api, methods=['GET'])
+        
     def method(self, name, authenticated=False, safe=False, validate=False, **options):
         def decorator(f):
             arg_names = getargspec(f)[0][1:]
