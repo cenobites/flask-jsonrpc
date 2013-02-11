@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+
+  <title>Flask-JSONRPC</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Flask-JSONRPC" />
+  <meta name="author" content="Cenobit Technologies, Inc.  http://cenobit.es/" />
+</head>
+<body>
+  <div id="form">
+    <label for="name">Name:</label>
+    <input id="name" name="name" type="text" placeholder="Enter a name here">
+    <input type="button" name="btn-send" id="btn-send" value="Send" />
+    <hr>
+    <h1 id="message"></h1>
+  </div>
+
+  <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script>
+  <script type="text/javascript" src="{{ url_for('static', filename='js/api.js') }}"></script>
+  <script type="text/javascript">
+    $(document).ready(function($) {
+      var jsonrpc = new $jsonrpc({url: 'http://localhost:5000/api', version: '2.0'});
+
+      $('#form')
+        .undelegate('#btn-send', 'click')
+        .delegate('#btn-send', 'click', function(env) {
+          jsonrpc.request('hello.say', {name: $('#name').val()}).done(function(data) {
+            $('#message').text(data.result);
+          });
+        });
+
+      jsonrpc.request('hello.index').done(function(data) {
+        $('#message').text(data.result);
+      });
+    });
+  </script>
+</body>
+</html>
