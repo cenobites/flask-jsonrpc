@@ -22,11 +22,7 @@ def extract_raw_data_request(request):
     if request.method == 'GET':
         return request.query_string
     elif request.method == 'POST':
-        # True if the request was triggered via a JavaScript 
-        # XMLHttpRequest
-        if request.is_xhr:
-            return json.dumps(request.form.to_dict())
-        elif request.data:
+        if request.data:
             return request.data
         elif request.form.to_dict():
             return request.form.to_dict().keys()[0]
