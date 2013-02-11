@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) 2012, Cenobit Technologies, Inc. http://cenobit.es/
 # All rights reserved.
+from flask import current_app
 
 try:
     from flaskext.babel import gettext as _
@@ -42,13 +43,10 @@ class Error(Exception):
             'data': self.data
         }
 
-        # TODO: Add debug env flask
-        # from flask import current_app
-        
-        # if settings.DEBUG:
-        #     import sys, traceback
-        #     error['stack'] = traceback.format_exc()
-        #     error['executable'] = sys.executable
+        if current_app.config['DEBUG']:
+            import sys, traceback
+            error['stack'] = traceback.format_exc()
+            error['executable'] = sys.executable
 
         return error
 
