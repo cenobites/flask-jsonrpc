@@ -3,7 +3,7 @@
 # All rights reserved.
 from functools import wraps
 
-from flask import current_app, request, jsonify
+from flask import current_app, request, jsonify, json
 
 from flask_jsonrpc.exceptions import InvalidCredentialsError, InvalidParamsError
 
@@ -22,10 +22,13 @@ def extract_raw_data_request(request):
     if request.method == 'GET':
         return request.query_string
     elif request.method == 'POST':
-        if request.data:
+        # True if the request was triggered via a JavaScript 
+        # XMLHttpRequest
+        if request.is_xhr:
+            return json.dumps(request.form.to_dict())
+        elif request.data:
             return request.data
         elif request.form.to_dict():
-            #return '&'.join(['{}={}'.format(k,v) for k,v in request.form.to_dict().items()])
             return request.form.to_dict().keys()[0]
     return ''
 

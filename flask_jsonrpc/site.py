@@ -140,7 +140,7 @@ class JSONRPCSite(object):
             '1.1': lambda f, r, p: f(*encode_arg11(p), **encode_kw(encode_kw11(p))),
             '1.0': lambda f, r, p: f(*p)
         }
-        
+
         try:
             # params: An Array or Object, that holds the actual parameter values 
             # for the invocation of the procedure. Can be omitted if empty.
@@ -189,7 +189,7 @@ class JSONRPCSite(object):
         
         except Error, e:
             #got_request_exception.connect(log_exception, current_app._get_current_object())
-            
+
             response['error'] = e.json_rpc_format
             if version in ('1.1', '2.0') and 'result' in response:
                 response.pop('result')
@@ -197,7 +197,7 @@ class JSONRPCSite(object):
         except Exception, e:
             # exception missed by others
             #got_request_exception.connect(log_exception, current_app._get_current_object())
-            
+
             other_error = OtherError(e)
             response['error'] = other_error.json_rpc_format
             status = other_error.status
@@ -218,7 +218,7 @@ class JSONRPCSite(object):
         # json-rpc response
         response = self.empty_response()
         raw_data = extract_raw_data_request(request)
-        
+
         try:
             if request.method == 'GET':
                 valid, D = self.validate_get(request, method)
@@ -230,8 +230,8 @@ class JSONRPCSite(object):
             else:
                 try:
                     D = json.loads(raw_data)
-                except:
-                    raise InvalidRequestError
+                except Exception, e:
+                    raise InvalidRequestError(e.message)
             
             if type(D) is list:
                 response = [self.response_dict(request, d, is_batch=True)[0] for d in D]
