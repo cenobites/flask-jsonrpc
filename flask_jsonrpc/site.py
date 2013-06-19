@@ -125,7 +125,7 @@ class JSONRPCSite(object):
 
     def extract_id_request(self, raw_data):
         if not raw_data is None and raw_data.find('id') != -1:
-            find_id = re.findall(r'["|\']id["|\']:([0-9])|["|\']id["|\']:["|\'](.+?)["|\']', 
+            find_id = re.findall(r'["|\']id["|\']:([0-9]+)|["|\']id["|\']:["|\'](.+?)["|\']', 
                                  raw_data.replace(' ', ''), re.U)
             if find_id:
                 g1, g2 = find_id[0]
