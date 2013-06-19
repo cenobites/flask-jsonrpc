@@ -30,7 +30,11 @@ import StringIO
 from functools import wraps
 from inspect import getargspec
 
-from collections import OrderedDict
+try:
+    from collections import OrderedDict
+except ImportError:
+    # python 2.6 or earlier, use backport
+    from ordereddict import OrderedDict
 
 from flask import current_app, request, jsonify
 
