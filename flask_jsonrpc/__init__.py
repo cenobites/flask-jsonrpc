@@ -158,8 +158,8 @@ def _site_api(method=''):
     response_dict, status_code = default_site.dispatch(request, method)
     if current_app.config['DEBUG']:
         print('\n ++ data request')
-        print('>> request: {}'.format(extract_raw_data_request(request)))
-        print('<< response: {}, {}'.format(status_code, response_dict))
+        print('>> request: {0}'.format(extract_raw_data_request(request)))
+        print('<< response: {0}, {1}'.format(status_code, response_dict))
     return jsonify_status_code(status_code, response_dict), status_code
 
 
