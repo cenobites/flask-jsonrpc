@@ -50,14 +50,14 @@ except (NameError, ImportError):
     csrf_exempt = empty_dec
 
 NoneType = type(None)
-encode_kw = lambda p: dict([(str(k), v) for k, v in p.iteritems()])
+encode_kw = lambda p: dict([(str(k), v) for k, v in list(p.items())])
 
 def encode_kw11(p):
-    if not type(p) is dict:
+    if not isinstance(p,  dict):
         return {}
     ret = p.copy()
     removes = []
-    for k, v in ret.iteritems():
+    for k, v in list(ret.items()):
         try:
             int(k)
         except ValueError:
@@ -69,14 +69,14 @@ def encode_kw11(p):
     return ret
 
 def encode_arg11(p):
-    if type(p) is list:
+    if isinstance(p, list):
         return p
-    elif not type(p) is dict:
+    elif not isinstance(p,  dict):
         return []
     else:
         pos = []
         d = encode_kw(p)
-        for k, v in d.iteritems():
+        for k, v in list(d.items()):
             try:
                 pos.append(int(k))
             except ValueError:
@@ -86,29 +86,29 @@ def encode_arg11(p):
         return [d[str(i)] for i in pos]
 
 def validate_params(method, D):
-    if type(D['params']) == Object:
-        keys = method.json_arg_types.keys()
+    if isinstance(D['params'], Object):
+        keys = list(method.json_arg_types.keys())
         if len(keys) != len(D['params']):
-            raise InvalidParamsError('Not eough params provided for %s' % method.json_sig)
+            raise InvalidParamsError('Not eough params provided for {0}'.format(method.json_sig))
         for k in keys:
             if not k in D['params']:
-                raise InvalidParamsError('%s is not a valid parameter for %s' 
-                                         % (k, method.json_sig))
+                raise InvalidParamsError('{0} is not a valid parameter for {1}' \
+                                         .format(k, method.json_sig))
             if not Any.kind(D['params'][k]) == method.json_arg_types[k]:
-                raise InvalidParamsError('%s is not the correct type %s for %s'
-                    % (type(D['params'][k]), method.json_arg_types[k], method.json_sig))
-    elif type(D['params']) == Array:
-        arg_types = method.json_arg_types.values()
+                raise InvalidParamsError('{0} is not the correct type {1} for {2}' \
+                    .format(type(D['params'][k]), method.json_arg_types[k], method.json_sig))
+    elif isinstance(D['params'], Array):
+        arg_types = list(method.json_arg_types.values())
         try:
             for i, arg in enumerate(D['params']):
                 if not Any.kind(arg) == arg_types[i]:
-                    raise InvalidParamsError('%s is not the correct type %s for %s'
-                                             % (type(arg), arg_types[i], method.json_sig))
+                    raise InvalidParamsError('{0} is not the correct type {1} for {2}' \
+                                             .format(type(arg), arg_types[i], method.json_sig))
         except IndexError:
-            raise InvalidParamsError('Too many params provided for %s' % method.json_sig)
+            raise InvalidParamsError('Too many params provided for {0}'.format(method.json_sig))
         else:
             if len(D['params']) != len(arg_types):
-                raise InvalidParamsError('Not enouh params provided for %s' % method.json_sig)
+                raise InvalidParamsError('Not enouh params provided for {0}'.format(method.json_sig))
 
 
 class JSONRPCSite(object):
@@ -123,9 +123,10 @@ class JSONRPCSite(object):
         self.register('system.describe', self.describe)
         
     def register(self, name, method):
-        self.urls[unicode(name)] = method
+        self.urls[str(name)] = method
 
     def extract_id_request(self, raw_data):
+        raw_data = str(raw_data)
         if not raw_data is None and raw_data.find('id') != -1:
             find_id = re.findall(r'["|\']id["|\']:([0-9]+)|["|\']id["|\']:["|\'](.+?)["|\']', 
                                  raw_data.replace(' ', ''), re.U)
@@ -147,7 +148,7 @@ class JSONRPCSite(object):
     def validate_get(self, request, method):
         encode_get_params = lambda r: dict([(k, v[0] if len(v) == 1 else v) for k, v in r])
         if request.method == 'GET':
-            method = unicode(method)
+            method = str(method)
             if method in self.urls and getattr(self.urls[method], 'json_safe', False):
                 D = {
                     'params': request.args.to_dict(),
@@ -162,7 +163,7 @@ class JSONRPCSite(object):
         version = version_hint
         response = self.empty_response(version=version)
         apply_version = {
-            '2.0': lambda f, r, p: f(**encode_kw(p)) if type(p) is dict else f(*p),
+            '2.0': lambda f, r, p: f(**encode_kw(p)) if isinstance(p, dict) else f(*p),
             '1.1': lambda f, r, p: f(*encode_arg11(p), **encode_kw(encode_kw11(p))),
             '1.0': lambda f, r, p: f(*p)
         }
@@ -175,15 +176,15 @@ class JSONRPCSite(object):
             if 'method' not in D or 'params' not in D:
                 raise InvalidParamsError('Request requires str:"method" and list:"params"')
             if D['method'] not in self.urls:
-                raise MethodNotFoundError('Method not found. Available methods: %s' % ('\n'.join(self.urls.keys())))
+                raise MethodNotFoundError('Method not found. Available methods: {0}'.format('\n'.join(list(self.urls.keys()))))
             
             if 'jsonrpc' in D:
                 if str(D['jsonrpc']) not in apply_version:
-                    raise InvalidRequestError('JSON-RPC version %s not supported.' % D['jsonrpc'])
+                    raise InvalidRequestError('JSON-RPC version {0} not supported.'.format(D['jsonrpc']))
                 version = request.jsonrpc_version = response['jsonrpc'] = str(D['jsonrpc'])
             elif 'version' in D:
                 if str(D['version']) not in apply_version:
-                    raise InvalidRequestError('JSON-RPC version %s not supported.' % D['version'])
+                    raise InvalidRequestError('JSON-RPC version {0} not supported.'.format(D['version']))
                 version = request.jsonrpc_version = response['version'] = str(D['version'])
             else:
                 request.jsonrpc_version = '1.0'
@@ -207,18 +208,19 @@ class JSONRPCSite(object):
                 return None, 204
             
             encoder = current_app.json_encoder()
-            if not sum(map(lambda e: isinstance(R, e), # type of `R` should be one of these or...
-                 (dict, str, unicode, int, long, list, set, NoneType, bool))):
+            # type of `R` should be one of these or...
+            if not sum([isinstance(R, e) for e in \
+                    string_types + integer_types + (dict, list, set, NoneType, bool)]):
                 try:
                     rs = encoder.default(R) # ...or something this thing supports
-                except TypeError, exc:
-                    raise TypeError("Return type not supported, for %r" % R)
+                except TypeError as exc:
+                    raise TypeError("Return type not supported, for {0!r}".format(R))
 
             response['result'] = R
             
             status = 200
         
-        except Error, e:
+        except Error as e:
             # exception missed by others
             #got_request_exception.connect(log_exception, current_app._get_current_object())
 
@@ -226,7 +228,7 @@ class JSONRPCSite(object):
             if version in ('1.1', '2.0') and 'result' in response:
                 response.pop('result')
             status = e.status
-        except HTTPException, e:
+         except HTTPException as e:
             # exception missed by others
             #got_request_exception.connect(log_exception, current_app._get_current_object())
 
@@ -236,7 +238,16 @@ class JSONRPCSite(object):
             status = e.code
             if version in ('1.1', '2.0') and 'result' in response:
                 response.pop('result')
-        except Exception, e:
+        except Exception as e:
+            # exception missed by others
+            #got_request_exception.connect(log_exception, current_app._get_current_object())
+
+            other_error = OtherError(e)
+            response['error'] = other_error.json_rpc_format
+            response['error']['code'] = e.code
+            status = e.code
+            if version in ('1.1', '2.0') and 'result' in response:
+                response.pop('result')
             # exception missed by others
             #got_request_exception.connect(log_exception, current_app._get_current_object())
 
@@ -272,23 +283,23 @@ class JSONRPCSite(object):
             else:
                 try:
                     D = json.loads(raw_data)
-                except Exception, e:
+                except Exception as e:
                     raise InvalidRequestError(e.message)
             
-            if type(D) is list:
+            if isinstance(D, list):
                 response = [self.response_dict(request, d, is_batch=True)[0] for d in D]
                 status = 200
             else:
                 response, status = self.response_dict(request, D)
-                if response is None and (not u'id' in D or D[u'id'] is None): # a notification
+                if response is None and (not 'id' in D or D['id'] is None): # a notification
                     response = ''
                     return response, status
-        except Error, e:
+        except Error as e:
             #got_request_exception.connect(log_exception, current_app._get_current_object())
 
             response['error'] = e.json_rpc_format
             status = e.status
-        except Exception, e:
+        except Exception as e:
             # exception missed by others
             #got_request_exception.connect(log_exception, current_app._get_current_object())            
 
@@ -311,18 +322,18 @@ class JSONRPCSite(object):
             'summary': M.__doc__,
             'idempotent': M.json_safe,
             'params': [{'type': str(Any.kind(t)), 'name': k} 
-                for k, t in M.json_arg_types.iteritems()],
+                for k, t in list(M.json_arg_types.items())],
             'return': {'type': str(Any.kind(M.json_return_type))}}
     
     def service_desc(self):
         return {
             'sdversion': '1.0',
             'name': self.name,
-            'id': 'urn:uuid:%s' % str(self.uuid),
+            'id': 'urn:uuid:{0}'.format(str(self.uuid)),
             'summary': self.__doc__,
             'version': self.version,
             'procs': [self.procedure_desc(k) 
-                for k in self.urls.iterkeys()
+                for k in list(self.urls.keys())
                     if self.urls[k] != self.describe]}
     
     def describe(self):

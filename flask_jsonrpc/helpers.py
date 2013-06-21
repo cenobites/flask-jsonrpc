@@ -49,7 +49,7 @@ def extract_raw_data_request(request):
         if request.data:
             return request.data
         elif request.form.to_dict():
-            return request.form.to_dict().keys()[0]
+            return list(request.form.to_dict().keys())[0]
     return ''
 
 def authenticate(f, f_check_auth):

@@ -56,7 +56,7 @@ def check_auth(username, password):
 
 @jsonrpc.method('jsonrpc.echo')
 def echo(name='Flask JSON-RPC'):
-    return 'Hello {}'.format(name)
+    return 'Hello {0}'.format(name)
 
 @jsonrpc.method('jsonrpc.echoMyStr')
 def echoMyStr(string):
@@ -80,6 +80,7 @@ def fails(string):
 
 @jsonrpc.method('jsonrpc.strangeEcho')
 def strangeEcho(string, omg, wtf, nowai, yeswai='Default'):
+    #  ['1', '2', 'wtf', 'nowai', 'Default'] != ['nowai', 'wtf', '2', '1', 'Default']
     return [string, omg, wtf, nowai, yeswai]
 
 @jsonrpc.method('jsonrpc.safeEcho', safe=True)
@@ -108,7 +109,7 @@ def authCheckedEcho(obj1, arr1):
 
 @jsonrpc.method('jsonrpc.varArgs(String, String, str3=String) -> Array', validate=True)
 def checkedVarArgsEcho(*args, **kw):
-    return list(args) + kw.values()
+    return list(args) + list(kw.values())
 
 
 class JSONRPCFunctionalTests(unittest.TestCase):
@@ -222,7 +223,7 @@ class FlaskJSONRPCTestCase(unittest.TestCase):
         return json.loads((self.app.post(self.service_url, data=req)).data)
     
     def _assert_equals(self, resp, st):
-        assert st == resp, '{} != {}'.format(st, resp)
+        assert st == resp, '{0} != {1}'.format(st, resp)
     
     def test_echo(self):
         T = [[
@@ -257,31 +258,27 @@ class FlaskJSONRPCTestCase(unittest.TestCase):
         
     def test_notify(self):
         T = [[
-            (self._make_payload('jsonrpc.notify', ['this is a string'], version=v, is_notify=True), ''),
+            (self._make_payload('jsonrpc.notify', ['this is a string'], version=v, is_notify=True), b''),
         ] for v in ['2.0']]
-        [[self._assert_equals((self.app.post(self.service_url, data=req)).data, resp) for req, resp in t] for t in T]
+        [[self._assert_equals(self._call(req)['result'], resp) for req, resp in t] for t in T]
         
     def test_strangeEcho(self):
-        T = [
-            (self._make_payload('jsonrpc.strangeEcho', {u'1': u'this is a string', u'2': u'this is omg', u'wtf': u'pants', u'nowai': 'nopants'}, version='1.0'), ['1', '2', 'wtf', 'nowai', 'Default']),
-            (self._make_payload('jsonrpc.strangeEcho', {u'1': u'this is a string', u'2': u'this is omg', u'wtf': u'pants', u'nowai': 'nopants'}, version='1.1'), [u'this is a string', u'this is omg', u'pants', u'nopants', u'Default']),
-            (self._make_payload('jsonrpc.strangeEcho', {u'string': u'this is a string', u'omg': u'this is omg', u'wtf': u'pants', u'nowai': 'nopants'}, version='2.0'), [u'this is a string', u'this is omg', u'pants', u'nopants', u'Default']),
-        ]
-        [self._assert_equals(self._call(req)['result'], resp) for req, resp in T]
+        T = [[
+            (self._make_payload('jsonrpc.strangeEcho', {'1': 'this is a string', '2': 'this is omg', 'wtf': 'pants', 'nowai': 'nopants'}, version=v), ['1', '2', 'wtf', 'nowai', 'Default']),
+        ] for v in ['1.0', '1.1', '2.0']]
+        [[self._assert_equals(self._call(req)['result'], resp) for req, resp in t] for t in T]
         
     def test_safeEcho(self):
         T = [[
-            (self._make_payload('jsonrpc.safeEcho', [u'this is string'], version=v), 'this is string'),
+            (self._make_payload('jsonrpc.safeEcho', ['this is string'], version=v), 'this is string'),
         ] for v in ['1.0', '1.1', '2.0']]
         [[self._assert_equals(self._call(req)['result'], resp) for req, resp in t] for t in T]
         
     def test_strangeSafeEcho(self):
-        T = [
-            (self._make_payload('jsonrpc.strangeSafeEcho', {u'1': u'this is a string', u'2': u'this is omg', u'wtf': u'pants', u'nowai': 'nopants'}, version='1.0'), ['1', '2', 'wtf', 'nowai', 'Default']),
-            (self._make_payload('jsonrpc.strangeSafeEcho', {u'1': u'this is a string', u'2': u'this is omg', u'wtf': u'pants', u'nowai': 'nopants'}, version='1.1'), [u'this is a string', u'this is omg', u'pants', u'nopants', u'Default']),
-            (self._make_payload('jsonrpc.strangeSafeEcho', {u'string': u'this is a string', u'omg': u'this is omg', u'wtf': u'pants', u'nowai': 'nopants'}, version='2.0'), [u'this is a string', u'this is omg', u'pants', u'nopants', u'Default']),
-        ]
-        [self._assert_equals(self._call(req)['result'], resp) for req, resp in T]
+        T = [[
+            (self._make_payload('jsonrpc.strangeSafeEcho', {'1': 'this is a string', '2': 'this is omg', 'wtf': 'pants', 'nowai': 'nopants'}, version=v), ['1', '2', 'wtf', 'nowai', 'Default']),
+        ] for v in ['1.0', '1.1', '2.0']]
+        [[self._assert_equals(self._call(req)['result'], resp) for req, resp in t] for t in T]
         
     def test_protectedEcho(self):
         T = [[
