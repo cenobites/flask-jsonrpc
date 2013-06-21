@@ -25,6 +25,7 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
+from functools import reduce
 
 def _types_gen(T):
     yield T
@@ -40,12 +41,12 @@ class Type(type):
     """ A rudimentary extension to `type` that provides polymorphic
     types for run-time type checking of JSON data types. IE:
     
-    assert type(u'') == String
-    assert type('') == String
-    assert type('') == Any
-    assert Any.kind('') == String
-    assert Any.decode('str') == String
-    assert Any.kind({}) == Object
+    assert isinstance(u'', String)
+    assert isinstance('', String)
+    assert isinstance('', Any)
+    assert isinstance(Any.kind(''), String)
+    assert isinstance(Any.decode('str'), String)
+    assert isinstance(Any.kind({}), Object)
     """
     
     def __init__(self, *args, **kwargs):
@@ -79,8 +80,7 @@ class Type(type):
             ty = lambda t: t
         return reduce(
             lambda L, R: R if (hasattr(R, 't') and ty(t) == R) else L,
-            filter(lambda T: T is not Any, 
-                _types_gen(self)))
+            [T for T in _types_gen(self) if T is not Any])
     
     def decode(self, n):
         return reduce(
@@ -89,9 +89,9 @@ class Type(type):
 
 # JSON primatives and data types
 Object = Type('Object', (object,), {}).I(dict).N('obj')
-Number = Type('Number', (object,), {}).I(int, long).N('num')
+Number = Type('Number', (object,), {}).I(int).N('num')
 Boolean = Type('Boolean', (object,), {}).I(bool).N('bit')
-String = Type('String', (object,), {}).I(str, unicode).N('str')
+String = Type('String', (object,), {}).I(str).N('str')
 Array = Type('Array', (object,), {}).I(list, set, tuple).N('arr')
 Nil = Type('Nil', (object,), {}).I(type(None)).N('nil')
 Any = Type('Any', (object,), {}).I(
