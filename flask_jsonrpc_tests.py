@@ -107,68 +107,72 @@ class FlaskJSONRPCTestCase(unittest.TestCase):
         assert st == resp, '{} != {}'.format(st, resp)
     
     def test_echo(self):
-        R = [[
+        T = [[
             (self._make_payload('jsonrpc.echo', version=v), 'Hello Flask JSON-RPC'),
             (self._make_payload('jsonrpc.echo', ['Flask'], version=v), 'Hello Flask'),
             (self._make_payload('jsonrpc.echo', None, version=v), 'Hello Flask JSON-RPC'),
             (self._make_payload('jsonrpc.echo', [], version=v), 'Hello Flask JSON-RPC'),
             (self._make_payload('jsonrpc.echo', {}, version=v), 'Hello Flask JSON-RPC'),
-        ] for v in ['1.0', '1.1', '2.0']][0]
-        [self._assert_equals(self._call(req)['result'], resp) for req, resp in R]
+        ] for v in ['1.0', '1.1', '2.0']]
+        [[self._assert_equals(self._call(req)['result'], resp) for req, resp in t] for t in T]
         
     def test_notify(self):
-        R = [[
+        T = [[
             (self._make_payload('jsonrpc.notify', ['this is a string'], version=v, is_notify=True), ''),
-        ] for v in ['2.0']][0]
-        [self._assert_equals((self.app.post(self.service_url, data=req)).data, resp) for req, resp in R]
+        ] for v in ['2.0']]
+        [[self._assert_equals((self.app.post(self.service_url, data=req)).data, resp) for req, resp in t] for t in T]
         
     def test_strangeEcho(self):
-        R = [[
-            (self._make_payload('jsonrpc.strangeEcho', {u'1': u'this is a string', u'2': u'this is omg', u'wtf': u'pants', u'nowai': 'nopants'}, version=v), ['1', '2', 'wtf', 'nowai', 'Default']),
-        ] for v in ['1.0', '1.1', '2.0']][0]
-        [self._assert_equals(self._call(req)['result'], resp) for req, resp in R]
+        T = [
+            (self._make_payload('jsonrpc.strangeEcho', {u'1': u'this is a string', u'2': u'this is omg', u'wtf': u'pants', u'nowai': 'nopants'}, version='1.0'), ['1', '2', 'wtf', 'nowai', 'Default']),
+            (self._make_payload('jsonrpc.strangeEcho', {u'1': u'this is a string', u'2': u'this is omg', u'wtf': u'pants', u'nowai': 'nopants'}, version='1.1'), [u'this is a string', u'this is omg', u'pants', u'nopants', u'Default']),
+            (self._make_payload('jsonrpc.strangeEcho', {u'string': u'this is a string', u'omg': u'this is omg', u'wtf': u'pants', u'nowai': 'nopants'}, version='2.0'), [u'this is a string', u'this is omg', u'pants', u'nopants', u'Default']),
+        ]
+        [self._assert_equals(self._call(req)['result'], resp) for req, resp in T]
         
     def test_safeEcho(self):
-        R = [[
+        T = [[
             (self._make_payload('jsonrpc.safeEcho', [u'this is string'], version=v), 'this is string'),
-        ] for v in ['1.0', '1.1', '2.0']][0]
-        [self._assert_equals(self._call(req)['result'], resp) for req, resp in R]
+        ] for v in ['1.0', '1.1', '2.0']]
+        [[self._assert_equals(self._call(req)['result'], resp) for req, resp in t] for t in T]
         
     def test_strangeSafeEcho(self):
-        R = [[
-            (self._make_payload('jsonrpc.strangeSafeEcho', {u'1': u'this is a string', u'2': u'this is omg', u'wtf': u'pants', u'nowai': 'nopants'}, version=v), ['1', '2', 'wtf', 'nowai', 'Default']),
-        ] for v in ['1.0', '1.1', '2.0']][0]
-        [self._assert_equals(self._call(req)['result'], resp) for req, resp in R]
+        T = [
+            (self._make_payload('jsonrpc.strangeSafeEcho', {u'1': u'this is a string', u'2': u'this is omg', u'wtf': u'pants', u'nowai': 'nopants'}, version='1.0'), ['1', '2', 'wtf', 'nowai', 'Default']),
+            (self._make_payload('jsonrpc.strangeSafeEcho', {u'1': u'this is a string', u'2': u'this is omg', u'wtf': u'pants', u'nowai': 'nopants'}, version='1.1'), [u'this is a string', u'this is omg', u'pants', u'nopants', u'Default']),
+            (self._make_payload('jsonrpc.strangeSafeEcho', {u'string': u'this is a string', u'omg': u'this is omg', u'wtf': u'pants', u'nowai': 'nopants'}, version='2.0'), [u'this is a string', u'this is omg', u'pants', u'nopants', u'Default']),
+        ]
+        [self._assert_equals(self._call(req)['result'], resp) for req, resp in T]
         
     def test_protectedEcho(self):
-        R = [[
+        T = [[
             (self._make_payload('jsonrpc.checkedEcho', ['hai', 'hai'], version=v), 'haihai'),
-        ] for v in ['1.0', '1.1', '2.0']][0]
-        [self._assert_equals(self._call(req)['result'], resp) for req, resp in R]
+        ] for v in ['1.0', '1.1', '2.0']]
+        [[self._assert_equals(self._call(req)['result'], resp) for req, resp in t] for t in T]
         
     def test_protectedArgsEcho(self):
-        R = [[
+        T = [[
             (self._make_payload('jsonrpc.checkedArgsEcho', ['hai', 'hai'], version=v), 'haihai'),
-        ] for v in ['1.0', '1.1', '2.0']][0]
-        [self._assert_equals(self._call(req)['result'], resp) for req, resp in R]
+        ] for v in ['1.0', '1.1', '2.0']]
+        [[self._assert_equals(self._call(req)['result'], resp) for req, resp in t] for t in T]
         
     def test_protectedReturnEcho(self):
-        R = [[
+        T = [[
             (self._make_payload('jsonrpc.checkedReturnEcho', [], version=v), 'this is a string'),
-        ] for v in ['1.0', '1.1', '2.0']][0]
-        [self._assert_equals(self._call(req)['result'], resp) for req, resp in R]
+        ] for v in ['1.0', '1.1', '2.0']]
+        [[self._assert_equals(self._call(req)['result'], resp) for req, resp in t] for t in T]
         
     def test_authCheckedEcho(self):
-        R = [[
+        T = [[
             (self._make_payload('jsonrpc.authCheckedEcho', [1.0, [1,2,3]], version=v), {'obj1': 1.0, 'arr1': [1,2,3]}),
-        ] for v in ['1.0', '1.1', '2.0']][0]
-        [self._assert_equals(self._call(req)['result'], resp) for req, resp in R]
+        ] for v in ['1.0', '1.1', '2.0']]
+        [[self._assert_equals(self._call(req)['result'], resp) for req, resp in t] for t in T]
         
     def test_checkedVarArgsEcho(self):
-        R = [[
+        T = [[
             (self._make_payload('jsonrpc.varArgs', ['hai', 'hai', ' -> \o/'], version=v), ['hai', 'hai', ' -> \o/']),
-        ] for v in ['1.0', '1.1', '2.0']][0]
-        [self._assert_equals(self._call(req)['result'], resp) for req, resp in R]
+        ] for v in ['1.0', '1.1', '2.0']]
+        [[self._assert_equals(self._call(req)['result'], resp) for req, resp in t] for t in T]
         
 
 if __name__ == '__main__':
