@@ -189,7 +189,20 @@ class JSONRPCSite(object):
             method = self.urls[str(D['method'])]
             if getattr(method, 'json_validate', False):
                 validate_params(method, D)
+
+            if 'id' in D and D['id'] is not None: # regular request
+                response['id'] = D['id']
+                if version in ('1.1', '2.0') and 'error' in response:
+                    response.pop('error')
+            elif is_batch: # notification, not ok in a batch format, but happened anyway
+                raise InvalidRequestError
+            else: # notification
+                return None, 204
+
             R = apply_version[version](method, request, D['params'])
+
+            if 'id' not in D or ('id' in D and D['id'] is None): # notification
+                return None, 204
             
             encoder = json.JSONEncoder()
             if not sum(map(lambda e: isinstance(R, e), # type of `R` should be one of these or...
@@ -199,15 +212,7 @@ class JSONRPCSite(object):
                 except TypeError, exc:
                     raise TypeError("Return type not supported, for %r" % R)
 
-            if 'id' in D and D['id'] is not None: # regular request
-                response['result'] = R
-                response['id'] = D['id']
-                if version in ('1.1', '2.0') and 'error' in response:
-                    response.pop('error')
-            elif is_batch: # notification, not ok in a batch format, but happened anyway
-                raise InvalidRequestError
-            else: # notification
-                return None, 204
+            response['result'] = R
             
             status = 200
         
@@ -237,13 +242,13 @@ class JSONRPCSite(object):
     
     @csrf_exempt
     def dispatch(self, request, method=''):
-
         # in case we do something json doesn't like, we always get back valid 
         # json-rpc response
         response = self.empty_response()
-        raw_data = extract_raw_data_request(request)
 
         try:
+            raw_data = extract_raw_data_request(request)
+
             if request.method == 'GET':
                 valid, D = self.validate_get(request, method)
                 if not valid:
