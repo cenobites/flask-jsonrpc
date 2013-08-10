@@ -48,14 +48,14 @@ jsonrpc = JSONRPC(app, '/api')
 def check_auth(username, password):
     return True
 
-@jsonrpc.method('app.index', authenticated=check_auth)
+@jsonrpc.method('App.index', authenticated=check_auth)
 def index():
     return 'Welcome to Flask JSON-RPC'
 
-@jsonrpc.method('app.echo(name=str)', authenticated=check_auth)
-def echo(name=''):
+@jsonrpc.method('App.echo(name=str) -> str', validate=True, authenticated=check_auth)
+def echo(name='Flask JSON-RPC'):
     return 'Hello {}'.format(name)
 
 
 if __name__ == '__main__':
-    app.run()
+    app.run(host='0.0.0.0', debug=True)

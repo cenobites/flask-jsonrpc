@@ -32,10 +32,10 @@ from hrx import jsonrpc
 mod = Blueprint('hello', __name__)
 jsonrpc.register_blueprint(mod)
 
-@jsonrpc.method('hello.index')
+@jsonrpc.method('Hello.index')
 def index():
     return 'Welcome to Hello API!'
 
-@jsonrpc.method('hello.say(name=String)')
+@jsonrpc.method('Hello.say(name=String)')
 def say(name=''):
     return 'Hello {0}!'.format(name)
