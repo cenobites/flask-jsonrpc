@@ -26,11 +26,10 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 import uuid
-from io import StringIO
-import urllib.request, urllib.parse, urllib.error
 
 from flask import json, current_app
 
+from flask_jsonrpc._compat import NativeStringIO, urlopen
 from flask_jsonrpc.types import Object, Any
 
 
@@ -56,12 +55,14 @@ class ServiceProxy(object):
     def send_payload(self, params):
         """Performs the actual sending action and returns the result
         """
-        return urllib.request.urlopen(self.service_url, json.dumps({
+        data = json.dumps({
             'jsonrpc': self.version,
             'method': self.service_name,
             'params': params,
             'id': str(uuid.uuid1())
-        })).read()
+        })
+        data_binary = data.encode('utf-8')
+        return urlopen(self.service_url, data_binary).read()
       
     def __call__(self, *args, **kwargs):
         params = kwargs if len(kwargs) else args
@@ -74,7 +75,7 @@ class ServiceProxy(object):
         if 'error' in y:
             try:
                 if current_app.config['DEBUG']:
-                    print(('{0} error {1!r}'.format(self.service_name, y)))
+                    print('{0} error {1!r}'.format(self.service_name, y))
             except:
                 pass
         return y
@@ -88,7 +89,7 @@ class FakePayload(object):
     that wouldn't work in Real Life.
     """
     def __init__(self, content):
-        self.__content = StringIO(content)
+        self.__content = NativeStringIO(content)
         self.__len = len(content)
 
     def read(self, num_bytes=None):

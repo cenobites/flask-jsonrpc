@@ -37,6 +37,7 @@ from optparse import OptionParser
 
 from flask import json
 
+from flask_jsonrpc._compat import b, u
 from flask_jsonrpc.proxy import ServiceProxy
 from flask_jsonrpc.site import validate_params
 from flask_jsonrpc import _parse_sig, OrderedDict, JSONRPC
@@ -56,7 +57,7 @@ def check_auth(username, password):
 
 @jsonrpc.method('jsonrpc.echo')
 def echo(name='Flask JSON-RPC'):
-    return 'Hello {0}'.format(name)
+    return 'Hello {}'.format(name)
 
 @jsonrpc.method('jsonrpc.echoMyStr')
 def echoMyStr(string):
@@ -133,9 +134,9 @@ class JSONRPCFunctionalTests(unittest.TestCase):
         ]
         for sig in working_sigs:
             ret = _parse_sig(sig[0], list(iter(sig[2])))
-            self.assertEquals(ret[0], sig[1])
-            self.assertEquals(ret[1], sig[2])
-            self.assertEquals(ret[2], sig[3])
+            self.assertEqual(ret[0], sig[1])
+            self.assertEqual(ret[1], sig[2])
+            self.assertEqual(ret[2], sig[3])
         for sig in error_sigs:
             e = None
             try:
@@ -164,7 +165,6 @@ class JSONRPCFunctionalTests(unittest.TestCase):
         self.assert_(validate_params(M, {'params': {'s1': 'omg', 's2': 'wtf'}}) is None)
   
     def test_types(self):
-        assert type(u'') == String
         assert type('') == String
         assert not type('') == Object
         assert not type([]) == Object
@@ -176,7 +176,7 @@ class JSONRPCFunctionalTests(unittest.TestCase):
         assert Any.kind(None) == Nil
 
 
-class ServiceProxyTestCase(unittest.TestCase):
+class ServiceProxyTestCase:
     
     def setUp(self):
         self.service_url = 'http://{0}:{1}/api'.format(SERVER_HOSTNAME, SERVER_PORT)
@@ -186,7 +186,7 @@ class ServiceProxyTestCase(unittest.TestCase):
 
     def test_positional_args(self):
         proxy = ServiceProxy(self.service_url)
-        self.assert_(proxy.jsonrpc.echo()[u'result'] == 'Hello Flask JSON-RPC')
+        self.assertTrue(proxy.jsonrpc.echo()['result'] == 'Hello Flask JSON-RPC')
         try:
             proxy.jsonrpc.echo(name='Hello')
         except Exception, e:
@@ -196,8 +196,8 @@ class ServiceProxyTestCase(unittest.TestCase):
   
     def test_keyword_args(self):
         proxy = ServiceProxy(self.service_url, version='2.0')
-        self.assert_(proxy.jsonrpc.echo(name='Flask')[u'result'] == 'Hello Flask')
-        self.assert_(proxy.jsonrpc.echo('JSON-RPC')[u'result'] == 'Hello JSON-RPC')
+        self.assertTrue(proxy.jsonrpc.echo(name='Flask')['result'] == 'Hello Flask')
+        self.assertTrue(proxy.jsonrpc.echo('JSON-RPC')['result'] == 'Hello JSON-RPC')
 
 
 class FlaskJSONRPCTestCase(unittest.TestCase):
@@ -220,10 +220,10 @@ class FlaskJSONRPCTestCase(unittest.TestCase):
         })
         
     def _call(self, req):
-        return json.loads((self.app.post(self.service_url, data=req)).data)
+        return json.loads(u(self.app.post(self.service_url, data=req).data).decode('utf-8'))
     
     def _assert_equals(self, resp, st):
-        assert st == resp, '{0} != {1}'.format(st, resp)
+        assert st == resp, '{0!r} != {1!r}'.format(st, resp)
     
     def test_echo(self):
         T = [[
@@ -260,14 +260,13 @@ class FlaskJSONRPCTestCase(unittest.TestCase):
         T = [[
             (self._make_payload('jsonrpc.notify', ['this is a string'], version=v, is_notify=True), b''),
         ] for v in ['2.0']]
-        [[self._assert_equals(self._call(req)['result'], resp) for req, resp in t] for t in T]
+        [[self._assertEqual((self.app.post(self.service_url, data=req)).data, resp) for req, resp in t] for t in T]
         
     def test_strangeEcho(self):
         T = [[
             (self._make_payload('jsonrpc.strangeEcho', {'1': 'this is a string', '2': 'this is omg', 'wtf': 'pants', 'nowai': 'nopants'}, version=v), ['1', '2', 'wtf', 'nowai', 'Default']),
         ] for v in ['1.0', '1.1', '2.0']]
         [[self._assert_equals(self._call(req)['result'], resp) for req, resp in t] for t in T]
-        
     def test_safeEcho(self):
         T = [[
             (self._make_payload('jsonrpc.safeEcho', ['this is string'], version=v), 'this is string'),
@@ -279,7 +278,6 @@ class FlaskJSONRPCTestCase(unittest.TestCase):
             (self._make_payload('jsonrpc.strangeSafeEcho', {'1': 'this is a string', '2': 'this is omg', 'wtf': 'pants', 'nowai': 'nopants'}, version=v), ['1', '2', 'wtf', 'nowai', 'Default']),
         ] for v in ['1.0', '1.1', '2.0']]
         [[self._assert_equals(self._call(req)['result'], resp) for req, resp in t] for t in T]
-        
     def test_protectedEcho(self):
         T = [[
             (self._make_payload('jsonrpc.checkedEcho', ['hai', 'hai'], version=v), 'haihai'),
@@ -300,7 +298,8 @@ class FlaskJSONRPCTestCase(unittest.TestCase):
         
     def test_authCheckedEcho(self):
         T = [[
-            (self._make_payload('jsonrpc.authCheckedEcho', [1.0, [1,2,3]], version=v), {'obj1': 1.0, 'arr1': [1,2,3]}),
+            (self._make_payload('jsonrpc.authCheckedEcho', [1.0, [1,2,3]], version=v), 
+                {'username': 'flask', 'password': 'jsonrpc', 'obj1': 1.0, 'arr1': [1,2,3]}),
         ] for v in ['1.0', '1.1', '2.0']]
         [[self._assert_equals(self._call(req)['result'], resp) for req, resp in t] for t in T]
         

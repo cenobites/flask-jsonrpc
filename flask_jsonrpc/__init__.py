@@ -26,13 +26,12 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 import re
-from io import StringIO
 from functools import wraps
 from inspect import getargspec
-from collections import OrderedDict
 
 from flask import current_app, request, jsonify
 
+from flask_jsonrpc._compat import b, u, OrderedDict, NativeStringIO
 from flask_jsonrpc.site import jsonrpc_site
 from flask_jsonrpc.types import Object, Number, Boolean, String, Array, Nil, Any, Type
 from flask_jsonrpc.helpers import jsonify_status_code, extract_raw_data_request, authenticate
@@ -62,7 +61,7 @@ def _type_checking_available(sig='', validate=False):
 def _validate_arg(value, expected):
     """Returns whether or not ``value`` is the ``expected`` type.
     """
-    if isinstance(value, expected):
+    if type(value) == expected:
         return True
     return False
 
@@ -94,7 +93,7 @@ def _parse_sig(sig, arg_names, validate=False):
     name in python (ie: it takes a variable number of arguments) will be
     keyed as the stringified version of it's index.
     
-        sig                 the signature to be parsed
+        sig           the signature to be parsed
         arg_names     a list of argument names extracted from python source
     
     Returns a tuple of (method name, types dict, return type)
@@ -103,31 +102,30 @@ def _parse_sig(sig, arg_names, validate=False):
     if not d:
         raise ValueError('Invalid method signature {0}'.format(sig))
     d = d.groupdict()
-
     ret = [(n, Any) for n in arg_names]
-    if 'args_sig' in d and isinstance(d['args_sig'], str) and d['args_sig'].strip():
+    if 'args_sig' in d and type(d['args_sig']) is str and d['args_sig'].strip():
         for i, arg in enumerate(d['args_sig'].strip().split(',')):
             _type_checking_available(sig, validate)
             if '=' in arg:
-                if not isinstance(ret, OrderedDict):
+                if not type(ret) is OrderedDict:
                     ret = OrderedDict(ret)
                 dk = KWARG_RE.match(arg)
                 if not dk:
                     raise ValueError('Could not parse arg type {0} in {1}'.format(arg, sig))
                 dk = dk.groupdict()
-                if not sum([(k in dk and isinstance(dk[k], str) and bool(dk[k].strip()))
+                if not sum([(k in dk and type(dk[k]) is str and bool(dk[k].strip()))
                         for k in ('arg_name', 'arg_type')]):
                     raise ValueError('Invalid kwarg value {0} in {1}'.format(arg, sig))
                 ret[dk['arg_name']] = _eval_arg_type(dk['arg_type'], None, arg, sig)
             else:
-                if isinstance(ret, OrderedDict):
+                if type(ret) is OrderedDict:
                     raise ValueError('Positional arguments must occur '
                                      'before keyword arguments in {0}'.format(sig))
                 if len(ret) < i + 1:
                     ret.append((str(i), _eval_arg_type(arg, None, arg, sig)))
                 else:
                     ret[i] = (ret[i][0], _eval_arg_type(arg, None, arg, sig))
-    if not isinstance(ret ,OrderedDict):
+    if not type(ret) is OrderedDict:
         ret = OrderedDict(ret)
     return (d['method_name'], 
                     ret, 
