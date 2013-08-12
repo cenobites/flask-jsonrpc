@@ -29,6 +29,7 @@ from functools import wraps
 
 from flask import current_app, request, jsonify, json
 
+from flask_jsonrpc._compat import b, u, text_type
 from flask_jsonrpc.exceptions import InvalidCredentialsError, InvalidParamsError
 
 def jsonify_status_code(status_code, *args, **kw):
@@ -43,18 +44,24 @@ def jsonify_status_code(status_code, *args, **kw):
     return response
 
 def extract_raw_data_request(request):
-    if request.method == 'GET':
-        return request.query_string
-    elif request.method == 'POST':
-        if request.data:
-            return request.data
-        elif request.form.to_dict():
-            return list(request.form.to_dict().keys())[0]
-    return ''
+    def _extract_raw_data_request(request):
+        if request.method == 'GET':
+            return u(request.query_string)
+        elif request.method == 'POST':
+            if request.data:
+                return u(request.data)
+            elif request.form.to_dict():
+                return u(list(request.form.to_dict().keys())[0])
+        return u('')
+    raw_data = _extract_raw_data_request(request)
+    return raw_data.decode(request.charset) \
+        if request.charset else raw_data.decode('utf-8')
+
 
 def authenticate(f, f_check_auth):
     @wraps(f)
     def _f(*args, **kwargs):
+        print('args', args, 'kw', kwargs)
         is_auth = False
         try:
             creds = args[:2]
