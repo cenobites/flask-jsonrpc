@@ -25,7 +25,7 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-from flask_jsonrpc._compat import string_types, integer_types, reduce, OrderedDict
+from flask_jsonrpc._compat import string_types, integer_types, reduce
 
 def _types_gen(T):
     yield T
@@ -88,7 +88,7 @@ class Type(type):
             _types_gen(self))
 
 # JSON primatives and data types
-Object = Type('Object', (object,), {}).I(dict, OrderedDict).N('obj')
+Object = Type('Object', (object,), {}).I(dict).N('obj')
 Number = Type('Number', (object,), {}).I(*integer_types).N('num')
 Boolean = Type('Boolean', (object,), {}).I(bool).N('bit')
 String = Type('String', (object,), {}).I(*string_types).N('str')
