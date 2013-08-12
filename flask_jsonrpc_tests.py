@@ -260,7 +260,13 @@ class FlaskJSONRPCTestCase(unittest.TestCase):
         T = [[
             (self._make_payload('jsonrpc.notify', ['this is a string'], version=v, is_notify=True), b''),
         ] for v in ['2.0']]
-        [[self._assertEqual((self.app.post(self.service_url, data=req)).data, resp) for req, resp in t] for t in T]
+        [[self._assert_equals((self.app.post(self.service_url, data=req)).data, resp) for req, resp in t] for t in T]
+        
+    def test_strangeEcho(self):
+        T = [
+            (self._make_payload('jsonrpc.strangeEcho', {'1': 'this is a string', '2': 'this is omg', 'wtf': 'pants', 'nowai': 'nopants'}, version='1.1'), ['this is a string', 'this is omg', 'pants', 'nopants', 'Default']),
+        ]
+        [self._assert_equals(self._call(req)['result'], resp) for req, resp in T]
         
     def test_strangeEcho(self):
         T = [[
@@ -272,6 +278,12 @@ class FlaskJSONRPCTestCase(unittest.TestCase):
             (self._make_payload('jsonrpc.safeEcho', ['this is string'], version=v), 'this is string'),
         ] for v in ['1.0', '1.1', '2.0']]
         [[self._assert_equals(self._call(req)['result'], resp) for req, resp in t] for t in T]
+        
+    def test_strangeSafeEcho(self):
+        T = [
+            (self._make_payload('jsonrpc.strangeSafeEcho', {'1': 'this is a string', '2': 'this is omg', 'wtf': 'pants', 'nowai': 'nopants'}, version='1.1'), ['this is a string', 'this is omg', 'pants', 'nopants', 'Default']),
+        ]
+        [self._assert_equals(self._call(req)['result'], resp) for req, resp in T]
         
     def test_strangeSafeEcho(self):
         T = [[
@@ -298,8 +310,7 @@ class FlaskJSONRPCTestCase(unittest.TestCase):
         
     def test_authCheckedEcho(self):
         T = [[
-            (self._make_payload('jsonrpc.authCheckedEcho', [1.0, [1,2,3]], version=v), 
-                {'username': 'flask', 'password': 'jsonrpc', 'obj1': 1.0, 'arr1': [1,2,3]}),
+            (self._make_payload('jsonrpc.authCheckedEcho', [1.0, [1,2,3]], version=v), {'obj1': 1.0, 'arr1': [1,2,3]}),
         ] for v in ['1.0', '1.1', '2.0']]
         [[self._assert_equals(self._call(req)['result'], resp) for req, resp in t] for t in T]
         
