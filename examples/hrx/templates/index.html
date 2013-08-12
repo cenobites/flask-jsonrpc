@@ -28,12 +28,12 @@
       $('#form')
         .undelegate('#btn-send', 'click')
         .delegate('#btn-send', 'click', function(env) {
-          jsonrpc.request('hello.say', {name: $('#name').val()}).done(function(data) {
+          jsonrpc.request('Hello.say', {name: $('#name').val()}).done(function(data) {
             $('#message').text(data.result);
           });
         });
 
-      jsonrpc.request('hello.index').done(function(data) {
+      jsonrpc.request('Hello.index').done(function(data) {
         $('#message').text(data.result);
       });
     });

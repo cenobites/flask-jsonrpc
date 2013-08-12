@@ -32,6 +32,6 @@ from modular import jsonrpc
 mod = Blueprint('user', __name__)
 jsonrpc.register_blueprint(mod)
 
-@jsonrpc.method('user.index')
+@jsonrpc.method('User.index')
 def index():
     return 'Welcome to User API'
