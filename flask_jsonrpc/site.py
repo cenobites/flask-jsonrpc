@@ -53,7 +53,7 @@ NoneType = type(None)
 encode_kw = lambda p: dict([(str(k), v) for k, v in iteritems(p)])
 
 def encode_kw11(p):
-    if not type(p) is dict:
+    if not (type(p) is dict or type(p) is OrderedDict):
         return {}
     ret = p.copy()
     removes = []
@@ -71,7 +71,7 @@ def encode_kw11(p):
 def encode_arg11(p):
     if type(p) is list:
         return p
-    elif not type(p) is dict:
+    elif not (type(p) is dict or type(p) is OrderedDict):
         return []
     else:
         pos = []
@@ -163,7 +163,8 @@ class JSONRPCSite(object):
         version = version_hint
         response = self.empty_response(version=version)
         apply_version = {
-            '2.0': lambda f, p: f(**encode_kw(p)) if type(p) is dict else f(*p),
+            '2.0': lambda f, p: f(**encode_kw(p)) \
+                        if type(p) is dict or type(p) is OrderedDict else f(*p),
             '1.1': lambda f, p: f(*encode_arg11(p), **encode_kw(encode_kw11(p))),
             '1.0': lambda f, p: f(*p)
         }
@@ -212,7 +213,7 @@ class JSONRPCSite(object):
 
             # type of `R` should be one of these or...
             if not sum([isinstance(R, e) for e in \
-                    string_types + integer_types + (dict, list, set, NoneType, bool)]):
+                    string_types + integer_types + (dict, OrderedDict, list, set, NoneType, bool)]):
                 try:
                     rs = encoder.default(R) # ...or something this thing supports
                 except TypeError as exc:
@@ -263,7 +264,7 @@ class JSONRPCSite(object):
                 raise RequestPostError
             else:
                 try:
-                    D = json.loads(raw_data, object_pairs_hook=OrderedDict)
+                    D = json.loads(str(raw_data), object_pairs_hook=OrderedDict)
                 except Exception as e:
                     raise InvalidRequestError(e.message)
             

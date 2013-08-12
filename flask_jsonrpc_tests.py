@@ -218,7 +218,7 @@ class FlaskJSONRPCTestCase(unittest.TestCase):
     def _call(self, req):
         return json.loads(u(self.app.post(self.service_url, data=req).data).decode('utf-8'))
     
-    def _assertEqual(self, resp, st):
+    def _assert_equals(self, resp, st):
         assert st == resp, '{0!r} != {1!r}'.format(st, resp)
     
     def test_echo(self):
@@ -229,71 +229,82 @@ class FlaskJSONRPCTestCase(unittest.TestCase):
             (self._make_payload('jsonrpc.echo', [], version=v), 'Hello Flask JSON-RPC'),
             (self._make_payload('jsonrpc.echo', {}, version=v), 'Hello Flask JSON-RPC'),
         ] for v in ['1.0', '1.1', '2.0']]
-        [[self._assertEqual(self._call(req)['result'], resp) for req, resp in t] for t in T]
+        [[self._assert_equals(self._call(req)['result'], resp) for req, resp in t] for t in T]
 
     def test_my_str(self):
         T = [[
             (self._make_payload('jsonrpc.echoMyStr', ['Hello Flask JSON-RPC'], version=v), 'Hello Flask JSON-RPC'),
             (self._make_payload('jsonrpc.echoMyStr', ['Hello Flask'], version=v), 'Hello Flask'),
         ] for v in ['1.0', '1.1', '2.0']]
-        [[self._assertEqual(self._call(req)['result'], resp) for req, resp in t] for t in T]
+        [[self._assert_equals(self._call(req)['result'], resp) for req, resp in t] for t in T]
 
     def test_auth(self):
         T = [[
             (self._make_payload('jsonrpc.echoAuth', ['username', 'password', 'Hello Flask JSON-RPC'], version=v), 'Hello Flask JSON-RPC'),
             (self._make_payload('jsonrpc.echoAuth', ['username', 'password', 'Hello Flask'], version=v), 'Hello Flask'),
         ] for v in ['1.0', '1.1', '2.0']]
-        [[self._assertEqual(self._call(req)['result'], resp) for req, resp in t] for t in T]
+        [[self._assert_equals(self._call(req)['result'], resp) for req, resp in t] for t in T]
 
     def test_auth_checked(self):
         T = [[
             (self._make_payload('jsonrpc.echoAuthChecked', {'username': 'flask', 'password': 'jsonrpc', 'string': 'Hello Flask JSON-RPC'}, version=v), 'Hello Flask JSON-RPC'),
             (self._make_payload('jsonrpc.echoAuthChecked', {'username': 'flask', 'password': 'jsonrpc', 'string': 'Hello Flask'}, version=v), 'Hello Flask'),
         ] for v in ['1.1', '2.0']]
-        [[self._assertEqual(self._call(req)['result'], resp) for req, resp in t] for t in T]
+        [[self._assert_equals(self._call(req)['result'], resp) for req, resp in t] for t in T]
         
     def test_notify(self):
         T = [[
             (self._make_payload('jsonrpc.notify', ['this is a string'], version=v, is_notify=True), b('')),
         ] for v in ['2.0']]
-        [[self._assertEqual((self.app.post(self.service_url, data=req)).data, resp) for req, resp in t] for t in T]
+        [[self._assert_equals((self.app.post(self.service_url, data=req)).data, resp) for req, resp in t] for t in T]
+        
+    def test_strangeEcho(self):
+        T = [
+            (self._make_payload('jsonrpc.strangeEcho', {'1': 'this is a string', '2': 'this is omg', 'wtf': 'pants', 'nowai': 'nopants'}, version='1.1'), ['this is a string', 'this is omg', 'pants', 'nopants', 'Default']),
+        ]
+        [self._assert_equals(self._call(req)['result'], resp) for req, resp in T]
         
     def test_safeEcho(self):
         T = [[
             (self._make_payload('jsonrpc.safeEcho', ['this is string'], version=v), 'this is string'),
         ] for v in ['1.0', '1.1', '2.0']]
-        [[self._assertEqual(self._call(req)['result'], resp) for req, resp in t] for t in T]
+        [[self._assert_equals(self._call(req)['result'], resp) for req, resp in t] for t in T]
+        
+    def test_strangeSafeEcho(self):
+        T = [
+            (self._make_payload('jsonrpc.strangeSafeEcho', {'1': 'this is a string', '2': 'this is omg', 'wtf': 'pants', 'nowai': 'nopants'}, version='1.1'), ['this is a string', 'this is omg', 'pants', 'nopants', 'Default']),
+        ]
+        [self._assert_equals(self._call(req)['result'], resp) for req, resp in T]
         
     def test_protectedEcho(self):
         T = [[
             (self._make_payload('jsonrpc.checkedEcho', ['hai', 'hai'], version=v), 'haihai'),
         ] for v in ['1.0', '1.1', '2.0']]
-        [[self._assertEqual(self._call(req)['result'], resp) for req, resp in t] for t in T]
+        [[self._assert_equals(self._call(req)['result'], resp) for req, resp in t] for t in T]
         
     def test_protectedArgsEcho(self):
         T = [[
             (self._make_payload('jsonrpc.checkedArgsEcho', ['hai', 'hai'], version=v), 'haihai'),
         ] for v in ['1.0', '1.1', '2.0']]
-        [[self._assertEqual(self._call(req)['result'], resp) for req, resp in t] for t in T]
+        [[self._assert_equals(self._call(req)['result'], resp) for req, resp in t] for t in T]
         
     def test_protectedReturnEcho(self):
         T = [[
             (self._make_payload('jsonrpc.checkedReturnEcho', [], version=v), 'this is a string'),
         ] for v in ['1.0', '1.1', '2.0']]
-        [[self._assertEqual(self._call(req)['result'], resp) for req, resp in t] for t in T]
+        [[self._assert_equals(self._call(req)['result'], resp) for req, resp in t] for t in T]
         
     def test_authCheckedEcho(self):
         T = [[
-            (self._make_payload('jsonrpc.authCheckedEcho', [1.0, [1,2,3]], version=v), 
-                {'username': 'flask', 'password': 'jsonrpc', 'obj1': 1.0, 'arr1': [1,2,3]}),
+            (self._make_payload('jsonrpc.authCheckedEcho', [1.0, [1,2,3]], version=v), {'obj1': 1.0, 'arr1': [1,2,3]}),
         ] for v in ['1.0', '1.1', '2.0']]
-        [[self._assertEqual(self._call(req)['result'], resp) for req, resp in t] for t in T]
+        [[self._assert_equals(self._call(req)['result'], resp) for req, resp in t] for t in T]
         
     def test_checkedVarArgsEcho(self):
         T = [[
             (self._make_payload('jsonrpc.varArgs', ['hai', 'hai', ' -> \o/'], version=v), ['hai', 'hai', ' -> \o/']),
         ] for v in ['1.0', '1.1', '2.0']]
-        [[self._assertEqual(self._call(req)['result'], resp) for req, resp in t] for t in T]
+        [[self._assert_equals(self._call(req)['result'], resp) for req, resp in t] for t in T]
 
 
 class FlaskTestClient(object):
@@ -332,9 +343,8 @@ def main():
     if options.run:
         return app.run(host='0.0.0.0', debug=True)
 
-    #with FlaskTestClient():
-    #    unittest.main()
-    unittest.main()
+    with FlaskTestClient():
+        unittest.main()
 
 if __name__ == '__main__':
     main()

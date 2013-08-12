@@ -82,7 +82,7 @@ else:
     def b(s):
         return s
     def u(s):
-        return unicode(s, 'unicode_escape')
+        return unicode(s)
     unichr = unichr
     range_type = xrange
     text_type = unicode

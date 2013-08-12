@@ -57,11 +57,9 @@ def extract_raw_data_request(request):
     return raw_data.decode(request.charset) \
         if request.charset else raw_data.decode('utf-8')
 
-
 def authenticate(f, f_check_auth):
     @wraps(f)
     def _f(*args, **kwargs):
-        print('args', args, 'kw', kwargs)
         is_auth = False
         try:
             creds = args[:2]
