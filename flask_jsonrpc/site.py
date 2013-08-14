@@ -39,6 +39,7 @@ from flask_jsonrpc.exceptions import (Error, ParseError, InvalidRequestError,
                                       MethodNotFoundError, InvalidParamsError, 
                                       ServerError, RequestPostError,
                                       InvalidCredentialsError, OtherError)
+from werkzeug.exceptions import HTTPException
 
 empty_dec = lambda f: f
 try:
@@ -218,6 +219,13 @@ class JSONRPCSite(object):
             if version in ('1.1', '2.0') and 'result' in response:
                 response.pop('result')
             status = e.status
+        except HTTPException, e:
+            other_error = OtherError(e)
+            response['error'] = other_error.json_rpc_format
+            status = e.code
+
+            if version in ('1.1', '2.0') and 'result' in response:
+                response.pop('result')
         except Exception, e:
             # exception missed by others
             #got_request_exception.connect(log_exception, current_app._get_current_object())
