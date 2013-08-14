@@ -313,7 +313,7 @@ class JSONRPCSite(object):
             'version': self.version,
             'procs': [self.procedure_desc(k) 
                 for k in self.urls.iterkeys()
-                    if self.urls[k] != self.describe and (request is None or self.urls[k].json_method == request]}
+                    if self.urls[k] != self.describe and request is None or self.urls[k].json_method == request]}
     
     def describe(self, request=None):
         return self.service_desc(request)
