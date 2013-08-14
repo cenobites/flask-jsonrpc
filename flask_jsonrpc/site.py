@@ -222,6 +222,7 @@ class JSONRPCSite(object):
         except HTTPException, e:
             other_error = OtherError(e)
             response['error'] = other_error.json_rpc_format
+            response['error']['code'] = e.code
             status = e.code
 
             if version in ('1.1', '2.0') and 'result' in response:
