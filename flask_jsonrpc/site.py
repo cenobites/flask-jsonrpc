@@ -208,7 +208,7 @@ class JSONRPCSite(object):
             if 'id' not in D or ('id' in D and D['id'] is None): # notification
                 return None, 204
             
-            encoder = json.JSONEncoder()
+            encoder = current_app.json_encoder()
 
             # type of `R` should be one of these or...
             if not sum([isinstance(R, e) for e in \
