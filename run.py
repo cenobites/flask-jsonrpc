@@ -35,7 +35,7 @@ app = Flask(__name__)
 # Flask-JSONRPC
 jsonrpc = JSONRPC(app, '/api')
 
-@jsonrpc.method('app.index')
+@jsonrpc.method('App.index')
 def index():
     return 'Welcome to Flask JSON-RPC'
 
