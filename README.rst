@@ -3,6 +3,8 @@ Flask JSON-RPC
 
 A basic JSON-RPC implementation for your Flask-powered sites based on `django-json-rpc <https://github.com/samuraisam/django-json-rpc>`_.
 
+For support python 3.3 or later use the branch `py3k <https://github.com/cenobites/flask-jsonrpc/tree/py3k>`_ (experimental).
+
 Adding Flask JSON-RPC to your application
 *****************************************
 

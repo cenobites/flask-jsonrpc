@@ -31,6 +31,8 @@ import datetime
 from uuid import uuid1
 from functools import wraps
 
+from werkzeug.exceptions import HTTPException
+
 from flask import json, jsonify, current_app, got_request_exception
 
 from flask_jsonrpc.helpers import extract_raw_data_request, log_exception
@@ -223,12 +225,23 @@ class JSONRPCSite(object):
             status = 200
         
         except Error as e:
+            # exception missed by others
             #got_request_exception.connect(log_exception, current_app._get_current_object())
 
             response['error'] = e.json_rpc_format
             if version in ('1.1', '2.0') and 'result' in response:
                 response.pop('result')
             status = e.status
+        except HTTPException as e:
+            # exception missed by others
+            #got_request_exception.connect(log_exception, current_app._get_current_object())
+
+            other_error = OtherError(e)
+            response['error'] = other_error.json_rpc_format
+            response['error']['code'] = e.code
+            status = e.code
+            if version in ('1.1', '2.0') and 'result' in response:
+                response.pop('result')
         except Exception as e:
             # exception missed by others
             #got_request_exception.connect(log_exception, current_app._get_current_object())
@@ -304,7 +317,7 @@ class JSONRPCSite(object):
             'idempotent': M.json_safe,
             'params': [{'type': str(Any.kind(t)), 'name': k} 
                 for k, t in iteritems(M.json_arg_types)],
-            'return': {'type': M.json_return_type}}
+            'return': {'type': str(Any.kind(M.json_return_type))}}
     
     def service_desc(self):
         return {
@@ -317,7 +330,7 @@ class JSONRPCSite(object):
                 for k in iterkeys(self.urls)
                     if self.urls[k] != self.describe]}
     
-    def describe(self, request):
+    def describe(self):
         return self.service_desc()
 
 
