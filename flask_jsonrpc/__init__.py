@@ -189,7 +189,7 @@ class JSONRPC(object):
         
     def method(self, name, authenticated=False, safe=False, validate=False, **options):
         def decorator(f):
-            arg_names = getargspec(f)[0][1:]
+            arg_names = getargspec(f)[0]
             X = {'name': name, 'arg_names': arg_names}
             if authenticated:
                 # TODO: this is an assumption

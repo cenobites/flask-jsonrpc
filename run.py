@@ -29,13 +29,20 @@
 from flask import Flask
 from flask_jsonrpc import JSONRPC
 
+# Flask application
 app = Flask(__name__)
+
+# Flask-JSONRPC
 jsonrpc = JSONRPC(app, '/api')
 
 @jsonrpc.method('app.index')
-def index():
+def index1(a1, a2, a3):
     return 'Welcome to Flask JSON-RPC'
 
+# Blueprint registers
+from flask_jsonrpc.views import browse
+
+app.register_blueprint(browse.mod, url_prefix='/')
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True)

@@ -62,7 +62,7 @@ class Type(type):
     
     def __str__(self):
         return getattr(self, '_name', 'unknown')
-    
+
     def N(self, n):
         self._name = n
         return self

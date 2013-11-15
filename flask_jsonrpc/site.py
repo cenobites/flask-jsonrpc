@@ -299,7 +299,7 @@ class JSONRPCSite(object):
             'idempotent': M.json_safe,
             'params': [{'type': str(Any.kind(t)), 'name': k} 
                 for k, t in M.json_arg_types.iteritems()],
-            'return': {'type': M.json_return_type}}
+            'return': {'type': str(Any.kind(M.json_return_type))}}
     
     def service_desc(self):
         return {
@@ -312,7 +312,7 @@ class JSONRPCSite(object):
                 for k in self.urls.iterkeys()
                     if self.urls[k] != self.describe]}
     
-    def describe(self, request):
+    def describe(self):
         return self.service_desc()
 
 
