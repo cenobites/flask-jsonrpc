@@ -36,7 +36,7 @@ app = Flask(__name__)
 jsonrpc = JSONRPC(app, '/api')
 
 @jsonrpc.method('app.index')
-def index1():
+def index():
     return 'Welcome to Flask JSON-RPC'
 
 # Blueprint registers
