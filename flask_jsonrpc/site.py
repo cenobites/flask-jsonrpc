@@ -39,6 +39,7 @@ from flask_jsonrpc.exceptions import (Error, ParseError, InvalidRequestError,
                                       MethodNotFoundError, InvalidParamsError, 
                                       ServerError, RequestPostError,
                                       InvalidCredentialsError, OtherError)
+from werkzeug.exceptions import HTTPException
 
 empty_dec = lambda f: f
 try:
@@ -223,6 +224,14 @@ class JSONRPCSite(object):
             if version in ('1.1', '2.0') and 'result' in response:
                 response.pop('result')
             status = e.status
+        except HTTPException, e:
+            other_error = OtherError(e)
+            response['error'] = other_error.json_rpc_format
+            response['error']['code'] = e.code
+            status = e.code
+
+            if version in ('1.1', '2.0') and 'result' in response:
+                response.pop('result')
         except Exception, e:
             # exception missed by others
             #got_request_exception.connect(log_exception, current_app._get_current_object())
@@ -299,9 +308,9 @@ class JSONRPCSite(object):
             'idempotent': M.json_safe,
             'params': [{'type': str(Any.kind(t)), 'name': k} 
                 for k, t in M.json_arg_types.iteritems()],
-            'return': {'type': M.json_return_type}}
+            'return': {'type': str(Any.kind(M.json_return_type))}}
     
-    def service_desc(self):
+    def service_desc(self, request):
         return {
             'sdversion': '1.0',
             'name': self.name,
@@ -310,10 +319,10 @@ class JSONRPCSite(object):
             'version': self.version,
             'procs': [self.procedure_desc(k) 
                 for k in self.urls.iterkeys()
-                    if self.urls[k] != self.describe]}
+                    if self.urls[k] != self.describe and request is None or self.urls[k].json_method == request]}
     
-    def describe(self, request):
-        return self.service_desc()
+    def describe(self, request=None):
+        return self.service_desc(request)
 
 
 jsonrpc_site = JSONRPCSite()
