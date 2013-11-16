@@ -9,58 +9,17 @@
         return [name];
     };
 
-    App.controller('ApplicationCtrl', ['$scope', '$location', 'PendingRequests', 'ContentLoaded', 'Api', function($scope, $location, PendingRequests, ContentLoaded, Api) {
-        $scope.response = {
-          'status': 200,
-          'headers': {
-            'content-type': 'application/json',
-            'content-length': '113',
-            'server': 'Werkzeug/0.8.3 Python/2.7.5',
-            'date': 'Fri, 15 Nov 2013 20:15:18 GMT',
-            'data': {
-              'jsonrpc': '2.0',
-              'id': '148c96a5-456c-43ba-a534-ebb0b54311cc',
-              'method': 'JSONRPC.welcome',
-              'params': []
-            }
-          },
-          'config': {
-            'transformRequest': [
-              null,
-              null
-            ],
-            'transformResponse': [
-              null
-            ],
-            'method': 'POST',
-            'url': '/api',
-            'data': {
-              'jsonrpc': '2.0',
-              'id': '148c96a5-456c-43ba-a534-ebb0b54311cc',
-              'method': 'JSONRPC.welcome',
-              'params': []
-            },
-            'headers': {
-              'Accept': 'application/json, text/plain, */*',
-              'Content-Type': 'application/json;charset=utf-8'
-            }
-          }
-        };
-        $scope.response_object = {
-          'id': '148c96a5-456c-43ba-a534-ebb0b54311cc', 
-          'jsonrpc': '2.0', 
-          'result': 'Welcome to Flask JSON-RPC'
-        };
-        Api.packages(function(packages) {
-            $scope.packages = packages;
-            ContentLoaded.hide();
-        });
+    App.controller('ApplicationCtrl', ['$scope', '$location', 'responseExample', 'responseObjectExample', 'PendingRequests', 'ContentLoaded', 'Toolbar', function($scope, $location, responseExample, responseObjectExample, PendingRequests, ContentLoaded, Toolbar) {
+        Toolbar.hide();
 
-        $scope.$on('breadcrumb', function(event, breadcrumb) {
+        $scope.response = responseExample;
+        $scope.response_object = responseObjectExample;
+
+        $scope.$on('App:breadcrumb', function(event, breadcrumb) {
             $scope.breadcrumbs = breadcrumbs(breadcrumb);
         });
 
-        $scope.$emit('breadcrumb', 'dashboard');
+        $scope.$emit('App:breadcrumb', 'Dashboard');
 
         $scope.showContentLoaded = function() {
             return ContentLoaded.isShow();
@@ -68,6 +27,10 @@
 
         $scope.showSpinner = function() {
             return PendingRequests.isPending();
+        };
+
+        $scope.showToolbar = function() {
+            return Toolbar.isShow();
         };
 
         $scope.routeIs = function(route) {
@@ -83,13 +46,33 @@
         };
     }]);
 
-    App.controller('MenuCtrl', ['$scope', '$location', 'Handlebars', function($scope, $location, Handlebars) {
+    App.controller('MenuCtrl', ['$scope', '$location', 'Handlebars', 'ContentLoaded', 'Api', function($scope, $location, Handlebars, ContentLoaded, Api) {
+        ContentLoaded.show();
+        Api.packages(function(packages) {
+            $scope.packages = packages;
+            ContentLoaded.hide();
+        });
+
         $scope.showTooltip = function(module) {
             return Handlebars.template('menu-module-tooltip', module);
         };
 
         $scope.showReponseObject = function(module) {
             return $location.path(module.name);
+        };
+    }]);
+
+    App.controller('ViewerContainerCtrl', ['$scope', '$location', 'Toolbar', function($scope, $location, Toolbar) {
+        $scope.resend = function() {
+            $scope.$broadcast('RPC:resend');
+        };
+
+        $scope.changeParameters = function() {
+            $scope.$broadcast('RPC:changeParameters');
+        };
+
+        $scope.notify = function() {
+            $scope.$broadcast('RPC:notify');
         };
     }]);
 
@@ -111,9 +94,10 @@
         };
     }]);
 
-    App.controller('ResponseObjectCtrl', ['$scope', '$window', '$modal', 'ContentLoaded', 'RPC', 'module', function($scope, $window, $modal, ContentLoaded, RPC, module) {
+    App.controller('ResponseObjectCtrl', ['$scope', '$window', '$modal', 'ContentLoaded', 'Toolbar', 'RPC', 'module', function($scope, $window, $modal, ContentLoaded, Toolbar, RPC, module) {
+        Toolbar.show();
         $scope.module = module;
-        $scope.$emit('breadcrumb', module.name);
+        $scope.$emit('App:breadcrumb', module.name);
 
         var RPCCall = function(module) {
             RPC.call(module).success(function(response_object, status, headers, config) { // success
@@ -131,25 +115,43 @@
                 $scope.response_object = undefined;
                 ContentLoaded.hide();
             });
+        },
+        RPCCallModal = function(module) {
+            $modal.open({
+                templateUrl: 'module_dialog.html',
+                controller: 'ModuleDialogCtrl',
+                resolve: {
+                    module: function() {
+                        return $scope.module;
+                    }
+                }
+            }).result.then(function(module) { // ok
+                return RPCCall(module);
+            }, function() { // cancel
+                ContentLoaded.hide();
+                $window.history.back();
+            });
         };
+
+        $scope.$on('RPC:resend', function(event) {
+            return RPCCall($scope.module);
+        });
+        
+        $scope.$on('RPC:changeParameters', function(event) {
+            return RPCCallModal($scope.module);
+        });
+
+        $scope.$on('RPC:notify', function(event) {
+            var m = angular.copy($scope.module);
+            m.notify = true;
+            return RPCCall(m);
+        });
 
         if (!module.params || !module.params.length) {
             return RPCCall(module);
         }
 
-        $modal.open({
-            templateUrl: 'module_dialog.html',
-            controller: 'ModuleDialogCtrl',
-            resolve: {
-                module: function() {
-                    return $scope.module;
-                }
-            }
-        }).result.then(function(module) { // ok
-            return RPCCall(module);
-        }, function() { // cancel
-            $window.history.back();
-        });
+        return RPCCallModal(module);
     }]);
 
 })(window.App);

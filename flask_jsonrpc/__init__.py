@@ -161,23 +161,43 @@ def _inject_args(sig, types):
 def _site_api(method=''):
     response_dict, status_code = default_site.dispatch(request, method)
     if current_app.config['DEBUG']:
-        print('\n ++ data request')
-        print('>> request: {0}'.format(extract_raw_data_request(request)))
-        print('<< response: {0}, {1}'.format(status_code, response_dict))
+        print '\n ++ data request'
+        print '>> request: {0}'.format(extract_raw_data_request(request))
+        print '<< response: {0}, {1}'.format(status_code, response_dict)
     return jsonify_status_code(status_code, response_dict), status_code
 
 
 class JSONRPC(object):
     
-    def __init__(self, app=None, service_url='/api', auth_backend=authenticate, site=default_site):
+    def __init__(self, app=None, service_url='/api', auth_backend=authenticate, site=default_site,
+                 enable_web_browsable_api=False):
         self.service_url = service_url
+        self.browse_url = self._make_browse_url(service_url)
+        self.enable_web_browsable_api = enable_web_browsable_api
         self.auth_backend = auth_backend
         self.site = site
         if app is not None:
             self.app = app
             self.init_app(self.app)
+            self._register_browse(self.app)
         else:
             self.app = None
+
+    def _make_browse_url(self, service_url):
+        return service_url + '/browse' \
+            if not service_url.endswith('/') \
+            else service_url + 'browse'
+
+    def _register_browse(self, app):
+        if app.config['DEBUG'] or self.enable_web_browsable_api:
+            self._enable_web_browsable_api(app)
+
+    def _enable_web_browsable_api(self, app, url_prefix=None):
+        from flask_jsonrpc.views import browse
+        if url_prefix is None:
+            url_prefix = self.browse_url
+        self.browse_url = url_prefix
+        app.register_blueprint(browse.mod, url_prefix=url_prefix)
             
     def init_app(self, app):
         app.add_url_rule(self.service_url, '', _site_api, methods=['POST'])

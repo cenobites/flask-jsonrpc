@@ -5,23 +5,16 @@
 		'core.service', 'core.directive', 'core.filter', 
 		'browse.service', 'browse.directive', 'browse.filter'
 		]).
-		config(['$routeProvider', function($routeProvider) {
+		config(['$routeProvider', 'urlPrefix', function($routeProvider, urlPrefix) {
 	    	$routeProvider
 	    		.when('/', {
 	    			reloadOnSearch: false,
-	    			templateUrl: '/browse/partials/dashboard.html',
-                    controller: 'ApplicationCtrl',
-                    resolve: {
-                        packages: ['ContentLoaded', 'Api', function(ContentLoaded, Api) {
-                            ContentLoaded.show();
-                            //return Api.packages().$promise;
-                            return [];
-                        }]
-                    }
+	    			templateUrl: urlPrefix + '/partials/dashboard.html',
+                    controller: 'ApplicationCtrl'
 	    		})
                 .when('/:method', {
                     controller: 'ResponseObjectCtrl',
-                    templateUrl: '/browse/partials/response_object.html',
+                    templateUrl: urlPrefix + '/partials/response_object.html',
                     resolve: {
                         module: ['$route', 'ContentLoaded', 'Api', function($route, ContentLoaded, Api) {
                             ContentLoaded.show();
@@ -30,7 +23,7 @@
                     }
                 })
 	    		.otherwise({
-	    			redirectTo: '/'
+	    			redirectTo: urlPrefix
 	    		});
 		}]);
 
@@ -53,9 +46,6 @@
         $(window).bind('load resize scroll', function(env) {
             App.adjust();
         });
-
-        //
-        //$('.tooltip-it').tooltip({delay: {show: 800, hide: 100}});
 	};
 
 	root.App = App;

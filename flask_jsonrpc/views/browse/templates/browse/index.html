@@ -4,15 +4,15 @@
 {% block bodyid %}browse{% endblock %}
 
 {% block include_style %}
-<link href="{{ url_for('static', filename='css/bootstrap-browse.css') }}" rel="stylesheet"/>
+<link href="{{ url_for('browse.static', filename='css/bootstrap-browse.css') }}" rel="stylesheet"/>
 {% endblock %}
 
 {% block include_script %}
-<script src="{{ url_for('static', filename='js/apps/browse/app.js') }}"></script>
-<script src="{{ url_for('static', filename='js/apps/browse/directives.js') }}"></script>
-<script src="{{ url_for('static', filename='js/apps/browse/filters.js') }}"></script>
-<script src="{{ url_for('static', filename='js/apps/browse/services.js') }}"></script>
-<script src="{{ url_for('static', filename='js/apps/browse/controllers.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('browse.static', filename='js/apps/browse/app.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('browse.static', filename='js/apps/browse/directives.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('browse.static', filename='js/apps/browse/filters.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('browse.static', filename='js/apps/browse/services.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('browse.static', filename='js/apps/browse/controllers.js') }}"></script>
 {% endblock %}
 
 {% block templates_js %}
@@ -30,7 +30,7 @@
       <div class="row">
         <div id="logo-section">
           <div id="logo-loading-box"><div id="logo-loading" ng-show="showSpinner()"></div></div>
-          <a id="logo-link" href="#/">Web browsable API</a>
+          <a id="logo-link" class="title" href="#/">Web browsable API</a>
         </div>
       </div>
       <div id="box-subscribe" class="row box-subscribe">
@@ -42,10 +42,10 @@
           {% raw %}
           <li class="dropdown" ng-repeat="(package_name, modules) in packages">
             <a data-toggle="collapse" data-target="#{{package_name}}"><i class="icon icon-folder-open"></i> {{package_name}}</a>
-            <div id="{{package_name}}" class="accordion-body collapse">
+            <div id="{{package_name}}" class="accordion-body collapse" ng-class="{in:$first}">
               <ul class="dropdown-submenu">
                 <li ng-repeat="module in modules">
-                  <a ng-click="showReponseObject(module)" ng-class="{active:routeIs(module.name)}" class="disableable" data-placement="top" data-toggle="tooltip" tooltip="{{showTooltip(module)}}"><i class="icon icon-caret-right"></i> {{module.name}}</a>
+                  <a ng-click="showReponseObject(module)" ng-class="{active:routeIs(module.name)}" class="disableable" data-placement="bottom" data-toggle="tooltip" tooltip="{{showTooltip(module)}}"><i class="icon icon-caret-right"></i> {{module.name}}</a>
                 </li>
               </ul>
             </div>
@@ -57,13 +57,25 @@
       </div>
     </div>
 
-    <div id="viewer-container" data-ng-hide="showContentLoaded()" class="col-sm-9 col-md-9" style="min-height: 381px;">
+    <div ng-controller="ViewerContainerCtrl" id="viewer-container" data-ng-hide="showContentLoaded()" class="col-sm-9 col-md-9" style="min-height: 381px;">
       <div class="row">
         <div id="viewer-header-container">
           <div id="viewer-header">
             <div id="viewer-top-controls-container">
               <div id="viewer-top-controls">
                 <span style="color: #777777;">A look at what's new in your web browsable API</span>
+
+                <ul class="list-inline pull-right sparkline-box" ng-show="showToolbar()">
+                  <li>
+                    <h4 class="blue"><button ng-click="resend()" class="btn btn-blue">Resend</button></h4>
+                  </li>
+                  <li>
+                    <h4 class="blue"><button ng-click="changeParameters()" class="btn btn-green">Change parameters</button></h4>
+                  </li>
+                  <li>
+                    <h4 class="green"><button ng-click="notify()" class="btn btn-gold">Notify</button></h4>
+                  </li>
+                </ul>
               </div>
             </div>
           </div>
@@ -82,7 +94,7 @@
       </div>
     </div> <!-- content -->
 
-    <div data-ng-show="showContentLoaded()">
+    <div data-ng-show="showContentLoaded()" class="col-sm-9 col-md-9" style="padding-left: 0px; padding-right: 0px;">
       <div id="viewer-header-container">
         <div id="viewer-header">
           <div id="viewer-top-controls-container">
@@ -93,7 +105,7 @@
         </div>
       </div>
       <div class="loading-content">
-        <img alt="loading" src="{{ url_for('static', filename='img/iframe-loader.gif') }}">
+        <img alt="loading" src="{{ url_for('browse.static', filename='img/iframe-loader.gif') }}">
         <h1>Just one moment...</h1>
         Please wait while we get your web browsable API information.
         <div> </div>

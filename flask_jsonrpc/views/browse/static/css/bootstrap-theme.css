@@ -533,7 +533,8 @@ h6 {
 
 
 h1, .h1 {
-  font-size: 36px; }
+  font-size: 36px;
+  line-height: 36px !important; }
 
 
 h2, .h2 {
@@ -12120,7 +12121,8 @@ disabled look for disabled choices in the results dropdown
 .sparkline-box {
   margin: 0;
   padding: 0;
-  margin-top: 10px; }
+  /*margin-top: 10px;*/
+  margin-top: 0px; }
   
   .sparkline-box.side .sparkline {
     margin-top: 5px; }

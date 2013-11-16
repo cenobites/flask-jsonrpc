@@ -15,12 +15,13 @@
               <label class="control-label" for="course">{{param.name}} -> {{param.type}}: </label><input type="text" class="form-control" name="{{param.name}}" id="{{param.name}}" ng-model="param.value" ng-keyup="hitEnter($event)" required>
               <span class="help-block"></span>
             </span>
+            <label class="control-label" for="notify">Is a notify?</label><input type="checkbox" class="form-control" name="notify" id="notify" ng-model="module.notify" />
           </div>
         </ng-form>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-default" ng-click="cancel()">Cancel</button>
-        <button type="button" class="btn btn-primary" ng-click="ok()" ng-disabled="(nameDialog.$dirty && nameDialog.$invalid) || nameDialog.$pristine">Save</button>
+        <button type="button" class="btn btn-default btn-sm" ng-click="cancel()">Cancel</button>
+        <button type="button" class="btn btn-primary btn-blue btn-sm" ng-click="ok()" ng-disabled="(nameDialog.$dirty && nameDialog.$invalid) || nameDialog.$pristine">Save</button>
       </div>
       </div>
   </div>
