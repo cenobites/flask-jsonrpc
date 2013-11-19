@@ -49,7 +49,11 @@ setup(
     author_email='nycholas@gmail.com',
     description='Adds JSONRPC support to Flask.',
     long_description=__doc__,
-    packages=['flask_jsonrpc'],
+    packages=[
+        'flask_jsonrpc',
+        'flask_jsonrpc.views',
+        'flask_jsonrpc.views.browse'
+    ],
     zip_safe=False,
     include_package_data=True,
     platforms='any',

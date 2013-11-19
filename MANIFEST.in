@@ -1,0 +1,2 @@
+recursive-include flask_jsonrpc/views/browse/templates *
+recursive-include flask_jsonrpc/views/browse/static *
