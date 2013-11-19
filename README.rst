@@ -3,7 +3,21 @@ Flask JSON-RPC
 
 A basic JSON-RPC implementation for your Flask-powered sites based on `django-json-rpc <https://github.com/samuraisam/django-json-rpc>`_.
 
+Some reasons you might want to use:
+
+* Simple, powerful, flexible and pythoic API.
+* The Web browseable API.
+* Support for authentication.
+* Proxy to test your JSON Service.
+* Run-time type checking.
+* Extensive documentation, and great community support.
+
 For support python 3.3 or later use the branch `py3k <https://github.com/cenobites/flask-jsonrpc/tree/py3k>`_ (experimental).
+
+There is a live example API for testing purposes, `available here <http://localhost:5000/api/browse>`_.
+
+**Below:** Screenshot from the browsable API
+![Web Browsable API](https://f.cloud.github.com/assets/298350/1575590/203c595a-5150-11e3-99a0-4a6fd9bcbe52.png)
 
 Adding Flask JSON-RPC to your application
 *****************************************
@@ -75,6 +89,8 @@ All code of Example `run.py <https://github.com/cenobites/flask-jsonrpc/blob/mas
 Testing your service
 ********************
 
+You can test your service using the provided web browsable API, available at http://localhost:5000/api/browse (if using the url patterns from above) or with the included ServiceProxy:
+
 ::
 
     >>> from flask_jsonrpc.proxy import ServiceProxy
@@ -83,14 +99,14 @@ Testing your service
     >>> server.App.index()
     {'jsonrpc': '2.0', 'id': '91bce374-462f-11e2-af55-f0bf97588c3b', 'result': 'Welcome to Flask JSON-RPC'}
 
+We add the ``jsonrpc_version`` variable to the request object. It be either '1.0', '1.1' or '2.0'. Arg.
 
 For more tests see `Examples <https://github.com/cenobites/flask-jsonrpc/wiki/Examples>`_.
-
 
 Dependecies
 ***********
 
-* Python 2.7 or later (http://www.python.org)
+* Python (2.6.5+), (2.7, 3.2, 3.3) or later (http://www.python.org)
 * Flask 0.9 or later (http://flask.pocoo.org)
 
 
