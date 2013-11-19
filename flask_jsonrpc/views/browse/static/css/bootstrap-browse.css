@@ -36,6 +36,10 @@ pre {
     clear:both;
 }
 
+.content-main {
+  padding-bottom: 50px;
+}
+
 /* bootstrap ui angular */
 .nav, .pagination, .carousel a { cursor: pointer; } 
 .modal {display: block}
