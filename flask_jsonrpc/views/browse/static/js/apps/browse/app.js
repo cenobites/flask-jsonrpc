@@ -1,7 +1,7 @@
 (function(root) {
 	'use strict';
 
-	var App = angular.module('browse', ['ngRoute', 'ngResource', 'ui.bootstrap',
+	var App = angular.module('browse', ['ngRoute', 'ngResource', 'ngSanitize', 'ui.bootstrap',
 		'core.service', 'core.directive', 'core.filter', 
 		'browse.service', 'browse.directive', 'browse.filter'
 		]).
@@ -46,6 +46,9 @@
         $(window).bind('load resize scroll', function(env) {
             App.adjust();
         });
+
+        // JSON highlighting
+        prettyPrint();
 	};
 
 	root.App = App;
