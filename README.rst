@@ -16,7 +16,7 @@ For support python 3.3 or later use the branch `py3k <https://github.com/cenobit
 
 There is a live example API for testing purposes, `available here <http://localhost:5000/api/browse>`_.
 
-**Below:** Screenshot from the browsable API
+**Below:** *Screenshot from the browsable API*
 
 .. image:: https://f.cloud.github.com/assets/298350/1575590/203c595a-5150-11e3-99a0-4a6fd9bcbe52.png
 
