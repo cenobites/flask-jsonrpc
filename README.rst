@@ -14,7 +14,7 @@ Some reasons you might want to use:
 
 For support python 3.3 or later use the branch `py3k <https://github.com/cenobites/flask-jsonrpc/tree/py3k>`_ (experimental).
 
-There is a live example API for testing purposes, `available here <http://localhost:5000/api/browse>`_.
+There is a live example API for testing purposes, `available here <http://flask-jsonrpc.herokuapp.com/api/browse>`_.
 
 **Below:** *Screenshot from the browsable API*
 
