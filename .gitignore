@@ -15,3 +15,6 @@ syntax: glob
 *.directory
 __pycache__
 src/**/build/*
+Flask_JSONRPC.egg-info/*
+build/*
+dist/*
