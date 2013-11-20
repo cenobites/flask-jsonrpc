@@ -57,7 +57,7 @@
       </div>
     </div>
 
-    <div ng-controller="ViewerContainerCtrl" id="viewer-container" data-ng-hide="showContentLoaded()" class="col-sm-9 col-md-9" style="min-height: 381px;">
+    <div ng-controller="ViewerContainerCtrl" id="viewer-container" data-ng-hide="showContentLoaded" class="col-sm-9 col-md-9" style="min-height: 381px;">
       <div class="row">
         <div id="viewer-header-container">
           <div id="viewer-header">
@@ -65,7 +65,7 @@
               <div id="viewer-top-controls">
                 <span style="color: #777777;">A look at what's new in your web browsable API</span>
 
-                <ul class="list-inline pull-right sparkline-box" ng-show="showToolbar()">
+                <ul class="list-inline pull-right sparkline-box" ng-show="showToolbar">
                   <li>
                     <h4 class="blue"><button ng-click="resend()" class="btn btn-blue">Resend</button></h4>
                   </li>
@@ -94,7 +94,7 @@
       </div>
     </div> <!-- content -->
 
-    <div data-ng-show="showContentLoaded()" class="col-sm-9 col-md-9" style="padding-left: 0px; padding-right: 0px;">
+    <div data-ng-show="showContentLoaded" class="col-sm-9 col-md-9" style="padding-left: 0px; padding-right: 0px;">
       <div id="viewer-header-container">
         <div id="viewer-header">
           <div id="viewer-top-controls-container">

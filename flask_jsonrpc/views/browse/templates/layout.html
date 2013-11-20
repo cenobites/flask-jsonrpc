@@ -22,6 +22,7 @@
   {% endblock %}
   <link href="{{ url_for('browse.static', filename='css/fonts.css') }}" rel="stylesheet"/>
   <link rel="stylesheet" type="text/css" href="{{ url_for('browse.static', filename='css/prettify.css') }}"/>
+  <link rel="stylesheet" type="text/css" href="{{ url_for('browse.static', filename='css/loading-bar.min.css') }}"/>
   {% block include_style %}{% endblock %}
   {% endblock %}
 
@@ -48,7 +49,7 @@
   {% endblock %}
 
   <!-- Content -->
-  <div id="content">
+  <div id="content" ng-hide="showFakeIntro">
   {% block content %}{% endblock %}
   </div>
   <!-- END Content -->
@@ -63,8 +64,10 @@
   <script type="text/javascript" src="{{ url_for('browse.static', filename='js/libs/angular/angular-route.min.js') }}"></script>
   <script type="text/javascript" src="{{ url_for('browse.static', filename='js/libs/angular/angular-resource.min.js') }}"></script>
   <script type="text/javascript" src="{{ url_for('browse.static', filename='js/libs/angular/angular-sanitize.min.js') }}"></script>
+  <script type="text/javascript" src="{{ url_for('browse.static', filename='js/libs/angular/angular-animate.min.js') }}"></script>
   <script type="text/javascript" src="{{ url_for('browse.static', filename='js/libs/angular/ui-bootstrap-0.7.0.min.js') }}"></script>
   <script type="text/javascript" src="{{ url_for('browse.static', filename='js/libs/angular/ui-bootstrap-tpls-0.7.0.min.js') }}"></script>
+  <script type="text/javascript" src="{{ url_for('browse.static', filename='js/libs/angular/loading-bar.min.js') }}"></script>
   <!--<script type="text/javascript" src="{{ url_for('browse.static', filename='js/libs/angular/dialogs.min.js') }}"></script>-->
   <script type="text/javascript" src="{{ url_for('browse.static', filename='js/libs/bootstrap/bootstrap.min.js') }}"></script>
   <script type="text/javascript" src="{{ url_for('browse.static', filename='js/libs/handlebars-v1.1.2.js') }}"></script>

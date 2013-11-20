@@ -2,18 +2,6 @@
     'use strict';
 
     angular.module('core.service', [])
-        .value('ContentLoaded', {
-            value: false,
-            show: function() {
-                this.value = true;
-            },
-            hide: function() {
-                this.value = false;
-            },
-            isShow: function() {
-                return this.value;
-            }
-        })
         .value('PendingRequests', {
             counter: 0,
             increment: function() { 
@@ -28,6 +16,9 @@
                 return this.counter > 0;
             }
         })
+        .config(['cfpLoadingBarProvider', function(cfpLoadingBarProvider) {
+            cfpLoadingBarProvider.includeSpinner = true;
+        }])
         .config(['$httpProvider', 'PendingRequestsProvider', function($httpProvider, PendingRequestsProvider) {
             var PendingRequests = PendingRequestsProvider.$get();
             $httpProvider.responseInterceptors.push("PendingRequestsHttpInterceptor");

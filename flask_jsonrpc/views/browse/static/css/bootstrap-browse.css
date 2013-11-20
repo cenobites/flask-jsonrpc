@@ -1,5 +1,23 @@
 @charset "UTF-8";
 
+/* angularjs */
+[ng\:cloak], [ng-cloak], [data-ng-cloak], [x-ng-cloak], .ng-cloak, .x-ng-cloak {
+  display: none !important;
+}
+
+.hide {
+  display: none;
+}
+
+.show {
+  display: block;
+}
+
+/* loading bar */
+#loading-bar-spinner {
+  top: 17px;
+}
+
 /* code */
 pre {
   display: block;
@@ -126,7 +144,9 @@ body {
   background-color: #444;
   color: #fff;
 }
-
+.navbar-brand {
+  margin-left: 15px;
+}
 
 
 .brand .first {

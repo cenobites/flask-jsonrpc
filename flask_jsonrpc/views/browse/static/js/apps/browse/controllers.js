@@ -9,28 +9,35 @@
         return [name];
     };
 
-    App.controller('ApplicationCtrl', ['$scope', '$location', 'responseExample', 'responseObjectExample', 'PendingRequests', 'ContentLoaded', 'Toolbar', function($scope, $location, responseExample, responseObjectExample, PendingRequests, ContentLoaded, Toolbar) {
-        Toolbar.hide();
-
+    App.controller('ApplicationCtrl', ['$scope', '$location', '$timeout',
+                                       'responseExample', 'responseObjectExample', 'PendingRequests', 
+                                       function($scope, $location, $timeout,
+                                                responseExample, responseObjectExample, PendingRequests) {
+        $scope.showFakeIntro = true;
+        $scope.showContentLoaded = true;
+        $scope.showToolbar = false;
+        $scope.breadcrumbs = breadcrumbs('Dashboard');
         $scope.response = responseExample;
         $scope.response_object = responseObjectExample;
+
+        $scope.$on('App:displayFakeIntro', function(event, display) {
+            $scope.showFakeIntro = display;
+        });
+
+        $scope.$on('App:displayContentLoaded', function(event, display) {
+            $scope.showContentLoaded = display;
+        });
 
         $scope.$on('App:breadcrumb', function(event, breadcrumb) {
             $scope.breadcrumbs = breadcrumbs(breadcrumb);
         });
 
-        $scope.$emit('App:breadcrumb', 'Dashboard');
-
-        $scope.showContentLoaded = function() {
-            return ContentLoaded.isShow();
-        };
+        $scope.$on('App:displayToolbar', function(event, display) {
+            $scope.showToolbar = display;
+        });
 
         $scope.showSpinner = function() {
             return PendingRequests.isPending();
-        };
-
-        $scope.showToolbar = function() {
-            return Toolbar.isShow();
         };
 
         $scope.routeIs = function(route) {
@@ -46,11 +53,18 @@
         };
     }]);
 
-    App.controller('MenuCtrl', ['$scope', '$location', 'Handlebars', 'ContentLoaded', 'Api', function($scope, $location, Handlebars, ContentLoaded, Api) {
-        ContentLoaded.show();
+    App.controller('MenuCtrl', ['$scope', '$location', '$timeout',
+                                'Handlebars', 'Api', 
+                                function($scope, $location, $timeout,
+                                         Handlebars, Api) {
+        $scope.$emit('App:displayFakeIntro', true);
+        $scope.$emit('App:displayContentLoaded', true);
         Api.packages(function(packages) {
             $scope.packages = packages;
-            ContentLoaded.hide();
+            $scope.$emit('App:displayFakeIntro', false);
+            $timeout(function() {
+                $scope.$emit('App:displayContentLoaded', false);
+            }, 750);
         });
 
         $scope.showTooltip = function(module) {
@@ -62,7 +76,7 @@
         };
     }]);
 
-    App.controller('ViewerContainerCtrl', ['$scope', '$location', 'Toolbar', function($scope, $location, Toolbar) {
+    App.controller('ViewerContainerCtrl', ['$scope', '$location', function($scope, $location) {
         $scope.resend = function() {
             $scope.$broadcast('RPC:resend');
         };
@@ -94,9 +108,10 @@
         };
     }]);
 
-    App.controller('ResponseObjectCtrl', ['$scope', '$window', '$modal', 'ContentLoaded', 'Toolbar', 'RPC', 'module', function($scope, $window, $modal, ContentLoaded, Toolbar, RPC, module) {
-        Toolbar.show();
+    App.controller('ResponseObjectCtrl', ['$scope', '$window', '$modal', 'RPC', 'module', function($scope, $window, $modal, RPC, module) {
         $scope.module = module;
+        //$scope.$emit('App:displayContentLoaded', true);
+        $scope.$emit('App:displayToolbar', true);
         $scope.$emit('App:breadcrumb', module.name);
 
         var RPCCall = function(module) {
@@ -106,14 +121,14 @@
 
                 $scope.response = {status: status, headers: headers_pretty, config: config};
                 $scope.response_object = response_object;
-                ContentLoaded.hide();
+                $scope.$emit('App:displayContentLoaded', false);
             }).error(function(response_object, status, headers, config) { // error
                 var headers_pretty = headers();
                 headers_pretty.data = config.data;
 
                 $scope.response = {status_code: status, headers: headers_pretty, config: config};
                 $scope.response_object = undefined;
-                ContentLoaded.hide();
+                $scope.$emit('App:displayContentLoaded', false);
             });
         },
         RPCCallModal = function(module) {
@@ -128,7 +143,7 @@
             }).result.then(function(module) { // ok
                 return RPCCall(module);
             }, function() { // cancel
-                ContentLoaded.hide();
+                $scope.$emit('App:displayContentLoaded', false);
                 $window.history.back();
             });
         };

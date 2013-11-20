@@ -1,7 +1,8 @@
 (function(root) {
 	'use strict';
 
-	var App = angular.module('browse', ['ngRoute', 'ngResource', 'ngSanitize', 'ui.bootstrap',
+	var App = angular.module('browse', ['ngRoute', 'ngResource', 'ngSanitize', 'ngAnimate', 
+        'ui.bootstrap', 'chieffancypants.loadingBar',
 		'core.service', 'core.directive', 'core.filter', 
 		'browse.service', 'browse.directive', 'browse.filter'
 		]).
@@ -16,8 +17,7 @@
                     controller: 'ResponseObjectCtrl',
                     templateUrl: urlPrefix + '/partials/response_object.html',
                     resolve: {
-                        module: ['$route', 'ContentLoaded', 'Api', function($route, ContentLoaded, Api) {
-                            ContentLoaded.show();
+                        module: ['$route', 'Api', function($route, Api) {
                             return Api.method({service: $route.current.params.method}).$promise;
                         }]
                     }
