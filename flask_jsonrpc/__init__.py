@@ -158,13 +158,15 @@ def _inject_args(sig, types):
         sig = '%s(%s)' % (sig, ', '.join(types))
     return sig
 
-def _site_api(method=''):
-    response_dict, status_code = default_site.dispatch(request, method)
-    if current_app.config['DEBUG']:
-        print '\n ++ data request'
-        print '>> request: {0}'.format(extract_raw_data_request(request))
-        print '<< response: {0}, {1}'.format(status_code, response_dict)
-    return jsonify_status_code(status_code, response_dict), status_code
+def _site_api(site):
+    def wrapper(method=''):
+        response_dict, status_code = site.dispatch(request, method)
+        if current_app.config['DEBUG']:
+            print '\n ++ data request'
+            print '>> request: {0}'.format(extract_raw_data_request(request))
+            print '<< response: {0}, {1}'.format(status_code, response_dict)
+        return jsonify_status_code(status_code, response_dict), status_code
+    return wrapper
 
 
 class JSONRPC(object):
@@ -176,6 +178,7 @@ class JSONRPC(object):
         self.enable_web_browsable_api = enable_web_browsable_api
         self.auth_backend = auth_backend
         self.site = site
+        self.site_api = _site_api(site)
         if app is not None:
             self.app = app
             self.init_app(self.app)
@@ -200,12 +203,12 @@ class JSONRPC(object):
         app.register_blueprint(browse.mod, url_prefix=url_prefix)
             
     def init_app(self, app):
-        app.add_url_rule(self.service_url, '', _site_api, methods=['POST'])
-        app.add_url_rule(self.service_url + '/<method>', '', _site_api, methods=['GET'])
+        app.add_url_rule(self.service_url, self.service_url, self.site_api, methods=['POST'])
+        app.add_url_rule(self.service_url + '/<method>', self.service_url + '/<method>', self.site_api, methods=['GET'])
         
     def register_blueprint(self, blueprint):
-        blueprint.add_url_rule(self.service_url, '', _site_api, methods=['POST'])
-        blueprint.add_url_rule(self.service_url + '/<method>', '', _site_api, methods=['GET'])
+        blueprint.add_url_rule(self.service_url, self.service_url, self.site_api, methods=['POST'])
+        blueprint.add_url_rule(self.service_url + '/<method>', self.service_url + '/<method>', self.site_api, methods=['GET'])
         
     def method(self, name, authenticated=False, safe=False, validate=False, **options):
         def decorator(f):
