@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# Copyright (c) 2012-2013, Cenobit Technologies, Inc. http://cenobit.es/
+# Copyright (c) 2012-2014, Cenobit Technologies, Inc. http://cenobit.es/
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -47,6 +47,9 @@ from flask_jsonrpc.exceptions import (Error, ParseError, InvalidRequestError,
                                       InvalidCredentialsError, OtherError)
 
 from run import app, jsonrpc
+
+SERVER_HOSTNAME = 'localhost'
+SERVER_PORT = 5001
 
 def check_auth(username, password):
     return True
@@ -175,7 +178,7 @@ class JSONRPCFunctionalTests(unittest.TestCase):
 class ServiceProxyTestCase(unittest.TestCase):
     
     def setUp(self):
-        self.service_url = 'http://127.0.0.1:5000/api'
+        self.service_url = 'http://{0}:{1}/api'.format(SERVER_HOSTNAME, SERVER_PORT)
         
     def tearDown(self):
         pass
@@ -345,7 +348,7 @@ def main():
 
     (options, args) = parser.parse_args()
     if options.run:
-        return app.run(host='0.0.0.0', debug=True)
+        return app.run(host=SERVER_HOSTNAME, port=SERVER_PORT)
 
     with FlaskTestClient():
         unittest.main()

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2012-2013, Cenobit Technologies, Inc. http://cenobit.es/
+# Copyright (c) 2012-2014, Cenobit Technologies, Inc. http://cenobit.es/
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -27,9 +27,30 @@
 # POSSIBILITY OF SUCH DAMAGE.
 from flask import Blueprint, request, jsonify, render_template
 
-from flask_jsonrpc.site import jsonrpc_site
 
-mod = Blueprint('browse', __name__, static_folder='static', template_folder='templates')
+class _Blueprint(Blueprint):
+
+    jsonrpc_site = None
+
+    def register(self, app, options, first_registration=False):
+        """Called by :meth:`Flask.register_blueprint` to register a blueprint
+        on the application. This can be overridden to customize the register
+        behavior. Keyword arguments from
+        :func:`~flask.Flask.register_blueprint` are directly forwarded to this
+        method in the `options` dictionary.
+        """
+        self.jsonrpc_site = options.get('jsonrpc_site')
+        self._got_registered_once = True
+        state = self.make_setup_state(app, options, first_registration)
+        if self.has_static_folder and \
+                not self.name + '.static' in state.app.view_functions.keys():
+            state.add_url_rule(self.static_url_path + '/<path:filename>',
+                               view_func=self.send_static_file,
+                               endpoint='static')
+        for deferred in self.deferred_functions:
+            deferred(state)
+
+mod = _Blueprint('browse', __name__, template_folder='templates', static_folder='static')
 
 @mod.route('/')
 def index():
@@ -40,7 +61,7 @@ def index():
 
 @mod.route('/packages.json')
 def json_packages():
-    jsonrpc_describe = jsonrpc_site.describe()
+    jsonrpc_describe = mod.jsonrpc_site.describe()
     packages = sorted(jsonrpc_describe['procs'], key=lambda proc: proc['name'])
     packages_tree = {}
     for package in packages:
@@ -50,7 +71,7 @@ def json_packages():
 
 @mod.route('/<method_name>.json')
 def json_method(method_name):
-    jsonrpc_describe = jsonrpc_site.describe()
+    jsonrpc_describe = mod.jsonrpc_site.describe()
     method = [method for method in jsonrpc_describe['procs'] if method['name'] == method_name][0]
     return jsonify(method)
 

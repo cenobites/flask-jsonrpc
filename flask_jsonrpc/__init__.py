@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2012-2013, Cenobit Technologies, Inc. http://cenobit.es/
+# Copyright (c) 2012-2014, Cenobit Technologies, Inc. http://cenobit.es/
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -186,6 +186,12 @@ class JSONRPC(object):
         else:
             self.app = None
 
+    def _unique_name(self, suffix=''):
+        st = '.'.join((self.service_url + suffix).split('/'))
+        st = st[1::] if st.startswith('.') else st
+        st = st[0:-1] if st.endswith('.') else st
+        return st
+
     def _make_browse_url(self, service_url):
         return service_url + '/browse' \
             if not service_url.endswith('/') \
@@ -200,15 +206,12 @@ class JSONRPC(object):
         if url_prefix is None:
             url_prefix = self.browse_url
         self.browse_url = url_prefix
-        app.register_blueprint(browse.mod, url_prefix=url_prefix)
+        app.register_blueprint(browse.mod, url_prefix=url_prefix, 
+            jsonrpc_site_name=self._unique_name(), jsonrpc_site=self.site)
             
     def init_app(self, app):
-        app.add_url_rule(self.service_url, self.service_url, self.site_api, methods=['POST'])
-        app.add_url_rule(self.service_url + '/<method>', self.service_url + '/<method>', self.site_api, methods=['GET'])
-        
-    def register_blueprint(self, blueprint):
-        blueprint.add_url_rule(self.service_url, self.service_url, self.site_api, methods=['POST'])
-        blueprint.add_url_rule(self.service_url + '/<method>', self.service_url + '/<method>', self.site_api, methods=['GET'])
+        app.add_url_rule(self.service_url, self._unique_name(), self.site_api, methods=['POST'])
+        app.add_url_rule(self.service_url + '/<method>', self._unique_name('/<method>'), self.site_api, methods=['GET'])
         
     def method(self, name, authenticated=False, safe=False, validate=False, **options):
         def decorator(f):

@@ -44,8 +44,8 @@ from flask_jsonrpc import JSONRPC
 from flask_jsonrpc.site import JSONRPCSite
 
 app = Flask(__name__)
-jsonrpc_v1 = JSONRPC(app, '/v1/api', site=JSONRPCSite())
-jsonrpc_v2 = JSONRPC(app, '/v2/api', site=JSONRPCSite())
+jsonrpc_v1 = JSONRPC(app, '/api/v1', site=JSONRPCSite(), enable_web_browsable_api=True)
+jsonrpc_v2 = JSONRPC(app, '/api/v2', site=JSONRPCSite(), enable_web_browsable_api=True)
 
 @jsonrpc_v1.method('App.index')
 def index_v1():
