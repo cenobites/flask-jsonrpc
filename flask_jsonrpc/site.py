@@ -332,4 +332,5 @@ class JSONRPCSite(object):
     def describe(self):
         return self.service_desc()
 
+
 jsonrpc_site = JSONRPCSite()
