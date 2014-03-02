@@ -56,7 +56,7 @@ def check_auth(username, password):
 
 @jsonrpc.method('jsonrpc.echo')
 def echo(name='Flask JSON-RPC'):
-    return 'Hello {}'.format(name)
+    return 'Hello %s' % name
 
 @jsonrpc.method('jsonrpc.echoMyStr')
 def echoMyStr(string):
@@ -178,7 +178,7 @@ class JSONRPCFunctionalTests(unittest.TestCase):
 class ServiceProxyTestCase(unittest.TestCase):
     
     def setUp(self):
-        self.service_url = 'http://{0}:{1}/api'.format(SERVER_HOSTNAME, SERVER_PORT)
+        self.service_url = 'http://%s:%s/api' % (SERVER_HOSTNAME, SERVER_PORT)
         
     def tearDown(self):
         pass

@@ -38,4 +38,4 @@ def index():
 
 @jsonrpc.method('Hello.say(name=String)')
 def say(name=''):
-    return 'Hello {0}!'.format(name)
+    return 'Hello %s' % name

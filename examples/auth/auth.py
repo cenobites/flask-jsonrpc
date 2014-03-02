@@ -54,7 +54,7 @@ def index():
 
 @jsonrpc.method('App.echo(name=str) -> str', validate=True, authenticated=check_auth)
 def echo(name='Flask JSON-RPC'):
-    return 'Hello {}'.format(name)
+    return 'Hello %s' % name
 
 
 if __name__ == '__main__':
