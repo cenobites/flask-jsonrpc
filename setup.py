@@ -28,7 +28,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 """
 Flask-JSONRPC
------------
+-------------
 
 Adds JSONRPC support to Flask.
 
@@ -42,13 +42,13 @@ from setuptools import setup
 
 setup(
     name='Flask-JSONRPC',
-    version='0.1',
+    version='0.2',
     url='https://github.com/cenobites/flask-jsonrpc',
     license='New BSD License',
     author='Nycholas de Oliveira e Oliveira',
     author_email='nycholas@gmail.com',
     description='Adds JSONRPC support to Flask.',
-    long_description=__doc__,
+    long_description=open('README.rst').read(),
     packages=[
         'flask_jsonrpc',
         'flask_jsonrpc.views',
@@ -58,7 +58,7 @@ setup(
     include_package_data=True,
     platforms='any',
     install_requires=[
-        'Flask'
+        'Flask>=0.9'
     ],
     classifiers=[
         'Environment :: Web Environment',
@@ -66,6 +66,7 @@ setup(
         'License :: OSI Approved :: BSD License',
         'Operating System :: OS Independent',
         'Programming Language :: Python',
+        'Programming Language :: Python :: 3',
         'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
         'Topic :: Software Development :: Libraries :: Python Modules'
     ]
