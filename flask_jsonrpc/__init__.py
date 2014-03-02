@@ -26,6 +26,7 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 import re
+import logging
 from functools import wraps
 from inspect import getargspec
 
@@ -156,9 +157,8 @@ def _site_api(site):
     def wrapper(method=''):
         response_dict, status_code = site.dispatch(request, method)
         if current_app.config['DEBUG']:
-            print '\n ++ data request'
-            print '>> request: {0}'.format(extract_raw_data_request(request))
-            print '<< response: {0}, {1}'.format(status_code, response_dict)
+            logging.debug('request: {0}'.format(extract_raw_data_request(request)))
+            logging.debug('response: {0}, {1}'.format(status_code, response_dict))
         return jsonify_status_code(status_code, response_dict), status_code
     return wrapper
 

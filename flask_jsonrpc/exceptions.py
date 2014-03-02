@@ -107,7 +107,7 @@ class InvalidParamsError(Error):
 class ServerError(Error):
     """Internal JSON-RPC error.
     """
-    code = -32603   
+    code = -32603
     message = _('Internal error.')
   
 # -32099..-32000    Server error.

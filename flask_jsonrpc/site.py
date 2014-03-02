@@ -35,8 +35,8 @@ from werkzeug.exceptions import HTTPException
 
 from flask import json, jsonify, current_app, got_request_exception
 
-from flask_jsonrpc.helpers import extract_raw_data_request, log_exception
 from flask_jsonrpc.types import Object, Array, Any
+from flask_jsonrpc.helpers import extract_raw_data_request, log_exception
 from flask_jsonrpc._compat import (text_type, string_types, integer_types,
                                    iteritems, iterkeys)
 from flask_jsonrpc.exceptions import (Error, ParseError, InvalidRequestError, 
@@ -232,26 +232,17 @@ class JSONRPCSite(object):
             if version in ('1.1', '2.0') and 'result' in response:
                 response.pop('result')
             status = e.status
-         except HTTPException as e:
+        except HTTPException as e:
             # exception missed by others
             #got_request_exception.connect(log_exception, current_app._get_current_object())
 
             other_error = OtherError(e)
             response['error'] = other_error.json_rpc_format
             response['error']['code'] = e.code
-            status = e.code
             if version in ('1.1', '2.0') and 'result' in response:
                 response.pop('result')
+            status = e.code
         except Exception as e:
-            # exception missed by others
-            #got_request_exception.connect(log_exception, current_app._get_current_object())
-
-            other_error = OtherError(e)
-            response['error'] = other_error.json_rpc_format
-            response['error']['code'] = e.code
-            status = e.code
-            if version in ('1.1', '2.0') and 'result' in response:
-                response.pop('result')
             # exception missed by others
             #got_request_exception.connect(log_exception, current_app._get_current_object())
 
@@ -307,7 +298,6 @@ class JSONRPCSite(object):
             #got_request_exception.connect(log_exception, current_app._get_current_object())            
 
             other_error = OtherError(e)
-
             response['result'] = None
             response['error'] = other_error.json_rpc_format
             status = other_error.status
