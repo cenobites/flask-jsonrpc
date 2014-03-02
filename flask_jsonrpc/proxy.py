@@ -26,11 +26,10 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 import uuid
-import urllib
-import StringIO
 
 from flask import json, current_app
 
+from flask_jsonrpc._compat import NativeStringIO, urlopen
 from flask_jsonrpc.types import Object, Any
 
 
@@ -43,7 +42,7 @@ class ServiceProxy(object):
 
     def __getattr__(self, name):
         if self.service_name != None:
-            name = '%s.%s' % (self.service_name, name)
+            name = '{0}.{1}'.format(self.service_name, name)
         params = dict(self.__dict__, service_name=name)
         return self.__class__(**params)
   
@@ -56,12 +55,14 @@ class ServiceProxy(object):
     def send_payload(self, params):
         """Performs the actual sending action and returns the result
         """
-        return urllib.urlopen(self.service_url, json.dumps({
+        data = json.dumps({
             'jsonrpc': self.version,
             'method': self.service_name,
             'params': params,
             'id': str(uuid.uuid1())
-        })).read()
+        })
+        data_binary = data.encode('utf-8')
+        return urlopen(self.service_url, data_binary).read()
       
     def __call__(self, *args, **kwargs):
         params = kwargs if len(kwargs) else args
@@ -71,10 +72,10 @@ class ServiceProxy(object):
                             'pass version="2.0" to use keyword arguments)')
         r = self.send_payload(params)    
         y = json.loads(r)
-        if u'error' in y:
+        if 'error' in y:
             try:
                 if current_app.config['DEBUG']:
-                    print '%s error %r' % (self.service_name, y)
+                    print('{0} error {1!r}'.format(self.service_name, y))
             except:
                 pass
         return y
@@ -88,7 +89,7 @@ class FakePayload(object):
     that wouldn't work in Real Life.
     """
     def __init__(self, content):
-        self.__content = StringIO(content)
+        self.__content = NativeStringIO(content)
         self.__len = len(content)
 
     def read(self, num_bytes=None):

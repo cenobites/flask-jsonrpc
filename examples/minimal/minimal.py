@@ -51,7 +51,7 @@ def index():
 
 @jsonrpc.method('App.hello')
 def hello(name):
-	return 'Hello {}'.format(name)
+	return 'Hello {0}'.format(name)
 
 @jsonrpc.method('App.helloDefaultArgs')
 def hello_default_args(string='Flask JSON-RPC'):

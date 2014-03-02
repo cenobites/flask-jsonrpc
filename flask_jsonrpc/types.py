@@ -25,6 +25,7 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
+from flask_jsonrpc._compat import string_types, integer_types, reduce
 
 def _types_gen(T):
     yield T
@@ -53,10 +54,10 @@ class Type(type):
     
     def __eq__(self, other):
         for T in _types_gen(self):
-            if isinstance(other, Type):
-                if T in other.t:
-                    return True
-            if type.__eq__(T, other):
+            if isinstance(other, Type) \
+                    and T in other.t:
+                return True
+            if type.__eq__(T, other) is True:
                 return True
         return False
     
@@ -79,8 +80,7 @@ class Type(type):
             ty = lambda t: t
         return reduce(
             lambda L, R: R if (hasattr(R, 't') and ty(t) == R) else L,
-            filter(lambda T: T is not Any, 
-                _types_gen(self)))
+            [T for T in _types_gen(self) if T is not Any])
     
     def decode(self, n):
         return reduce(
@@ -89,10 +89,10 @@ class Type(type):
 
 # JSON primatives and data types
 Object = Type('Object', (object,), {}).I(dict).N('obj')
-Number = Type('Number', (object,), {}).I(int, long).N('num')
+Number = Type('Number', (object,), {}).I(*integer_types).N('num')
 Boolean = Type('Boolean', (object,), {}).I(bool).N('bit')
-String = Type('String', (object,), {}).I(str, unicode).N('str')
+String = Type('String', (object,), {}).I(*string_types).N('str')
 Array = Type('Array', (object,), {}).I(list, set, tuple).N('arr')
 Nil = Type('Nil', (object,), {}).I(type(None)).N('nil')
 Any = Type('Any', (object,), {}).I(
-                Object, Number, Boolean, String, Array, Nil).N('any')
+            Object, Number, Boolean, String, Array, Nil).N('any')

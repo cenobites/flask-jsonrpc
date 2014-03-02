@@ -63,7 +63,7 @@ class Error(Exception):
         error = {
             'name': str(self.__class__.__name__),
             'code': self.code,
-            'message': "%s: %s" % (str(self.__class__.__name__), str(self.message)),
+            'message': '{0}: {1}'.format(str(self.__class__.__name__), str(self.message)),
             'data': self.data
         }
 
@@ -107,7 +107,7 @@ class InvalidParamsError(Error):
 class ServerError(Error):
     """Internal JSON-RPC error.
     """
-    code = -32603	
+    code = -32603
     message = _('Internal error.')
   
 # -32099..-32000    Server error.
