@@ -6,13 +6,14 @@ A basic JSON-RPC implementation for your Flask-powered sites based on `django-js
 Some reasons you might want to use:
 
 * Simple, powerful, flexible and pythoic API.
+* Support python 2.7, 3.2, 3.3 or later
 * The Web browseable API.
 * Support for authentication.
 * Proxy to test your JSON Service.
 * Run-time type checking.
 * Extensive documentation, and great community support.
 
-For support python 3.3 or later use the branch `py3k <https://github.com/cenobites/flask-jsonrpc/tree/py3k>`_ (experimental).
+For support python 2.6.5+ or earlier use the branch `py2k <https://github.com/cenobites/flask-jsonrpc/tree/py2k>`_.
 
 There is a live example API for testing purposes, `available here <http://flask-jsonrpc.herokuapp.com/api/browse>`_.
 
