@@ -57,7 +57,7 @@ def check_auth(username, password):
 
 @jsonrpc.method('jsonrpc.echo')
 def echo(name='Flask JSON-RPC'):
-    return 'Hello {}'.format(name)
+    return 'Hello {0}'.format(name)
 
 @jsonrpc.method('jsonrpc.echoMyStr')
 def echoMyStr(string):
