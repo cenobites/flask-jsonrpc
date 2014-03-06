@@ -222,7 +222,7 @@ class FlaskJSONRPCTestCase(unittest.TestCase):
         return json.loads((self.app.post(self.service_url, data=req)).data)
     
     def _assert_equals(self, resp, st):
-        assert st == resp, '{} != {}'.format(st, resp)
+        assert st == resp, '%s != %s' % (st, resp)
     
     def test_echo(self):
         T = [[
