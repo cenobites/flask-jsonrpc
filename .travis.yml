@@ -5,13 +5,8 @@ python:
   - "2.7"
 
 env:
-  - FLASK_ENV=TESTING
-  - FLASK=0.9
-  - FLASK=0.10
-
-branches:
-  only:
-    - py2k
+  - FLASK_ENV=TESTING FLASK=0.9
+  - FLASK_ENV=TESTING FLASK=0.10
 
 install: 
   - pip install -q Flask==$FLASK --use-mirrors --quiet
