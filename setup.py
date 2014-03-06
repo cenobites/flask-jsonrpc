@@ -26,19 +26,22 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-"""
-Flask-JSONRPC
--------------
-
-Adds JSONRPC support to Flask.
-
-Links
-`````
-
-* `documentation <http://packages.python.org/Flask-JSONRPC>`_
-* `development version <http://github.com/cenobites/flask-jsonrpc/zipball/master#egg=Flask-JSONRPC>`_
-"""
+import sys
 from setuptools import setup
+from setuptools.command.test import test as TestCommand
+
+
+class PyTest(TestCommand):
+
+    def finalize_options(self):
+        TestCommand.finalize_options(self)
+        self.test_args = []
+        self.test_suite = True
+
+    def run_tests(self):
+        import pytest
+        errno = pytest.main(self.test_args)
+        sys.exit(errno)
 
 setup(
     name='Flask-JSONRPC',
@@ -60,6 +63,8 @@ setup(
     install_requires=[
         'Flask>=0.9'
     ],
+    tests_require=['pytest'],
+    cmdclass={'test': PyTest},
     classifiers=[
         'Environment :: Web Environment',
         'Intended Audience :: Developers',
@@ -67,7 +72,8 @@ setup(
         'Operating System :: OS Independent',
         'Programming Language :: Python',
         'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: Implementation :: CPython',
         'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
-        'Topic :: Software Development :: Libraries :: Python Modules'
+        'Topic :: Software Development :: Libraries :: Python Modules',
     ]
 )
