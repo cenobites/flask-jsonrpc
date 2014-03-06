@@ -77,9 +77,9 @@ def _eval_arg_type(arg_type, T=Any, arg=None, sig=None):
     something just like 'str' or 'Object'.
     
         arg_type            the source to be evaluated
-        T                         the default type
-        arg                     context of where this type was extracted
-        sig                     context from where the arg was extracted
+        T                   the default type
+        arg                 context of where this type was extracted
+        sig                 context from where the arg was extracted
     
     Returns a type or a Type
     """
@@ -100,7 +100,7 @@ def _parse_sig(sig, arg_names, validate=False):
     name in python (ie: it takes a variable number of arguments) will be
     keyed as the stringified version of it's index.
     
-        sig                 the signature to be parsed
+        sig           the signature to be parsed
         arg_names     a list of argument names extracted from python source
     
     Returns a tuple of (method name, types dict, return type)

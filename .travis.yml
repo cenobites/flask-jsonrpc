@@ -11,7 +11,13 @@ env:
 install: 
   - pip install -q Flask==$FLASK
   - pip install -q ordereddict==1.1
+  - pip install coverage --quiet
+  - pip install coveralls --quiet
 
 script: 
   - python setup.py test
-  - python flask_jsonrpc_tests.py
+  - coverage run --source=flask_jsonrpc flask_jsonrpc_tests.py
+  - coverage report -m
+
+after_success:
+  coveralls

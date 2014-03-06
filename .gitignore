@@ -13,6 +13,7 @@ syntax: glob
 *.project
 *.settings
 *.directory
+*.coverage
 __pycache__
 src/**/build/*
 Flask_JSONRPC.egg-info/*
