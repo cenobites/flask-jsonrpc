@@ -339,6 +339,10 @@ class FlaskTestClient(object):
             time.sleep(1)
             if not FlaskTestClient.proc.poll() is None:
                 FlaskTestClient.proc.kill()
+        if not FlaskTestClient.proc is None \
+                and FlaskTestClient.proc.poll() is None:
+            FlaskTestClient.proc.kill()
+            time.sleep(1)
 
 def main():
     parser = OptionParser(usage='usage: %prog [options]')
