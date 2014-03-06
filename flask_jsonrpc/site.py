@@ -205,8 +205,13 @@ class JSONRPCSite(object):
 
             if 'id' not in D or ('id' in D and D['id'] is None): # notification
                 return None, 204
+
+            try:
+                encoder = current_app.json_encoder()
+            except AttributeError:
+                # Support Flask<=0.9
+                encoder = json.JSONEncoder()
             
-            encoder = current_app.json_encoder()
             if not sum(map(lambda e: isinstance(R, e), # type of `R` should be one of these or...
                  (dict, str, unicode, int, long, list, set, NoneType, bool))):
                 try:
