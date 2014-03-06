@@ -9,7 +9,7 @@ env:
   - FLASK_ENV=TESTING FLASK=0.10
 
 install: 
-  - pip install -q Flask==$FLASK --use-mirrors
+  - pip install -q Flask==$FLASK
   - pip install -q ordereddict==1.1
 
 script: 
