@@ -105,6 +105,7 @@ We add the ``jsonrpc_version`` variable to the request object. It be either '1.0
 
 For more tests see `Examples <https://github.com/cenobites/flask-jsonrpc/wiki/Examples>`_.
 
+
 Referencies
 ***********
 
@@ -113,6 +114,7 @@ Referencies
 * http://lucumr.pocoo.org/2011/1/22/forwards-compatible-python/
 * http://flask.pocoo.org/docs/python3/#python3-support
 * http://www.jsonrpc.org/
+
 
 Dependecies
 ***********
