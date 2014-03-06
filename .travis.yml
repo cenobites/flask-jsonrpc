@@ -7,10 +7,6 @@ python:
 env:
   - FLASK_ENV=TESTING
 
-branches:
-  only:
-    - master
-
 install: 
   - pip install -r requirements.pip --quiet
 
