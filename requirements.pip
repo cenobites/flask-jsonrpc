@@ -4,3 +4,4 @@
 #
 #     pip install -r requirements.pip
 Flask==0.10
+ordereddict==1.1
