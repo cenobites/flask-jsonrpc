@@ -283,6 +283,7 @@ class JSONRPCSite(object):
             if type(D) is list:
                 response = [self.response_dict(request, d, is_batch=True)[0] for d in D]
                 status = 200
+                return response, status
             else:
                 response, status = self.response_dict(request, D)
                 if response is None and (not 'id' in D or D['id'] is None): # a notification
