@@ -27,19 +27,16 @@
 # POSSIBILITY OF SUCH DAMAGE.
 from functools import wraps
 
-from flask import current_app, request, jsonify, json
+from flask import current_app, request, make_response, json
 
 from flask_jsonrpc._compat import b, u, text_type
 from flask_jsonrpc.exceptions import InvalidCredentialsError, InvalidParamsError
 
 def jsonify_status_code(status_code, *args, **kw):
     """Returns a jsonified response with the specified HTTP status code.
-
-    The positional and keyword arguments are passed directly to the
-    :func:`flask.jsonify` function which creates the response.
-
     """
-    response = jsonify(*args, **kw)
+    response = make_response(json.dumps(*args, **kw))
+    response.mimetype = 'application/json'
     response.status_code = status_code
     return response
 
