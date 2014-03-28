@@ -49,11 +49,11 @@ jsonrpc_v2 = JSONRPC(app, '/api/v2', site=JSONRPCSite(), enable_web_browsable_ap
 
 @jsonrpc_v1.method('App.index')
 def index_v1():
-    return 'Welcome to Flask JSON-RPC Version API 1'
+    return u'Welcome to Flask JSON-RPC Version API 1'
 
 @jsonrpc_v2.method('App.index')
 def index_v2():
-    return 'Welcome to Flask JSON-RPC Version API 2'
+    return u'Welcome to Flask JSON-RPC Version API 2'
 
 
 if __name__ == '__main__':

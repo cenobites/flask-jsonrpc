@@ -34,8 +34,8 @@ jsonrpc.register_blueprint(mod)
 
 @jsonrpc.method('Hello.index')
 def index():
-    return 'Welcome to Hello API!'
+    return u'Welcome to Hello API!'
 
 @jsonrpc.method('Hello.say(name=String)')
 def say(name=''):
-    return 'Hello %s' % name
+    return u'Hello %s' % name

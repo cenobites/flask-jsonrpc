@@ -50,11 +50,11 @@ def check_auth(username, password):
 
 @jsonrpc.method('App.index', authenticated=check_auth)
 def index():
-    return 'Welcome to Flask JSON-RPC'
+    return u'Welcome to Flask JSON-RPC'
 
 @jsonrpc.method('App.echo(name=str) -> str', validate=True, authenticated=check_auth)
 def echo(name='Flask JSON-RPC'):
-    return 'Hello %s' % name
+    return u'Hello %s' % name
 
 
 if __name__ == '__main__':

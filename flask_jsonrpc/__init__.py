@@ -42,8 +42,8 @@ from flask import current_app, request, jsonify
 from flask_jsonrpc.site import jsonrpc_site
 from flask_jsonrpc.types import Object, Number, Boolean, String, Array, Nil, Any, Type
 from flask_jsonrpc.helpers import jsonify_status_code, extract_raw_data_request, authenticate
-from flask_jsonrpc.exceptions import (Error, ParseError, InvalidRequestError, 
-                                      MethodNotFoundError, InvalidParamsError, 
+from flask_jsonrpc.exceptions import (Error, ParseError, InvalidRequestError,
+                                      MethodNotFoundError, InvalidParamsError,
                                       ServerError, RequestPostError,
                                       InvalidCredentialsError, OtherError)
 
@@ -75,12 +75,12 @@ def _validate_arg(value, expected):
 def _eval_arg_type(arg_type, T=Any, arg=None, sig=None):
     """Returns a type from a snippit of python source. Should normally be
     something just like 'str' or 'Object'.
-    
+
         arg_type            the source to be evaluated
         T                   the default type
         arg                 context of where this type was extracted
         sig                 context from where the arg was extracted
-    
+
     Returns a type or a Type
     """
     try:
@@ -99,10 +99,10 @@ def _parse_sig(sig, arg_names, validate=False):
     Numerically-indexed arguments that do not correspond to an argument
     name in python (ie: it takes a variable number of arguments) will be
     keyed as the stringified version of it's index.
-    
+
         sig           the signature to be parsed
         arg_names     a list of argument names extracted from python source
-    
+
     Returns a tuple of (method name, types dict, return type)
     """
     d = SIG_RE.match(sig)
@@ -134,8 +134,8 @@ def _parse_sig(sig, arg_names, validate=False):
                     ret[i] = (ret[i][0], _eval_arg_type(arg, None, arg, sig))
     if not type(ret) is OrderedDict:
         ret = OrderedDict(ret)
-    return (d['method_name'], 
-                    ret, 
+    return (d['method_name'],
+                    ret,
                     (_eval_arg_type(d['return_sig'], Any, 'return', sig)
                         if d['return_sig'] else Any))
 
@@ -143,16 +143,16 @@ def _inject_args(sig, types):
     """A function to inject arguments manually into a method signature before
     it's been parsed. If using keyword arguments use 'kw=type' instead in
     the types array.
-        
+
         sig         the string signature
         types     a list of types to be inserted
-        
+
     Returns the altered signature.
     """
     if '(' in sig:
         parts = sig.split('(')
         sig = '%s(%s%s%s' % (
-            parts[0], ', '.join(types), 
+            parts[0], ', '.join(types),
             (', ' if parts[1].index(')') > 0 else ''), parts[1]
         )
     else:
@@ -163,14 +163,14 @@ def _site_api(site):
     def wrapper(method=''):
         response_dict, status_code = site.dispatch(request, method)
         if current_app.config['DEBUG']:
-            logging.debug('request: %s' % extract_raw_data_request(request))
-            logging.debug('response: %s, %s' % (status_code, response_dict))
+            logging.debug('request: %s', extract_raw_data_request(request))
+            logging.debug('response: %s, %s', status_code, response_dict)
         return jsonify_status_code(status_code, response_dict), status_code
     return wrapper
 
 
 class JSONRPC(object):
-    
+
     def __init__(self, app=None, service_url='/api', auth_backend=authenticate, site=default_site,
                  enable_web_browsable_api=False):
         self.service_url = service_url
@@ -206,9 +206,9 @@ class JSONRPC(object):
         if url_prefix is None:
             url_prefix = self.browse_url
         self.browse_url = url_prefix
-        app.register_blueprint(browse.mod, url_prefix=url_prefix, 
+        app.register_blueprint(browse.mod, url_prefix=url_prefix,
             jsonrpc_site_name=self._unique_name(), jsonrpc_site=self.site)
-            
+
     def init_app(self, app):
         app.add_url_rule(self.service_url, self._unique_name(), self.site_api, methods=['POST'])
         app.add_url_rule(self.service_url + '/<method>', self._unique_name('/<method>'), self.site_api, methods=['GET'])
@@ -216,7 +216,7 @@ class JSONRPC(object):
     def register_blueprint(self, blueprint):
         blueprint.add_url_rule(self.service_url, '', self.site_api, methods=['POST'])
         blueprint.add_url_rule(self.service_url + '/<method>', '', self.site_api, methods=['GET'])
-        
+
     def method(self, name, authenticated=False, safe=False, validate=False, **options):
         def decorator(f):
             arg_names = getargspec(f)[0]

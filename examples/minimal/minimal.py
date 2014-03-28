@@ -47,27 +47,27 @@ jsonrpc = JSONRPC(app, '/api', enable_web_browsable_api=True)
 
 @jsonrpc.method('App.index')
 def index():
-    return 'Welcome to Flask JSON-RPC'
+    return u'Welcome to Flask JSON-RPC'
 
 @jsonrpc.method('App.hello')
 def hello(name):
-	return 'Hello %s' % name
+	return u'Hello %s' % name
 
 @jsonrpc.method('App.helloDefaultArgs')
 def hello_default_args(string='Flask JSON-RPC'):
-	return 'We salute you %s' string
+	return u'We salute you %s' (string,)
 
 @jsonrpc.method('App.helloDefaultArgsValidate(string=str) -> str', validate=True)
 def hello_default_args_validate(string='Flask JSON-RPC'):
-	return 'We salute you %s' string
+	return u'We salute you %s' (string,)
 
 @jsonrpc.method('App.argsValidateJSONMode(a1=Number, a2=String, a3=Boolean, a4=Array, a5=Object) -> Object')
 def args_validate_json_mode(a1, a2, a3, a4, a5):
-	return 'Number: %s, String: %s, Boolean: %s, Array: %s, Object: %s' % (a1, a2, a3, a4, a5)
+	return u'Number: %s, String: %s, Boolean: %s, Array: %s, Object: %s' % (a1, a2, a3, a4, a5)
 
 @jsonrpc.method('App.argsValidatePythonMode(a1=int, a2=str, a3=bool, a4=list, a5=dict) -> object')
 def args_validate_python_mode(a1, a2, a3, a4, a5):
-	return 'int: %s, str: %s, bool: %s, list: %s, dict: %s' % (a1, a2, a3, a4, a5)
+	return u'int: %s, str: %s, bool: %s, list: %s, dict: %s' % (a1, a2, a3, a4, a5)
 
 @jsonrpc.method('App.notify')
 def notify(string):
