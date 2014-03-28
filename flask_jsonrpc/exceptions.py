@@ -27,6 +27,8 @@
 # POSSIBILITY OF SUCH DAMAGE.
 from flask import current_app
 
+from flask_jsonrpc._compat import text_type
+
 try:
     from flaskext.babel import gettext as _
     _("You're lazy...") # this function lazy-loads settings
@@ -34,36 +36,36 @@ except (ImportError, NameError):
     _ = lambda t, *a, **k: t
 
 class Error(Exception):
-    """Error class based on the JSON-RPC 2.0 specs 
-    http://groups.google.com/group/json-rpc/web/json-rpc-1-2-proposal 
-      
+    """Error class based on the JSON-RPC 2.0 specs
+    http://groups.google.com/group/json-rpc/web/json-rpc-1-2-proposal
+
       code    - number
       message - string
       data    - object
-      
+
       status  - number    from http://groups.google.com/group/json-rpc/web/json-rpc-over-http JSON-RPC over HTTP Errors section
     """
-  
+
     code = 0
     message = None
     data = None
     status = 200
-  
+
     def __init__(self, message=None):
         """Setup the Exception and overwrite the default message
         """
         if message is not None:
             self.message = message
-  
+
     @property
     def json_rpc_format(self):
         """Return the Exception data in a format for JSON-RPC
         """
-    
+
         error = {
-            'name': str(self.__class__.__name__),
+            'name': text_type(self.__class__.__name__),
             'code': self.code,
-            'message': '{0}: {1}'.format(str(self.__class__.__name__), str(self.message)),
+            'message': '{0}: {1}'.format(text_type(self.__class__.__name__), text_type(self.message)),
             'data': self.data
         }
 
@@ -77,7 +79,7 @@ class Error(Exception):
 # Exceptions
 # from http://groups.google.com/group/json-rpc/web/json-rpc-1-2-proposal
 
-# The error-codes -32768 .. -32000 (inclusive) are reserved for pre-defined errors. 
+# The error-codes -32768 .. -32000 (inclusive) are reserved for pre-defined errors.
 # Any error-code within this range not defined explicitly below is reserved for future use
 
 class ParseError(Error):
@@ -85,33 +87,33 @@ class ParseError(Error):
     """
     code = -32700
     message = _('Parse error.')
-  
+
 class InvalidRequestError(Error):
     """The received JSON is not a valid JSON-RPC Request.
     """
     code = -32600
     message = _('Invalid Request.')
-  
+
 class MethodNotFoundError(Error):
     """The requested remote-procedure does not exist / is not available.
     """
     code = -32601
     message = _('Method not found.')
-  
+
 class InvalidParamsError(Error):
     """Invalid method parameters.
     """
     code = -32602
     message = _('Invalid params.')
-  
+
 class ServerError(Error):
     """Internal JSON-RPC error.
     """
     code = -32603
     message = _('Internal error.')
-  
+
 # -32099..-32000    Server error.
-# Reserved for implementation-defined server-errors.  
+# Reserved for implementation-defined server-errors.
 
 # The remainder of the space is available for application defined errors.
 
@@ -126,7 +128,7 @@ class InvalidCredentialsError(Error):
     code = 401
     message = _('Invalid login credentials')
     status = 401
-  
+
 class OtherError(Error):
     """catchall error
     """

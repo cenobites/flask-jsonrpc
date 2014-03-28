@@ -27,7 +27,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 import re
 import decimal
-import datetime 
+import datetime
 from uuid import uuid1
 from functools import wraps
 
@@ -39,8 +39,8 @@ from flask_jsonrpc.types import Object, Array, Any
 from flask_jsonrpc.helpers import extract_raw_data_request, log_exception
 from flask_jsonrpc._compat import (text_type, string_types, integer_types,
                                    iteritems, iterkeys)
-from flask_jsonrpc.exceptions import (Error, ParseError, InvalidRequestError, 
-                                      MethodNotFoundError, InvalidParamsError, 
+from flask_jsonrpc.exceptions import (Error, ParseError, InvalidRequestError,
+                                      MethodNotFoundError, InvalidParamsError,
                                       ServerError, RequestPostError,
                                       InvalidCredentialsError, OtherError)
 
@@ -52,7 +52,7 @@ except (NameError, ImportError):
     csrf_exempt = empty_dec
 
 NoneType = type(None)
-encode_kw = lambda p: dict([(str(k), v) for k, v in iteritems(p)])
+encode_kw = lambda p: dict([(text_type(k), v) for k, v in iteritems(p)])
 
 def encode_kw11(p):
     if not type(p) is dict:
@@ -85,7 +85,7 @@ def encode_arg11(p):
                 pass
         pos = list(set(pos))
         pos.sort()
-        return [d[str(i)] for i in pos]
+        return [d[text_type(i)] for i in pos]
 
 def validate_params(method, D):
     if type(D['params']) == Object:
@@ -117,26 +117,26 @@ def validate_params(method, D):
 class JSONRPCSite(object):
     """A JSON-RPC Site
     """
-    
+
     def __init__(self):
         self.urls = {}
-        self.uuid = str(uuid1())
+        self.uuid = text_type(uuid1())
         self.version = '1.0'
         self.name = 'Flask-JSONRPC'
         self.register('system.describe', self.describe)
-        
+
     def register(self, name, method):
         self.urls[text_type(name)] = method
 
     def extract_id_request(self, raw_data):
         if not raw_data is None and raw_data.find('id') != -1:
-            find_id = re.findall(r'["|\']id["|\']:([0-9]+)|["|\']id["|\']:["|\'](.+?)["|\']', 
+            find_id = re.findall(r'["|\']id["|\']:([0-9]+)|["|\']id["|\']:["|\'](.+?)["|\']',
                                  raw_data.replace(' ', ''), re.U)
             if find_id:
                 g1, g2 = find_id[0]
-                return g1 if g1 else g2 
+                return g1 if g1 else g2
         return None
-    
+
     def empty_response(self, version='1.0'):
         resp = {'id': None}
         if version == '1.1':
@@ -160,7 +160,7 @@ class JSONRPCSite(object):
                 }
                 return True, D
         return False, {}
-    
+
     def response_dict(self, request, D, is_batch=False, version_hint='1.0'):
         version = version_hint
         response = self.empty_response(version=version)
@@ -171,7 +171,7 @@ class JSONRPCSite(object):
         }
 
         try:
-            # params: An Array or Object, that holds the actual parameter values 
+            # params: An Array or Object, that holds the actual parameter values
             # for the invocation of the procedure. Can be omitted if empty.
             if 'params' not in D or not D['params']:
                  D['params'] = []
@@ -180,19 +180,19 @@ class JSONRPCSite(object):
             if D['method'] not in self.urls:
                 raise MethodNotFoundError('Method not found. Available methods: {0}' \
                     .format('\n'.join(list(self.urls.keys()))))
-            
+
             if 'jsonrpc' in D:
-                if str(D['jsonrpc']) not in apply_version:
+                if text_type(D['jsonrpc']) not in apply_version:
                     raise InvalidRequestError('JSON-RPC version {0} not supported.'.format(D['jsonrpc']))
-                version = request.jsonrpc_version = response['jsonrpc'] = str(D['jsonrpc'])
+                version = request.jsonrpc_version = response['jsonrpc'] = text_type(D['jsonrpc'])
             elif 'version' in D:
-                if str(D['version']) not in apply_version:
+                if text_type(D['version']) not in apply_version:
                     raise InvalidRequestError('JSON-RPC version {0} not supported.'.format(D['version']))
-                version = request.jsonrpc_version = response['version'] = str(D['version'])
+                version = request.jsonrpc_version = response['version'] = text_type(D['version'])
             else:
                 request.jsonrpc_version = '1.0'
-                
-            method = self.urls[str(D['method'])]
+
+            method = self.urls[text_type(D['method'])]
             if getattr(method, 'json_validate', False):
                 validate_params(method, D)
 
@@ -209,7 +209,7 @@ class JSONRPCSite(object):
 
             if 'id' not in D or ('id' in D and D['id'] is None): # notification
                 return None, 204
-            
+
             encoder = current_app.json_encoder()
 
             # type of `R` should be one of these or...
@@ -221,9 +221,9 @@ class JSONRPCSite(object):
                     raise TypeError("Return type not supported, for {0!r}".format(R))
 
             response['result'] = R
-            
+
             status = 200
-        
+
         except Error as e:
             # exception missed by others
             #got_request_exception.connect(log_exception, current_app._get_current_object())
@@ -256,12 +256,12 @@ class JSONRPCSite(object):
         # allowed to specify both or none.
         if version in ('1.1', '2.0') and 'error' in response and not response['error']:
             response.pop('error')
-        
+
         return response, status
-    
+
     @csrf_exempt
     def dispatch(self, request, method=''):
-        # in case we do something json doesn't like, we always get back valid 
+        # in case we do something json doesn't like, we always get back valid
         # json-rpc response
         response = self.empty_response()
         raw_data = extract_raw_data_request(request)
@@ -279,7 +279,7 @@ class JSONRPCSite(object):
                     D = json.loads(raw_data)
                 except Exception as e:
                     raise InvalidRequestError(e.message)
-            
+
             if type(D) is list:
                 response = [self.response_dict(request, d, is_batch=True)[0] for d in D]
                 status = 200
@@ -295,40 +295,40 @@ class JSONRPCSite(object):
             status = e.status
         except Exception as e:
             # exception missed by others
-            #got_request_exception.connect(log_exception, current_app._get_current_object())            
+            #got_request_exception.connect(log_exception, current_app._get_current_object())
 
             other_error = OtherError(e)
             response['result'] = None
             response['error'] = other_error.json_rpc_format
             status = other_error.status
-        
+
         # extract id the request
         json_request_id = self.extract_id_request(raw_data)
         response['id'] = json_request_id
 
         return response, status
-    
+
     def procedure_desc(self, key):
         M = self.urls[key]
         return {
             'name': M.json_method,
             'summary': M.__doc__,
             'idempotent': M.json_safe,
-            'params': [{'type': str(Any.kind(t)), 'name': k} 
+            'params': [{'type': text_type(Any.kind(t)), 'name': k}
                 for k, t in iteritems(M.json_arg_types)],
-            'return': {'type': str(Any.kind(M.json_return_type))}}
-    
+            'return': {'type': text_type(Any.kind(M.json_return_type))}}
+
     def service_desc(self):
         return {
             'sdversion': '1.0',
             'name': self.name,
-            'id': 'urn:uuid:{0}'.format(str(self.uuid)),
+            'id': 'urn:uuid:{0}'.format(text_type(self.uuid)),
             'summary': self.__doc__,
             'version': self.version,
-            'procs': [self.procedure_desc(k) 
+            'procs': [self.procedure_desc(k)
                 for k in iterkeys(self.urls)
                     if self.urls[k] != self.describe]}
-    
+
     def describe(self):
         return self.service_desc()
 

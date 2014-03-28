@@ -57,7 +57,7 @@ Write JSON-RPC methods.
 
     @jsonrpc.method('App.index')
     def index():
-        return 'Welcome to Flask JSON-RPC'
+        return u'Welcome to Flask JSON-RPC'
 
 All code of Example `run.py <https://github.com/cenobites/flask-jsonrpc/blob/master/run.py>`_.
 
@@ -65,10 +65,10 @@ All code of Example `run.py <https://github.com/cenobites/flask-jsonrpc/blob/mas
 3. Running
 
 ::
-    
+
     $ python run.py
      * Running on http://0.0.0.0:5000/
-     
+
 
 4. Testing
 
@@ -80,7 +80,7 @@ All code of Example `run.py <https://github.com/cenobites/flask-jsonrpc/blob/mas
     Content-Length: 77
     Server: Werkzeug/0.8.3 Python/2.7.3
     Date: Fri, 14 Dec 2012 19:26:56 GMT
-    
+
     {
       "jsonrpc": "2.0",
       "id": "1",

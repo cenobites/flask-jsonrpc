@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) 2013 by Armin Ronacher;
-#           (c) 2012-2013, Cenobit Technologies, Inc. http://cenobit.es/
+#           (c) 2010-2014 Benjamin Peterson;
+#           (c) 2012-2014, Cenobit Technologies, Inc. http://cenobit.es/
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -41,12 +42,13 @@ _identity = lambda x: x
 
 if PY3:
     def b(s):
-        return s.encode('utf-8')
+        return s.encode('latin-1')
     def u(s):
         return s
     unichr = chr
     range_type = range
     text_type = str
+    builtin_str = str
     binary_type = bytes
     string_types = (str,)
     integer_types = (int,)
@@ -81,11 +83,13 @@ if PY3:
 else:
     def b(s):
         return s
+    # Workaround for standalone backslash
     def u(s):
-        return unicode(s)
+        return unicode(s.replace(r'\\', r'\\\\'), 'unicode_escape')
     unichr = unichr
     range_type = xrange
     text_type = unicode
+    builtin_str = str
     binary_type = str
     string_types = (basestring, str, unicode)
     integer_types = (int, long)
@@ -124,6 +128,22 @@ else:
 
     from urlparse import urlparse
     from urllib import urlopen
+
+def to_native_string(string, encoding='ascii'):
+    """
+    Given a string object, regardless of type, returns a representation of that
+    string in the native string type, encoding and decoding where necessary.
+    This assumes ASCII unless told otherwise.
+    """
+    out = None
+    if isinstance(string, builtin_str):
+        out = string
+    else:
+        if PY2:
+            out = string.encode(encoding)
+        else:
+            out = string.decode(encoding)
+    return out
 
 def with_metaclass(meta, *bases):
     # This requires a bit of explanation: the basic idea is to make a

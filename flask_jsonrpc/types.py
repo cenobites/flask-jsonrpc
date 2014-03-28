@@ -25,7 +25,7 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-from flask_jsonrpc._compat import string_types, integer_types, reduce
+from flask_jsonrpc._compat import text_type, string_types, integer_types, reduce
 
 def _types_gen(T):
     yield T
@@ -40,7 +40,7 @@ def _types_gen(T):
 class Type(type):
     """ A rudimentary extension to `type` that provides polymorphic
     types for run-time type checking of JSON data types. IE:
-    
+
     assert type(u'') == String
     assert type('') == String
     assert type('') == Any
@@ -48,10 +48,10 @@ class Type(type):
     assert Any.decode('str') == String
     assert Any.kind({}) == Object
     """
-    
+
     def __init__(self, *args, **kwargs):
         type.__init__(self, *args, **kwargs)
-    
+
     def __eq__(self, other):
         for T in _types_gen(self):
             if isinstance(other, Type) \
@@ -60,18 +60,18 @@ class Type(type):
             if type.__eq__(T, other) is True:
                 return True
         return False
-    
+
     def __str__(self):
         return getattr(self, '_name', 'unknown')
 
     def N(self, n):
         self._name = n
         return self
-    
+
     def I(self, *args):
         self.t = list(args)
         return self
-    
+
     def kind(self, t):
         if type(t) is Type:
             return t
@@ -81,10 +81,10 @@ class Type(type):
         return reduce(
             lambda L, R: R if (hasattr(R, 't') and ty(t) == R) else L,
             [T for T in _types_gen(self) if T is not Any])
-    
+
     def decode(self, n):
         return reduce(
-            lambda L, R: R if (str(R) == n) else L,
+            lambda L, R: R if (text_type(R) == n) else L,
             _types_gen(self))
 
 # JSON primatives and data types

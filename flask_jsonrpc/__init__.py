@@ -32,12 +32,15 @@ from inspect import getargspec
 
 from flask import current_app, request, jsonify
 
-from flask_jsonrpc._compat import b, u, OrderedDict, NativeStringIO
 from flask_jsonrpc.site import jsonrpc_site
-from flask_jsonrpc.types import Object, Number, Boolean, String, Array, Nil, Any, Type
-from flask_jsonrpc.helpers import jsonify_status_code, extract_raw_data_request, authenticate
-from flask_jsonrpc.exceptions import (Error, ParseError, InvalidRequestError, 
-                                      MethodNotFoundError, InvalidParamsError, 
+from flask_jsonrpc._compat import (b, u, text_type, string_types,
+                                   OrderedDict, NativeStringIO)
+from flask_jsonrpc.types import (Object, Number, Boolean, String, Array,
+                                 Nil, Any, Type)
+from flask_jsonrpc.helpers import (jsonify_status_code,
+                                   extract_raw_data_request, authenticate)
+from flask_jsonrpc.exceptions import (Error, ParseError, InvalidRequestError,
+                                      MethodNotFoundError, InvalidParamsError,
                                       ServerError, RequestPostError,
                                       InvalidCredentialsError, OtherError)
 
@@ -69,19 +72,19 @@ def _validate_arg(value, expected):
 def _eval_arg_type(arg_type, T=Any, arg=None, sig=None):
     """Returns a type from a snippit of python source. Should normally be
     something just like 'str' or 'Object'.
-    
+
         arg_type            the source to be evaluated
         T                         the default type
         arg                     context of where this type was extracted
         sig                     context from where the arg was extracted
-    
+
     Returns a type or a Type
     """
     try:
         T = eval(arg_type)
     except Exception as e:
         raise ValueError('The type of {0} could not be evaluated in {1} for {2}: {3}' \
-            .format(arg_type, arg, sig, str(e)))
+            .format(arg_type, arg, sig, text_type(e)))
     else:
         if type(T) not in (type, Type):
             raise TypeError('{0} is not a valid type in {1} for {2}' \
@@ -93,10 +96,10 @@ def _parse_sig(sig, arg_names, validate=False):
     Numerically-indexed arguments that do not correspond to an argument
     name in python (ie: it takes a variable number of arguments) will be
     keyed as the stringified version of it's index.
-    
+
         sig           the signature to be parsed
         arg_names     a list of argument names extracted from python source
-    
+
     Returns a tuple of (method name, types dict, return type)
     """
     d = SIG_RE.match(sig)
@@ -104,17 +107,17 @@ def _parse_sig(sig, arg_names, validate=False):
         raise ValueError('Invalid method signature {0}'.format(sig))
     d = d.groupdict()
     ret = [(n, Any) for n in arg_names]
-    if 'args_sig' in d and type(d['args_sig']) is str and d['args_sig'].strip():
+    if text_type('args_sig') in d and type(d['args_sig']) in string_types and d['args_sig'].strip():
         for i, arg in enumerate(d['args_sig'].strip().split(',')):
             _type_checking_available(sig, validate)
-            if '=' in arg:
+            if text_type('=') in arg:
                 if not type(ret) is OrderedDict:
                     ret = OrderedDict(ret)
                 dk = KWARG_RE.match(arg)
                 if not dk:
                     raise ValueError('Could not parse arg type {0} in {1}'.format(arg, sig))
                 dk = dk.groupdict()
-                if not sum([(k in dk and type(dk[k]) is str and bool(dk[k].strip()))
+                if not sum([(k in dk and type(dk[k]) in string_types and bool(dk[k].strip()))
                         for k in ('arg_name', 'arg_type')]):
                     raise ValueError('Invalid kwarg value {0} in {1}'.format(arg, sig))
                 ret[dk['arg_name']] = _eval_arg_type(dk['arg_type'], None, arg, sig)
@@ -123,13 +126,13 @@ def _parse_sig(sig, arg_names, validate=False):
                     raise ValueError('Positional arguments must occur '
                                      'before keyword arguments in {0}'.format(sig))
                 if len(ret) < i + 1:
-                    ret.append((str(i), _eval_arg_type(arg, None, arg, sig)))
+                    ret.append((text_type(i), _eval_arg_type(arg, None, arg, sig)))
                 else:
                     ret[i] = (ret[i][0], _eval_arg_type(arg, None, arg, sig))
     if not type(ret) is OrderedDict:
         ret = OrderedDict(ret)
-    return (d['method_name'], 
-                    ret, 
+    return (d['method_name'],
+                    ret,
                     (_eval_arg_type(d['return_sig'], Any, 'return', sig)
                         if d['return_sig'] else Any))
 
@@ -137,16 +140,16 @@ def _inject_args(sig, types):
     """A function to inject arguments manually into a method signature before
     it's been parsed. If using keyword arguments use 'kw=type' instead in
     the types array.
-        
+
         sig         the string signature
-        types     a list of types to be inserted
-        
+        types       a list of types to be inserted
+
     Returns the altered signature.
     """
     if '(' in sig:
         parts = sig.split('(')
         sig = '{0}({1}{2}{3}'.format(
-            parts[0], ', '.join(types), 
+            parts[0], ', '.join(types),
             (', ' if parts[1].index(')') > 0 else ''), parts[1]
         )
     else:
@@ -157,14 +160,14 @@ def _site_api(site):
     def wrapper(method=''):
         response_dict, status_code = site.dispatch(request, method)
         if current_app.config['DEBUG']:
-            logging.debug('request: {0}'.format(extract_raw_data_request(request)))
-            logging.debug('response: {0}, {1}'.format(status_code, response_dict))
+            logging.debug('request: %s', extract_raw_data_request(request))
+            logging.debug('response: %s, %s', status_code, response_dict)
         return jsonify_status_code(status_code, response_dict), status_code
     return wrapper
 
 
 class JSONRPC(object):
-    
+
     def __init__(self, app=None, service_url='/api', auth_backend=authenticate, site=default_site,
                  enable_web_browsable_api=False):
         self.service_url = service_url
@@ -200,9 +203,9 @@ class JSONRPC(object):
         if url_prefix is None:
             url_prefix = self.browse_url
         self.browse_url = url_prefix
-        app.register_blueprint(browse.mod, url_prefix=url_prefix, 
+        app.register_blueprint(browse.mod, url_prefix=url_prefix,
             jsonrpc_site_name=self._unique_name(), jsonrpc_site=self.site)
-            
+
     def init_app(self, app):
         app.add_url_rule(self.service_url, self._unique_name(), self.site_api, methods=['POST'])
         app.add_url_rule(self.service_url + '/<method>', self._unique_name('/<method>'), self.site_api, methods=['GET'])
@@ -210,7 +213,7 @@ class JSONRPC(object):
     def register_blueprint(self, blueprint):
         blueprint.add_url_rule(self.service_url, '', self.site_api, methods=['POST'])
         blueprint.add_url_rule(self.service_url + '/<method>', '', self.site_api, methods=['GET'])
-        
+
     def method(self, name, authenticated=False, safe=False, validate=False, **options):
         def decorator(f):
             arg_names = getargspec(f)[0]

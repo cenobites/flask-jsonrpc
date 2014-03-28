@@ -41,13 +41,13 @@ if os.path.exists(FLASK_JSONRPC_PROJECT_DIR) \
     sys.path.append(FLASK_JSONRPC_PROJECT_DIR)
 
 from flask_jsonrpc import JSONRPC
-    
+
 app = Flask(__name__)
 jsonrpc = JSONRPC(app, '/api', enable_web_browsable_api=True)
 
 @jsonrpc.method('App.index')
 def index():
-    return 'Welcome to Flask JSON-RPC'
+    return u'Welcome to Flask JSON-RPC'
 
 import api.user
 import api.article

@@ -29,14 +29,14 @@ import uuid
 
 from flask import json, current_app
 
-from flask_jsonrpc._compat import NativeStringIO, urlopen
+from flask_jsonrpc._compat import text_type, NativeStringIO, urlopen
 from flask_jsonrpc.types import Object, Any
 
 
 class ServiceProxy(object):
-    
+
     def __init__(self, service_url, service_name=None, version='2.0'):
-        self.version = str(version)
+        self.version = text_type(version)
         self.service_url = service_url
         self.service_name = service_name
 
@@ -45,13 +45,13 @@ class ServiceProxy(object):
             name = '{0}.{1}'.format(self.service_name, name)
         params = dict(self.__dict__, service_name=name)
         return self.__class__(**params)
-  
+
     def __repr__(self):
         return {
             'jsonrpc': self.version,
             'method': self.service_name
         }
-    
+
     def send_payload(self, params):
         """Performs the actual sending action and returns the result
         """
@@ -59,18 +59,18 @@ class ServiceProxy(object):
             'jsonrpc': self.version,
             'method': self.service_name,
             'params': params,
-            'id': str(uuid.uuid1())
+            'id': text_type(uuid.uuid1())
         })
         data_binary = data.encode('utf-8')
         return urlopen(self.service_url, data_binary).read()
-      
+
     def __call__(self, *args, **kwargs):
         params = kwargs if len(kwargs) else args
         if Any.kind(params) == Object and self.version != '2.0':
             raise Exception('Unsupport arg type for JSON-RPC 1.0 '
                             '(the default version for this client, '
                             'pass version="2.0" to use keyword arguments)')
-        r = self.send_payload(params)    
+        r = self.send_payload(params)
         y = json.loads(r)
         if 'error' in y:
             try:
@@ -104,17 +104,17 @@ class FakePayload(object):
 class TestingServiceProxy(ServiceProxy):
     """Service proxy which works inside Django unittests
     """
-    
+
     def __init__(self, client, *args, **kwargs):
         super(TestingServiceProxy, self).__init__(*args, **kwargs)
         self.client = client
-    
+
     def send_payload(self, params):
         dump = json.dumps({
-            'jsonrpc' : self.version,
-            'method' : self.service_name,
-            'params' : params,
-            'id' : str(uuid.uuid1())
+            'jsonrpc': self.version,
+            'method': self.service_name,
+            'params': params,
+            'id': text_type(uuid.uuid1())
         })
         dump_payload = FakePayload(dump)
         response = current_app.post(self.service_url,

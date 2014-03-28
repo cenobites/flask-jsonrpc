@@ -34,4 +34,4 @@ jsonrpc.register_blueprint(mod)
 
 @jsonrpc.method('Article.index')
 def index():
-    return 'Welcome to Article API'
+    return u'Welcome to Article API'

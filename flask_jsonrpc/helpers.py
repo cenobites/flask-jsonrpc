@@ -37,7 +37,6 @@ def jsonify_status_code(status_code, *args, **kw):
 
     The positional and keyword arguments are passed directly to the
     :func:`flask.jsonify` function which creates the response.
-
     """
     response = jsonify(*args, **kw)
     response.status_code = status_code
@@ -46,16 +45,31 @@ def jsonify_status_code(status_code, *args, **kw):
 def extract_raw_data_request(request):
     def _extract_raw_data_request(request):
         if request.method == 'GET':
-            return u(request.query_string)
+            return request.query_string
         elif request.method == 'POST':
             if request.data:
-                return u(request.data)
+                return request.data
             elif request.form.to_dict():
-                return u(list(request.form.to_dict().keys())[0])
-        return u('')
+                return list(request.form.to_dict().keys())[0]
+        return b('')
     raw_data = _extract_raw_data_request(request)
-    return raw_data.decode(request.charset) \
-        if request.charset else raw_data.decode('utf-8')
+
+    tried_encodings = []
+
+    # Try charset from content-type
+    encoding = request.charset if request.charset else 'utf-8'
+
+    if encoding:
+        try:
+            return text_type(raw_data, encoding)
+        except UnicodeError:
+            tried_encodings.append(encoding)
+
+    # Fall back:
+    try:
+        return text_type(raw_data, encoding, errors='replace')
+    except TypeError:
+        return raw_data
 
 def authenticate(f, f_check_auth):
     @wraps(f)
