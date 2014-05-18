@@ -34,6 +34,7 @@ from functools import wraps
 from werkzeug.exceptions import HTTPException
 
 from flask import json, jsonify, current_app, got_request_exception
+from flask.wrappers import Response
 
 from flask_jsonrpc.types import Object, Array, Any
 from flask_jsonrpc.helpers import extract_raw_data_request, log_exception
@@ -211,18 +212,21 @@ class JSONRPCSite(object):
                 return None, 204
 
             encoder = current_app.json_encoder()
+            response['result'] = R
+            status = 200
 
             # type of `R` should be one of these or...
-            if not sum([isinstance(R, e) for e in \
+            if isinstance(R, Response):
+                status = R.status_code
+                response['result'] = R.status
+
+            elif not sum([isinstance(R, e) for e in \
                     string_types + integer_types + (dict, list, set, NoneType, bool)]):
                 try:
                     rs = encoder.default(R) # ...or something this thing supports
                 except TypeError as exc:
                     raise TypeError("Return type not supported, for {0!r}".format(R))
 
-            response['result'] = R
-
-            status = 200
 
         except Error as e:
             # exception missed by others
