@@ -1,0 +1,7 @@
+# This file collects all required third-party applications that are needed
+# to run this project. Later you can install all these apps in a row
+# using pip. Example:
+#
+# pip install -r requirements.pip
+Flask==0.10
+Flask-HTTPAuth==2.2.1
