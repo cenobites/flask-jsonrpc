@@ -48,7 +48,7 @@ jsonrpc = JSONRPC(app, '/api')
 
 def check_terminal_id(fn):
     def wrapped():
-        terminal_id = int(request.json.get('terminal_id', 0))
+        terminal_id = int(request.get_json(silent=True).get('terminal_id', 0))
         if terminal_id <= 0:
             raise OtherError('Invalid terminal ID')
         return fn()
@@ -57,7 +57,7 @@ def check_terminal_id(fn):
 @jsonrpc.method('App.index')
 @check_terminal_id
 def index():
-    return u'Terminal ID: {0}'.format(request.json['terminal_id'])
+    return u'Terminal ID: {0}'.format(request.get_json(silent=True).get('terminal_id', 0))
 
 
 if __name__ == '__main__':
