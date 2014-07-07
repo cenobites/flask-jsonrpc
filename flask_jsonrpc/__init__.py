@@ -156,31 +156,26 @@ def _inject_args(sig, types):
         sig = '{0}({1})'.format(sig, ', '.join(types))
     return sig
 
-def _site_api(site, decorators=[]):
+def _site_api(site):
     def wrapper(method=''):
         response_dict, status_code = site.dispatch(request, method)
         if current_app.config['DEBUG']:
             logging.debug('request: %s', extract_raw_data_request(request))
             logging.debug('response: %s, %s', status_code, response_dict)
-
-        response_func = jsonify_status_code
-        for decorator in decorators:
-            response_func = decorator(response_func)
-            
-        return response_func(status_code, response_dict), status_code
+        return jsonify_status_code(status_code, response_dict), status_code
     return wrapper
 
 
 class JSONRPC(object):
 
     def __init__(self, app=None, service_url='/api', auth_backend=authenticate, site=default_site,
-                 enable_web_browsable_api=False, decorators=[]):
+                 enable_web_browsable_api=False):
         self.service_url = service_url
         self.browse_url = self._make_browse_url(service_url)
         self.enable_web_browsable_api = enable_web_browsable_api
         self.auth_backend = auth_backend
         self.site = site
-        self.site_api = _site_api(site, decorators=decorators)
+        self.site_api = _site_api(site)
         if app is not None:
             self.app = app
             self.init_app(self.app)
@@ -213,11 +208,11 @@ class JSONRPC(object):
 
     def init_app(self, app):
         app.add_url_rule(self.service_url, self._unique_name(), self.site_api, methods=['POST', 'OPTIONS'])
-        app.add_url_rule(self.service_url + '/<method>', self._unique_name('/<method>'), self.site_api, methods=['GET'])
+        app.add_url_rule(self.service_url + '/<method>', self._unique_name('/<method>'), self.site_api, methods=['GET', 'OPTIONS'])
 
     def register_blueprint(self, blueprint):
         blueprint.add_url_rule(self.service_url, '', self.site_api, methods=['POST', 'OPTIONS'])
-        blueprint.add_url_rule(self.service_url + '/<method>', '', self.site_api, methods=['GET'])
+        blueprint.add_url_rule(self.service_url + '/<method>', '', self.site_api, methods=['GET', 'OPTIONS'])
 
     def method(self, name, authenticated=False, safe=False, validate=False, **options):
         def decorator(f):
@@ -241,3 +236,4 @@ class JSONRPC(object):
             self.site.register(method, _f)
             return _f
         return decorator
+

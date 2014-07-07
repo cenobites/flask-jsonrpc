@@ -33,8 +33,8 @@ from functools import wraps
 
 from werkzeug.exceptions import HTTPException
 
-from flask import json, jsonify, current_app, got_request_exception
 from flask.wrappers import Response
+from flask import json, jsonify, current_app
 
 from flask_jsonrpc.types import Object, Array, Any
 from flask_jsonrpc.helpers import extract_raw_data_request, log_exception
@@ -211,35 +211,29 @@ class JSONRPCSite(object):
             if 'id' not in D or ('id' in D and D['id'] is None): # notification
                 return None, 204
 
+            if isinstance(R, Response):
+                if R.status_code == 401:
+                    raise InvalidCredentialsError(R.status)
+                raise OtherError(R.status, R.status_code)
+
             encoder = current_app.json_encoder()
-            response['result'] = R
-            status = 200
 
             # type of `R` should be one of these or...
-            if isinstance(R, Response):
-                status = R.status_code
-                response['result'] = R.status
-
-            elif not sum([isinstance(R, e) for e in \
+            if not sum([isinstance(R, e) for e in \
                     string_types + integer_types + (dict, list, set, NoneType, bool)]):
                 try:
                     rs = encoder.default(R) # ...or something this thing supports
                 except TypeError as exc:
-                    raise TypeError("Return type not supported, for {0!r}".format(R))
+                    raise TypeError('Return type not supported, for {0!r}'.format(R))
 
-
+            response['result'] = R
+            status = 200
         except Error as e:
-            # exception missed by others
-            #got_request_exception.connect(log_exception, current_app._get_current_object())
-
             response['error'] = e.json_rpc_format
             if version in ('1.1', '2.0') and 'result' in response:
                 response.pop('result')
             status = e.status
         except HTTPException as e:
-            # exception missed by others
-            #got_request_exception.connect(log_exception, current_app._get_current_object())
-
             other_error = OtherError(e)
             response['error'] = other_error.json_rpc_format
             response['error']['code'] = e.code
@@ -247,9 +241,6 @@ class JSONRPCSite(object):
                 response.pop('result')
             status = e.code
         except Exception as e:
-            # exception missed by others
-            #got_request_exception.connect(log_exception, current_app._get_current_object())
-
             other_error = OtherError(e)
             response['error'] = other_error.json_rpc_format
             status = other_error.status
@@ -293,14 +284,9 @@ class JSONRPCSite(object):
                     response = ''
                     return response, status
         except Error as e:
-            #got_request_exception.connect(log_exception, current_app._get_current_object())
-
             response['error'] = e.json_rpc_format
             status = e.status
         except Exception as e:
-            # exception missed by others
-            #got_request_exception.connect(log_exception, current_app._get_current_object())
-
             other_error = OtherError(e)
             response['result'] = None
             response['error'] = other_error.json_rpc_format
@@ -338,3 +324,4 @@ class JSONRPCSite(object):
 
 
 jsonrpc_site = JSONRPCSite()
+
