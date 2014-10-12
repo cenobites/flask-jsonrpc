@@ -207,6 +207,8 @@ class JSONRPC(object):
             jsonrpc_site_name=self._unique_name(), jsonrpc_site=self.site)
 
     def init_app(self, app):
+        self.app = app
+        self._register_browse(self.app)
         app.add_url_rule(self.service_url, self._unique_name(), self.site_api, methods=['POST', 'OPTIONS'])
         app.add_url_rule(self.service_url + '/<method>', self._unique_name('/<method>'), self.site_api, methods=['GET', 'OPTIONS'])
 
