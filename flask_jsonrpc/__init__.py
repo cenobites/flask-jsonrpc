@@ -182,7 +182,6 @@ class JSONRPC(object):
         if app is not None:
             self.app = app
             self.init_app(self.app)
-            self._register_browse(self.app)
         else:
             self.app = None
 
@@ -210,6 +209,7 @@ class JSONRPC(object):
             jsonrpc_site_name=self._unique_name(), jsonrpc_site=self.site)
 
     def init_app(self, app):
+        self._register_browse(app)
         app.add_url_rule(self.service_url, self._unique_name(), self.site_api, methods=['POST', 'OPTIONS'])
         app.add_url_rule(self.service_url + '/<method>', self._unique_name('/<method>'), self.site_api, methods=['GET', 'OPTIONS'])
 
