@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2012-2014, Cenobit Technologies, Inc. http://cenobit.es/
+# Copyright (c) 2009 Samuel Sutch, <sam@sutch.net>
+# Copyright (c) 2012-2015, Cenobit Technologies, Inc. http://cenobit.es/
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without

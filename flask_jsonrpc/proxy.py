@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2012-2013, Cenobit Technologies, Inc. http://cenobit.es/
+# Copyright (c) 2009 Samuel Sutch, <sam@sutch.net>
+# Copyright (c) 2012-2015, Cenobit Technologies, Inc. http://cenobit.es/
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -35,7 +36,7 @@ from flask_jsonrpc.types import Object, Any
 
 
 class ServiceProxy(object):
-    
+
     def __init__(self, service_url, service_name=None, version='2.0'):
         self.version = str(version)
         self.service_url = service_url
@@ -46,13 +47,13 @@ class ServiceProxy(object):
             name = '%s.%s' % (self.service_name, name)
         params = dict(self.__dict__, service_name=name)
         return self.__class__(**params)
-  
+
     def __repr__(self):
         return {
             'jsonrpc': self.version,
             'method': self.service_name
         }
-    
+
     def send_payload(self, params):
         """Performs the actual sending action and returns the result
         """
@@ -62,14 +63,14 @@ class ServiceProxy(object):
             'params': params,
             'id': str(uuid.uuid1())
         })).read()
-      
+
     def __call__(self, *args, **kwargs):
         params = kwargs if len(kwargs) else args
         if Any.kind(params) == Object and self.version != '2.0':
             raise Exception('Unsupport arg type for JSON-RPC 1.0 '
                             '(the default version for this client, '
                             'pass version="2.0" to use keyword arguments)')
-        r = self.send_payload(params)    
+        r = self.send_payload(params)
         y = json.loads(r)
         if u'error' in y:
             try:
@@ -103,11 +104,11 @@ class FakePayload(object):
 class TestingServiceProxy(ServiceProxy):
     """Service proxy which works inside Django unittests
     """
-    
+
     def __init__(self, client, *args, **kwargs):
         super(TestingServiceProxy, self).__init__(*args, **kwargs)
         self.client = client
-    
+
     def send_payload(self, params):
         dump = json.dumps({
             'jsonrpc' : self.version,

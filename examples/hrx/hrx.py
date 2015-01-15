@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# Copyright (c) 2012-2013, Cenobit Technologies, Inc. http://cenobit.es/
+# Copyright (c) 2012-2015, Cenobit Technologies, Inc. http://cenobit.es/
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -41,7 +41,7 @@ if os.path.exists(FLASK_JSONRPC_PROJECT_DIR) \
     sys.path.append(FLASK_JSONRPC_PROJECT_DIR)
 
 from flask_jsonrpc import JSONRPC
-    
+
 app = Flask(__name__)
 app.config.from_object(__name__)
 jsonrpc = JSONRPC(app, '/api')
