@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) 2013 by Armin Ronacher;
 #           (c) 2010-2014 Benjamin Peterson;
-#           (c) 2012-2014, Cenobit Technologies, Inc. http://cenobit.es/
+#           (c) 2012-2015, Cenobit Technologies, Inc. http://cenobit.es/
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
