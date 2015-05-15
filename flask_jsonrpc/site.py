@@ -223,7 +223,7 @@ class JSONRPCSite(object):
             if not sum([isinstance(R, e) for e in \
                     string_types + integer_types + (dict, list, set, NoneType, bool)]):
                 try:
-                    rs = encoder.default(R) # ...or something this thing supports
+                    rs = encoder.encode(R) # ...or something this thing supports
                 except TypeError as exc:
                     raise TypeError('Return type not supported, for {0!r}'.format(R))
 
