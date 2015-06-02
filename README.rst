@@ -5,7 +5,7 @@ A basic JSON-RPC implementation for your Flask-powered sites based on `django-js
 
 Some reasons you might want to use:
 
-* Simple, powerful, flexible and pythoic API.
+* Simple, powerful, flexible and pythonic API.
 * Support python 2.7, `3.3 or later <http://flask.pocoo.org/docs/python3/#python3-support>`_
 * The Web browseable API.
 * Support for authentication.
