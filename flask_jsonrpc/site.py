@@ -29,7 +29,7 @@
 import re
 import decimal
 import datetime
-from uuid import uuid1
+from uuid import uuid4
 from functools import wraps
 
 from werkzeug.exceptions import HTTPException
@@ -119,11 +119,12 @@ def validate_params(method, D):
 class JSONRPCSite(object):
     """A JSON-RPC Site
     """
+    JSONRPC_VERSION_DEFAULT = '2.0'
 
     def __init__(self):
         self.urls = {}
-        self.uuid = text_type(uuid1())
-        self.version = '1.0'
+        self.uuid = text_type(uuid4())
+        self.version = JSONRPCSite.JSONRPC_VERSION_DEFAULT
         self.name = 'Flask-JSONRPC'
         self.register('system.describe', self.describe)
 
@@ -139,7 +140,7 @@ class JSONRPCSite(object):
                 return g1 if g1 else g2
         return None
 
-    def empty_response(self, version='1.0'):
+    def empty_response(self, version=JSONRPCSite.JSONRPC_VERSION_DEFAULT):
         resp = {'id': None}
         if version == '1.1':
             resp['version'] = version
@@ -163,7 +164,7 @@ class JSONRPCSite(object):
                 return True, D
         return False, {}
 
-    def response_dict(self, request, D, is_batch=False, version_hint='1.0'):
+    def response_dict(self, request, D, is_batch=False, version_hint=JSONRPCSite.JSONRPC_VERSION_DEFAULT):
         version = version_hint
         response = self.empty_response(version=version)
         apply_version = {
@@ -192,7 +193,7 @@ class JSONRPCSite(object):
                     raise InvalidRequestError('JSON-RPC version {0} not supported.'.format(D['version']))
                 version = request.jsonrpc_version = response['version'] = text_type(D['version'])
             else:
-                request.jsonrpc_version = '1.0'
+                request.jsonrpc_version = JSONRPCSite.JSONRPC_VERSION_DEFAULT
 
             method = self.urls[text_type(D['method'])]
             if getattr(method, 'json_validate', False):
