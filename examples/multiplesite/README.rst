@@ -19,7 +19,12 @@ Testing your service
 
 ::
 
-    $ curl -i -X POST  -H "Content-Type: application/json" -d '{"jsonrpc": "2.0", "method": "App.index", "id": "1"}' http://localhost:5000/api/v1
+    $ curl -i -X POST  -H "Content-Type: application/json; indent=4" \
+      -d '{
+        "jsonrpc": "2.0",
+        "method": "App.index",
+        "id": "1"
+      }' http://localhost:5000/api/v1
     HTTP/1.0 200 OK
     Content-Type: application/json
     Content-Length: 92
@@ -35,7 +40,12 @@ Testing your service
 
 ::
 
-    $ curl -i -X POST  -H "Content-Type: application/json" -d '{"jsonrpc": "2.0", "method": "App.index", "id": "1"}' http://localhost:5000/api/v2
+    $ curl -i -X POST -H "Content-Type: application/json; indent=4" \
+      -d '{
+        "jsonrpc": "2.0",
+        "method": "App.index",
+        "id": "1"
+      }' http://localhost:5000/api/v2
     HTTP/1.0 200 OK
     Content-Type: application/json
     Content-Length: 92

@@ -74,7 +74,14 @@ All code of Example `run.py <https://github.com/cenobites/flask-jsonrpc/blob/mas
 
 ::
 
-    $ curl -i -X POST -d '{"jsonrpc": "2.0", "method": "App.index", "params": {}, "id": "1"}' http://localhost:5000/api
+    $ curl -i -X POST \
+       -H "Content-Type: application/json; indent=4" \
+       -d '{
+        "jsonrpc": "2.0",
+        "method": "App.index",
+        "params": {},
+        "id": "1"
+    }' http://localhost:5000/api
     HTTP/1.0 200 OK
     Content-Type: application/json
     Content-Length: 77
