@@ -30,17 +30,19 @@ import uuid
 
 from flask import json, current_app
 
-from flask_jsonrpc.site import JSONRPC_VERSION_DEFAULT
 from flask_jsonrpc.types import Object, Any
-from flask_jsonrpc._compat import text_type, NativeStringIO, urlopen
+from flask_jsonrpc.site import JSONRPC_VERSION_DEFAULT
+from flask_jsonrpc._compat import text_type, NativeStringIO, Request, urlopen
 
 
 class ServiceProxy(object):
+    DEFAULT_HEADERS = {'Content-Type': 'application/json'}
 
-    def __init__(self, service_url, service_name=None, version=JSONRPC_VERSION_DEFAULT):
+    def __init__(self, service_url, service_name=None, version=JSONRPC_VERSION_DEFAULT, headers=None):
         self.version = text_type(version)
         self.service_url = service_url
         self.service_name = service_name
+        self.headers = headers or self.DEFAULT_HEADERS
 
     def __getattr__(self, name):
         if self.service_name != None:
@@ -64,7 +66,8 @@ class ServiceProxy(object):
             'id': text_type(uuid.uuid4())
         })
         data_binary = data.encode('utf-8')
-        return urlopen(self.service_url, data_binary).read()
+        url_request = Request(self.service_url, data_binary, headers=self.headers)
+        return urlopen(url_request).read()
 
     def __call__(self, *args, **kwargs):
         params = kwargs if len(kwargs) else args
@@ -116,10 +119,8 @@ class TestingServiceProxy(ServiceProxy):
             'jsonrpc': self.version,
             'method': self.service_name,
             'params': params,
-            'id': text_type(uuid.uuid1())
+            'id': text_type(uuid.uuid4())
         })
         dump_payload = FakePayload(dump)
-        response = current_app.post(self.service_url,
-                          **{'wsgi.input' : dump_payload,
-                          'CONTENT_LENGTH' : len(dump)})
+        response = current_app.post(self.service_url, **{'wsgi.input' : dump_payload, 'CONTENT_LENGTH' : len(dump)})
         return response.content

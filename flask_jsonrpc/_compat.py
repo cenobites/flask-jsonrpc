@@ -77,6 +77,7 @@ if PY3:
 
     from urllib.parse import urlparse
     from urllib.request import urlopen
+    from urllib.request import Request
 else:
     def b(s):
         return s
@@ -130,7 +131,8 @@ else:
         return filename
 
     from urlparse import urlparse
-    from urllib import urlopen
+    from urllib2 import urlopen
+    from urllib2 import Request
 
 def to_native_string(string, encoding='ascii'):
     """
