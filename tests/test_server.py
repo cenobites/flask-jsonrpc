@@ -59,7 +59,7 @@ class FlaskJSONRPCTestCase(ServerTestCase):
         })
 
     def _call(self, req):
-        return json.loads(self.app.post(self.service_url, data=req).data)
+        return json.loads(self.app.post(self.service_url, data=req, headers={'Content-Type': 'application/json'}).data)
 
     def _assert_equals(self, resp, st):
         self.assertEqual(st, resp, '{0!r} != {1!r}'.format(st, resp))
@@ -88,13 +88,13 @@ class FlaskJSONRPCTestCase(ServerTestCase):
         req_id = None
         for version in ['1.0', '1.1', '2.0']:
             req = json.dumps({'jsonrpc': version, 'method': 'jsonrpc.echo', 'id': req_id})
-            resp = self.app.post(self.service_url, data=req).data
+            resp = self.app.post(self.service_url, data=req, headers={'Content-Type': 'application/json'}).data
             self.assertEqual('', resp)
 
     def test_payload_id_null(self):
         for version in ['1.0', '1.1', '2.0']:
             req = json.dumps({'jsonrpc': version, 'method': 'jsonrpc.echo'})
-            resp = self.app.post(self.service_url, data=req).data
+            resp = self.app.post(self.service_url, data=req, headers={'Content-Type': 'application/json'}).data
             self.assertEqual('', resp)
 
     def test_echo(self):

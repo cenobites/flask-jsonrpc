@@ -32,9 +32,6 @@ from flask_jsonrpc.proxy import ServiceProxy
 
 from apptest import ServerTestCase
 
-SERVER_HOSTNAME = 'localhost'
-SERVER_PORT = 5001
-
 
 class ServiceProxyTestCase(ServerTestCase):
 

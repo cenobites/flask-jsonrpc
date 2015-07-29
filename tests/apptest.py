@@ -42,13 +42,11 @@ if os.path.exists(FLASK_JSONRPC_PROJECT_DIR) and not FLASK_JSONRPC_PROJECT_DIR i
 
 from flask_jsonrpc import JSONRPC
 
-from appserver import flask_server
-
 SERVER_HOSTNAME = 'localhost'
 SERVER_PORT = 5001
 
 app = Flask(__name__)
-app.config['DEBUG'] = True
+app.config['DEBUG'] = False
 app.config['TESTING'] = True
 jsonrpc = JSONRPC(app, '/api', enable_web_browsable_api=True)
 
@@ -112,20 +110,54 @@ def checkedVarArgsEcho(*args, **kw):
     return list(args) + list(kw.values())
 
 
+class FlaskTestServer(object):
+
+    def __init__(self):
+        self.process = None
+
+    def __enter__(self):
+        return self.run()
+
+    def __exit__(self, type, value, traceback):
+        self.kill()
+
+    def run(self):
+        if not self.process is None:
+            try:
+                self.kill()
+            except OSError:
+                pass
+        exe =  os.path.join(os.path.dirname(os.path.abspath(__file__)), 'apptest.py')
+        self.process = subprocess.Popen([sys.executable, exe, '--run'])
+        time.sleep(1)
+        return self.process
+
+    def kill(self, process=None):
+        process = process if not process is None else self.process
+        if not process is None and not process.poll() is None:
+            process.wait()
+            process.terminate()
+            time.sleep(1)
+            if not process.poll() is None:
+                process.kill()
+        if not process is None and process.poll() is None:
+            process.kill()
+            time.sleep(1)
+        self.process = None
+
+
 class ServerTestCase(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
         cls.app = app.test_client()
         cls.service_url = 'http://{0}:{1}/api'.format(SERVER_HOSTNAME, SERVER_PORT)
-        cls.server_process = flask_server.run()
+        cls.flask_server = FlaskTestServer()
+        cls.flask_server.run()
 
     @classmethod
     def tearDownClass(cls):
-        try:
-            flask_server.kill(process=cls.server_process)
-        except OSError:
-            pass
+        cls.flask_server.kill()
 
 def main():
     parser = argparse.ArgumentParser()
@@ -134,7 +166,7 @@ def main():
         help='Running Flask in subprocess')
     options = parser.parse_args()
     if options.run:
-        return app.run(host=SERVER_HOSTNAME, port=SERVER_PORT)
+        return app.run(host=SERVER_HOSTNAME, port=SERVER_PORT, debug=False)
 
 if __name__ == '__main__':
     main()
