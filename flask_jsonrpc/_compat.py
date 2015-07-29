@@ -88,7 +88,7 @@ else:
     text_type = unicode
     builtin_str = str
     binary_type = str
-    string_types = (basestring,)
+    string_types = (basestring, str, unicode)
     integer_types = (int, long)
 
     iterkeys = lambda d: d.iterkeys()

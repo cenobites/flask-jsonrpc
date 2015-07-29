@@ -30,13 +30,14 @@ import uuid
 
 from flask import json, current_app
 
-from flask_jsonrpc._compat import text_type, NativeStringIO, urlopen
+from flask_jsonrpc.site import JSONRPC_VERSION_DEFAULT
 from flask_jsonrpc.types import Object, Any
+from flask_jsonrpc._compat import text_type, NativeStringIO, urlopen
 
 
 class ServiceProxy(object):
 
-    def __init__(self, service_url, service_name=None, version='2.0'):
+    def __init__(self, service_url, service_name=None, version=JSONRPC_VERSION_DEFAULT):
         self.version = text_type(version)
         self.service_url = service_url
         self.service_name = service_name
@@ -60,7 +61,7 @@ class ServiceProxy(object):
             'jsonrpc': self.version,
             'method': self.service_name,
             'params': params,
-            'id': text_type(uuid.uuid1())
+            'id': text_type(uuid.uuid4())
         })
         data_binary = data.encode('utf-8')
         return urlopen(self.service_url, data_binary).read()

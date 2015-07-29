@@ -95,5 +95,4 @@ Boolean = Type('Boolean', (object,), {}).I(bool).N('bit')
 String = Type('String', (object,), {}).I(*string_types).N('str')
 Array = Type('Array', (object,), {}).I(list, set, tuple).N('arr')
 Nil = Type('Nil', (object,), {}).I(type(None)).N('nil')
-Any = Type('Any', (object,), {}).I(
-            Object, Number, Boolean, String, Array, Nil).N('any')
+Any = Type('Any', (object,), {}).I(Object, Number, Boolean, String, Array, Nil).N('any')

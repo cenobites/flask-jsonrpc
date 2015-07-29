@@ -46,6 +46,8 @@ from flask_jsonrpc.exceptions import (Error, ParseError, InvalidRequestError,
                                       ServerError, RequestPostError,
                                       InvalidCredentialsError, OtherError)
 
+JSONRPC_VERSION_DEFAULT = '2.0'
+
 empty_dec = lambda f: f
 try:
     # TODO: Add CSRF check
@@ -119,12 +121,11 @@ def validate_params(method, D):
 class JSONRPCSite(object):
     """A JSON-RPC Site
     """
-    JSONRPC_VERSION_DEFAULT = '2.0'
 
     def __init__(self):
         self.urls = {}
         self.uuid = text_type(uuid4())
-        self.version = JSONRPCSite.JSONRPC_VERSION_DEFAULT
+        self.version = JSONRPC_VERSION_DEFAULT
         self.name = 'Flask-JSONRPC'
         self.register('system.describe', self.describe)
 
@@ -132,15 +133,22 @@ class JSONRPCSite(object):
         self.urls[text_type(name)] = method
 
     def extract_id_request(self, raw_data):
-        if not raw_data is None and raw_data.find('id') != -1:
-            find_id = re.findall(r'["|\']id["|\']:([0-9]+)|["|\']id["|\']:["|\'](.+?)["|\']',
-                                 raw_data.replace(' ', ''), re.U)
-            if find_id:
-                g1, g2 = find_id[0]
-                return g1 if g1 else g2
-        return None
+        try:
+            D = json.loads(raw_data)
+            return D.get('id')
+        except Exception as e:
+            if not raw_data is None and raw_data.find('id') != -1:
+                find_id = re.findall(r'["|\']id["|\']:([0-9]+)|["|\']id["|\']:["|\'](.+?)["|\']',
+                                     raw_data.replace(' ', ''), re.U)
+                if find_id:
+                    g1, g2 = find_id[0]
+                    raw_id = g1 if g1 else g2
+                    if text_type(raw_id).isnumeric():
+                        return int(raw_id)
+                    return raw_id
+            return None
 
-    def empty_response(self, version=JSONRPCSite.JSONRPC_VERSION_DEFAULT):
+    def empty_response(self, version=JSONRPC_VERSION_DEFAULT):
         resp = {'id': None}
         if version == '1.1':
             resp['version'] = version
@@ -164,7 +172,7 @@ class JSONRPCSite(object):
                 return True, D
         return False, {}
 
-    def response_dict(self, request, D, is_batch=False, version_hint=JSONRPCSite.JSONRPC_VERSION_DEFAULT):
+    def response_dict(self, request, D, is_batch=False, version_hint=JSONRPC_VERSION_DEFAULT):
         version = version_hint
         response = self.empty_response(version=version)
         apply_version = {
@@ -193,7 +201,7 @@ class JSONRPCSite(object):
                     raise InvalidRequestError('JSON-RPC version {0} not supported.'.format(D['version']))
                 version = request.jsonrpc_version = response['version'] = text_type(D['version'])
             else:
-                request.jsonrpc_version = JSONRPCSite.JSONRPC_VERSION_DEFAULT
+                request.jsonrpc_version = JSONRPC_VERSION_DEFAULT
 
             method = self.urls[text_type(D['method'])]
             if getattr(method, 'json_validate', False):
