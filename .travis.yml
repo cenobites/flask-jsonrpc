@@ -9,6 +9,8 @@ env:
   - FLASK_ENV=TESTING
 
 install:
+  - pip install --upgrade pip --quiet
+  - pip install --upgrade setuptools --quiet
   - pip install -r requirements.pip --quiet
   - pip install -r requirements_test.pip --quiet
 
