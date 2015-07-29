@@ -8,15 +8,12 @@ python:
 env:
   - FLASK_ENV=TESTING
 
-install: 
+install:
   - pip install -r requirements.pip --quiet
-  - pip install coverage --quiet
-  - pip install coveralls --quiet
+  - pip install -r requirements_test.pip --quiet
 
-script: 
+script:
   - python setup.py test
-  - coverage run --source=flask_jsonrpc flask_jsonrpc_tests.py
-  - coverage report -m
 
 after_success:
   coveralls
