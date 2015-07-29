@@ -38,7 +38,7 @@ _identity = lambda x: x
 
 if PY3:
     def b(s):
-        return s.encode('latin-1')
+        return s.encode('utf-8')
     def u(s):
         return s
     unichr = chr

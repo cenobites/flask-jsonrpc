@@ -89,13 +89,13 @@ class FlaskJSONRPCTestCase(ServerTestCase):
         for version in ['1.0', '1.1', '2.0']:
             req = json.dumps({'jsonrpc': version, 'method': 'jsonrpc.echo', 'id': req_id})
             resp = self.app.post(self.service_url, data=req, headers={'Content-Type': 'application/json'}).data
-            self.assertEqual('', resp)
+            self.assertEqual(b(''), resp)
 
     def test_payload_id_null(self):
         for version in ['1.0', '1.1', '2.0']:
             req = json.dumps({'jsonrpc': version, 'method': 'jsonrpc.echo'})
             resp = self.app.post(self.service_url, data=req, headers={'Content-Type': 'application/json'}).data
-            self.assertEqual('', resp)
+            self.assertEqual(b(''), resp)
 
     def test_echo(self):
         T = [[
