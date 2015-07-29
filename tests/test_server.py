@@ -58,8 +58,10 @@ class FlaskJSONRPCTestCase(ServerTestCase):
             'id': None if is_notify else text_type(uuid.uuid4())
         })
 
-    def _call(self, req):
-        return json.loads(self.app.post(self.service_url, data=req, headers={'Content-Type': 'application/json'}).data)
+    def _call(self, request_data):
+        headers = {'Content-Type': 'application/json'}
+        response = self.app.post(self.service_url, data=request_data, headers=headers)
+        return json.loads(response.data)
 
     def _assert_equals(self, resp, st):
         self.assertEqual(st, resp, '{0!r} != {1!r}'.format(st, resp))
@@ -96,6 +98,32 @@ class FlaskJSONRPCTestCase(ServerTestCase):
             req = json.dumps({'jsonrpc': version, 'method': 'jsonrpc.echo'})
             resp = self.app.post(self.service_url, data=req, headers={'Content-Type': 'application/json'}).data
             self.assertEqual(b(''), resp)
+
+    def test_payload_result_1_0(self):
+        req = self._make_payload('jsonrpc.echo', version='1.0')
+        resp = self._call(req)
+        self.assertIn('result', resp)
+        self.assertIn('error', resp)
+
+    def test_payload_result(self):
+        for version in ['1.1', '2.0']:
+            req = self._make_payload('jsonrpc.echo', version=version)
+            resp = self._call(req)
+            self.assertIn('result', resp)
+            self.assertNotIn('error', resp)
+
+    def test_payload_error_1_0(self):
+        req = self._make_payload('jsonrpc.echoNotFound', version='1.0')
+        resp = self._call(req)
+        self.assertIn('result', resp)
+        self.assertIn('error', resp)
+
+    def test_payload_error(self):
+        for version in ['1.1', '2.0']:
+            req = self._make_payload('jsonrpc.echoNotFound', version=version)
+            resp = self._call(req)
+            self.assertNotIn('result', resp)
+            self.assertIn('error', resp)
 
     def test_echo(self):
         T = [[

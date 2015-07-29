@@ -182,6 +182,18 @@ class JSONRPCSite(object):
         }
 
         try:
+            # version: validate
+            if 'jsonrpc' in D:
+                if text_type(D['jsonrpc']) not in apply_version:
+                    raise InvalidRequestError('JSON-RPC version {0} not supported.'.format(D['jsonrpc']))
+                version = request.jsonrpc_version = response['jsonrpc'] = text_type(D['jsonrpc'])
+            elif 'version' in D:
+                if text_type(D['version']) not in apply_version:
+                    raise InvalidRequestError('JSON-RPC version {0} not supported.'.format(D['version']))
+                version = request.jsonrpc_version = response['version'] = text_type(D['version'])
+            else:
+                version = request.jsonrpc_version = JSONRPC_VERSION_DEFAULT
+
             # params: An Array or Object, that holds the actual parameter values
             # for the invocation of the procedure. Can be omitted if empty.
             if 'params' not in D or not D['params']:
@@ -192,25 +204,14 @@ class JSONRPCSite(object):
                 raise MethodNotFoundError('Method not found. Available methods: {0}' \
                     .format('\n'.join(list(self.urls.keys()))))
 
-            if 'jsonrpc' in D:
-                if text_type(D['jsonrpc']) not in apply_version:
-                    raise InvalidRequestError('JSON-RPC version {0} not supported.'.format(D['jsonrpc']))
-                version = request.jsonrpc_version = response['jsonrpc'] = text_type(D['jsonrpc'])
-            elif 'version' in D:
-                if text_type(D['version']) not in apply_version:
-                    raise InvalidRequestError('JSON-RPC version {0} not supported.'.format(D['version']))
-                version = request.jsonrpc_version = response['version'] = text_type(D['version'])
-            else:
-                request.jsonrpc_version = JSONRPC_VERSION_DEFAULT
-
             method = self.urls[text_type(D['method'])]
             if getattr(method, 'json_validate', False):
                 validate_params(method, D)
 
             if 'id' in D and D['id'] is not None: # regular request
                 response['id'] = D['id']
-                if version in ('1.1', '2.0') and 'error' in response:
-                    response.pop('error')
+                if version in ('1.1', '2.0'):
+                    response.pop('error', None)
             elif is_batch: # notification, not ok in a batch format, but happened anyway
                 raise InvalidRequestError
             else: # notification
@@ -240,27 +241,27 @@ class JSONRPCSite(object):
             status = 200
         except Error as e:
             response['error'] = e.json_rpc_format
-            if version in ('1.1', '2.0') and 'result' in response:
-                response.pop('result')
+            if version in ('1.1', '2.0'):
+                response.pop('result', None)
             status = e.status
         except HTTPException as e:
             other_error = OtherError(e)
             response['error'] = other_error.json_rpc_format
             response['error']['code'] = e.code
-            if version in ('1.1', '2.0') and 'result' in response:
-                response.pop('result')
+            if version in ('1.1', '2.0'):
+                response.pop('result', None)
             status = e.code
         except Exception as e:
             other_error = OtherError(e)
             response['error'] = other_error.json_rpc_format
             status = other_error.status
-            if version in ('1.1', '2.0') and 'result' in response:
-                response.pop('result')
+            if version in ('1.1', '2.0'):
+                response.pop('result', None)
 
         # Exactly one of result or error MUST be specified. It's not
         # allowed to specify both or none.
-        if version in ('1.1', '2.0') and 'error' in response and not response['error']:
-            response.pop('error')
+        if version in ('1.1', '2.0') and 'result' in response:
+            response.pop('error', None)
 
         return response, status
 
