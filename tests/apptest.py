@@ -101,13 +101,25 @@ def protectedArgsEcho(string, string2):
 def protectedReturnEcho():
     return 'this is a string'
 
-@jsonrpc.method('jsonrpc.authCheckedEcho(Object, Array) -> Object', validate=True)
+@jsonrpc.method('jsonrpc.authCheckedEcho(Any, Array) -> Object', validate=True)
 def authCheckedEcho(obj1, arr1):
     return {'obj1': obj1, 'arr1': arr1}
 
 @jsonrpc.method('jsonrpc.varArgs(String, String, str3=String) -> Array', validate=True)
 def checkedVarArgsEcho(*args, **kw):
     return list(args) + list(kw.values())
+
+@jsonrpc.method('jsonrpc.sum(Number, Number) -> Number', validate=True)
+def sum_(a, b):
+    return a + b
+
+@jsonrpc.method('jsonrpc.subtract(Number, Number) -> Number', validate=True)
+def subtract(a, b):
+    return a - b
+
+@jsonrpc.method('jsonrpc.divide(Number, Number) -> Number', validate=True)
+def divide(a, b):
+    return a / float(b)
 
 
 class FlaskTestServer(object):

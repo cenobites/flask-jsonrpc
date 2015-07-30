@@ -233,11 +233,16 @@ class JSONRPCSite(object):
                     raise InvalidCredentialsError(R.status)
                 raise OtherError(R.status, R.status_code)
 
-            encoder = current_app.json_encoder()
+            try:
+                # New in Flask version 0.10.
+                encoder = current_app.json_encoder()
+            except AttributeError:
+                encoder = json.JSONEncoder()
 
             # type of `R` should be one of these or...
             if not sum([isinstance(R, e) for e in \
-                    string_types + integer_types + (dict, list, set, NoneType, bool)]):
+                    string_types + integer_types + \
+                    (float, complex, dict, list, tuple, set, frozenset, NoneType, bool)]):
                 try:
                     rs = encoder.default(R) # ...or something this thing supports
                 except TypeError as exc:

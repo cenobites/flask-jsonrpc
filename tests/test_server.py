@@ -321,7 +321,7 @@ class FlaskJSONRPCTestCase(ServerTestCase):
 
     def test_authCheckedEcho(self):
         T = [[
-            (self._make_payload('jsonrpc.authCheckedEcho', [1.0, [1,2,3]], version=v), {'obj1': 1.0, 'arr1': [1,2,3]}),
+            (self._make_payload('jsonrpc.authCheckedEcho', [1.0, [1, 2, 3]], version=v), {'obj1': 1.0, 'arr1': [1, 2, 3]}),
         ] for v in ['1.0', '1.1', '2.0']]
         [[self._assert_equals(self._call(req)['result'], resp) for req, resp in t] for t in T]
 
@@ -329,5 +329,33 @@ class FlaskJSONRPCTestCase(ServerTestCase):
         T = [[
             (self._make_payload('jsonrpc.varArgs', ['hai', 'hai', ' -> \o/'], version=v), ['hai', 'hai', ' -> \o/']),
             (self._make_payload('jsonrpc.varArgs', ['Flask', 'გამარჯობა', 'JSON-RPC'], version=v), ['Flask', 'გამარჯობა', 'JSON-RPC']),
+        ] for v in ['1.0', '1.1', '2.0']]
+        [[self._assert_equals(self._call(req)['result'], resp) for req, resp in t] for t in T]
+
+    def test_sum(self):
+        T = [[
+            (self._make_payload('jsonrpc.sum', [1, 1], version=v), 2),
+            (self._make_payload('jsonrpc.sum', [19, 1], version=v), 20),
+            (self._make_payload('jsonrpc.sum', [1.0, 1.0], version=v), 2.0),
+            (self._make_payload('jsonrpc.sum', [1.5, 1.5], version=v), 3.0),
+        ] for v in ['1.0', '1.1', '2.0']]
+        [[self._assert_equals(self._call(req)['result'], resp) for req, resp in t] for t in T]
+
+    def test_subtract(self):
+        T = [[
+            (self._make_payload('jsonrpc.subtract', [1, 1], version=v), 0),
+            (self._make_payload('jsonrpc.subtract', [5.0, 5.0], version=v), 0.0),
+            (self._make_payload('jsonrpc.subtract', [10, 15], version=v), -5),
+            (self._make_payload('jsonrpc.subtract', [15, 5.5], version=v), 9.5),
+            (self._make_payload('jsonrpc.subtract', [1, 1.5], version=v), -0.5),
+        ] for v in ['1.0', '1.1', '2.0']]
+        [[self._assert_equals(self._call(req)['result'], resp) for req, resp in t] for t in T]
+
+    def test_divide(self):
+        T = [[
+            (self._make_payload('jsonrpc.divide', [1, 1], version=v), 1.0),
+            (self._make_payload('jsonrpc.divide', [5.0, 2.0], version=v), 2.5),
+            (self._make_payload('jsonrpc.divide', [10, 100], version=v), 0.1),
+            (self._make_payload('jsonrpc.divide', [-5, 1], version=v), -5.0),
         ] for v in ['1.0', '1.1', '2.0']]
         [[self._assert_equals(self._call(req)['result'], resp) for req, resp in t] for t in T]

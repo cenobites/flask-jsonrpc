@@ -48,6 +48,8 @@ class Type(type):
     assert Any.kind('') == String
     assert Any.decode('str') == String
     assert Any.kind({}) == Object
+    assert Any.kind(1) == Number
+    assert Any.kind(1.3333) == Number
     """
 
     def __init__(self, *args, **kwargs):
@@ -90,7 +92,7 @@ class Type(type):
 
 # JSON primatives and data types
 Object = Type('Object', (object,), {}).I(dict).N('obj')
-Number = Type('Number', (object,), {}).I(*integer_types).N('num')
+Number = Type('Number', (object,), {}).I(*(integer_types + (float, complex))).N('num')
 Boolean = Type('Boolean', (object,), {}).I(bool).N('bit')
 String = Type('String', (object,), {}).I(*string_types).N('str')
 Array = Type('Array', (object,), {}).I(list, set, tuple).N('arr')
