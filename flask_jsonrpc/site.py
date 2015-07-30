@@ -182,6 +182,12 @@ class JSONRPCSite(object):
         }
 
         try:
+            try:
+                # determine if an object is iterable?
+                iter(D)
+            except TypeError as e:
+                raise InvalidRequestError(e.message)
+
             # version: validate
             if 'jsonrpc' in D:
                 if text_type(D['jsonrpc']) not in apply_version:
@@ -265,6 +271,38 @@ class JSONRPCSite(object):
 
         return response, status
 
+    def batch_response_dict(self, request, D):
+        try:
+            responses = [self.response_dict(request, d, is_batch=True)[0] for d in D]
+            status = 200
+            if not responses:
+                raise InvalidRequestError('Empty array')
+        except Error as e:
+            for response in responses:
+                response.pop('result', None)
+                response['error'] = e.json_rpc_format
+            status = e.status
+        except Exception as e:
+            other_error = OtherError(e)
+            for response in responses:
+                response.pop('result', None)
+                response['error'] = other_error.json_rpc_format
+            status = other_error.status
+
+        for response in responses:
+            # Exactly one of result or error MUST be specified. It's not
+            # allowed to specify both or none.
+            if 'result' in response:
+                response.pop('error', None)
+
+        if not responses:
+            response = self.empty_response(version='2.0')
+            response['error'] = InvalidRequestError().json_rpc_format
+            response.pop('result', None)
+            responses = response
+
+        return responses, status
+
     @csrf_exempt
     def dispatch(self, request, method=''):
         # in case we do something json doesn't like, we always get back valid
@@ -279,27 +317,27 @@ class JSONRPCSite(object):
                     raise InvalidRequestError('The method you are trying to access is '
                                               'not availble by GET requests')
             elif not request.method == 'POST':
-                raise RequestPostError
+                raise RequestPostError()
             else:
                 try:
                     D = json.loads(raw_data)
                 except Exception as e:
-                    raise InvalidRequestError(e.message)
+                    raise ParseError(e.message)
 
             if type(D) is list:
-                response = [self.response_dict(request, d, is_batch=True)[0] for d in D]
-                status = 200
+                return self.batch_response_dict(request, D)
             else:
                 response, status = self.response_dict(request, D)
                 if response is None and (not 'id' in D or D['id'] is None): # a notification
                     response = ''
                     return response, status
         except Error as e:
+            response.pop('result', None)
             response['error'] = e.json_rpc_format
             status = e.status
         except Exception as e:
             other_error = OtherError(e)
-            response['result'] = None
+            response.pop('result', None)
             response['error'] = other_error.json_rpc_format
             status = other_error.status
 

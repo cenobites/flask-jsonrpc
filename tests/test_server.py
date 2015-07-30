@@ -125,6 +125,73 @@ class FlaskJSONRPCTestCase(ServerTestCase):
             self.assertNotIn('result', resp)
             self.assertIn('error', resp)
 
+    def test_batch_invalid_json(self):
+        req_json = '''[
+          {"jsonrpc": "2.0", "method": "sum", "params": [1,2,4], "id": "1"},
+          {"jsonrpc": "2.0", "method"
+        ]'''
+        resp = self._call(req_json)
+        self.assertNotIn('result', resp)
+        self.assertIn('error', resp)
+        self.assertEqual('ParseError', resp['error']['name'])
+
+    def test_batch_empty_json(self):
+        req = json.dumps([])
+        resp = self._call(req)
+        self.assertNotIn('result', resp)
+        self.assertIn('error', resp)
+        self.assertEqual('InvalidRequestError', resp['error']['name'])
+
+    def test_batch_invalid_but_not_empty(self):
+        req = json.dumps([1])
+        resp = self._call(req)
+        self.assertTrue(len(resp) == 1)
+        self.assertNotIn('result', resp[0])
+        self.assertIn('error', resp[0])
+        self.assertEqual('InvalidRequestError', resp[0]['error']['name'])
+
+    def test_batch_invalid(self):
+        req = json.dumps([
+            {'jsonrpc': '2.0','method': 'jsonrpc.echoNotFound', 'params': [], 'id': text_type(uuid.uuid4())},
+            {'jsonrpc': '2.0','method': 'jsonrpc.echo', 'params': [], 'id': text_type(uuid.uuid4())},
+            {'jsonrpc': '2.0','method': 'jsonrpc.echoNotFound', 'params': [], 'id': text_type(uuid.uuid4())}
+        ])
+        resp = self._call(req)
+        self.assertTrue(len(resp) == 3)
+        self.assertNotIn('result', resp[0])
+        self.assertIn('error', resp[0])
+        self.assertEqual('Hello Flask JSON-RPC', resp[1]['result'])
+        self.assertNotIn('error', resp[1])
+        self.assertNotIn('result', resp[2])
+        self.assertIn('error', resp[2])
+
+    def test_batch_call(self):
+        req = json.dumps([
+            {'jsonrpc': '2.0','method': 'jsonrpc.echo', 'id': text_type(uuid.uuid4())},
+            {'jsonrpc': '2.0','method': 'jsonrpc.echo', 'params': ['Flask'], 'id': text_type(uuid.uuid4())},
+            {'jsonrpc': '2.0','method': 'jsonrpc.echo', 'params': None, 'id': text_type(uuid.uuid4())},
+            {'jsonrpc': '2.0','method': 'jsonrpc.echo', 'params': [], 'id': text_type(uuid.uuid4())},
+            {'jsonrpc': '2.0','method': 'jsonrpc.echo', 'params': {}, 'id': text_type(uuid.uuid4())},
+            {'jsonrpc': '2.0','method': 'jsonrpc.echo', 'params': ['フラスコ'], 'id': text_type(uuid.uuid4())}
+        ])
+        resp = self._call(req)
+        self.assertTrue(len(resp) == 6)
+        self.assertEqual('Hello Flask JSON-RPC', resp[0]['result'])
+        self.assertNotIn('error', resp[0])
+        self.assertEqual('Hello Flask', resp[1]['result'])
+        self.assertNotIn('error', resp[1])
+        self.assertEqual('Hello Flask JSON-RPC', resp[2]['result'])
+        self.assertNotIn('error', resp[2])
+        self.assertEqual('Hello Flask JSON-RPC', resp[3]['result'])
+        self.assertNotIn('error', resp[3])
+        self.assertEqual('Hello Flask JSON-RPC', resp[4]['result'])
+        self.assertNotIn('error', resp[4])
+        self.assertEqual('Hello フラスコ', resp[5]['result'])
+        self.assertNotIn('error', resp[5])
+
+    def test_batch_notify(self):
+        pass
+
     def test_echo(self):
         T = [[
             (self._make_payload('jsonrpc.echo', version=v), 'Hello Flask JSON-RPC'),

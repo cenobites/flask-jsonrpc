@@ -160,10 +160,11 @@ def _inject_args(sig, types):
 def _site_api(site):
     def wrapper(method=''):
         response_dict, status_code = site.dispatch(request, method)
+        is_batch = type(response_dict) is list
         if current_app.config['DEBUG']:
             logging.debug('request: %s', extract_raw_data_request(request))
             logging.debug('response: %s, %s', status_code, response_dict)
-        return jsonify_status_code(status_code, response_dict), status_code
+        return jsonify_status_code(status_code, response_dict, is_batch=is_batch), status_code
     return wrapper
 
 
