@@ -125,6 +125,25 @@ class FlaskJSONRPCTestCase(ServerTestCase):
             self.assertNotIn('result', resp)
             self.assertIn('error', resp)
 
+    def test_payload_method_not_found(self):
+        for version in ['1.0', '1.1', '2.0']:
+            req = self._make_payload('jsonrpc.echoNotFound', version=version)
+            resp = self._call(req)
+            self.assertEqual('MethodNotFoundError', resp['error']['name'])
+
+    def test_payload_parse_invalid(self):
+        for version in ['1.0', '1.1', '2.0']:
+            req_json = '{"jsonrpc": "2.0", "method"'
+            resp = self._call(req_json)
+            self.assertEqual('ParseError', resp['error']['name'])
+
+    # TODO: make test!
+    # def test_payload_request_invalid(self):
+    #     for version in ['1.0', '1.1', '2.0']:
+    #         req = self._make_payload('1', 'bar', version=version)
+    #         resp = self._call(req)
+    #         self.assertEqual('RequestPostError', resp['error']['name'])
+
     def test_batch_invalid_json(self):
         req_json = '''[
           {"jsonrpc": "2.0", "method": "sum", "params": [1,2,4], "id": "1"},
@@ -190,7 +209,12 @@ class FlaskJSONRPCTestCase(ServerTestCase):
         self.assertNotIn('error', resp[5])
 
     def test_batch_notify(self):
-        pass
+        req = json.dumps([
+            {'jsonrpc': '2.0','method': 'jsonrpc.notify', 'params': ['Flask'], 'id': None},
+            {'jsonrpc': '2.0','method': 'jsonrpc.notify', 'params': ['JSON-RPC'], 'id': None},
+        ])
+        resp = self.app.post(self.service_url, data=req).data
+        self.assertEqual(b(''), resp)
 
     def test_echo(self):
         T = [[

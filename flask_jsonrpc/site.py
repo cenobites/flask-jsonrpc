@@ -172,7 +172,7 @@ class JSONRPCSite(object):
                 return True, D
         return False, {}
 
-    def response_dict(self, request, D, is_batch=False, version_hint=JSONRPC_VERSION_DEFAULT):
+    def response_dict(self, request, D, version_hint=JSONRPC_VERSION_DEFAULT):
         version = version_hint
         response = self.empty_response(version=version)
         apply_version = {
@@ -218,8 +218,6 @@ class JSONRPCSite(object):
                 response['id'] = D['id']
                 if version in ('1.1', '2.0'):
                     response.pop('error', None)
-            elif is_batch: # notification, not ok in a batch format, but happened anyway
-                raise InvalidRequestError
             else: # notification
                 return None, 204
 
@@ -278,7 +276,7 @@ class JSONRPCSite(object):
 
     def batch_response_dict(self, request, D):
         try:
-            responses = [self.response_dict(request, d, is_batch=True)[0] for d in D]
+            responses = [self.response_dict(request, d)[0] for d in D]
             status = 200
             if not responses:
                 raise InvalidRequestError('Empty array')
@@ -295,6 +293,8 @@ class JSONRPCSite(object):
             status = other_error.status
 
         for response in responses:
+            if response is None:
+                continue # notification
             # Exactly one of result or error MUST be specified. It's not
             # allowed to specify both or none.
             if 'result' in response:
@@ -305,6 +305,9 @@ class JSONRPCSite(object):
             response['error'] = InvalidRequestError().json_rpc_format
             response.pop('result', None)
             responses = response
+
+        if not all(responses):
+            return '', 204 # notification
 
         return responses, status
 
