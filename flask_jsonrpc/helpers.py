@@ -25,6 +25,7 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
+from __future__ import unicode_literals
 from functools import wraps
 
 from flask import current_app, request, jsonify, make_response, json

@@ -186,7 +186,7 @@ class JSONRPCSite(object):
                 # determine if an object is iterable?
                 iter(D)
             except TypeError as e:
-                raise InvalidRequestError(e.message)
+                raise InvalidRequestError(getattr(e, 'message', e.args[0] if len(e.args) > 0 else None))
 
             # version: validate
             if 'jsonrpc' in D:
@@ -330,7 +330,7 @@ class JSONRPCSite(object):
                 try:
                     D = json.loads(raw_data)
                 except Exception as e:
-                    raise ParseError(e.message)
+                    raise ParseError(getattr(e, 'message', e.args[0] if len(e.args) > 0 else None))
 
             if type(D) is list:
                 return self.batch_response_dict(request, D)
