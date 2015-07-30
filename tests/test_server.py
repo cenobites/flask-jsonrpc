@@ -104,6 +104,7 @@ class FlaskJSONRPCTestCase(ServerTestCase):
         resp = self._call(req)
         self.assertIn('result', resp)
         self.assertIn('error', resp)
+        self.assertIsNotNone(resp['id'])
 
     def test_payload_result(self):
         for version in ['1.1', '2.0']:
@@ -111,12 +112,14 @@ class FlaskJSONRPCTestCase(ServerTestCase):
             resp = self._call(req)
             self.assertIn('result', resp)
             self.assertNotIn('error', resp)
+            self.assertIsNotNone(resp['id'])
 
     def test_payload_error_1_0(self):
         req = self._make_payload('jsonrpc.echoNotFound', version='1.0')
         resp = self._call(req)
         self.assertIn('result', resp)
         self.assertIn('error', resp)
+        self.assertIsNotNone(resp['id'])
 
     def test_payload_error(self):
         for version in ['1.1', '2.0']:
@@ -124,18 +127,21 @@ class FlaskJSONRPCTestCase(ServerTestCase):
             resp = self._call(req)
             self.assertNotIn('result', resp)
             self.assertIn('error', resp)
+            self.assertIsNotNone(resp['id'])
 
     def test_payload_method_not_found(self):
         for version in ['1.0', '1.1', '2.0']:
             req = self._make_payload('jsonrpc.echoNotFound', version=version)
             resp = self._call(req)
             self.assertEqual('MethodNotFoundError', resp['error']['name'])
+            self.assertIsNotNone(resp['id'])
 
     def test_payload_parse_invalid(self):
         for version in ['1.0', '1.1', '2.0']:
             req_json = '{"jsonrpc": "2.0", "method"'
             resp = self._call(req_json)
             self.assertEqual('ParseError', resp['error']['name'])
+            self.assertIsNone(resp['id'])
 
     # TODO: make test!
     # def test_payload_request_invalid(self):

@@ -350,8 +350,15 @@ class JSONRPCSite(object):
             status = other_error.status
 
         # extract id the request
-        json_request_id = self.extract_id_request(raw_data)
-        response['id'] = json_request_id
+        if not response.get('id', False):
+            json_request_id = self.extract_id_request(raw_data)
+            response['id'] = json_request_id
+
+        # If there was an error in detecting the id in the Request object
+        # (e.g. Parse error/Invalid Request), it MUST be Null.
+        if not response and 'error' in response:
+            if response['error']['name'] in ('ParseError', 'InvalidRequestError', 'RequestPostError'):
+                response['id'] = None
 
         return response, status
 
