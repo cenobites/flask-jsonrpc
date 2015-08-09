@@ -53,12 +53,11 @@ class Type(type):
     """
 
     def __init__(self, *args, **kwargs):
-        type.__init__(self, *args, **kwargs)
+        super(Type, self).__init__(*args, **kwargs)
 
     def __eq__(self, other):
         for T in _types_gen(self):
-            if isinstance(other, Type) \
-                    and T in other.t:
+            if isinstance(other, Type) and getattr(other, 't', False) and T in other.t:
                 return True
             if type.__eq__(T, other) is True:
                 return True
@@ -93,8 +92,8 @@ class Type(type):
 # JSON primatives and data types
 Object = Type('Object', (object,), {}).I(dict).N('obj')
 Number = Type('Number', (object,), {}).I(*(integer_types + (float, complex))).N('num')
-Boolean = Type('Boolean', (object,), {}).I(bool).N('bit')
+Boolean = Type('Boolean', (object,), {}).I(bool).N('bool')
 String = Type('String', (object,), {}).I(*string_types).N('str')
-Array = Type('Array', (object,), {}).I(list, set, tuple).N('arr')
+Array = Type('Array', (object,), {}).I(list, set, frozenset, tuple).N('arr')
 Nil = Type('Nil', (object,), {}).I(type(None)).N('nil')
 Any = Type('Any', (object,), {}).I(Object, Number, Boolean, String, Array, Nil).N('any')

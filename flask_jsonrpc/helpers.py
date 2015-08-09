@@ -100,6 +100,3 @@ def authenticate(f, f_check_auth):
             raise InvalidCredentialsError()
         return f(*args, **kwargs)
     return _f
-
-def log_exception(sender, exception, **extra):
-    sender.logger.debug('Got exception during processing: %s', exception)

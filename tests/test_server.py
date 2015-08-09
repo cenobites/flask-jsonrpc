@@ -39,10 +39,10 @@ from flask_jsonrpc.exceptions import (Error, ParseError, InvalidRequestError,
                                       ServerError, RequestPostError,
                                       InvalidCredentialsError, OtherError)
 
-from apptest import ServerTestCase
+from apptest import FlaskJSONRPCServerTestCase
 
 
-class FlaskJSONRPCTestCase(ServerTestCase):
+class FlaskJSONRPCTestCase(FlaskJSONRPCServerTestCase):
 
     def setUp(self):
         pass

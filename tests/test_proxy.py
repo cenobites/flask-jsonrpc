@@ -28,12 +28,14 @@
 from __future__ import unicode_literals
 import unittest
 
+from flask import current_app
+
 from flask_jsonrpc.proxy import ServiceProxy
 
-from apptest import ServerTestCase
+from apptest import FlaskJSONRPCServerTestCase
 
 
-class ServiceProxyTestCase(ServerTestCase):
+class JSONRPCServiceProxyTestCase(FlaskJSONRPCServerTestCase):
 
     def test_positional_args(self):
         proxy = ServiceProxy(self.service_url, version='1.0')
@@ -111,3 +113,7 @@ class ServiceProxyTestCase(ServerTestCase):
                 (proxy.jsonrpc.echoMyStr('העלא פלאַסק דזשסאָן-רפּק'), 'העלא פלאַסק דזשסאָן-רפּק')
                 ]
             ]
+
+    def test_method_repr(self):
+        proxy = ServiceProxy(self.service_url)
+        self.assertEqual('{"jsonrpc": "2.0", "method": "jsonrpc.echo"}', repr(proxy.jsonrpc.echo))

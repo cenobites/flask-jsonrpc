@@ -28,18 +28,16 @@
 from __future__ import unicode_literals
 import unittest
 
-from flask import json
-
 from flask_jsonrpc._compat import b, u, text_type
 from flask_jsonrpc.site import validate_params
 from flask_jsonrpc import _parse_sig, OrderedDict
 from flask_jsonrpc.exceptions import InvalidParamsError
 from flask_jsonrpc.types import Any, Object, Number, Boolean, String, Array, Nil
 
-from run import app, jsonrpc
+from apptest import jsonrpc
 
 
-class JSONRPCFunctionalTests(unittest.TestCase):
+class JSONRPCFunctionalTestCase(unittest.TestCase):
 
     def test_method_parser(self):
         working_sigs = [
@@ -91,8 +89,16 @@ class JSONRPCFunctionalTests(unittest.TestCase):
         self.assertTrue(validate_params(M, {'params': {'s1': 'omg', 's2': 'wtf'}}) is None)
 
     def test_types(self):
+        self.assertEqual(type(1), Number)
+        self.assertEqual(type(1.0), Number)
+        self.assertEqual(type(1+3j), Number)
+        self.assertEqual(type(-34.54555), Number)
+        self.assertEqual(type(99999999999999999), Number)
         self.assertEqual(type(u''), String)
         self.assertEqual(type(''), String)
+        self.assertEqual(type({}), Object)
+        self.assertEqual(type(set()), Array)
+        self.assertEqual(type(frozenset()), Array)
         self.assertNotEqual(type(''), Object)
         self.assertNotEqual(type([]), Object)
         self.assertEqual(type([]), Array)

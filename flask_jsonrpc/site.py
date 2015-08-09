@@ -38,7 +38,7 @@ from flask.wrappers import Response
 from flask import json, jsonify, current_app
 
 from flask_jsonrpc.types import Object, Array, Any
-from flask_jsonrpc.helpers import extract_raw_data_request, log_exception
+from flask_jsonrpc.helpers import extract_raw_data_request
 from flask_jsonrpc._compat import (text_type, string_types, integer_types,
                                    iteritems, iterkeys)
 from flask_jsonrpc.exceptions import (Error, ParseError, InvalidRequestError,
@@ -172,13 +172,22 @@ class JSONRPCSite(object):
                 return True, D
         return False, {}
 
+    def apply_version_2_0(self, f, p):
+        return f(**encode_kw(p)) if type(p) is dict else f(*p)
+
+    def apply_version_1_1(self, f, p):
+        return f(*encode_arg11(p), **encode_kw(encode_kw11(p)))
+
+    def apply_version_1_0(self, f, p):
+        return f(*p)
+
     def response_dict(self, request, D, version_hint=JSONRPC_VERSION_DEFAULT):
         version = version_hint
         response = self.empty_response(version=version)
         apply_version = {
-            '2.0': lambda f, p: f(**encode_kw(p)) if type(p) is dict else f(*p),
-            '1.1': lambda f, p: f(*encode_arg11(p), **encode_kw(encode_kw11(p))),
-            '1.0': lambda f, p: f(*p)
+            '2.0': self.apply_version_2_0,
+            '1.1': self.apply_version_1_1,
+            '1.0': self.apply_version_1_0
         }
 
         try:

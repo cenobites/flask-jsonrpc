@@ -51,10 +51,10 @@ class ServiceProxy(object):
         return self.__class__(**params)
 
     def __repr__(self):
-        return {
+        return json.dumps({
             'jsonrpc': self.version,
             'method': self.service_name
-        }
+        })
 
     def send_payload(self, params):
         """Performs the actual sending action and returns the result
@@ -100,7 +100,7 @@ class FakePayload(object):
     def read(self, num_bytes=None):
         if num_bytes is None:
             num_bytes = self.__len or 0
-        assert self.__len >= num_bytes, "Cannot read more than the available bytes from the HTTP incoming data."
+        assert self.__len >= num_bytes, 'Cannot read more than the available bytes from the HTTP incoming data.'
         content = self.__content.read(num_bytes)
         self.__len -= num_bytes
         return content

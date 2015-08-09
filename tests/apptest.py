@@ -158,7 +158,7 @@ class FlaskTestServer(object):
         self.process = None
 
 
-class ServerTestCase(unittest.TestCase):
+class FlaskJSONRPCServerTestCase(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
