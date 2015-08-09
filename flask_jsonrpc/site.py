@@ -35,7 +35,7 @@ from functools import wraps
 from werkzeug.exceptions import HTTPException
 
 from flask.wrappers import Response
-from flask import json, jsonify, current_app
+from flask import json, jsonify, request, make_response, current_app
 
 from flask_jsonrpc.types import Object, Array, Any
 from flask_jsonrpc.helpers import extract_raw_data_request
@@ -181,7 +181,7 @@ class JSONRPCSite(object):
     def apply_version_1_0(self, f, p):
         return f(*p)
 
-    def response_dict(self, request, D, version_hint=JSONRPC_VERSION_DEFAULT):
+    def response_obj(self, request, D, version_hint=JSONRPC_VERSION_DEFAULT):
         version = version_hint
         response = self.empty_response(version=version)
         apply_version = {
@@ -236,6 +236,8 @@ class JSONRPCSite(object):
                 return None, 204
 
             if isinstance(R, Response):
+                if R.status_code == 200:
+                    return R, R.status_code
                 if R.status_code == 401:
                     raise InvalidCredentialsError(R.status)
                 raise OtherError(R.status, R.status_code)
@@ -283,9 +285,9 @@ class JSONRPCSite(object):
 
         return response, status
 
-    def batch_response_dict(self, request, D):
+    def batch_response_obj(self, request, D):
         try:
-            responses = [self.response_dict(request, d)[0] for d in D]
+            responses = [self.response_obj(request, d)[0] for d in D]
             status = 200
             if not responses:
                 raise InvalidRequestError('Empty array')
@@ -320,6 +322,40 @@ class JSONRPCSite(object):
 
         return responses, status
 
+    def make_response(self, rv):
+        """Converts the return value from a view function to a real
+        response object that is an instance of :attr:`response_class`.
+        """
+        status_or_headers = headers = None
+        if isinstance(rv, tuple):
+            rv, status_or_headers, headers = rv + (None,) * (3 - len(rv))
+
+        if rv is None:
+            raise ValueError('View function did not return a response')
+
+        if isinstance(status_or_headers, (dict, list)):
+            headers, status_or_headers = status_or_headers, None
+
+        D = json.loads(extract_raw_data_request(request))
+        if type(D) is list:
+            raise InvalidRequestError('JSON-RPC batch with decorator (make_response) not is supported')
+        else:
+            response_obj = self.empty_response(version=D['jsonrpc'])
+            response_obj['id'] = D['id']
+            response_obj['result'] = rv
+            response_obj.pop('error', None)
+            rv = jsonify(response_obj)
+
+        if status_or_headers is not None:
+            if isinstance(status_or_headers, string_types):
+                rv.status = status_or_headers
+            else:
+                rv.status_code = status_or_headers
+        if headers:
+            rv.headers.extend(headers)
+
+        return rv
+
     @csrf_exempt
     def dispatch(self, request, method=''):
         # in case we do something json doesn't like, we always get back valid
@@ -342,12 +378,16 @@ class JSONRPCSite(object):
                     raise ParseError(getattr(e, 'message', e.args[0] if len(e.args) > 0 else None))
 
             if type(D) is list:
-                return self.batch_response_dict(request, D)
-            else:
-                response, status = self.response_dict(request, D)
-                if response is None and (not 'id' in D or D['id'] is None): # a notification
-                    response = ''
-                    return response, status
+                return self.batch_response_obj(request, D)
+
+            response, status = self.response_obj(request, D)
+
+            if isinstance(response, Response):
+               return response, status
+
+            if response is None and (not 'id' in D or D['id'] is None): # a notification
+                response = ''
+                return response, status
         except Error as e:
             response.pop('result', None)
             response['error'] = e.json_rpc_format

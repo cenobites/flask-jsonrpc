@@ -28,10 +28,21 @@
 from __future__ import unicode_literals
 from functools import wraps
 
-from flask import current_app, request, jsonify, make_response, json
+from flask import current_app, request, jsonify, json
+from flask import make_response as flask_make_response
 
 from flask_jsonrpc._compat import b, u, text_type
 from flask_jsonrpc.exceptions import InvalidCredentialsError, InvalidParamsError
+
+def make_response(*args):
+    """Sometimes it is necessary to set additional headers in a view.  Because
+    views do not have to return response objects but can return a value that
+    is converted into a response object by Flask itself, it becomes tricky to
+    add headers to it.  This function can be called instead of using a return
+    and you will get a response object which you can use to attach headers.
+    """
+    from flask_jsonrpc.site import jsonrpc_site
+    return jsonrpc_site.make_response(args)
 
 def jsonify_status_code(status_code, *args, **kw):
     """Returns a jsonified response with the specified HTTP status code.
@@ -41,7 +52,7 @@ def jsonify_status_code(status_code, *args, **kw):
     """
     is_batch = kw.pop('is_batch', False)
     if is_batch:
-        response = make_response(json.dumps(*args, **kw))
+        response = flask_make_response(json.dumps(*args, **kw))
         response.mimetype = 'application/json'
         response.status_code = status_code
         return response

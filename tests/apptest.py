@@ -40,7 +40,7 @@ FLASK_JSONRPC_PROJECT_DIR = os.path.join(PROJECT_DIR)
 if os.path.exists(FLASK_JSONRPC_PROJECT_DIR) and not FLASK_JSONRPC_PROJECT_DIR in sys.path:
     sys.path.append(FLASK_JSONRPC_PROJECT_DIR)
 
-from flask_jsonrpc import JSONRPC
+from flask_jsonrpc import JSONRPC, make_response
 
 SERVER_HOSTNAME = 'localhost'
 SERVER_PORT = 5001
@@ -52,6 +52,13 @@ jsonrpc = JSONRPC(app, '/api', enable_web_browsable_api=True)
 
 def check_auth(username, password):
     return True
+
+def jsonrcp_headers(fn):
+    def wrapped(*args, **kwargs):
+        response = make_response(fn(*args, **kwargs))
+        response.headers['X-JSONRPC-Tag'] = 'JSONRPC 2.0'
+        return response
+    return wrapped
 
 @jsonrpc.method('jsonrpc.echo')
 def echo(name='Flask JSON-RPC'):
@@ -120,6 +127,11 @@ def subtract(a, b):
 @jsonrpc.method('jsonrpc.divide(Number, Number) -> Number', validate=True)
 def divide(a, b):
     return a / float(b)
+
+@jsonrpc.method('jsonrpc.decorators(String) -> String')
+@jsonrcp_headers
+def decorators(string):
+    return 'Hello {0}'.format(string)
 
 
 class FlaskTestServer(object):

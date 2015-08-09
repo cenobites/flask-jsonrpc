@@ -389,3 +389,9 @@ class FlaskJSONRPCTestCase(FlaskJSONRPCServerTestCase):
             (self._make_payload('jsonrpc.divide', [-5, 1], version=v), -5.0),
         ] for v in ['1.0', '1.1', '2.0']]
         [[self._assert_equals(self._call(req)['result'], resp) for req, resp in t] for t in T]
+
+    def test_decorators(self):
+        T = [[
+            (self._make_payload('jsonrpc.decorators', ['Flask JSON-RPC'], version=v), 'Hello Flask JSON-RPC'),
+        ] for v in ['1.0', '1.1', '2.0']]
+        [[self._assert_equals(self._call(req)['result'], resp) for req, resp in t] for t in T]

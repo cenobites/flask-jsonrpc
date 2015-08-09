@@ -31,5 +31,5 @@ import unittest
 
 class FlaskJSONRPCTestCase(unittest.TestCase):
 
-    def test_positional_args(self):
+    def test_(self):
         pass

@@ -68,3 +68,29 @@ Testing your service
       "id": "1",
       "jsonrpc": "2.0"
     }
+
+
+::
+    $ curl -i -X POST  -H "Content-Type: application/json; indent=4" \
+      -d '{
+        "jsonrpc": "2.0",
+        "method": "App.decorators",
+        "params": {},
+        "id": "1",
+        "terminal_id": 1
+      }' http://localhost:5000/api
+    HTTP/1.0 200 OK
+    Content-Type: application/json
+    Content-Length: 231
+    X-JSONRPC-Tag: JSONRPC 2.0
+    Server: Werkzeug/0.10.4 Python/3.4.3
+    Date: Sun, 09 Aug 2015 17:00:16 GMT
+
+    {
+      "id": "1",
+      "jsonrpc": "2.0",
+      "result": {
+        "headers": "Host: localhost:5000\r\nUser-Agent: curl/7.43.0\r\nAccept: */*\r\nContent-Length: 134\r\nContent-Type: application/json; indent=4\r\n\r\n",
+        "terminal_id": 1
+      }
+    }

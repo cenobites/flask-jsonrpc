@@ -114,6 +114,15 @@ class JSONRPCServiceProxyTestCase(FlaskJSONRPCServerTestCase):
                 ]
             ]
 
+
+    def test_decorators(self):
+        for version in ['1.0', '1.1', '2.0']:
+            proxy = ServiceProxy(self.service_url, version=version)
+            [self.assertEquals(resp, req['result']) for req, resp in [
+                (proxy.jsonrpc.decorators('Flask JSON-RPC'), 'Hello Flask JSON-RPC')
+                ]
+            ]
+
     def test_method_repr(self):
         proxy = ServiceProxy(self.service_url)
         self.assertEqual('{"jsonrpc": "2.0", "method": "jsonrpc.echo"}', repr(proxy.jsonrpc.echo))

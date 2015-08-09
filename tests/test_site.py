@@ -31,5 +31,5 @@ import unittest
 
 class JSONRPCSiteTestCase(unittest.TestCase):
 
-    def test_exceptions(self):
+    def test_(self):
         pass
