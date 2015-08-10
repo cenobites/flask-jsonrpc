@@ -74,7 +74,14 @@ All code of Example `run.py <https://github.com/cenobites/flask-jsonrpc/blob/mas
 
 ::
 
-    $ curl -i -X POST -d '{"jsonrpc": "2.0", "method": "App.index", "params": {}, "id": "1"}' http://localhost:5000/api
+    $ curl -i -X POST \
+       -H "Content-Type: application/json; indent=4" \
+       -d '{
+        "jsonrpc": "2.0",
+        "method": "App.index",
+        "params": {},
+        "id": "1"
+    }' http://localhost:5000/api
     HTTP/1.0 200 OK
     Content-Type: application/json
     Content-Length: 77
@@ -120,12 +127,12 @@ Dependecies
 ***********
 
 * Python (2.6.5+), (2.7, 3.3) or later (http://www.python.org)
-* Flask 0.9 or later (http://flask.pocoo.org)
+* Flask 0.10 or later (http://flask.pocoo.org)
 
 
 Project Information
 *******************
 
 :Author: Cenobit Technologies, Inc.
-:Version: v0.0.1 of 2012/12/14
+:Version: v0.3 of 2015/08/10
 :License: `New BSD License <http://opensource.org/licenses/BSD-3-Clause>`_

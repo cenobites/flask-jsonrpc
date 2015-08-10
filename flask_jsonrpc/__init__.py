@@ -31,6 +31,7 @@ import logging
 from functools import wraps
 from inspect import getargspec
 
+from flask.wrappers import Response
 from flask import current_app, request, jsonify
 
 from flask_jsonrpc.site import jsonrpc_site
@@ -38,7 +39,7 @@ from flask_jsonrpc._compat import (b, u, text_type, string_types,
                                    OrderedDict, NativeStringIO)
 from flask_jsonrpc.types import (Object, Number, Boolean, String, Array,
                                  Nil, Any, Type)
-from flask_jsonrpc.helpers import (jsonify_status_code,
+from flask_jsonrpc.helpers import (make_response, jsonify_status_code,
                                    extract_raw_data_request, authenticate)
 from flask_jsonrpc.exceptions import (Error, ParseError, InvalidRequestError,
                                       MethodNotFoundError, InvalidParamsError,
@@ -159,11 +160,14 @@ def _inject_args(sig, types):
 
 def _site_api(site):
     def wrapper(method=''):
-        response_dict, status_code = site.dispatch(request, method)
+        response_obj, status_code = site.dispatch(request, method)
+        if isinstance(response_obj, Response):
+           return response_obj, response_obj.status_code
+        is_batch = type(response_obj) is list
         if current_app.config['DEBUG']:
             logging.debug('request: %s', extract_raw_data_request(request))
-            logging.debug('response: %s, %s', status_code, response_dict)
-        return jsonify_status_code(status_code, response_dict), status_code
+            logging.debug('response: %s, %s', status_code, response_obj)
+        return jsonify_status_code(status_code, response_obj, is_batch=is_batch), status_code
     return wrapper
 
 
@@ -209,7 +213,8 @@ class JSONRPC(object):
     def init_app(self, app):
         self._register_browse(app)
         app.add_url_rule(self.service_url, self._unique_name(), self.site_api, methods=['POST', 'OPTIONS'])
-        app.add_url_rule(self.service_url + '/<method>', self._unique_name('/<method>'), self.site_api, methods=['GET', 'OPTIONS'])
+        app.add_url_rule(self.service_url + '/<method>', self._unique_name('/<method>'), self.site_api,
+                         methods=['GET', 'OPTIONS'])
 
     def register_blueprint(self, blueprint):
         blueprint.add_url_rule(self.service_url, '', self.site_api, methods=['POST', 'OPTIONS'])

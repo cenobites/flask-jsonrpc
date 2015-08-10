@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # Copyright (c) 2012-2015, Cenobit Technologies, Inc. http://cenobit.es/
 # All rights reserved.
@@ -26,18 +25,15 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-from flask import Flask
-from flask_jsonrpc import JSONRPC
+from __future__ import unicode_literals
+import unittest
 
-# Flask application
-app = Flask(__name__)
+from flask_jsonrpc.exceptions import Error
 
-# Flask-JSONRPC
-jsonrpc = JSONRPC(app, '/api', enable_web_browsable_api=True)
 
-@jsonrpc.method('App.index')
-def index():
-    return 'Welcome to Flask JSON-RPC'
+class JSONRPCExceptionsTestCase(unittest.TestCase):
 
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', debug=True)
+    def test_exceptions(self):
+        error = Error(message='Testing...', code=123)
+        #error_dict = error.json_rpc_format
+        #self.assertEqual('Error', error_dict['name'])

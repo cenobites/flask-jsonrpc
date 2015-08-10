@@ -19,3 +19,8 @@ src/**/build/*
 Flask_JSONRPC.egg-info/*
 build/*
 dist/*
+.eggs/
+.venv/
+.venv2/
+.venv26/
+htmlcov/

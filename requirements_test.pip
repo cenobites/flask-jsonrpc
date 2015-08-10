@@ -2,5 +2,9 @@
 # to run this project. Later you can install all these apps in a row
 # using pip. Example::
 #
-#     pip install -r requirements.pip
-Flask>=0.10
+#     pip install -r requirements_test.pip
+mock==1.0.1
+coverage==3.7.1
+pytest==2.6.4
+pytest-cov==1.8.1
+coveralls

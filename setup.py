@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# Copyright (c) 2012-2013, Cenobit Technologies, Inc. http://cenobit.es/
+# Copyright (c) 2012-2015, Cenobit Technologies, Inc. http://cenobit.es/
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -27,11 +27,17 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 import sys
+
 from setuptools import setup
 from setuptools.command.test import test as TestCommand
 
 
 class PyTest(TestCommand):
+    user_options = [('pytest-args=', 'a', 'Arguments to pass to py.test')]
+
+    def initialize_options(self):
+        TestCommand.initialize_options(self)
+        self.pytest_args = []
 
     def finalize_options(self):
         TestCommand.finalize_options(self)
@@ -45,7 +51,7 @@ class PyTest(TestCommand):
 
 setup(
     name='Flask-JSONRPC',
-    version='0.2',
+    version='0.3',
     url='https://github.com/cenobites/flask-jsonrpc',
     license='New BSD License',
     author='Nycholas de Oliveira e Oliveira',
@@ -61,9 +67,14 @@ setup(
     include_package_data=True,
     platforms='any',
     install_requires=[
-        'Flask>=0.9'
+        'Flask>=0.10'
     ],
-    tests_require=['pytest'],
+    tests_require=[
+        'mock',
+        'coverage',
+        'pytest',
+        'pytest-cov'
+    ],
     cmdclass={'test': PyTest},
     classifiers=[
         'Environment :: Web Environment',
