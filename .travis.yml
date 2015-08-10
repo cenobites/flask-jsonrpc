@@ -7,14 +7,12 @@ python:
   - "2.7"
 
 env:
-  - FLASK_ENV=TESTING FLASK=0.9
-  - FLASK_ENV=TESTING FLASK=0.10
+  - FLASK_ENV=TESTING
 
 install:
   - pip install --upgrade pip --quiet
   - pip install --upgrade setuptools --quiet
-  - pip install -q Flask==$FLASK
-  - pip install -q ordereddict==1.1
+  - pip install -r requirements.pip --quiet
   - pip install -r requirements_test.pip --quiet
 
 script:

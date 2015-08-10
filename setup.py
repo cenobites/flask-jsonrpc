@@ -66,7 +66,7 @@ setup(
     include_package_data=True,
     platforms='any',
     install_requires=[
-        'Flask>=0.9',
+        'Flask>=0.10',
         'ordereddict==1.1'
     ],
     tests_require=[

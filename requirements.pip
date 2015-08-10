@@ -3,5 +3,5 @@
 # using pip. Example::
 #
 #     pip install -r requirements.pip
-Flask>=0.9
+Flask>=0.10
 ordereddict==1.1
