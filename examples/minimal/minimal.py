@@ -77,6 +77,18 @@ def notify(string):
 def fails(string):
 	raise ValueError
 
+@jsonrpc.method('App.sum(Number, Number) -> Number', validate=True)
+def sum_(a, b):
+    return a + b
+
+@jsonrpc.method('App.subtract(Number, Number) -> Number', validate=True)
+def subtract(a, b):
+    return a - b
+
+@jsonrpc.method('App.divide(Number, Number) -> Number', validate=True)
+def divide(a, b):
+    return a / float(b)
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True)

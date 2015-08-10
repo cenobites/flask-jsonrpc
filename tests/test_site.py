@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # Copyright (c) 2012-2015, Cenobit Technologies, Inc. http://cenobit.es/
 # All rights reserved.
@@ -26,56 +25,10 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-import os
-import sys
-
-from flask import Flask, request, json
-
-PROJECT_DIR, PROJECT_MODULE_NAME = os.path.split(
-    os.path.dirname(os.path.realpath(__file__))
-)
-
-FLASK_JSONRPC_PROJECT_DIR = os.path.join(PROJECT_DIR, os.pardir)
-if os.path.exists(FLASK_JSONRPC_PROJECT_DIR) \
-        and not FLASK_JSONRPC_PROJECT_DIR in sys.path:
-    sys.path.append(FLASK_JSONRPC_PROJECT_DIR)
-
-from flask_jsonrpc import JSONRPC, make_response
-from flask_jsonrpc.exceptions import OtherError
-
-app = Flask(__name__)
-jsonrpc = JSONRPC(app, '/api')
-
-def check_terminal_id(fn):
-    def wrapped(*args, **kwargs):
-        terminal_id = int(request.get_json(silent=True).get('terminal_id', 0))
-        if terminal_id <= 0:
-            raise OtherError('Invalid terminal ID')
-        rv = fn(*args, **kwargs)
-        return rv
-    return wrapped
-
-def jsonrcp_headers(fn):
-    def wrapped(*args, **kwargs):
-        response = make_response(fn(*args, **kwargs))
-        response.headers['X-JSONRPC-Tag'] = 'JSONRPC 2.0'
-        return response
-    return wrapped
-
-@jsonrpc.method('App.index')
-@check_terminal_id
-def index():
-    return u'Terminal ID: {0}'.format(request.get_json(silent=True).get('terminal_id', 0))
-
-@jsonrpc.method('App.decorators')
-@check_terminal_id
-@jsonrcp_headers
-def decorators():
-    return {
-        'terminal_id': request.get_json(silent=True).get('terminal_id', 0),
-        'headers': str(request.headers)
-    }
+import unittest
 
 
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', debug=True)
+class JSONRPCSiteTestCase(unittest.TestCase):
+
+    def test_(self):
+        pass

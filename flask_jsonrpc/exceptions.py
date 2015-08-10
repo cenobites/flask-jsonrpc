@@ -30,7 +30,7 @@ from flask import current_app
 
 try:
     from flaskext.babel import gettext as _
-    _("You're lazy...") # this function lazy-loads settings
+    _("You're lazy...") # this function lazy-loads settings (pragma: no cover)
 except (ImportError, NameError):
     _ = lambda t, *a, **k: t
 

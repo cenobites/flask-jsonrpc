@@ -29,20 +29,22 @@
 import re
 import decimal
 import datetime
-from uuid import uuid1
+from uuid import uuid4
 from functools import wraps
 
 from werkzeug.exceptions import HTTPException
 
 from flask.wrappers import Response
-from flask import json, jsonify, current_app
+from flask import json, jsonify, request, make_response, current_app
 
-from flask_jsonrpc.helpers import extract_raw_data_request, log_exception
 from flask_jsonrpc.types import Object, Array, Any
+from flask_jsonrpc.helpers import extract_raw_data_request
 from flask_jsonrpc.exceptions import (Error, ParseError, InvalidRequestError,
                                       MethodNotFoundError, InvalidParamsError,
                                       ServerError, RequestPostError,
                                       InvalidCredentialsError, OtherError)
+
+JSONRPC_VERSION_DEFAULT = '2.0'
 
 empty_dec = lambda f: f
 try:
@@ -119,8 +121,8 @@ class JSONRPCSite(object):
 
     def __init__(self):
         self.urls = {}
-        self.uuid = str(uuid1())
-        self.version = '1.0'
+        self.uuid = str(uuid4())
+        self.version = JSONRPC_VERSION_DEFAULT
         self.name = 'Flask-JSONRPC'
         self.register('system.describe', self.describe)
 
@@ -128,15 +130,23 @@ class JSONRPCSite(object):
         self.urls[unicode(name)] = method
 
     def extract_id_request(self, raw_data):
-        if not raw_data is None and raw_data.find('id') != -1:
-            find_id = re.findall(r'["|\']id["|\']:([0-9]+)|["|\']id["|\']:["|\'](.+?)["|\']',
-                                 raw_data.replace(' ', ''), re.U)
-            if find_id:
-                g1, g2 = find_id[0]
-                return g1 if g1 else g2
-        return None
+        try:
 
-    def empty_response(self, version='1.0'):
+            D = json.loads(raw_data)
+            return D.get('id')
+        except Exception:
+            if not raw_data is None and raw_data.find('id') != -1:
+                find_id = re.findall(r'["|\']id["|\']:([0-9]+)|["|\']id["|\']:["|\'](.+?)["|\']',
+                                     raw_data.replace(' ', ''), re.U)
+                if find_id:
+                    g1, g2 = find_id[0]
+                    raw_id = g1 if g1 else g2
+                    if unicode(raw_id).isnumeric():
+                        return int(raw_id)
+                    return raw_id
+            return None
+
+    def empty_response(self, version=JSONRPC_VERSION_DEFAULT):
         resp = {'id': None}
         if version == '1.1':
             resp['version'] = version
@@ -160,25 +170,32 @@ class JSONRPCSite(object):
                 return True, D
         return False, {}
 
-    def response_dict(self, request, D, is_batch=False, version_hint='1.0'):
+    def apply_version_2_0(self, f, p):
+        return f(**encode_kw(p)) if type(p) is dict else f(*p)
+
+    def apply_version_1_1(self, f, p):
+        return f(*encode_arg11(p), **encode_kw(encode_kw11(p)))
+
+    def apply_version_1_0(self, f, p):
+        return f(*p)
+
+    def response_obj(self, request, D, version_hint=JSONRPC_VERSION_DEFAULT):
         version = version_hint
         response = self.empty_response(version=version)
         apply_version = {
-            '2.0': lambda f, r, p: f(**encode_kw(p)) if type(p) is dict else f(*p),
-            '1.1': lambda f, r, p: f(*encode_arg11(p), **encode_kw(encode_kw11(p))),
-            '1.0': lambda f, r, p: f(*p)
+            '2.0': self.apply_version_2_0,
+            '1.1': self.apply_version_1_1,
+            '1.0': self.apply_version_1_0
         }
 
         try:
-            # params: An Array or Object, that holds the actual parameter values
-            # for the invocation of the procedure. Can be omitted if empty.
-            if 'params' not in D or not D['params']:
-                 D['params'] = []
-            if 'method' not in D or 'params' not in D:
-                raise InvalidParamsError('Request requires str:"method" and list:"params"')
-            if D['method'] not in self.urls:
-                raise MethodNotFoundError('Method not found. Available methods: %s' % ('\n'.join(self.urls.keys())))
+            try:
+                # determine if an object is iterable?
+                iter(D)
+            except TypeError as e:
+                raise InvalidRequestError(getattr(e, 'message', e.args[0] if len(e.args) > 0 else None))
 
+            # version: validate
             if 'jsonrpc' in D:
                 if str(D['jsonrpc']) not in apply_version:
                     raise InvalidRequestError('JSON-RPC version %s not supported.' % D['jsonrpc'])
@@ -188,7 +205,16 @@ class JSONRPCSite(object):
                     raise InvalidRequestError('JSON-RPC version %s not supported.' % D['version'])
                 version = request.jsonrpc_version = response['version'] = str(D['version'])
             else:
-                request.jsonrpc_version = '1.0'
+                version = request.jsonrpc_version = JSONRPC_VERSION_DEFAULT
+
+            # params: An Array or Object, that holds the actual parameter values
+            # for the invocation of the procedure. Can be omitted if empty.
+            if 'params' not in D or not D['params']:
+                 D['params'] = []
+            if 'method' not in D or 'params' not in D:
+                raise InvalidParamsError('Request requires str:"method" and list:"params"')
+            if D['method'] not in self.urls:
+                raise MethodNotFoundError('Method not found. Available methods: %s' % ('\n'.join(self.urls.keys())))
 
             method = self.urls[str(D['method'])]
             if getattr(method, 'json_validate', False):
@@ -196,31 +222,32 @@ class JSONRPCSite(object):
 
             if 'id' in D and D['id'] is not None: # regular request
                 response['id'] = D['id']
-                if version in ('1.1', '2.0') and 'error' in response:
-                    response.pop('error')
-            elif is_batch: # notification, not ok in a batch format, but happened anyway
-                raise InvalidRequestError
+                if version in ('1.1', '2.0'):
+                    response.pop('error', None)
             else: # notification
                 return None, 204
 
-            R = apply_version[version](method, request, D['params'])
+            R = apply_version[version](method, D['params'])
 
             if 'id' not in D or ('id' in D and D['id'] is None): # notification
                 return None, 204
 
             if isinstance(R, Response):
+                if R.status_code == 200:
+                    return R, R.status_code
                 if R.status_code == 401:
                     raise InvalidCredentialsError(R.status)
                 raise OtherError(R.status, R.status_code)
 
             try:
+                # New in Flask version 0.10.
                 encoder = current_app.json_encoder()
             except AttributeError:
                 # Support Flask<=0.9
                 encoder = json.JSONEncoder()
 
             if not sum(map(lambda e: isinstance(R, e), # type of `R` should be one of these or...
-                 (dict, str, unicode, int, long, list, set, NoneType, bool))):
+                 (dict, str, unicode, int, long, float, list, tuple, set, frozenset, NoneType, bool))):
                 try:
                     rs = encoder.default(R) # ...or something this thing supports
                 except TypeError, exc:
@@ -230,29 +257,106 @@ class JSONRPCSite(object):
             status = 200
         except Error, e:
             response['error'] = e.json_rpc_format
-            if version in ('1.1', '2.0') and 'result' in response:
-                response.pop('result')
+            if version in ('1.1', '2.0'):
+                response.pop('result', None)
             status = e.status
         except HTTPException, e:
             other_error = OtherError(e)
             response['error'] = other_error.json_rpc_format
             response['error']['code'] = e.code
             status = e.code
-            if version in ('1.1', '2.0') and 'result' in response:
-                response.pop('result')
+            if version in ('1.1', '2.0'):
+                response.pop('result', None)
         except Exception, e:
             other_error = OtherError(e)
             response['error'] = other_error.json_rpc_format
             status = other_error.status
-            if version in ('1.1', '2.0') and 'result' in response:
-                response.pop('result')
+            if version in ('1.1', '2.0'):
+                response.pop('result', None)
 
         # Exactly one of result or error MUST be specified. It's not
         # allowed to specify both or none.
-        if version in ('1.1', '2.0') and 'error' in response and not response['error']:
-            response.pop('error')
+        if version in ('1.1', '2.0') and 'result' in response:
+            response.pop('error', None)
 
         return response, status
+
+    def batch_response_obj(self, request, D):
+        responses = []
+        status = 200
+
+        for d in D:
+            try:
+                responses.append(self.response_obj(request, d)[0])
+            except Error as e:
+                response = self.empty_response(version=d['jsonrpc'])
+                response['id'] = d.get('id')
+                response['error'] = e.json_rpc_format
+                response.pop('result', None)
+                responses.append(response)
+            except Exception as e:
+                other_error = OtherError(e)
+                response = self.empty_response(version=d['jsonrpc'])
+                response['id'] = d.get('id')
+                response['error'] = other_error.json_rpc_format
+                response.pop('result', None)
+                responses.append(response)
+
+        if not responses:
+            raise InvalidRequestError('Empty array')
+
+        for response in responses:
+            if response is None:
+                continue # notification
+            # Exactly one of result or error MUST be specified. It's not
+            # allowed to specify both or none.
+            if 'result' in response:
+                response.pop('error', None)
+
+        if not responses:
+            response = self.empty_response(version=JSONRPC_VERSION_DEFAULT)
+            response['error'] = InvalidRequestError().json_rpc_format
+            response.pop('result', None)
+            responses = response
+
+        if not all(responses):
+            return '', 204 # notification
+
+        return responses, status
+
+    def make_response(self, rv):
+        """Converts the return value from a view function to a real
+        response object that is an instance of :attr:`response_class`.
+        """
+        status_or_headers = headers = None
+        if isinstance(rv, tuple):
+            rv, status_or_headers, headers = rv + (None,) * (3 - len(rv))
+
+        if rv is None:
+            raise ValueError('View function did not return a response')
+
+        if isinstance(status_or_headers, (dict, list)):
+            headers, status_or_headers = status_or_headers, None
+
+        D = json.loads(extract_raw_data_request(request))
+        if type(D) is list:
+            raise InvalidRequestError('JSON-RPC batch with decorator (make_response) not is supported')
+        else:
+            response_obj = self.empty_response(version=D['jsonrpc'])
+            response_obj['id'] = D['id']
+            response_obj['result'] = rv
+            response_obj.pop('error', None)
+            rv = jsonify(response_obj)
+
+        if status_or_headers is not None:
+            if isinstance(status_or_headers, string_types):
+                rv.status = status_or_headers
+            else:
+                rv.status_code = status_or_headers
+        if headers:
+            rv.headers.extend(headers)
+
+        return rv
 
     @csrf_exempt
     def dispatch(self, request, method=''):
@@ -268,33 +372,44 @@ class JSONRPCSite(object):
                     raise InvalidRequestError('The method you are trying to access is '
                                               'not availble by GET requests')
             elif not request.method == 'POST':
-                raise RequestPostError
+                raise RequestPostError()
             else:
                 try:
                     D = json.loads(raw_data)
                 except Exception, e:
-                    raise InvalidRequestError(e.message)
+                    raise ParseError()
 
             if type(D) is list:
-                response = [self.response_dict(request, d, is_batch=True)[0] for d in D]
-                status = 200
-            else:
-                response, status = self.response_dict(request, D)
-                if response is None and (not u'id' in D or D[u'id'] is None): # a notification
-                    response = ''
-                    return response, status
+                return self.batch_response_obj(request, D)
+
+            response, status = self.response_obj(request, D)
+
+            if isinstance(response, Response):
+               return response, status
+
+            if response is None and (not u'id' in D or D[u'id'] is None): # a notification
+                response = ''
+                return response, status
         except Error, e:
+            response.pop('result', None)
             response['error'] = e.json_rpc_format
             status = e.status
         except Exception, e:
             other_error = OtherError(e)
-            response['result'] = None
+            response.pop('result', None)
             response['error'] = other_error.json_rpc_format
             status = other_error.status
 
         # extract id the request
-        json_request_id = self.extract_id_request(raw_data)
-        response['id'] = json_request_id
+        if not response.get('id', False):
+            json_request_id = self.extract_id_request(raw_data)
+            response['id'] = json_request_id
+
+        # If there was an error in detecting the id in the Request object
+        # (e.g. Parse error/Invalid Request), it MUST be Null.
+        if not response and 'error' in response:
+            if response['error']['name'] in ('ParseError', 'InvalidRequestError', 'RequestPostError'):
+                response['id'] = None
 
         return response, status
 
