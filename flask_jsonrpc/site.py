@@ -286,22 +286,20 @@ class JSONRPCSite(object):
         return response, status
 
     def batch_response_obj(self, request, D):
+        status = 200
         try:
             responses = [self.response_obj(request, d)[0] for d in D]
-            status = 200
             if not responses:
                 raise InvalidRequestError('Empty array')
         except Error as e:
             for response in responses:
                 response.pop('result', None)
                 response['error'] = e.json_rpc_format
-            status = e.status
         except Exception as e:
             other_error = OtherError(e)
             for response in responses:
                 response.pop('result', None)
                 response['error'] = other_error.json_rpc_format
-            status = other_error.status
 
         for response in responses:
             if response is None:

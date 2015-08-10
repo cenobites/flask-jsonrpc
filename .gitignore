@@ -22,4 +22,5 @@ dist/*
 .eggs/
 .venv/
 .venv2/
+.venv26/
 htmlcov/
