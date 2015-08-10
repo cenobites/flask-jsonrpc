@@ -127,7 +127,7 @@ Dependecies
 ***********
 
 * Python (2.6.5+), (2.7, 3.3) or later (http://www.python.org)
-* Flask 0.9 or later (http://flask.pocoo.org)
+* Flask 0.10 or later (http://flask.pocoo.org)
 
 
 Project Information
