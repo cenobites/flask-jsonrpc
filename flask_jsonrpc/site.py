@@ -95,7 +95,7 @@ def validate_params(method, D):
     if type(D['params']) == Object:
         keys = method.json_arg_types.keys()
         if len(keys) != len(D['params']):
-            raise InvalidParamsError('Not eough params provided for {0}' \
+            raise InvalidParamsError('Not enough params provided for {0}' \
                 .format(method.json_sig))
         for k in keys:
             if not k in D['params']:
@@ -115,7 +115,7 @@ def validate_params(method, D):
             raise InvalidParamsError('Too many params provided for {0}'.format(method.json_sig))
         else:
             if len(D['params']) != len(arg_types):
-                raise InvalidParamsError('Not enouh params provided for {0}'.format(method.json_sig))
+                raise InvalidParamsError('Not enough params provided for {0}'.format(method.json_sig))
 
 
 class JSONRPCSite(object):
