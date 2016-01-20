@@ -172,9 +172,14 @@ def _site_api(site):
 
 
 class JSONRPC(object):
-
-    def __init__(self, app=None, service_url='/api', auth_backend=authenticate, site=default_site,
-                 enable_web_browsable_api=False):
+    """
+    auth_args is a list of tuples, with each tuple containing an arg name and arg type.
+    Example:
+        to inject a "username" and "password" into the method arguments, the auth_args
+        paramter would be [('username', 'String'), ('password', 'String')]
+    """
+    def __init__(self, app=None, service_url='/api', auth_backend=authenticate, auth_args=None,
+                 site=default_site, enable_web_browsable_api=False):
         self.service_url = service_url
         self.browse_url = self._make_browse_url(service_url)
         self.enable_web_browsable_api = enable_web_browsable_api
@@ -186,6 +191,10 @@ class JSONRPC(object):
             self.init_app(self.app)
         else:
             self.app = None
+        self.auth_args = auth_args
+        if self.auth_args is not None:
+            self.auth_arg_names = [x[0] for x in self.auth_args]
+            self.auth_arg_types = [x[1] for x in self.auth_args]
 
     def _unique_name(self, suffix=''):
         st = '.'.join((self.service_url + suffix).split('/'))
@@ -224,10 +233,9 @@ class JSONRPC(object):
         def decorator(f):
             arg_names = getargspec(f)[0]
             X = {'name': name, 'arg_names': arg_names}
-            if authenticated:
-                # TODO: this is an assumption
-                X['arg_names'] = ['username', 'password'] + X['arg_names']
-                X['name'] = _inject_args(X['name'], ('String', 'String'))
+            if authenticated and self.auth_arg_names is not None:
+                X['arg_names'] = self.auth_arg_names + X['arg_names']
+                X['name'] = _inject_args(X['name'], self.auth_arg_types)
                 _f = self.auth_backend(f, authenticated)
             else:
                 _f = f
