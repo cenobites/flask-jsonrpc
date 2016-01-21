@@ -178,7 +178,8 @@ class JSONRPC(object):
         to inject a "username" and "password" into the method arguments, the auth_args
         paramter would be [('username', 'String'), ('password', 'String')]
     """
-    def __init__(self, app=None, service_url='/api', auth_backend=authenticate, auth_args=None,
+    def __init__(self, app=None, service_url='/api', auth_backend=authenticate,
+                 auth_args=[('username', 'String'), ('password', 'String')],
                  site=default_site, enable_web_browsable_api=False):
         self.service_url = service_url
         self.browse_url = self._make_browse_url(service_url)
