@@ -233,9 +233,10 @@ class JSONRPC(object):
         def decorator(f):
             arg_names = getargspec(f)[0]
             X = {'name': name, 'arg_names': arg_names}
-            if authenticated and self.auth_arg_names is not None:
-                X['arg_names'] = self.auth_arg_names + X['arg_names']
-                X['name'] = _inject_args(X['name'], self.auth_arg_types)
+            if authenticated:
+                if self.auth_args is not None:
+                    X['arg_names'] = self.auth_arg_names + X['arg_names']
+                    X['name'] = _inject_args(X['name'], self.auth_arg_types)
                 _f = self.auth_backend(f, authenticated)
             else:
                 _f = f
