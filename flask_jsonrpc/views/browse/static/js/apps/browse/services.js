@@ -41,8 +41,8 @@
           }
         })
         .constant('responseObjectExample', {
-          'id': '148c96a5-456c-43ba-a534-ebb0b54311cc', 
-          'jsonrpc': '2.0', 
+          'id': '148c96a5-456c-43ba-a534-ebb0b54311cc',
+          'jsonrpc': '2.0',
           'result': 'Welcome to Flask JSON-RPC'
         })
         .value('Toolbar', {
@@ -88,7 +88,7 @@
                             return parseFloat(param.value);
                         }
                         return parseInt(param.value);
-                    } else if (param.type === 'bit') {
+                    } else if (param.type === 'bool') {
                         return (/^(true|1)$/i).test(param.value);
                     } else if (param.type === 'str') {
                         return param.value;
@@ -103,8 +103,8 @@
                 },
                 payload: function(module, options) {
                     var payload = {
-                        jsonrpc: '2.0', 
-                        method: module.name, 
+                        jsonrpc: '2.0',
+                        method: module.name,
                         params: {}
                         //params: []
                     };
