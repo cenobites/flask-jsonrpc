@@ -133,5 +133,5 @@ Project Information
 *******************
 
 :Author: Cenobit Technologies, Inc.
-:Version: v0.3 of 2015/08/10
+:Version: v0.3.1 of 2016/05/11
 :License: `New BSD License <http://opensource.org/licenses/BSD-3-Clause>`_
