@@ -30,7 +30,7 @@ from flask import Blueprint, request, jsonify, render_template
 
 class _Blueprint(Blueprint):
 
-    jsonrpc_site = None
+    site_map = {}
 
     def register(self, app, options, first_registration=False):
         """Called by :meth:`Flask.register_blueprint` to register a blueprint
@@ -39,7 +39,9 @@ class _Blueprint(Blueprint):
         :func:`~flask.Flask.register_blueprint` are directly forwarded to this
         method in the `options` dictionary.
         """
-        self.jsonrpc_site = options.get('jsonrpc_site')
+        prefix_url = options.get('url_prefix')
+        jsonrpc_site = options.get('jsonrpc_site')
+        self.site_map[prefix_url] = jsonrpc_site
         self._got_registered_once = True
         state = self.make_setup_state(app, options, first_registration)
         if self.has_static_folder and \
@@ -61,7 +63,8 @@ def index():
 
 @mod.route('/packages.json')
 def json_packages():
-    jsonrpc_describe = mod.jsonrpc_site.describe()
+    url_prefix = request.path[:request.path.rfind('/')]
+    jsonrpc_describe = mod.site_map[url_prefix].describe()
     packages = sorted(jsonrpc_describe['procs'], key=lambda proc: proc['name'])
     packages_tree = {}
     for package in packages:
@@ -71,7 +74,8 @@ def json_packages():
 
 @mod.route('/<method_name>.json')
 def json_method(method_name):
-    jsonrpc_describe = mod.jsonrpc_site.describe()
+    url_prefix = request.path[:request.path.rfind('/')]
+    jsonrpc_describe = mod.site_map[url_prefix].describe()
     method = [method for method in jsonrpc_describe['procs'] if method['name'] == method_name][0]
     return jsonify(method)
 
