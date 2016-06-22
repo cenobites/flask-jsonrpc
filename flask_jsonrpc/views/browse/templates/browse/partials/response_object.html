@@ -7,7 +7,7 @@
         <h4 class="modal-title"><span class="glyphicon glyphicon-star"></span> {{module.name}}(<span ng-repeat="param in module.params">{{param.name}}: {{param.type}}<span ng-if="!$last">, </span></span>) -> {{module.return.type}}</h4>
       </div>
       <div class="modal-body">
-        <h5><b>Summary:</b> <span ng-if="!module.summary">None</span>{{module.summary}}</h5>
+        <h5><b>Summary:</b> <span ng-if="!module.summary">None</span><span style="white-space: pre-wrap;">{{module.summary}}</span></h5>
         <h5><b>Idempotent:</b> {{module.idempotent}}</h5>
         <ng-form name="nameDialog" novalidate role="form">
           <div class="form-group input-group-lg">
