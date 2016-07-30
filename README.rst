@@ -7,7 +7,7 @@ Some reasons you might want to use:
 
 * Simple, powerful, flexible and pythonic API.
 * Support python 2.7, `3.3 or later <http://flask.pocoo.org/docs/python3/#python3-support>`_
-* The Web browseable API.
+* The web browsable API.
 * Support for authentication.
 * Proxy to test your JSON Service.
 * Run-time type checking.
@@ -59,7 +59,7 @@ Write JSON-RPC methods.
     def index():
         return u'Welcome to Flask JSON-RPC'
 
-All code of Example `run.py <https://github.com/cenobites/flask-jsonrpc/blob/master/run.py>`_.
+All code of example `run.py <https://github.com/cenobites/flask-jsonrpc/blob/master/run.py>`_.
 
 
 3. Running
@@ -113,8 +113,8 @@ We add the ``jsonrpc_version`` variable to the request object. It be either '1.0
 For more tests see `Examples <https://github.com/cenobites/flask-jsonrpc/wiki/Examples>`_.
 
 
-Referencies
-***********
+References
+**********
 
 * http://docs.python.org/
 * http://flask.pocoo.org/docs/
@@ -123,8 +123,8 @@ Referencies
 * http://www.jsonrpc.org/
 
 
-Dependecies
-***********
+Dependencies
+************
 
 * Python (2.6.5+), (2.7, 3.3) or later (http://www.python.org)
 * Flask 0.10 or later (http://flask.pocoo.org)
