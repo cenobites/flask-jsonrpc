@@ -52,7 +52,7 @@ class Error(Exception):
     data = None
     status = 200
 
-    def __init__(self, message=None, code=None):
+    def __init__(self, message=None, code=None, data=None):
         """Setup the Exception and overwrite the default message
         """
         super(Error, self).__init__()
@@ -60,6 +60,8 @@ class Error(Exception):
             self.message = message
         if code is not None:
             self.code = code
+        if data is not None:
+            self.data = data
 
     @property
     def json_rpc_format(self):
