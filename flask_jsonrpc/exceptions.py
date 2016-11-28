@@ -71,7 +71,7 @@ class Error(Exception):
         error = {
             'name': text_type(self.__class__.__name__),
             'code': self.code,
-            'message': '{0}: {1}'.format(text_type(self.__class__.__name__), text_type(self.message)),
+            'message': '{0}'.format(text_type(self.message)),
             'data': self.data
         }
 
