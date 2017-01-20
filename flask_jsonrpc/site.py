@@ -253,7 +253,7 @@ class JSONRPCSite(object):
                     string_types + integer_types + \
                     (float, complex, dict, list, tuple, set, frozenset, NoneType, bool)]):
                 try:
-                    rs = encoder.default(R) # ...or something this thing supports
+                    rs = encoder.encode(R) # ...or something this thing supports
                 except TypeError as exc:
                     raise TypeError('Return type not supported, for {0!r}'.format(R))
 
