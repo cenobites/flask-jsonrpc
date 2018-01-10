@@ -176,18 +176,22 @@ def with_metaclass(meta, *bases):
 # happened until the next bytecode instruction?
 BROKEN_PYPY_CTXMGR_EXIT = False
 if hasattr(sys, 'pypy_version_info'):
-    class _Mgr(object):
-        def __enter__(self):
-            return self
-        def __exit__(self, *args):
-            sys.exc_clear()
-    try:
+    # I don't know if this thread exception clear issue is python3 relevant
+    # but there's no exc_clear in python3 so we should not perform *these*
+    # checks the same as python2 way
+    if sys.version_info < (3,):
+        class _Mgr(object):
+            def __enter__(self):
+                return self
+            def __exit__(self, *args):
+                sys.exc_clear()
         try:
-            with _Mgr():
-                raise AssertionError()
-        except:
-            raise
-    except TypeError:
-        BROKEN_PYPY_CTXMGR_EXIT = True
-    except AssertionError:
-        pass
+            try:
+                with _Mgr():
+                    raise AssertionError()
+            except:
+                raise
+        except TypeError:
+            BROKEN_PYPY_CTXMGR_EXIT = True
+        except AssertionError:
+            pass
