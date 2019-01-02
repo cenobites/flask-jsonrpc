@@ -76,8 +76,7 @@ def extract_raw_data_request(request):
 
     # Try charset from content-type
     encoding = request.charset if request.charset else 'utf-8'
-
-    if encoding:
+    if encoding and not isinstance(raw_data, unicode):
         try:
             return text_type(raw_data, encoding)
         except UnicodeError:
