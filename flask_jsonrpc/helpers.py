@@ -31,7 +31,7 @@ from functools import wraps
 from flask import current_app, request, jsonify, json
 from flask import make_response as flask_make_response
 
-from flask_jsonrpc._compat import b, u, text_type
+from flask_jsonrpc._compat import b, u, text_type, PY2
 from flask_jsonrpc.exceptions import InvalidCredentialsError, InvalidParamsError
 
 def make_response(*args):
@@ -76,10 +76,11 @@ def extract_raw_data_request(request):
 
     # Try charset from content-type
     encoding = request.charset if request.charset else 'utf-8'
-
     if encoding:
         try:
             return text_type(raw_data, encoding)
+        except TypeError:
+            return raw_data
         except UnicodeError:
             tried_encodings.append(encoding)
 
