@@ -27,6 +27,7 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 import re
+import logging
 import decimal
 import datetime
 from uuid import uuid4
@@ -57,6 +58,8 @@ except (NameError, ImportError):
 
 NoneType = type(None)
 encode_kw = lambda p: dict([(text_type(k), v) for k, v in iteritems(p)])
+
+logger = logging.getLogger(__name__)
 
 def encode_kw11(p):
     if not type(p) is dict:
@@ -392,6 +395,7 @@ class JSONRPCSite(object):
             status = e.status
         except Exception as e:
             other_error = OtherError(e)
+            logger.exception('Other error: {0}'.format(str(other_error.json_rpc_format)))
             response.pop('result', None)
             response['error'] = other_error.json_rpc_format
             status = other_error.status
