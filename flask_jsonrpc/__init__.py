@@ -72,7 +72,7 @@ def _validate_arg(value, expected):
     return False
 
 def _eval_arg_type(arg_type, T=Any, arg=None, sig=None):
-    """Returns a type from a snippit of python source. Should normally be
+    """Returns a type from a snippet of python source. Should normally be
     something just like 'str' or 'Object'.
 
         arg_type            the source to be evaluated
