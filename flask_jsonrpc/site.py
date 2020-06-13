@@ -83,6 +83,8 @@ class JSONRPCSite:
 
             return self.dispatch(json_data)
         except JSONRPCError as e:
+            current_app.logger.error('jsonrpc error')
+            current_app.logger.exception(e)
             response = {
                 'id': json_data.get('id'),
                 'jsonrpc': json_data.get('jsonrpc', JSONRPC_VERSION_DEFAULT),
@@ -90,6 +92,8 @@ class JSONRPCSite:
             }
             return response, e.status_code, JSONRPC_DEFAULT_HTTP_HEADERS
         except Exception as e:  # pylint: disable=W0703
+            current_app.logger.error('unexpected error')
+            current_app.logger.exception(e)
             jsonrpc_error = ServerError(data={'message': str(e)})
             response = {
                 'id': json_data.get('id'),
@@ -108,7 +112,7 @@ class JSONRPCSite:
         try:
             return json.loads(request_data)
         except ValueError as e:
-            current_app.logger.error('invalid json')
+            current_app.logger.error('invalid json: %s', request_data)
             current_app.logger.exception(e)
             raise ParseError(data={'message': 'Invalid JSON: {0!r}'.format(request_data)})
 
@@ -134,6 +138,8 @@ class JSONRPCSite:
                     }
                 )
         except TypeError as e:
+            current_app.logger.error('invalid type checked for: %s', view_func.__name__)
+            current_app.logger.exception(e)
             raise InvalidParamsError(data={'message': str(e)})
 
         return self.make_response(req_json, resp_view)
