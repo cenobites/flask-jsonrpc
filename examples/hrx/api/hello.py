@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2012-2015, Cenobit Technologies, Inc. http://cenobit.es/
+# Copyright (c) 2012-2020, Cenobit Technologies, Inc. http://cenobit.es/
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -32,9 +32,11 @@ from hrx import jsonrpc
 mod = Blueprint('hello', __name__)
 jsonrpc.register_blueprint(mod)
 
+
 @jsonrpc.method('Hello.index')
 def index():
     return u'Welcome to Hello API!'
+
 
 @jsonrpc.method('Hello.say(name=String)')
 def say(name=''):

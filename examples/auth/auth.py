@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# Copyright (c) 2012-2015, Cenobit Technologies, Inc. http://cenobit.es/
+# Copyright (c) 2012-2020, Cenobit Technologies, Inc. http://cenobit.es/
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -31,26 +31,27 @@ import sys
 
 from flask import Flask
 
-PROJECT_DIR, PROJECT_MODULE_NAME = os.path.split(
-    os.path.dirname(os.path.realpath(__file__))
-)
+from flask_jsonrpc import JSONRPC  # noqa: E402
+
+PROJECT_DIR, PROJECT_MODULE_NAME = os.path.split(os.path.dirname(os.path.realpath(__file__)))
 
 FLASK_JSONRPC_PROJECT_DIR = os.path.join(PROJECT_DIR, os.pardir)
-if os.path.exists(FLASK_JSONRPC_PROJECT_DIR) \
-        and not FLASK_JSONRPC_PROJECT_DIR in sys.path:
+if os.path.exists(FLASK_JSONRPC_PROJECT_DIR) and FLASK_JSONRPC_PROJECT_DIR not in sys.path:
     sys.path.append(FLASK_JSONRPC_PROJECT_DIR)
 
-from flask_jsonrpc import JSONRPC
 
 app = Flask(__name__)
 jsonrpc = JSONRPC(app, '/api')
 
-def check_auth(username, password):
+
+def check_auth(_username, _password):
     return True
+
 
 @jsonrpc.method('App.index', authenticated=check_auth)
 def index():
     return u'Welcome to Flask JSON-RPC'
+
 
 @jsonrpc.method('App.echo(name=str) -> str', validate=True, authenticated=check_auth)
 def echo(name='Flask JSON-RPC'):

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2012-2015, Cenobit Technologies, Inc. http://cenobit.es/
+# Copyright (c) 2020-2020, Cenobit Technologies, Inc. http://cenobit.es/
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -25,11 +25,9 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-from __future__ import unicode_literals
-import unittest
+from flask_jsonrpc.helpers import urn
 
 
-class JSONRPCHelpersTestCase(unittest.TestCase):
-
-    def test_(self):
-        pass
+def test_urn():
+    assert urn('') == 'urn::'
+    assert urn('a', 'b', 'c', 'd') == 'urn:a:b.c.d'

@@ -3,4 +3,5 @@
 # using pip. Example::
 #
 #     pip install -r requirements.pip
-Flask>=0.10
+Flask>=1.0.0
+typeguard

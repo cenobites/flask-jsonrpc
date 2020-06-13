@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2012-2015, Cenobit Technologies, Inc. http://cenobit.es/
+# Copyright (c) 2020-2020, Cenobit Technologies, Inc. http://cenobit.es/
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -25,11 +25,35 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-from __future__ import unicode_literals
-import unittest
+from typing import Callable, Type, Union
+
+from typeguard import typechecked
+
+from .site import JSONRPCSite
+from .views import JSONRPCView
 
 
-class JSONRPCSiteTestCase(unittest.TestCase):
+class JSONRCPDecoratorMixin:
+    def get_jsonrpc_site(self) -> JSONRPCSite:
+        raise NotImplementedError
 
-    def test_(self):
-        pass
+    def get_jsonrpc_site_api(self) -> Type[JSONRPCView]:
+        raise NotImplementedError
+
+    def method(self, name: Union[str, None] = None, validate: bool = True, **options) -> Callable:
+        def decorator(fn: Callable) -> Callable:
+            method_name = fn.__name__ if not name else name
+            if validate and not getattr(fn, '__annotations__', None):
+                raise ValueError('no type annotations present to: {0}'.format(method_name))
+            fn_annotations = fn.__annotations__.copy()
+            fn.jsonrpc_method_name = method_name  # type: ignore
+            fn.jsonrpc_method_sig = fn_annotations.copy()  # type: ignore
+            fn.jsonrpc_method_return = fn_annotations.pop('return', None)  # type: ignore
+            fn.jsonrpc_method_params = fn_annotations  # type: ignore
+            fn.jsonrpc_validate = validate  # type: ignore
+            fn.jsonrpc_options = options  # type: ignore
+            fn_wrapped = typechecked(fn) if validate else fn
+            self.get_jsonrpc_site().register(method_name, fn_wrapped)
+            return fn_wrapped
+
+        return decorator

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# Copyright (c) 2012-2015, Cenobit Technologies, Inc. http://cenobit.es/
+# Copyright (c) 2012-2020, Cenobit Technologies, Inc. http://cenobit.es/
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -46,35 +46,26 @@ class PyTest(TestCommand):
 
     def run_tests(self):
         import pytest
+
         errno = pytest.main(self.test_args)
         sys.exit(errno)
 
+
 setup(
     name='Flask-JSONRPC',
-    version='0.3.1',
+    version='1.0.0rc1',
     url='https://github.com/cenobites/flask-jsonrpc',
     license='New BSD License',
     author='Nycholas de Oliveira e Oliveira',
     author_email='nycholas@gmail.com',
     description='Adds JSONRPC support to Flask.',
-    long_description=open('README.rst').read(),
-    packages=[
-        'flask_jsonrpc',
-        'flask_jsonrpc.views',
-        'flask_jsonrpc.views.browse'
-    ],
+    long_description=open('README.md').read(),
+    packages=['flask_jsonrpc', 'flask_jsonrpc.views', 'flask_jsonrpc.views.browse'],
     zip_safe=False,
     include_package_data=True,
     platforms='any',
-    install_requires=[
-        'Flask>=0.10'
-    ],
-    tests_require=[
-        'mock',
-        'coverage',
-        'pytest',
-        'pytest-cov'
-    ],
+    install_requires=['Flask>=1.0.0', 'typeguard'],
+    tests_require=['mock', 'coverage', 'pytest', 'pytest-cov'],
     cmdclass={'test': PyTest},
     classifiers=[
         'Environment :: Web Environment',
@@ -86,5 +77,5 @@ setup(
         'Programming Language :: Python :: Implementation :: CPython',
         'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
         'Topic :: Software Development :: Libraries :: Python Modules',
-    ]
+    ],
 )

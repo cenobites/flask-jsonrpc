@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2012-2015, Cenobit Technologies, Inc. http://cenobit.es/
+# Copyright (c) 2012-2020, Cenobit Technologies, Inc. http://cenobit.es/
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -31,6 +31,7 @@ from modular import jsonrpc
 
 mod = Blueprint('user', __name__)
 jsonrpc.register_blueprint(mod)
+
 
 @jsonrpc.method('User.index')
 def index():

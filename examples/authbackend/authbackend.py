@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# Copyright (c) 2012-2015, Cenobit Technologies, Inc. http://cenobit.es/
+# Copyright (c) 2012-2020, Cenobit Technologies, Inc. http://cenobit.es/
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -32,18 +32,17 @@ from functools import wraps
 
 from flask import Flask
 
-PROJECT_DIR, PROJECT_MODULE_NAME = os.path.split(
-    os.path.dirname(os.path.realpath(__file__))
-)
+from flask_jsonrpc import JSONRPC, InvalidCredentialsError, InvalidParamsError  # noqa: E402
+
+PROJECT_DIR, PROJECT_MODULE_NAME = os.path.split(os.path.dirname(os.path.realpath(__file__)))
 
 FLASK_JSONRPC_PROJECT_DIR = os.path.join(PROJECT_DIR, os.pardir)
-if os.path.exists(FLASK_JSONRPC_PROJECT_DIR) \
-        and not FLASK_JSONRPC_PROJECT_DIR in sys.path:
+if os.path.exists(FLASK_JSONRPC_PROJECT_DIR) and FLASK_JSONRPC_PROJECT_DIR not in sys.path:
     sys.path.append(FLASK_JSONRPC_PROJECT_DIR)
 
-from flask_jsonrpc import JSONRPC
 
 app = Flask(__name__)
+
 
 def authenticate(f, f_check_auth):
     @wraps(f)
@@ -61,21 +60,27 @@ def authenticate(f, f_check_auth):
                     kwargs.pop('username')
                     kwargs.pop('password')
             else:
-                raise InvalidParamsError('Authenticated methods require at least '
-                                         '[username, password] or {username: password:} arguments')
+                raise InvalidParamsError(
+                    'Authenticated methods require at least ' '[username, password] or {username: password:} arguments'
+                )
         if not is_auth:
             raise InvalidCredentialsError()
         return f(*args, **kwargs)
+
     return _f
+
 
 jsonrpc = JSONRPC(app, '/api', auth_backend=authenticate)
 
-def check_auth(username, password):
+
+def check_auth(_username, _password):
     return True
+
 
 @jsonrpc.method('App.index', authenticated=check_auth)
 def index():
     return u'Welcome to Flask JSON-RPC'
+
 
 @jsonrpc.method('App.echo(name=str)', authenticated=check_auth)
 def echo(name=''):

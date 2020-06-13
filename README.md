@@ -1,5 +1,4 @@
-Flask JSON-RPC
-==============
+# Flask JSON-RPC
 
 A basic JSON-RPC implementation for your Flask-powered sites based on `django-json-rpc <https://github.com/samuraisam/django-json-rpc>`_.
 
@@ -21,59 +20,56 @@ There is a live example API for testing purposes, `available here <http://flask-
 
 .. image:: https://f.cloud.github.com/assets/298350/1575590/203c595a-5150-11e3-99a0-4a6fd9bcbe52.png
 
-Adding Flask JSON-RPC to your application
-*****************************************
+### Adding Flask JSON-RPC to your application
 
 1. Installation
 
-::
-
+```
     $ pip install Flask-JSONRPC
+```
 
 or
 
-::
-
+```
     $ git clone git://github.com/cenobites/flask-jsonrpc.git
     $ cd flask-jsonrpc
     $ python setup.py install
+```
 
 
 2. Getting Started
 
 Create your application and initialize the Flask-JSONRPC.
 
-::
-
+```
     from flask import Flask
     from flask_jsonrpc import JSONRPC
 
     app = Flask(__name__)
     jsonrpc = JSONRPC(app, '/api')
+```
 
 Write JSON-RPC methods.
 
-::
-
+```
     @jsonrpc.method('App.index')
     def index():
         return u'Welcome to Flask JSON-RPC'
+```
 
 All code of example `run.py <https://github.com/cenobites/flask-jsonrpc/blob/master/run.py>`_.
 
 
 3. Running
 
-::
-
+```
     $ python run.py
      * Running on http://0.0.0.0:5000/
-
+```
 
 4. Testing
 
-::
-
+```
     $ curl -i -X POST \
        -H "Content-Type: application/json; indent=4" \
        -d '{
@@ -93,28 +89,26 @@ All code of example `run.py <https://github.com/cenobites/flask-jsonrpc/blob/mas
       "id": "1",
       "result": "Welcome to Flask JSON-RPC"
     }
+```
 
-
-Testing your service
-********************
+### Testing your service
 
 You can test your service using the provided web browsable API, available at http://localhost:5000/api/browse (if using the url patterns from above) or with the included ServiceProxy:
 
-::
-
+```
     >>> from flask_jsonrpc.proxy import ServiceProxy
     >>> server = ServiceProxy('http://localhost:5000/api')
     >>>
     >>> server.App.index()
     {'jsonrpc': '2.0', 'id': '91bce374-462f-11e2-af55-f0bf97588c3b', 'result': 'Welcome to Flask JSON-RPC'}
+```
 
 We add the ``jsonrpc_version`` variable to the request object. It be either '1.0', '1.1' or '2.0'. Arg.
 
 For more tests see `Examples <https://github.com/cenobites/flask-jsonrpc/wiki/Examples>`_.
 
 
-References
-**********
+### References
 
 * http://docs.python.org/
 * http://flask.pocoo.org/docs/
@@ -123,15 +117,13 @@ References
 * http://www.jsonrpc.org/
 
 
-Dependencies
-************
+### Dependencies
 
 * Python (2.6.5+), (2.7, 3.3) or later (http://www.python.org)
 * Flask 0.10 or later (http://flask.pocoo.org)
 
 
-Project Information
-*******************
+### Project Information
 
 :Author: Cenobit Technologies, Inc.
 :Version: v0.3.1 of 2016/05/11

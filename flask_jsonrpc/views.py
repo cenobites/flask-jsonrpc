@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2012-2015, Cenobit Technologies, Inc. http://cenobit.es/
+# Copyright (c) 2020-2020, Cenobit Technologies, Inc. http://cenobit.es/
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -25,11 +25,18 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-from __future__ import unicode_literals
-import unittest
+from flask import Response, jsonify, make_response
+from flask.views import View
+
+from .site import JSONRPCSite
 
 
-class FlaskJSONRPCTestCase(unittest.TestCase):
+class JSONRPCView(View):
+    methods = ['POST']
 
-    def test_(self):
-        pass
+    def __init__(self, jsonrpc_site: JSONRPCSite):
+        self.jsonrpc_site = jsonrpc_site
+
+    def dispatch_request(self) -> Response:  # type: ignore
+        response, status_code, headers = self.jsonrpc_site.dispatch_request()
+        return make_response(jsonify(response), status_code, headers)

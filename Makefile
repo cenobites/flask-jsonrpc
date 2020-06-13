@@ -1,7 +1,6 @@
 .PHONY: all clean test test-deps env env2
 
 VIRTUALENV_EXISTS := $(shell [ -d .venv ] && echo 1 || echo 0)
-VIRTUALENV2_EXISTS := $(shell [ -d .venv2 ] && echo 1 || echo 0)
 
 all: clean test
 	@python setup.py build
@@ -20,16 +19,7 @@ test-deps:
 
 env:
 ifeq ($(VIRTUALENV_EXISTS), 0)
-	@virtualenv --distribute --unzip-setuptools --no-site-packages .venv
-	@.venv/bin/pip install --upgrade pip --quiet
-	@.venv/bin/pip install --upgrade setuptools --quiet
+	@python -m venv .venv
+	@.venv/bin/pip install --upgrade pip setuptools
 	@.venv/bin/pip install -r requirements.pip
-endif
-
-env2:
-ifeq ($(VIRTUALENV2_EXISTS), 0)
-	@virtualenv2 --distribute --unzip-setuptools --no-site-packages .venv2
-	@.venv2/bin/pip install --upgrade pip --quiet
-	@.venv2/bin/pip install --upgrade setuptools --quiet
-	@.venv2/bin/pip install -r requirements.pip
 endif

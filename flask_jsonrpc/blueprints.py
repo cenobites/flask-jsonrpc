@@ -1,6 +1,5 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# Copyright (c) 2012-2020, Cenobit Technologies, Inc. http://cenobit.es/
+# Copyright (c) 2020-2020, Cenobit Technologies, Inc. http://cenobit.es/
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -26,51 +25,29 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-import os
-import sys
+from typing import Type
 
-from flask import Flask
-from flask.ext.httpauth import HTTPBasicAuth
-
-from flask_jsonrpc import JSONRPC  # noqa: E402
-
-PROJECT_DIR, PROJECT_MODULE_NAME = os.path.split(os.path.dirname(os.path.realpath(__file__)))
-
-FLASK_JSONRPC_PROJECT_DIR = os.path.join(PROJECT_DIR, os.pardir)
-if os.path.exists(FLASK_JSONRPC_PROJECT_DIR) and FLASK_JSONRPC_PROJECT_DIR not in sys.path:
-    sys.path.append(FLASK_JSONRPC_PROJECT_DIR)
+from .globals import default_jsonrpc_site, default_jsonrpc_site_api
+from .site import JSONRPCSite
+from .views import JSONRPCView
+from .wrappers import JSONRCPDecoratorMixin
 
 
-app = Flask(__name__)
-auth = HTTPBasicAuth()
-jsonrpc = JSONRPC(app, '/api', enable_web_browsable_api=True)
+class JSONRPCBlueprint(JSONRCPDecoratorMixin):
+    def __init__(
+        self,
+        name: str,
+        import_name: str,
+        jsonrpc_site: Type[JSONRPCSite] = default_jsonrpc_site,
+        jsonrpc_site_api: Type[JSONRPCView] = default_jsonrpc_site_api,
+    ):
+        self.name = name
+        self.import_name = import_name
+        self.jsonrpc_site = jsonrpc_site()
+        self.jsonrpc_site_api = jsonrpc_site_api
 
-users = {'john': 'hello', 'susan': 'bye'}
+    def get_jsonrpc_site(self) -> JSONRPCSite:
+        return self.jsonrpc_site
 
-
-@auth.get_password
-def get_pw(username):
-    if username in users:
-        return users.get(username)
-    return None
-
-
-@auth.verify_password
-def verify_pwd(username, password):
-    return users.get(username) == password
-
-
-@jsonrpc.method('App.index')
-@auth.login_required
-def index():
-    return u'Welcome to Flask JSON-RPC'
-
-
-@jsonrpc.method('App.hello')
-@auth.login_required
-def hello(name):
-    return u'Hello {0}'.format(name)
-
-
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', debug=True)
+    def get_jsonrpc_site_api(self) -> Type[JSONRPCView]:
+        return self.jsonrpc_site_api

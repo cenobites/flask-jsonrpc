@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # Copyright (c) 2012-2020, Cenobit Technologies, Inc. http://cenobit.es/
 # All rights reserved.
@@ -29,54 +28,33 @@
 import os
 import sys
 
-from flask import Flask, json, request
+import pytest
 
-from flask_jsonrpc import JSONRPC, make_response  # noqa: E402
-from flask_jsonrpc.exceptions import OtherError  # noqa: E402
+from .apptest import create_app  # noqa: E402  pylint: disable=C0413
 
 PROJECT_DIR, PROJECT_MODULE_NAME = os.path.split(os.path.dirname(os.path.realpath(__file__)))
-
-FLASK_JSONRPC_PROJECT_DIR = os.path.join(PROJECT_DIR, os.pardir)
+FLASK_JSONRPC_PROJECT_DIR = os.path.join(PROJECT_DIR)
 if os.path.exists(FLASK_JSONRPC_PROJECT_DIR) and FLASK_JSONRPC_PROJECT_DIR not in sys.path:
     sys.path.append(FLASK_JSONRPC_PROJECT_DIR)
 
 
-app = Flask(__name__)
-jsonrpc = JSONRPC(app, '/api')
+@pytest.fixture
+def app():
+    """Create and configure a new app instance for each test."""
+    flask_app = create_app()
+
+    yield flask_app
 
 
-def check_terminal_id(fn):
-    def wrapped(*args, **kwargs):
-        terminal_id = int(request.get_json(silent=True).get('terminal_id', 0))
-        if terminal_id <= 0:
-            raise OtherError('Invalid terminal ID')
-        rv = fn(*args, **kwargs)
-        return rv
-
-    return wrapped
+# pylint: disable=W0621
+@pytest.fixture
+def client(app):
+    """A test client for the app."""
+    return app.test_client()
 
 
-def jsonrcp_headers(fn):
-    def wrapped(*args, **kwargs):
-        response = make_response(fn(*args, **kwargs))
-        response.headers['X-JSONRPC-Tag'] = 'JSONRPC 2.0'
-        return response
-
-    return wrapped
-
-
-@jsonrpc.method('App.index')
-@check_terminal_id
-def index():
-    return u'Terminal ID: {0}'.format(request.get_json(silent=True).get('terminal_id', 0))
-
-
-@jsonrpc.method('App.decorators')
-@check_terminal_id
-@jsonrcp_headers
-def decorators():
-    return {'terminal_id': request.get_json(silent=True).get('terminal_id', 0), 'headers': str(request.headers)}
-
-
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', debug=True)
+# pylint: disable=W0621
+@pytest.fixture
+def runner(app):
+    """A test runner for the app's Click commands."""
+    return app.test_cli_runner()
