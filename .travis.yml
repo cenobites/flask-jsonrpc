@@ -19,9 +19,9 @@ install:
 
 script:
   - flake8 flask_jsonrpc/ tests/ examples/
-  - pylint flask_jsonrpc/ tests/ examples/
-  - pytest
+  - pylint flask_jsonrpc/
   - mypy flask_jsonrpc/
+  - pytest
 
 after_success:
   coveralls
