@@ -25,23 +25,24 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-from typing import Callable, Type, Union
+from typing import TYPE_CHECKING, Any, Type, Callable, Optional
 
 from typeguard import typechecked
 
-from .site import JSONRPCSite
-from .views import JSONRPCView
+if TYPE_CHECKING:
+    from .site import JSONRPCSite
+    from .views import JSONRPCView
 
 
 class JSONRCPDecoratorMixin:
-    def get_jsonrpc_site(self) -> JSONRPCSite:
+    def get_jsonrpc_site(self) -> 'JSONRPCSite':
         raise NotImplementedError
 
-    def get_jsonrpc_site_api(self) -> Type[JSONRPCView]:
+    def get_jsonrpc_site_api(self) -> Type['JSONRPCView']:
         raise NotImplementedError
 
-    def method(self, name: Union[str, None] = None, validate: bool = True, **options) -> Callable:
-        def decorator(fn: Callable) -> Callable:
+    def method(self, name: Optional[str] = None, validate: bool = True, **options: Any) -> Callable[..., Any]:
+        def decorator(fn: Callable[..., Any]) -> Callable[..., Any]:
             method_name = fn.__name__ if not name else name
             if validate and not getattr(fn, '__annotations__', None):
                 raise ValueError('no type annotations present to: {0}'.format(method_name))

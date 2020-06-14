@@ -27,8 +27,9 @@
 # POSSIBILITY OF SUCH DAMAGE.
 from typing import Tuple
 
-import pytest
 from flask import Flask
+
+import pytest
 
 from flask_jsonrpc import JSONRPC, JSONRPCBlueprint
 

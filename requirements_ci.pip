@@ -7,5 +7,4 @@ flake8
 flake8-quotes
 pylint
 isort
-isort[pyproject]
 mypy

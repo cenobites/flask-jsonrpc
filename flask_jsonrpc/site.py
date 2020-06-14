@@ -25,30 +25,33 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-from typing import Any, Callable, Dict, List, Tuple, Type, Union
 from uuid import UUID, uuid4
+from typing import Any, Dict, List, Type, Final, Tuple, Union, TypeVar, Callable
 
-from flask import current_app, json, request
+from flask import json, request, current_app
+
 from werkzeug.datastructures import Headers
 
 from .exceptions import (
-    InvalidParamsError,
-    InvalidRequestError,
-    JSONRPCError,
-    MethodNotFoundError,
     ParseError,
     ServerError,
+    JSONRPCError,
+    InvalidParamsError,
+    InvalidRequestError,
+    MethodNotFoundError,
 )
 
-JSONRPC_VERSION_DEFAULT: str = '2.0'
-JSONRCP_DESCRIBE_METHOD_NAME: str = 'system.describe'
-JSONRPC_DEFAULT_HTTP_HEADERS: Dict[str, str] = {}
-JSONRPC_DEFAULT_HTTP_STATUS_CODE: int = 200
+T = TypeVar('T')
+
+JSONRPC_VERSION_DEFAULT: Final[str] = '2.0'
+JSONRCP_DESCRIBE_METHOD_NAME: Final[str] = 'system.describe'
+JSONRPC_DEFAULT_HTTP_HEADERS: Final[Dict[str, str]] = {}
+JSONRPC_DEFAULT_HTTP_STATUS_CODE: Final[int] = 200
 
 
 class JSONRPCSite:
-    def __init__(self):
-        self.view_funcs: Dict[str, Callable] = {}
+    def __init__(self) -> None:
+        self.view_funcs: Dict[str, Callable[..., Any]] = {}
         self.uuid: UUID = uuid4()
         self.name: str = 'Flask-JSONRPC'
         self.version: str = JSONRPC_VERSION_DEFAULT
@@ -64,10 +67,10 @@ class JSONRPCSite:
         mt = request.mimetype
         return mt == 'application/json' or mt.startswith('application/') and mt.endswith('+json')
 
-    def register(self, name: str, view_func: Callable) -> None:
+    def register(self, name: str, view_func: Callable[..., Any]) -> None:
         self.view_funcs[name] = view_func
 
-    def dispatch_request(self) -> Tuple[Any, int, Union[Headers, Dict[str, str], Tuple, List[Tuple]]]:
+    def dispatch_request(self) -> Tuple[Any, int, Union[Headers, Dict[str, str], Tuple[str], List[Tuple[str]]]]:
         json_data: Dict[str, Any] = {}
         try:
             if not self.validate_request():
@@ -102,13 +105,13 @@ class JSONRPCSite:
             }
             return response, jsonrpc_error.status_code, JSONRPC_DEFAULT_HTTP_HEADERS
 
-    def validate_request(self):
+    def validate_request(self) -> bool:
         if not self.is_json:
             current_app.logger.error('invalid mimetype')
             return False
         return True
 
-    def to_json(self, request_data: bytes) -> Dict[str, Any]:
+    def to_json(self, request_data: bytes) -> Any:
         try:
             return json.loads(request_data)
         except ValueError as e:
@@ -116,7 +119,9 @@ class JSONRPCSite:
             current_app.logger.exception(e)
             raise ParseError(data={'message': 'Invalid JSON: {0!r}'.format(request_data)})
 
-    def dispatch(self, req_json: Dict[str, Any]):
+    def dispatch(
+        self, req_json: Dict[str, Any]
+    ) -> Tuple[Any, int, Union[Headers, Dict[str, str], Tuple[str], List[Tuple[str]]]]:
         if not self.validate(req_json):
             raise InvalidRequestError(data={'message': 'Invalid JSON: {0}'.format(req_json)})
 
@@ -151,7 +156,7 @@ class JSONRPCSite:
 
     def unpack_tuple_returns(
         self, resp_view: Any
-    ) -> Tuple[Any, int, Union[Headers, Dict[str, str], Tuple, List[Tuple]]]:
+    ) -> Tuple[Any, int, Union[Headers, Dict[str, str], Tuple[str], List[Tuple[str]]]]:
         # https://github.com/pallets/flask/blob/d091bb00c0358e9f30006a064f3dbb671b99aeae/src/flask/app.py#L1981
         if isinstance(resp_view, tuple):
             len_resp_view = len(resp_view)
@@ -178,7 +183,7 @@ class JSONRPCSite:
 
     def make_response(
         self, req_json: Dict[str, Any], resp_view: Any
-    ) -> Tuple[Any, int, Union[Headers, Dict[str, str], Tuple, List[Tuple]]]:
+    ) -> Tuple[Any, int, Union[Headers, Dict[str, str], Tuple[str], List[Tuple[str]]]]:
         rv, status_code, headers = self.unpack_tuple_returns(resp_view)
         if self.is_notification_request(req_json):
             return None, status_code, headers
@@ -188,7 +193,7 @@ class JSONRPCSite:
     def is_notification_request(self, req_json: Dict[str, Any]) -> bool:
         return 'id' not in req_json
 
-    def python_type_name(self, pytype: Type) -> str:
+    def python_type_name(self, pytype: Type[T]) -> str:
         if pytype is None:
             return 'none'
         if getattr(pytype, '__name__', None):

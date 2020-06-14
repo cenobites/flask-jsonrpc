@@ -26,9 +26,10 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 import itertools
+from typing import Any
 
 
-def urn(name: str, *args) -> str:
+def urn(name: str, *args: Any) -> str:
     splited_args = [arg.split('/') for arg in args]
     st = '.'.join(list(itertools.chain(*splited_args)))
     st = st[1::] if st.startswith('.') else st

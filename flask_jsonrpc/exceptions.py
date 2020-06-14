@@ -27,7 +27,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 import sys
 import traceback
-from typing import Any, Dict, Union
+from typing import Any, Dict, Optional
 
 from flask import current_app
 
@@ -52,11 +52,17 @@ class JSONRPCError(Exception):
     """
 
     code: int = 0
-    message: Union[str, None] = None
-    data: Union[Dict[Any, Any], None] = None
+    message: Optional[str] = None
+    data: Optional[Any] = None
     status_code: int = 400
 
-    def __init__(self, message: str = None, code: int = None, data: Dict[str, Any] = None, status_code: int = None):
+    def __init__(
+        self,
+        message: Optional[str] = None,
+        code: Optional[int] = None,
+        data: Optional[Any] = None,
+        status_code: Optional[int] = None,
+    ) -> None:
         """Setup the Exception and overwrite the default message
         """
         super(JSONRPCError, self).__init__()

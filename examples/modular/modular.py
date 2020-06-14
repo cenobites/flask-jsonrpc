@@ -31,8 +31,8 @@ import sys
 
 from flask import Flask
 
-import api.article  # noqa: E402
 import api.user  # noqa: E402
+import api.article  # noqa: E402
 from flask_jsonrpc import JSONRPC  # noqa: E402
 
 PROJECT_DIR, PROJECT_MODULE_NAME = os.path.split(os.path.dirname(os.path.realpath(__file__)))

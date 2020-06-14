@@ -25,28 +25,30 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-from typing import Type, Union
+from typing import TYPE_CHECKING, Type, Union, Optional
 
 from flask import Flask
 
-from .blueprints import JSONRPCBlueprint
-from .contrib.browse import create_browse
 from .globals import default_jsonrpc_site, default_jsonrpc_site_api
 from .helpers import urn
-from .site import JSONRPCSite
-from .views import JSONRPCView
 from .wrappers import JSONRCPDecoratorMixin
+from .contrib.browse import create_browse
+
+if TYPE_CHECKING:
+    from .site import JSONRPCSite
+    from .views import JSONRPCView
+    from .blueprints import JSONRPCBlueprint
 
 
 class JSONRPC(JSONRCPDecoratorMixin):
     def __init__(
         self,
-        app: Union[Flask, None] = None,
+        app: Optional[Flask] = None,
         service_url: str = '/api',
-        jsonrpc_site: Type[JSONRPCSite] = default_jsonrpc_site,
-        jsonrpc_site_api: Type[JSONRPCView] = default_jsonrpc_site_api,
+        jsonrpc_site: Type['JSONRPCSite'] = default_jsonrpc_site,
+        jsonrpc_site_api: Type['JSONRPCView'] = default_jsonrpc_site_api,
         enable_web_browsable_api: bool = False,
-    ):
+    ) -> None:
         self.app = app
         self.service_url = service_url
         self.jsonrpc_site = jsonrpc_site()
@@ -56,10 +58,10 @@ class JSONRPC(JSONRCPDecoratorMixin):
         if app:
             self.init_app(app)
 
-    def get_jsonrpc_site(self) -> JSONRPCSite:
+    def get_jsonrpc_site(self) -> 'JSONRPCSite':
         return self.jsonrpc_site
 
-    def get_jsonrpc_site_api(self) -> Type[JSONRPCView]:
+    def get_jsonrpc_site_api(self) -> Type['JSONRPCView']:
         return self.jsonrpc_site_api
 
     def _make_browse_url(self, service_url: str) -> str:
@@ -75,7 +77,7 @@ class JSONRPC(JSONRCPDecoratorMixin):
         self.register_browse(app, self)
 
     def register_blueprint(
-        self, app: Flask, jsonrpc_app: JSONRPCBlueprint, url_prefix: str, enable_web_browsable_api: bool = False
+        self, app: Flask, jsonrpc_app: 'JSONRPCBlueprint', url_prefix: str, enable_web_browsable_api: bool = False
     ) -> None:
         service_url = ''.join([self.service_url, url_prefix]) if url_prefix else self.service_url
         app.add_url_rule(
@@ -89,7 +91,7 @@ class JSONRPC(JSONRCPDecoratorMixin):
             self.register_browse(app, jsonrpc_app, url_prefix=url_prefix)
 
     def register_browse(
-        self, app: Flask, jsonrpc_app: Union['JSONRPC', JSONRPCBlueprint], url_prefix: Union[str, None] = None
+        self, app: Flask, jsonrpc_app: Union['JSONRPC', 'JSONRPCBlueprint'], url_prefix: Optional[str] = None
     ) -> None:
         browse_url = ''.join([self.service_url, url_prefix, '/browse']) if url_prefix else self.browse_url
         if app.config['DEBUG'] or self.enable_web_browsable_api:

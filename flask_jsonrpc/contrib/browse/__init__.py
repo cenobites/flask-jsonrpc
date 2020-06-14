@@ -25,19 +25,20 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-from typing import Any, Dict
+from typing import TYPE_CHECKING, Any, Dict
 
-from flask import Blueprint, jsonify, render_template, request
+from flask import Blueprint, jsonify, request, render_template
 
-from flask_jsonrpc.site import JSONRPCSite
+if TYPE_CHECKING:
+    from flask_jsonrpc.site import JSONRPCSite
 
 
-def create_browse(name: str, jsonrpc_site: JSONRPCSite) -> Blueprint:
+def create_browse(name: str, jsonrpc_site: 'JSONRPCSite') -> Blueprint:
     browse = Blueprint(name, __name__, template_folder='templates', static_folder='static')
 
     # pylint: disable=W0612
     @browse.route('/')
-    def index():
+    def index() -> str:
         url_prefix = request.path
         url_prefix = url_prefix if not url_prefix.endswith('/') else url_prefix[:-1]
         service_url = url_prefix.replace('/browse', '')
@@ -45,7 +46,7 @@ def create_browse(name: str, jsonrpc_site: JSONRPCSite) -> Blueprint:
 
     # pylint: disable=W0612
     @browse.route('/packages.json')
-    def json_packages():
+    def json_packages() -> Any:
         jsonrpc_describe = jsonrpc_site.describe()
         packages = sorted(jsonrpc_describe['procs'], key=lambda proc: proc['name'])
         packages_tree: Dict[str, Any] = {}
@@ -56,19 +57,19 @@ def create_browse(name: str, jsonrpc_site: JSONRPCSite) -> Blueprint:
 
     # pylint: disable=W0612
     @browse.route('/<method_name>.json')
-    def json_method(method_name: str):
+    def json_method(method_name: str) -> Any:
         jsonrpc_describe = jsonrpc_site.describe()
         method = [method for method in jsonrpc_describe['procs'] if method['name'] == method_name][0]
         return jsonify(method)
 
     # pylint: disable=W0612
     @browse.route('/partials/dashboard.html')
-    def partials_dashboard():
+    def partials_dashboard() -> str:
         return render_template('browse/partials/dashboard.html')
 
     # pylint: disable=W0612
     @browse.route('/partials/response_object.html')
-    def partials_response_object():
+    def partials_response_object() -> str:
         return render_template('browse/partials/response_object.html')
 
     return browse

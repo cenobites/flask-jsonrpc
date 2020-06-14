@@ -25,12 +25,14 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-from typing import Type
+from typing import TYPE_CHECKING, Type
 
 from .globals import default_jsonrpc_site, default_jsonrpc_site_api
-from .site import JSONRPCSite
-from .views import JSONRPCView
 from .wrappers import JSONRCPDecoratorMixin
+
+if TYPE_CHECKING:
+    from .site import JSONRPCSite
+    from .views import JSONRPCView
 
 
 class JSONRPCBlueprint(JSONRCPDecoratorMixin):
@@ -38,16 +40,16 @@ class JSONRPCBlueprint(JSONRCPDecoratorMixin):
         self,
         name: str,
         import_name: str,
-        jsonrpc_site: Type[JSONRPCSite] = default_jsonrpc_site,
-        jsonrpc_site_api: Type[JSONRPCView] = default_jsonrpc_site_api,
-    ):
+        jsonrpc_site: Type['JSONRPCSite'] = default_jsonrpc_site,
+        jsonrpc_site_api: Type['JSONRPCView'] = default_jsonrpc_site_api,
+    ) -> None:
         self.name = name
         self.import_name = import_name
         self.jsonrpc_site = jsonrpc_site()
         self.jsonrpc_site_api = jsonrpc_site_api
 
-    def get_jsonrpc_site(self) -> JSONRPCSite:
+    def get_jsonrpc_site(self) -> 'JSONRPCSite':
         return self.jsonrpc_site
 
-    def get_jsonrpc_site_api(self) -> Type[JSONRPCView]:
+    def get_jsonrpc_site_api(self) -> Type['JSONRPCView']:
         return self.jsonrpc_site_api

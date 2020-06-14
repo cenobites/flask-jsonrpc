@@ -32,7 +32,7 @@ from functools import wraps
 
 from flask import Flask
 
-from flask_jsonrpc import JSONRPC, InvalidCredentialsError, InvalidParamsError  # noqa: E402
+from flask_jsonrpc import JSONRPC, InvalidParamsError, InvalidCredentialsError  # noqa: E402
 
 PROJECT_DIR, PROJECT_MODULE_NAME = os.path.split(os.path.dirname(os.path.realpath(__file__)))
 
