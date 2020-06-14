@@ -218,11 +218,11 @@ def test_app_echo_raise_invalid_params_error(client):
 def test_app_notify(client):
     rv = client.post('/api', json={'jsonrpc': '2.0', 'method': 'jsonrpc.notify'})
     assert rv.json is None
-    assert rv.status_code == 200
+    assert rv.status_code == 204
 
     rv = client.post('/api', json={'jsonrpc': '2.0', 'method': 'jsonrpc.notify', 'params': ['Some string']})
     assert rv.json is None
-    assert rv.status_code == 200
+    assert rv.status_code == 204
 
 
 def test_app_fails(client):

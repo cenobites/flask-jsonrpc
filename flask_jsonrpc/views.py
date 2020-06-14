@@ -42,4 +42,6 @@ class JSONRPCView(View):
 
     def dispatch_request(self) -> Response:  # type: ignore
         response, status_code, headers = self.jsonrpc_site.dispatch_request()
+        if status_code == 204:
+            return make_response('', status_code, headers)
         return make_response(jsonify(response), status_code, headers)

@@ -186,7 +186,7 @@ class JSONRPCSite:
     ) -> Tuple[Any, int, Union[Headers, Dict[str, str], Tuple[str], List[Tuple[str]]]]:
         rv, status_code, headers = self.unpack_tuple_returns(resp_view)
         if self.is_notification_request(req_json):
-            return None, status_code, headers
+            return None, 204, headers
         resp = {'id': req_json.get('id'), 'jsonrpc': req_json.get('jsonrpc', JSONRPC_VERSION_DEFAULT), 'result': rv}
         return resp, status_code, headers
 
