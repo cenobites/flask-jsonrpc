@@ -39,8 +39,8 @@ def create_browse(name: str, jsonrpc_site: 'JSONRPCSite') -> Blueprint:
     # pylint: disable=W0612
     @browse.route('/')
     def index() -> str:
-        url_prefix = request.path
-        url_prefix = url_prefix if not url_prefix.endswith('/') else url_prefix[:-1]
+        url_prefix = request.script_root + request.path
+        url_prefix = url_prefix.rstrip('/')
         service_url = url_prefix.replace('/browse', '')
         return render_template('browse/index.html', service_url=service_url, url_prefix=url_prefix)
 

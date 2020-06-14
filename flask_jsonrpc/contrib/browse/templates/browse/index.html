@@ -4,15 +4,15 @@
 {% block bodyid %}browse{% endblock %}
 
 {% block include_style %}
-<link href="{{ url_for('static', filename='css/bootstrap-browse.css') }}" rel="stylesheet"/>
+<link href="{{ url_for('browse.static', filename='css/bootstrap-browse.css') }}" rel="stylesheet"/>
 {% endblock %}
 
 {% block include_script %}
-<script type="text/javascript" src="{{ url_for('static', filename='js/apps/browse/app.js') }}"></script>
-<script type="text/javascript" src="{{ url_for('static', filename='js/apps/browse/directives.js') }}"></script>
-<script type="text/javascript" src="{{ url_for('static', filename='js/apps/browse/filters.js') }}"></script>
-<script type="text/javascript" src="{{ url_for('static', filename='js/apps/browse/services.js') }}"></script>
-<script type="text/javascript" src="{{ url_for('static', filename='js/apps/browse/controllers.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('browse.static', filename='js/apps/browse/app.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('browse.static', filename='js/apps/browse/directives.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('browse.static', filename='js/apps/browse/filters.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('browse.static', filename='js/apps/browse/services.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('browse.static', filename='js/apps/browse/controllers.js') }}"></script>
 {% endblock %}
 
 {% block templates_js %}
@@ -105,7 +105,7 @@
         </div>
       </div>
       <div class="loading-content">
-        <img alt="loading" src="{{ url_for('static', filename='img/iframe-loader.gif') }}">
+        <img alt="loading" src="{{ url_for('browse.static', filename='img/iframe-loader.gif') }}">
         <h1>Just one moment...</h1>
         Please wait while we get your web browsable API information.
         <div> </div>

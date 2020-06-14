@@ -81,6 +81,10 @@ def test_browse_create():
         assert b'module_dialog.html' in rv.data
         assert rv.status_code == 200
 
+        rv = client.get('/api/browse/static/js/main.js')
+        assert b'App' in rv.data
+        assert rv.status_code == 200
+
 
 def test_browse_create_without_register_app():
     app = Flask(__name__, instance_relative_config=True)
@@ -109,6 +113,10 @@ def test_browse_create_without_register_app():
 
         rv = client.get('/api/browse/')
         assert b'Flask JSON-RPC | Web Browsable API' in rv.data
+        assert rv.status_code == 200
+
+        rv = client.get('/api/browse/static/js/main.js')
+        assert b'App' in rv.data
         assert rv.status_code == 200
 
 
@@ -161,6 +169,10 @@ def test_browse_create_multiple_jsonrpc_versions():
         assert b'Flask JSON-RPC | Web Browsable API' in rv.data
         assert rv.status_code == 200
 
+        rv = client.get('/api/v1/browse/static/js/main.js')
+        assert b'App' in rv.data
+        assert rv.status_code == 200
+
         rv = client.get('/api/v2/browse/packages.json')
         assert rv.json == {
             'app': [
@@ -182,6 +194,10 @@ def test_browse_create_multiple_jsonrpc_versions():
 
         rv = client.get('/api/v2/browse/')
         assert b'Flask JSON-RPC | Web Browsable API' in rv.data
+        assert rv.status_code == 200
+
+        rv = client.get('/api/v2/browse/static/js/main.js')
+        assert b'App' in rv.data
         assert rv.status_code == 200
 
 
@@ -232,6 +248,14 @@ def test_browse_create_modular_apps():
         }
         assert rv.status_code == 200
 
+        rv = client.get('/api/b1/browse/')
+        assert b'Flask JSON-RPC | Web Browsable API' in rv.data
+        assert rv.status_code == 200
+
+        rv = client.get('/api/b1/browse/static/js/main.js')
+        assert b'App' in rv.data
+        assert rv.status_code == 200
+
         rv = client.get('/api/b2/browse/packages.json')
         assert rv.json == {
             'blue2': [
@@ -249,6 +273,14 @@ def test_browse_create_modular_apps():
                 },
             ]
         }
+        assert rv.status_code == 200
+
+        rv = client.get('/api/b2/browse/')
+        assert b'Flask JSON-RPC | Web Browsable API' in rv.data
+        assert rv.status_code == 200
+
+        rv = client.get('/api/b2/browse/static/js/main.js')
+        assert b'App' in rv.data
         assert rv.status_code == 200
 
         rv = client.get('/api/b3/browse/packages.json')
