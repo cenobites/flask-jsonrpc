@@ -1,3 +1,6 @@
+[![Build Status](https://travis-ci.org/cenobites/flask-jsonrpc.svg?branch=master)](https://travis-ci.org/cenobites/flask-jsonrpc)
+[![Coverage Status](https://coveralls.io/repos/github/cenobites/flask-jsonrpc/badge.svg?branch=master)](https://coveralls.io/github/cenobites/flask-jsonrpc?branch=master)
+
 # Flask JSON-RPC
 
 A basic JSON-RPC implementation for your Flask-powered sites.
