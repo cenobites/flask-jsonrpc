@@ -1,18 +1,14 @@
 # Flask JSON-RPC
 
-A basic JSON-RPC implementation for your Flask-powered sites based on `django-json-rpc <https://github.com/samuraisam/django-json-rpc>`_.
+A basic JSON-RPC implementation for your Flask-powered sites.
 
 Some reasons you might want to use:
 
 * Simple, powerful, flexible and pythonic API.
-* Support python 2.7, `3.3 or later <http://flask.pocoo.org/docs/python3/#python3-support>`_
+* Support python 3.6 or later.
 * The web browsable API.
-* Support for authentication.
-* Proxy to test your JSON Service.
-* Run-time type checking.
+* Run-time type checking functions defined with `PEP 484 <https://www.python.org/dev/peps/pep-0484/>`_ argument (and return) type annotations.
 * Extensive documentation, and great community support.
-
-For support python 2.6.5+ or earlier use the branch `py2k <https://github.com/cenobites/flask-jsonrpc/tree/py2k>`_.
 
 There is a live example API for testing purposes, `available here <http://flask-jsonrpc.herokuapp.com/api/browse>`_.
 
@@ -53,8 +49,8 @@ Write JSON-RPC methods.
 
 ```
     @jsonrpc.method('App.index')
-    def index():
-        return u'Welcome to Flask JSON-RPC'
+    def index() -> str:
+        return 'Welcome to Flask JSON-RPC'
 ```
 
 All code of example `run.py <https://github.com/cenobites/flask-jsonrpc/blob/master/run.py>`_.
@@ -91,40 +87,9 @@ All code of example `run.py <https://github.com/cenobites/flask-jsonrpc/blob/mas
     }
 ```
 
-### Testing your service
-
-You can test your service using the provided web browsable API, available at http://localhost:5000/api/browse (if using the url patterns from above) or with the included ServiceProxy:
-
-```
-    >>> from flask_jsonrpc.proxy import ServiceProxy
-    >>> server = ServiceProxy('http://localhost:5000/api')
-    >>>
-    >>> server.App.index()
-    {'jsonrpc': '2.0', 'id': '91bce374-462f-11e2-af55-f0bf97588c3b', 'result': 'Welcome to Flask JSON-RPC'}
-```
-
-We add the ``jsonrpc_version`` variable to the request object. It be either '1.0', '1.1' or '2.0'. Arg.
-
-For more tests see `Examples <https://github.com/cenobites/flask-jsonrpc/wiki/Examples>`_.
-
 
 ### References
 
 * http://docs.python.org/
-* http://flask.pocoo.org/docs/
-* http://lucumr.pocoo.org/2011/1/22/forwards-compatible-python/
-* http://flask.pocoo.org/docs/python3/#python3-support
+* https://flask.palletsprojects.com/
 * http://www.jsonrpc.org/
-
-
-### Dependencies
-
-* Python (2.6.5+), (2.7, 3.3) or later (http://www.python.org)
-* Flask 0.10 or later (http://flask.pocoo.org)
-
-
-### Project Information
-
-:Author: Cenobit Technologies, Inc.
-:Version: v0.3.1 of 2016/05/11
-:License: `New BSD License <http://opensource.org/licenses/BSD-3-Clause>`_

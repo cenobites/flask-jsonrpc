@@ -26,30 +26,7 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-import sys
-
 from setuptools import setup
-from setuptools.command.test import test as TestCommand
-
-
-class PyTest(TestCommand):
-    user_options = [('pytest-args=', 'a', 'Arguments to pass to py.test')]
-
-    def initialize_options(self):
-        TestCommand.initialize_options(self)
-        self.pytest_args = []
-
-    def finalize_options(self):
-        TestCommand.finalize_options(self)
-        self.test_args = []
-        self.test_suite = True
-
-    def run_tests(self):
-        import pytest
-
-        errno = pytest.main(self.test_args)
-        sys.exit(errno)
-
 
 setup(
     name='Flask-JSONRPC',
@@ -60,13 +37,14 @@ setup(
     author_email='nycholas@gmail.com',
     description='Adds JSONRPC support to Flask.',
     long_description=open('README.md').read(),
-    packages=['flask_jsonrpc', 'flask_jsonrpc.views', 'flask_jsonrpc.views.browse'],
+    packages=['flask_jsonrpc', 'flask_jsonrpc.contrib', 'flask_jsonrpc.contrib.browse'],
     zip_safe=False,
     include_package_data=True,
     platforms='any',
+    python_requires='>= 3.6',
     install_requires=['Flask>=1.0.0', 'typeguard'],
-    tests_require=['mock', 'coverage', 'pytest', 'pytest-cov'],
-    cmdclass={'test': PyTest},
+    setup_requires=['pytest-runner'],
+    tests_require=['mock', 'coverage', 'pytest', 'pytest-cov', 'typeguard'],
     classifiers=[
         'Environment :: Web Environment',
         'Intended Audience :: Developers',
