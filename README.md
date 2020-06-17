@@ -5,16 +5,17 @@ A basic JSON-RPC implementation for your Flask-powered sites.
 Some reasons you might want to use:
 
 * Simple, powerful, flexible and pythonic API.
+* Support JSON-RPC 2.0 version.
 * Support python 3.6 or later.
 * The web browsable API.
-* Run-time type checking functions defined with `PEP 484 <https://www.python.org/dev/peps/pep-0484/>`_ argument (and return) type annotations.
+* Run-time type checking functions defined with [PEP 484](https://www.python.org/dev/peps/pep-0484/) argument (and return) type annotations.
 * Extensive documentation, and great community support.
 
-There is a live example API for testing purposes, `available here <http://flask-jsonrpc.herokuapp.com/api/browse>`_.
+There is a live example API for testing purposes, [available here](http://flask-jsonrpc.herokuapp.com/api/browse).
 
 **Below:** *Screenshot from the browsable API*
 
-.. image:: https://f.cloud.github.com/assets/298350/1575590/203c595a-5150-11e3-99a0-4a6fd9bcbe52.png
+![Web browsable API](https://f.cloud.github.com/assets/298350/1575590/203c595a-5150-11e3-99a0-4a6fd9bcbe52.png "Web browsable API")
 
 ### Adding Flask JSON-RPC to your application
 
@@ -53,7 +54,7 @@ Write JSON-RPC methods.
         return 'Welcome to Flask JSON-RPC'
 ```
 
-All code of example `run.py <https://github.com/cenobites/flask-jsonrpc/blob/master/run.py>`_.
+All code of example [run.py](https://github.com/cenobites/flask-jsonrpc/blob/master/run.py).
 
 
 3. Running
@@ -90,6 +91,6 @@ All code of example `run.py <https://github.com/cenobites/flask-jsonrpc/blob/mas
 
 ### References
 
-* http://docs.python.org/
-* https://flask.palletsprojects.com/
-* http://www.jsonrpc.org/
+* [http://docs.python.org/](http://docs.python.org/)
+* [https://flask.palletsprojects.com/](https://flask.palletsprojects.com/)
+* [http://www.jsonrpc.org/](http://www.jsonrpc.org/)
