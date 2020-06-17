@@ -26,13 +26,11 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
+# isort:skip_file
 import os
 import sys
 
 from flask import Flask, render_template
-
-import api.hello  # noqa: E402
-from flask_jsonrpc import JSONRPC  # noqa: E402
 
 PROJECT_DIR, PROJECT_MODULE_NAME = os.path.split(os.path.dirname(os.path.realpath(__file__)))
 
@@ -40,10 +38,13 @@ FLASK_JSONRPC_PROJECT_DIR = os.path.join(PROJECT_DIR, os.pardir)
 if os.path.exists(FLASK_JSONRPC_PROJECT_DIR) and FLASK_JSONRPC_PROJECT_DIR not in sys.path:
     sys.path.append(FLASK_JSONRPC_PROJECT_DIR)
 
+from api.hello import hello  # noqa: E402   pylint: disable=C0413
+from flask_jsonrpc import JSONRPC  # noqa: E402   pylint: disable=C0413
 
 app = Flask(__name__)
 app.config.from_object(__name__)
 jsonrpc = JSONRPC(app, '/api')
+jsonrpc.register_blueprint(app, hello, url_prefix='/hello')
 
 
 @app.route('/')

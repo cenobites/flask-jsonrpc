@@ -23,7 +23,7 @@
   <script type="text/javascript" src="{{ url_for('static', filename='js/api.js') }}"></script>
   <script type="text/javascript">
     $(document).ready(function($) {
-      var jsonrpc = new $jsonrpc({url: 'http://localhost:5000/api', version: '2.0'});
+      var jsonrpc = new $jsonrpc({url: 'http://localhost:5000/api/hello', version: '2.0'});
 
       $('#form')
         .undelegate('#btn-send', 'click')

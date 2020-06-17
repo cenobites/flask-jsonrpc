@@ -43,7 +43,6 @@ repos:
       language: system
       entry: pylint
       types: [python]
-      files: ^flask_jsonrpc/
 - repo: local
   hooks:
     - id: mypy
@@ -57,6 +56,6 @@ repos:
     - id: pytest
       name: pytest
       language: system
-      entry: pytest
+      entry: pytest flask_jsonrpc/ tests/
       types: [python]
       pass_filenames: false

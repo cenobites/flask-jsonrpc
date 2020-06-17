@@ -32,6 +32,7 @@ from flask import json, request, current_app
 
 from werkzeug.datastructures import Headers
 
+from .helpers import from_python_type
 from .exceptions import (
     ParseError,
     ServerError,
@@ -194,11 +195,7 @@ class JSONRPCSite:
         return 'id' not in req_json
 
     def python_type_name(self, pytype: Type[T]) -> str:
-        if pytype is None:
-            return 'none'
-        if getattr(pytype, '__name__', None):
-            return pytype.__name__
-        return str(pytype)
+        return str(from_python_type(pytype))
 
     def procedure_desc(self, key: str) -> Dict[str, Any]:
         view_func = self.view_funcs[key]

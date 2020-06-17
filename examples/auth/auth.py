@@ -26,12 +26,11 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
+# isort:skip_file
 import os
 import sys
 
-from flask import Flask
-
-from flask_jsonrpc import JSONRPC  # noqa: E402
+from flask import Flask, request
 
 PROJECT_DIR, PROJECT_MODULE_NAME = os.path.split(os.path.dirname(os.path.realpath(__file__)))
 
@@ -39,23 +38,37 @@ FLASK_JSONRPC_PROJECT_DIR = os.path.join(PROJECT_DIR, os.pardir)
 if os.path.exists(FLASK_JSONRPC_PROJECT_DIR) and FLASK_JSONRPC_PROJECT_DIR not in sys.path:
     sys.path.append(FLASK_JSONRPC_PROJECT_DIR)
 
+from flask_jsonrpc import JSONRPC, JSONRPCView  # noqa: E402   pylint: disable=C0413
+
+
+class UnauthorizedError(Exception):
+    pass
+
+
+class AuthorizationView(JSONRPCView):
+    def check_auth(self) -> bool:
+        username = request.headers.get('X-Username')
+        password = request.headers.get('X-Password')
+        return username == 'username' and password == 'secret'
+
+    def dispatch_request(self):
+        if not self.check_auth():
+            raise UnauthorizedError()
+        return super(AuthorizationView, self).dispatch_request()
+
 
 app = Flask(__name__)
-jsonrpc = JSONRPC(app, '/api')
+jsonrpc = JSONRPC(app, '/api', jsonrpc_site_api=AuthorizationView)
 
 
-def check_auth(_username, _password):
-    return True
+@jsonrpc.method('App.index')
+def index() -> str:
+    return 'Welcome to Flask JSON-RPC'
 
 
-@jsonrpc.method('App.index', authenticated=check_auth)
-def index():
-    return u'Welcome to Flask JSON-RPC'
-
-
-@jsonrpc.method('App.echo(name=str) -> str', validate=True, authenticated=check_auth)
-def echo(name='Flask JSON-RPC'):
-    return u'Hello {0}'.format(name)
+@jsonrpc.method('App.echo')
+def echo(name: str = 'Flask JSON-RPC') -> str:
+    return 'Hello {0}'.format(name)
 
 
 if __name__ == '__main__':

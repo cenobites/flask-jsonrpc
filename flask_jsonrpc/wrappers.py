@@ -25,7 +25,7 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-from typing import TYPE_CHECKING, Any, Type, Callable, Optional
+from typing import TYPE_CHECKING, Any, Type, Callable, Optional, get_type_hints
 
 from typeguard import typechecked
 
@@ -46,7 +46,7 @@ class JSONRCPDecoratorMixin:
             method_name = fn.__name__ if not name else name
             if validate and not getattr(fn, '__annotations__', None):
                 raise ValueError('no type annotations present to: {0}'.format(method_name))
-            fn_annotations = fn.__annotations__.copy()
+            fn_annotations = get_type_hints(fn)
             fn.jsonrpc_method_name = method_name  # type: ignore
             fn.jsonrpc_method_sig = fn_annotations.copy()  # type: ignore
             fn.jsonrpc_method_return = fn_annotations.pop('return', None)  # type: ignore

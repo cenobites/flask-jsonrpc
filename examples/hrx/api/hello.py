@@ -25,19 +25,16 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-from flask import Blueprint
+from flask_jsonrpc import JSONRPCBlueprint
 
-from hrx import jsonrpc
-
-mod = Blueprint('hello', __name__)
-jsonrpc.register_blueprint(mod)
+hello = JSONRPCBlueprint('hello', __name__)
 
 
-@jsonrpc.method('Hello.index')
-def index():
-    return u'Welcome to Hello API!'
+@hello.method('Hello.index')
+def index() -> str:
+    return 'Welcome to Hello API!'
 
 
-@jsonrpc.method('Hello.say(name=String)')
-def say(name=''):
-    return u'Hello {0}!'.format(name)
+@hello.method('Hello.say')
+def say(name: str = '') -> str:
+    return 'Hello {0}!'.format(name)

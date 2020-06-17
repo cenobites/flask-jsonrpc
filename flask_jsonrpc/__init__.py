@@ -26,6 +26,7 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 from .app import JSONRPC
+from .views import JSONRPCView
 from .blueprints import JSONRPCBlueprint
 
 __version__ = '1.0.0rc1'

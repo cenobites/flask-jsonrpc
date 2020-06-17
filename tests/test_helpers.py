@@ -25,9 +25,28 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-from flask_jsonrpc.helpers import urn
+from typing import AnyStr
+
+import pytest
+
+from flask_jsonrpc.helpers import urn, from_python_type
 
 
 def test_urn():
-    assert urn('') == 'urn::'
-    assert urn('a', 'b', 'c', 'd') == 'urn:a:b.c.d'
+    with pytest.raises(ValueError, match='name is required'):
+        urn(None)
+    with pytest.raises(ValueError, match='name is required'):
+        urn('')
+    assert urn('a', 'b', 'c', 'd') == 'urn::a:b.c.d'
+
+
+def test_from_python_type():
+    assert str(from_python_type(str)) == 'String'
+    assert str(from_python_type(AnyStr)) == 'String'
+    assert str(from_python_type(int)) == 'Number'
+    assert str(from_python_type(float)) == 'Number'
+    assert str(from_python_type(dict)) == 'Object'
+    assert str(from_python_type(list)) == 'Array'
+    assert str(from_python_type(tuple)) == 'Array'
+    assert str(from_python_type(bool)) == 'Boolean'
+    assert str(from_python_type(type(None))) == 'Null'

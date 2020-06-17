@@ -26,12 +26,64 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 import itertools
-from typing import Any
+from typing import TYPE_CHECKING, Any
+
+from .types import Types, Object
+
+if TYPE_CHECKING:
+    from .types import JSONRPCNewType
 
 
 def urn(name: str, *args: Any) -> str:
+    """Return the URN name.
+
+    >>> urn('python')
+    'urn::python'
+    >>> urn('python', 'Flask', 'JsonRPC')
+    'urn::python:flask.jsonrpc'
+    >>> urn('python', '/api/browse')
+    'urn::python:api.browse'
+    >>> urn(None)
+    Traceback (most recent call last):
+        ...
+    ValueError: name is required
+    >>> urn('')
+    Traceback (most recent call last):
+        ...
+    ValueError: name is required
+    """
+    if not name:
+        raise ValueError('name is required')
     splited_args = [arg.split('/') for arg in args]
     st = '.'.join(list(itertools.chain(*splited_args)))
-    st = st[1::] if st.startswith('.') else st
-    st = st[0:-1] if st.endswith('.') else st
-    return 'urn:{0}:{1}'.format(name, st.replace('..', '.'))
+    st = st.rstrip('.').lstrip('.')
+    sep = ':' if len(args) > 0 else ''
+    return 'urn::{0}{1}{2}'.format(name, sep, st.replace('..', '.')).lower()
+
+
+def from_python_type(tp: Any) -> 'JSONRPCNewType':
+    """Convert Python type to JSONRPCNewType.
+
+    >>> str(from_python_type(str))
+    'String'
+    >>> str(from_python_type(int))
+    'Number'
+    >>> str(from_python_type(dict))
+    'Object'
+    >>> str(from_python_type(list))
+    'Array'
+    >>> str(from_python_type(bool))
+    'Boolean'
+    >>> str(from_python_type(None))
+    'Null'
+    """
+    for t in Types:
+        if t.check_type(tp):
+            return t
+    return Object
+
+
+if __name__ == '__main__':
+    import doctest
+
+    doctest.testmod()

@@ -57,7 +57,7 @@ def create_app(test_config=None):  # noqa: C901  pylint: disable=W0612
 
     # pylint: disable=W0612
     @jsonrpc.method('jsonrpc.echo')
-    def echo(string: str) -> str:
+    def echo(string: str, _some: Any = None) -> str:
         return string
 
     # pylint: disable=W0612

@@ -56,8 +56,8 @@ def test_browse_create():
             'app': [
                 {
                     'name': 'app.fn2',
-                    'params': [{'name': 's', 'type': 'str'}],
-                    'return': {'type': 'str'},
+                    'params': [{'name': 's', 'type': 'String'}],
+                    'return': {'type': 'String'},
                     'summary': None,
                 }
             ]
@@ -67,8 +67,8 @@ def test_browse_create():
         rv = client.get('/api/browse/app.fn2.json')
         assert rv.json == {
             'name': 'app.fn2',
-            'params': [{'name': 's', 'type': 'str'}],
-            'return': {'type': 'str'},
+            'params': [{'name': 's', 'type': 'String'}],
+            'return': {'type': 'String'},
             'summary': None,
         }
         assert rv.status_code == 200
@@ -103,8 +103,8 @@ def test_browse_create_without_register_app():
             'app': [
                 {
                     'name': 'app.fn2',
-                    'params': [{'name': 's', 'type': 'str'}],
-                    'return': {'type': 'str'},
+                    'params': [{'name': 's', 'type': 'String'}],
+                    'return': {'type': 'String'},
                     'summary': None,
                 }
             ]
@@ -151,14 +151,14 @@ def test_browse_create_multiple_jsonrpc_versions():
             'app': [
                 {
                     'name': 'app.fn2',
-                    'params': [{'name': 's', 'type': 'str'}],
-                    'return': {'type': 'str'},
+                    'params': [{'name': 's', 'type': 'String'}],
+                    'return': {'type': 'String'},
                     'summary': None,
                 },
                 {
                     'name': 'app.fn3',
-                    'params': [{'name': 's', 'type': 'str'}],
-                    'return': {'type': 'str'},
+                    'params': [{'name': 's', 'type': 'String'}],
+                    'return': {'type': 'String'},
                     'summary': None,
                 },
             ]
@@ -178,14 +178,14 @@ def test_browse_create_multiple_jsonrpc_versions():
             'app': [
                 {
                     'name': 'app.fn1',
-                    'params': [{'name': 's', 'type': 'str'}],
-                    'return': {'type': 'str'},
+                    'params': [{'name': 's', 'type': 'String'}],
+                    'return': {'type': 'String'},
                     'summary': None,
                 },
                 {
                     'name': 'app.fn2',
-                    'params': [{'name': 's', 'type': 'str'}],
-                    'return': {'type': 'str'},
+                    'params': [{'name': 's', 'type': 'String'}],
+                    'return': {'type': 'String'},
                     'summary': None,
                 },
             ]
@@ -240,8 +240,8 @@ def test_browse_create_modular_apps():
             'blue1': [
                 {
                     'name': 'blue1.fn2',
-                    'params': [{'name': 's', 'type': 'str'}],
-                    'return': {'type': 'str'},
+                    'params': [{'name': 's', 'type': 'String'}],
+                    'return': {'type': 'String'},
                     'summary': None,
                 }
             ]
@@ -261,14 +261,14 @@ def test_browse_create_modular_apps():
             'blue2': [
                 {
                     'name': 'blue2.fn1',
-                    'params': [{'name': 's', 'type': 'str'}],
-                    'return': {'type': 'str'},
+                    'params': [{'name': 's', 'type': 'String'}],
+                    'return': {'type': 'String'},
                     'summary': None,
                 },
                 {
                     'name': 'blue2.fn2',
-                    'params': [{'name': 's', 'type': 'str'}],
-                    'return': {'type': 'str'},
+                    'params': [{'name': 's', 'type': 'String'}],
+                    'return': {'type': 'String'},
                     'summary': None,
                 },
             ]

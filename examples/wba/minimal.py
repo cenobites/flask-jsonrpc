@@ -26,12 +26,12 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
+# isort:skip_file
 import os
 import sys
+from typing import NoReturn, Optional
 
 from flask import Flask
-
-from flask_jsonrpc import JSONRPC  # noqa: E402
 
 PROJECT_DIR, PROJECT_MODULE_NAME = os.path.split(os.path.dirname(os.path.realpath(__file__)))
 
@@ -39,51 +39,45 @@ FLASK_JSONRPC_PROJECT_DIR = os.path.join(PROJECT_DIR, os.pardir)
 if os.path.exists(FLASK_JSONRPC_PROJECT_DIR) and FLASK_JSONRPC_PROJECT_DIR not in sys.path:
     sys.path.append(FLASK_JSONRPC_PROJECT_DIR)
 
+from flask_jsonrpc import JSONRPC  # noqa: E402   pylint: disable=C0413
 
 app = Flask(__name__)
 jsonrpc = JSONRPC(app, '/api', enable_web_browsable_api=True)
 
 
 @jsonrpc.method('App.index')
-def index():
-    return u'Welcome to Flask JSON-RPC'
+def index() -> str:
+    return 'Welcome to Flask JSON-RPC'
 
 
 @jsonrpc.method('App.hello')
-def hello(name):
-    return u'Hello {0}'.format(name)
+def hello(name: str) -> str:
+    return 'Hello {0}'.format(name)
 
 
 @jsonrpc.method('App.helloDefaultArgs')
-def hello_default_args(string='Flask JSON-RPC'):
-    return u'We salute you {0}'.format(string)
+def hello_default_args(string: str = 'Flask JSON-RPC') -> str:
+    return 'We salute you {0}'.format(string)
 
 
-@jsonrpc.method('App.helloDefaultArgsValidate(string=str) -> str', validate=True)
-def hello_default_args_validate(string='Flask JSON-RPC'):
-    return u'We salute you {0}'.format(string)
+@jsonrpc.method('App.helloDefaultArgsValidate')
+def hello_default_args_validate(string: str = 'Flask JSON-RPC') -> str:
+    return 'We salute you {0}'.format(string)
 
 
-@jsonrpc.method(
-    'App.argsValidateJSONMode(a1=Number, a2=String, a3=Boolean, a4=Array, a5=Object) -> Object', validate=True
-)
-def args_validate_json_mode(a1, a2, a3, a4, a5):
-    return u'Number: {0}, String: {1}, Boolean: {2}, Array: {3}, Object: {4}'.format(a1, a2, a3, a4, a5)
-
-
-@jsonrpc.method('App.argsValidatePythonMode(a1=int, a2=str, a3=bool, a4=list, a5=dict) -> object')
-def args_validate_python_mode(a1, a2, a3, a4, a5):
-    return u'int: {0}, str: {1}, bool: {2}, list: {3}, dict: {4}'.format(a1, a2, a3, a4, a5)
+@jsonrpc.method('App.args')
+def args_validate_python_mode(a1: int, a2: str, a3: bool, a4: list, a5: dict) -> str:
+    return 'int: {0}, str: {1}, bool: {2}, list: {3}, dict: {4}'.format(a1, a2, a3, a4, a5)
 
 
 @jsonrpc.method('App.notify')
-def notify(string):
+def notify(_string: Optional[str]) -> None:
     pass
 
 
 @jsonrpc.method('App.fails')
-def fails(string):
-    raise ValueError
+def fails(string: Optional[str]) -> NoReturn:
+    raise ValueError('example of fail')
 
 
 if __name__ == '__main__':

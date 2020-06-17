@@ -81,32 +81,29 @@
                     return $http(options);
                 },
                 getValue: function(param) {
-                    if (param.type === 'obj') {
+                    if (param.type === 'Object') {
                         return eval('('+ param.value + ')');
-                    } else if (param.type === 'num') {
+                    } else if (param.type === 'Number') {
                         if (param.value.indexOf('.') !== -1) {
                             return parseFloat(param.value);
                         }
                         return parseInt(param.value);
-                    } else if (param.type === 'bool') {
+                    } else if (param.type === 'Boolean') {
                         return (/^(true|1)$/i).test(param.value);
-                    } else if (param.type === 'str') {
+                    } else if (param.type === 'String') {
                         return param.value;
-                    } else if (param.type === 'arr') {
+                    } else if (param.type === 'Array') {
                         return eval('(' + param.value + ')');
-                    } else if (param.type === 'nil') {
+                    } else if (param.type === 'Null') {
                         return null;
-                    } else if (param.type === 'any') {
-                        return param.value;
                     }
-                    return param;
+                    return param.value;
                 },
                 payload: function(module, options) {
                     var payload = {
                         jsonrpc: '2.0',
                         method: module.name,
                         params: {}
-                        //params: []
                     };
 
                     if (!module.notify) {
@@ -120,7 +117,6 @@
 
                     for (var i = 0; i < module.params.length; i++) {
                         payload.params[module.params[i].name] = this.getValue(module.params[i]);
-                        //payload.params.push(module.params[i].value);
                     }
 
                     return payload;

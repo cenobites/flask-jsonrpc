@@ -58,16 +58,19 @@ Testing your service
 
     {
       "error": {
-        "code": 500,
-        "data": null,
-        "executable": "/usr/bin/python2",
-        "message": "OtherError: Invalid terminal ID",
-        "name": "OtherError",
-        "stack": "Traceback (most recent call last):\n  File \"/home/nycholas/project/src/o_lalertom/flask/flask-jsonrpc/examples/../flask_jsonrpc/site.py\", line 208, in response_dict\n    R = apply_version[version](method, D['params'])\n  File \"/home/nycholas/project/src/o_lalertom/flask/flask-jsonrpc/examples/../flask_jsonrpc/site.py\", line 168, in <lambda>\n    '2.0': lambda f, p: f(**encode_kw(p)) if type(p) is dict else f(*p),\n  File \"decorator.py\", line 53, in wrapped\n    raise OtherError('Invalid terminal ID')\nOtherError\n"
+          "code": -32000,
+          "data": {
+          "message": "Invalid terminal ID"
+          },
+          "executable": "/home/nycholas/project/cenobit.es/src/flask-jsonrpc/.venv/bin/python",
+          "message": "Server error",
+          "name": "ServerError",
+          "stack": "Traceback (most recent call last):\n  File \"/home/nycholas/project/cenobit.es/src/flask-jsonrpc/examples/../flask_jsonrpc/site.py\", line 88, in dispatch_request\n    return self.dispatch(json_data)\n  File \"/home/nycholas/project/cenobit.es/src/flask-jsonrpc/examples/../flask_jsonrpc/site.py\", line 138, in dispatch\n    resp_view = view_func(**params)\n  File \"/home/nycholas/project/cenobit.es/src/flask-jsonrpc/.venv/lib/python3.8/site-packages/typeguard/__init__.py\", line 840, in wrapper\n    retval = func(*args, **kwargs)\n  File \"/home/nycholas/project/cenobit.es/src/flask-jsonrpc/examples/decorator/decorator.py\", line 52, in wrapped\n    raise ValueError('Invalid terminal ID')\nValueError: Invalid terminal ID\n"
       },
       "id": "1",
       "jsonrpc": "2.0"
     }
+
 
 
 ::
@@ -87,10 +90,10 @@ Testing your service
     Date: Sun, 09 Aug 2015 17:00:16 GMT
 
     {
-      "id": "1",
-      "jsonrpc": "2.0",
-      "result": {
-        "headers": "Host: localhost:5000\r\nUser-Agent: curl/7.43.0\r\nAccept: */*\r\nContent-Length: 134\r\nContent-Type: application/json; indent=4\r\n\r\n",
-        "terminal_id": 1
-      }
+        "id": "1",
+        "jsonrpc": "2.0",
+        "result": {
+            "headers": "Host: localhost:5000\r\nUser-Agent: curl/7.70.0\r\nAccept: */*\r\nContent-Type: application/json; indent=4\r\nContent-Length: 137\r\n\r\n",
+            "terminal_id": 1
+        }
     }

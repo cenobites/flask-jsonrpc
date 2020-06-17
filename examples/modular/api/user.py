@@ -25,14 +25,11 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-from flask import Blueprint
+from flask_jsonrpc import JSONRPCBlueprint
 
-from modular import jsonrpc
-
-mod = Blueprint('user', __name__)
-jsonrpc.register_blueprint(mod)
+user = JSONRPCBlueprint('user', __name__)
 
 
-@jsonrpc.method('User.index')
-def index():
-    return u'Welcome to User API'
+@user.method('User.index')
+def index() -> str:
+    return 'Welcome to User API'

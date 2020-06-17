@@ -26,13 +26,13 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
+# isort:skip_file
 import os
 import sys
-from typing import Any, Dict, List, NoReturn, Optional
+from typing import Any, Dict, List, Union, NoReturn, Optional
+from numbers import Real
 
-from flask import Flask, url_for
-
-from flask_jsonrpc import JSONRPC  # noqa: E402
+from flask import Flask
 
 PROJECT_DIR, PROJECT_MODULE_NAME = os.path.split(os.path.dirname(os.path.realpath(__file__)))
 
@@ -40,6 +40,7 @@ FLASK_JSONRPC_PROJECT_DIR = os.path.join(PROJECT_DIR, os.pardir)
 if os.path.exists(FLASK_JSONRPC_PROJECT_DIR) and FLASK_JSONRPC_PROJECT_DIR not in sys.path:
     sys.path.append(FLASK_JSONRPC_PROJECT_DIR)
 
+from flask_jsonrpc import JSONRPC  # noqa: E402   pylint: disable=C0413
 
 app = Flask(__name__)
 jsonrpc = JSONRPC(app, '/api', enable_web_browsable_api=True)
@@ -66,25 +67,34 @@ def args_validate(a1: int, a2: str, a3: bool, a4: List[Any], a5: Dict[Any, Any])
 
 
 @jsonrpc.method('App.notify')
-def notify(_string: Optional[str]) -> None:
+def notify(_string: Optional[str] = None) -> None:
     pass
 
 
 @jsonrpc.method('App.fails')
-def fails(_string: str) -> NoReturn:
-    raise ValueError
+def fails(_string: Optional[str] = None) -> NoReturn:
+    raise ValueError('example of fail')
 
 
 @jsonrpc.method('App.sum')
-def sum_(a: int, b: int) -> int:
+def sum_(a: Real, b: Real) -> Real:
     return a + b
 
 
 @jsonrpc.method('App.subtract')
-def subtract(a: int, b: int) -> int:
+def subtract(a: Union[int, float], b: Union[int, float]) -> Union[int, float]:
     return a - b
 
 
+@jsonrpc.method('App.multiply')
+def multiply(a: float, b: float) -> float:
+    return a * b
+
+
 @jsonrpc.method('App.divide')
-def divide(a: float, b: float) -> float:
+def divide(a: Real, b: Real) -> Real:
     return a / float(b)
+
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', debug=True)

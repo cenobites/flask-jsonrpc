@@ -10,7 +10,7 @@
     };
 
     App.controller('ApplicationCtrl', ['$scope', '$location', '$timeout',
-                                       'responseExample', 'responseObjectExample', 'PendingRequests', 
+                                       'responseExample', 'responseObjectExample', 'PendingRequests',
                                        function($scope, $location, $timeout,
                                                 responseExample, responseObjectExample, PendingRequests) {
         $scope.showFakeIntro = true;
@@ -48,13 +48,13 @@
                     }
                 }
                 return false;
-            } 
+            }
             return ('/'+route === $location.path());
         };
     }]);
 
     App.controller('MenuCtrl', ['$scope', '$location', '$timeout',
-                                'Handlebars', 'Api', 
+                                'Handlebars', 'Api',
                                 function($scope, $location, $timeout,
                                          Handlebars, Api) {
         $scope.$emit('App:displayFakeIntro', true);
@@ -110,11 +110,13 @@
 
     App.controller('ResponseObjectCtrl', ['$scope', '$window', '$modal', 'RPC', 'module', function($scope, $window, $modal, RPC, module) {
         $scope.module = module;
-        //$scope.$emit('App:displayContentLoaded', true);
         $scope.$emit('App:displayToolbar', true);
         $scope.$emit('App:breadcrumb', module.name);
 
         var RPCCall = function(module) {
+            $scope.request_object = RPC.payload(module);
+            $scope.response = undefined;
+            $scope.response_object = undefined;
             RPC.call(module).success(function(response_object, status, headers, config) { // success
                 var headers_pretty = headers();
                 headers_pretty.data = config.data;
@@ -127,7 +129,7 @@
                 headers_pretty.data = config.data;
 
                 $scope.response = {status_code: status, headers: headers_pretty, config: config};
-                $scope.response_object = undefined;
+                $scope.response_object = response_object;
                 $scope.$emit('App:displayContentLoaded', false);
             });
         },
@@ -144,14 +146,13 @@
                 return RPCCall(module);
             }, function() { // cancel
                 $scope.$emit('App:displayContentLoaded', false);
-                $window.history.back();
             });
         };
 
         $scope.$on('RPC:resend', function(event) {
             return RPCCall($scope.module);
         });
-        
+
         $scope.$on('RPC:changeParameters', function(event) {
             return RPCCallModal($scope.module);
         });
