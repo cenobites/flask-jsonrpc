@@ -1,25 +1,31 @@
+import sys
 from typing import (
     Any,
     Set,
     Dict,
     List,
     Text,
-    Final,
+    Tuple,
     Union,
     AnyStr,
-    Literal,
     Mapping,
     TypeVar,
     NoReturn,
     Optional,
     NamedTuple,
     DefaultDict,
-    OrderedDict,
     get_type_hints,
 )
 from numbers import Real, Number, Complex, Integral, Rational
 
+import pytest
+
 from flask_jsonrpc import types
+
+try:
+    from typing import OrderedDict  # pylint: disable=C0412
+except ImportError:
+    from collections import OrderedDict
 
 
 def test_types():
@@ -40,9 +46,6 @@ def test_types():
 
     assert types.Object.check_type(dict)
     assert types.Object.check_type(Dict)
-    assert types.Object.check_type(DefaultDict)
-    assert types.Object.check_type(OrderedDict)
-    assert types.Object.check_type(Mapping)
     assert types.Object.check_type(Any)
     assert str(types.Object) == 'Object'
 
@@ -52,6 +55,7 @@ def test_types():
     assert types.Array.check_type(List)
     assert types.Array.check_type(NamedTuple)
     assert not types.Array.check_type(Set)
+    assert types.Array.check_type(Tuple)
     assert str(types.Array) == 'Array'
 
     assert types.Boolean.check_type(bool)
@@ -63,12 +67,20 @@ def test_types():
     assert str(types.Null) == 'Null'
 
 
+@pytest.mark.skipif(sys.version_info < (3, 7), reason='requires python3.7 or higher')
+def test_types_others():
+    assert types.Object.check_type(OrderedDict)
+    assert types.Object.check_type(DefaultDict)
+    assert types.Object.check_type(Mapping)
+
+
+@pytest.mark.skipif(sys.version_info < (3, 7), reason='requires python3.7 or higher')
 def test_types_complex():
     T = TypeVar('T')
     S = TypeVar('S', int, float)
     X = TypeVar('X', bound=int)
-    U = Literal[str]
-    V = Final[str]
+    U = types.Literal[str]
+    V = types.Final[str]
 
     assert types.Object.check_type(T)
     assert types.Number.check_type(S)

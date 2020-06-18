@@ -15,8 +15,8 @@ install:
   - pip install -r requirements_test.pip --quiet
 
 script:
-  - flake8 flask_jsonrpc/ tests/ examples/
-  - pylint flask_jsonrpc/
+  - flake8 flask_jsonrpc/ tests/
+  - pylint flask_jsonrpc/ tests/
   - mypy flask_jsonrpc/
   - pytest
 

@@ -46,7 +46,7 @@ Create your application and initialize the Flask-JSONRPC.
     from flask_jsonrpc import JSONRPC
 
     app = Flask(__name__)
-    jsonrpc = JSONRPC(app, '/api')
+    jsonrpc = JSONRPC(app, '/api', enable_web_browsable_api=True)
 ```
 
 Write JSON-RPC methods.

@@ -2,7 +2,7 @@
 # to run this project. Later you can install all these apps in a row
 # using pip. Example::
 #
-#     pip install -r requirements_development.pip
+#     pip install -r requirements_dev.pip
 bpython
 jedi
 rope

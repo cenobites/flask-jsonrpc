@@ -25,24 +25,43 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-from typing import (
-    Any,
-    Dict,
-    List,
-    Text,
-    Final,
-    Tuple,
-    Union,
-    Literal,
-    TypeVar,
-    NoReturn,
-    NamedTuple,
-    get_args,
-    get_origin,
-)
+from typing import Any, Dict, List, Text, Tuple, Union, TypeVar, NamedTuple
 from numbers import Real, Integral, Rational
 from collections import OrderedDict, defaultdict
 from collections.abc import Mapping
+
+# Python 3.8+
+try:
+    from typing_extensions import Literal
+except ImportError:  # pragma: no cover
+    from typing import Literal  # type: ignore  # pylint: disable=C0412
+
+# Python 3.8+
+try:
+    from typing_extensions import Final
+except ImportError:  # pragma: no cover
+    from typing import Final  # type: ignore  # pylint: disable=C0412
+
+# Python 3.5.4+ / 3.6.2+
+try:
+    from typing import get_args  # pylint: disable=C0412
+except ImportError:  # pragma: no cover
+    from .typing_inspect import get_args  # type: ignore
+
+# Python 3.5.4+ / 3.6.2+
+try:
+    from typing import get_origin  # pylint: disable=C0412
+except ImportError:  # pragma: no cover
+    from .typing_inspect import get_origin  # type: ignore
+
+# Python 3.5.4+ / 3.6.2+
+try:
+    from typing_extensions import NoReturn  # pylint: disable=C0412
+except ImportError:  # pragma: no cover
+    try:
+        from typing import NoReturn  # pylint: disable=C0412
+    except ImportError:
+        NoReturn = None  # type: ignore
 
 
 class JSONRPCNewType:
@@ -77,7 +96,7 @@ class JSONRPCNewType:
         expected_types = get_args(expected_type)
         return self.check_expected_types(expected_types)
 
-    def check_type(self, o: type) -> bool:
+    def check_type(self, o: type) -> bool:  # pylint: disable=R0911
         expected_type = o
         if expected_type is Any:
             return self is Object
@@ -92,6 +111,9 @@ class JSONRPCNewType:
         if origin_type is not None:
             if origin_type is Union:
                 return self.check_union(expected_type)
+
+            if origin_type is Tuple or origin_type is tuple:
+                return self is Array
 
             if origin_type is Literal:
                 return self.check_literal(expected_type)

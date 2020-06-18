@@ -26,7 +26,7 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 from uuid import UUID, uuid4
-from typing import Any, Dict, List, Type, Final, Tuple, Union, TypeVar, Callable
+from typing import Any, Dict, List, Type, Tuple, Union, TypeVar, Callable
 
 from flask import json, request, current_app
 
@@ -44,10 +44,10 @@ from .exceptions import (
 
 T = TypeVar('T')
 
-JSONRPC_VERSION_DEFAULT: Final[str] = '2.0'
-JSONRCP_DESCRIBE_METHOD_NAME: Final[str] = 'system.describe'
-JSONRPC_DEFAULT_HTTP_HEADERS: Final[Dict[str, str]] = {}
-JSONRPC_DEFAULT_HTTP_STATUS_CODE: Final[int] = 200
+JSONRPC_VERSION_DEFAULT: str = '2.0'
+JSONRCP_DESCRIBE_METHOD_NAME: str = 'system.describe'
+JSONRPC_DEFAULT_HTTP_HEADERS: Dict[str, str] = {}
+JSONRPC_DEFAULT_HTTP_STATUS_CODE: int = 200
 
 
 class JSONRPCSite:
