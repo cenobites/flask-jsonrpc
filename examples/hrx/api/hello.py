@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2012-2015, Cenobit Technologies, Inc. http://cenobit.es/
+# Copyright (c) 2012-2020, Cenobit Technologies, Inc. http://cenobit.es/
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -25,17 +25,16 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-from flask import Blueprint
+from flask_jsonrpc import JSONRPCBlueprint
 
-from hrx import jsonrpc
+hello = JSONRPCBlueprint('hello', __name__)
 
-mod = Blueprint('hello', __name__)
-jsonrpc.register_blueprint(mod)
 
-@jsonrpc.method('Hello.index')
-def index():
-    return u'Welcome to Hello API!'
+@hello.method('Hello.index')
+def index() -> str:
+    return 'Welcome to Hello API!'
 
-@jsonrpc.method('Hello.say(name=String)')
-def say(name=''):
-    return u'Hello {0}!'.format(name)
+
+@hello.method('Hello.say')
+def say(name: str = '') -> str:
+    return 'Hello {0}!'.format(name)

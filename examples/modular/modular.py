@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# Copyright (c) 2012-2015, Cenobit Technologies, Inc. http://cenobit.es/
+# Copyright (c) 2012-2020, Cenobit Technologies, Inc. http://cenobit.es/
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -26,32 +26,33 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
+# isort:skip_file
 import os
 import sys
 
 from flask import Flask
 
-PROJECT_DIR, PROJECT_MODULE_NAME = os.path.split(
-    os.path.dirname(os.path.realpath(__file__))
-)
+PROJECT_DIR, PROJECT_MODULE_NAME = os.path.split(os.path.dirname(os.path.realpath(__file__)))
 
 FLASK_JSONRPC_PROJECT_DIR = os.path.join(PROJECT_DIR, os.pardir)
-if os.path.exists(FLASK_JSONRPC_PROJECT_DIR) \
-        and not FLASK_JSONRPC_PROJECT_DIR in sys.path:
+if os.path.exists(FLASK_JSONRPC_PROJECT_DIR) and FLASK_JSONRPC_PROJECT_DIR not in sys.path:
     sys.path.append(FLASK_JSONRPC_PROJECT_DIR)
 
-from flask_jsonrpc import JSONRPC
+from flask_jsonrpc import JSONRPC  # noqa: E402   pylint: disable=C0413
+
+from api.user import user  # noqa: E402   pylint: disable=C0413,E0611
+from api.article import article  # noqa: E402   pylint: disable=C0413,E0611
 
 app = Flask(__name__)
 jsonrpc = JSONRPC(app, '/api', enable_web_browsable_api=True)
+jsonrpc.register_blueprint(app, user, url_prefix='/user', enable_web_browsable_api=True)
+jsonrpc.register_blueprint(app, article, url_prefix='/article', enable_web_browsable_api=True)
+
 
 @jsonrpc.method('App.index')
-def index():
-    return u'Welcome to Flask JSON-RPC'
-
-import api.user
-import api.article
+def index() -> str:
+    return 'Welcome to Flask JSON-RPC'
 
 
 if __name__ == '__main__':
-    app.run()
+    app.run(host='0.0.0.0', debug=True)

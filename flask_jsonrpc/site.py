@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2009 Samuel Sutch, <sam@sutch.net>
-# Copyright (c) 2012-2015, Cenobit Technologies, Inc. http://cenobit.es/
+# Copyright (c) 2020-2020, Cenobit Technologies, Inc. http://cenobit.es/
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -26,412 +25,199 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-import re
-import decimal
-import datetime
-from uuid import uuid4
-from functools import wraps
+from uuid import UUID, uuid4
+from typing import Any, Dict, List, Type, Tuple, Union, TypeVar, Callable
 
-from werkzeug.exceptions import HTTPException
+from flask import json, request, current_app
 
-from flask.wrappers import Response
-from flask import json, jsonify, request, make_response, current_app
+from werkzeug.datastructures import Headers
 
-from flask_jsonrpc.types import Object, Array, Any
-from flask_jsonrpc.helpers import extract_raw_data_request
-from flask_jsonrpc._compat import (text_type, string_types, integer_types,
-                                   iteritems, iterkeys)
-from flask_jsonrpc.exceptions import (Error, ParseError, InvalidRequestError,
-                                      MethodNotFoundError, InvalidParamsError,
-                                      ServerError, RequestPostError,
-                                      InvalidCredentialsError, OtherError)
+from .helpers import from_python_type
+from .exceptions import (
+    ParseError,
+    ServerError,
+    JSONRPCError,
+    InvalidParamsError,
+    InvalidRequestError,
+    MethodNotFoundError,
+)
 
-JSONRPC_VERSION_DEFAULT = '2.0'
+T = TypeVar('T')
 
-empty_dec = lambda f: f
-try:
-    # TODO: Add CSRF check
-    csrf_exempt = empty_dec
-except (NameError, ImportError):
-    csrf_exempt = empty_dec
+JSONRPC_VERSION_DEFAULT: str = '2.0'
+JSONRCP_DESCRIBE_METHOD_NAME: str = 'system.describe'
+JSONRPC_DEFAULT_HTTP_HEADERS: Dict[str, str] = {}
+JSONRPC_DEFAULT_HTTP_STATUS_CODE: int = 200
 
-NoneType = type(None)
-encode_kw = lambda p: dict([(text_type(k), v) for k, v in iteritems(p)])
 
-def encode_kw11(p):
-    if not type(p) is dict:
-        return {}
-    ret = p.copy()
-    removes = []
-    for k, v in iteritems(ret):
+class JSONRPCSite:
+    def __init__(self) -> None:
+        self.view_funcs: Dict[str, Callable[..., Any]] = {}
+        self.uuid: UUID = uuid4()
+        self.name: str = 'Flask-JSONRPC'
+        self.version: str = JSONRPC_VERSION_DEFAULT
+        self.register(JSONRCP_DESCRIBE_METHOD_NAME, self.describe)
+
+    @property
+    def is_json(self) -> bool:
+        """Check if the mimetype indicates JSON data, either
+        :mimetype:`application/json` or :mimetype:`application/*+json`.
+
+        https://github.com/pallets/werkzeug/blob/master/src/werkzeug/wrappers/json.py#L54
+        """
+        mt = request.mimetype
+        return mt == 'application/json' or mt.startswith('application/') and mt.endswith('+json')
+
+    def register(self, name: str, view_func: Callable[..., Any]) -> None:
+        self.view_funcs[name] = view_func
+
+    def dispatch_request(self) -> Tuple[Any, int, Union[Headers, Dict[str, str], Tuple[str], List[Tuple[str]]]]:
+        json_data: Dict[str, Any] = {}
         try:
-            int(k)
-        except ValueError:
-            pass
-        else:
-            removes.append(k)
-    for k in removes:
-        ret.pop(k)
-    return ret
+            if not self.validate_request():
+                raise ParseError(
+                    data={
+                        'message': 'Invalid mime type for JSON: {0}, use header Content-Type: application/json'.format(
+                            request.mimetype
+                        )
+                    }
+                )
 
-def encode_arg11(p):
-    if type(p) is list:
-        return p
-    elif not type(p) is dict:
-        return []
-    else:
-        pos = []
-        d = encode_kw(p)
-        for k, v in iteritems(d):
-            try:
-                pos.append(int(k))
-            except ValueError:
-                pass
-        pos = list(set(pos))
-        pos.sort()
-        return [d[text_type(i)] for i in pos]
+            json_data = self.to_json(request.data)
 
-def validate_params(method, D):
-    if type(D['params']) == Object:
-        keys = method.json_arg_types.keys()
-        if len(keys) != len(D['params']):
-            raise InvalidParamsError('Not enough params provided for {0}' \
-                .format(method.json_sig))
-        for k in keys:
-            if not k in D['params']:
-                raise InvalidParamsError('{0} is not a valid parameter for {1}' \
-                    .format(k, method.json_sig))
-            if not Any.kind(D['params'][k]) == method.json_arg_types[k]:
-                raise InvalidParamsError('{0} is not the correct type {1} for {2}' \
-                    .format(type(D['params'][k]), method.json_arg_types[k], method.json_sig))
-    elif type(D['params']) == Array:
-        arg_types = list(method.json_arg_types.values())
+            return self.dispatch(json_data)
+        except JSONRPCError as e:
+            current_app.logger.error('jsonrpc error')
+            current_app.logger.exception(e)
+            response = {
+                'id': json_data.get('id'),
+                'jsonrpc': json_data.get('jsonrpc', JSONRPC_VERSION_DEFAULT),
+                'error': e.jsonrpc_format,
+            }
+            return response, e.status_code, JSONRPC_DEFAULT_HTTP_HEADERS
+        except Exception as e:  # pylint: disable=W0703
+            current_app.logger.error('unexpected error')
+            current_app.logger.exception(e)
+            jsonrpc_error = ServerError(data={'message': str(e)})
+            response = {
+                'id': json_data.get('id'),
+                'jsonrpc': json_data.get('jsonrpc', JSONRPC_VERSION_DEFAULT),
+                'error': jsonrpc_error.jsonrpc_format,
+            }
+            return response, jsonrpc_error.status_code, JSONRPC_DEFAULT_HTTP_HEADERS
+
+    def validate_request(self) -> bool:
+        if not self.is_json:
+            current_app.logger.error('invalid mimetype')
+            return False
+        return True
+
+    def to_json(self, request_data: bytes) -> Any:
         try:
-            for i, arg in enumerate(D['params']):
-                if not Any.kind(arg) == arg_types[i]:
-                    raise InvalidParamsError('{0} is not the correct type {1} for {2}' \
-                        .format(type(arg), arg_types[i], method.json_sig))
-        except IndexError:
-            raise InvalidParamsError('Too many params provided for {0}'.format(method.json_sig))
-        else:
-            if len(D['params']) != len(arg_types):
-                raise InvalidParamsError('Not enough params provided for {0}'.format(method.json_sig))
+            return json.loads(request_data)
+        except ValueError as e:
+            current_app.logger.error('invalid json: %s', request_data)
+            current_app.logger.exception(e)
+            raise ParseError(data={'message': 'Invalid JSON: {0!r}'.format(request_data)})
 
+    def dispatch(
+        self, req_json: Dict[str, Any]
+    ) -> Tuple[Any, int, Union[Headers, Dict[str, str], Tuple[str], List[Tuple[str]]]]:
+        if not self.validate(req_json):
+            raise InvalidRequestError(data={'message': 'Invalid JSON: {0}'.format(req_json)})
 
-class JSONRPCSite(object):
-    """A JSON-RPC Site
-    """
+        params = req_json.get('params', {})
+        view_func = self.view_funcs.get(req_json['method'])
+        if not view_func:
+            raise MethodNotFoundError(data={'message': 'Method not found: {0}'.format(req_json['method'])})
 
-    def __init__(self):
-        self.urls = {}
-        self.uuid = text_type(uuid4())
-        self.version = JSONRPC_VERSION_DEFAULT
-        self.name = 'Flask-JSONRPC'
-        self.register('system.describe', self.describe)
-
-    def register(self, name, method):
-        self.urls[text_type(name)] = method
-
-    def extract_id_request(self, raw_data):
         try:
-            D = json.loads(raw_data)
-            return D.get('id')
-        except Exception as e:
-            if not raw_data is None and raw_data.find('id') != -1:
-                find_id = re.findall(r'["|\']id["|\']:([0-9]+)|["|\']id["|\']:["|\'](.+?)["|\']',
-                                     raw_data.replace(' ', ''), re.U)
-                if find_id:
-                    g1, g2 = find_id[0]
-                    raw_id = g1 if g1 else g2
-                    if text_type(raw_id).isnumeric():
-                        return int(raw_id)
-                    return raw_id
-            return None
+            if isinstance(params, (tuple, set, list)):
+                resp_view = view_func(*params)
+            elif isinstance(params, dict):
+                resp_view = view_func(**params)
+            else:
+                raise InvalidParamsError(
+                    data={
+                        'message': 'Parameter structures are by-position '
+                        '(tuple, set, list) or by-name (dict): {0}'.format(params)
+                    }
+                )
+        except TypeError as e:
+            current_app.logger.error('invalid type checked for: %s', view_func.__name__)
+            current_app.logger.exception(e)
+            raise InvalidParamsError(data={'message': str(e)})
 
-    def empty_response(self, version=JSONRPC_VERSION_DEFAULT):
-        resp = {'id': None}
-        if version == '1.1':
-            resp['version'] = version
-            return resp
-        if version == '2.0':
-            resp['jsonrpc'] = version
-        resp.update({'error': None, 'result': None})
-        return resp
+        return self.make_response(req_json, resp_view)
 
-    def validate_get(self, request, method):
-        encode_get_params = lambda r: dict([(k, v[0] if len(v) == 1 else v) for k, v in r])
-        if request.method == 'GET':
-            method = text_type(method)
-            if method in self.urls and getattr(self.urls[method], 'json_safe', False):
-                D = {
-                    'params': request.args.to_dict(),
-                    'method': method,
-                    'id': 'jsonrpc',
-                    'version': '1.1'
-                }
-                return True, D
-        return False, {}
+    def validate(self, req_json: Dict[str, Any]) -> bool:
+        if 'method' not in req_json:
+            return False
+        return True
 
-    def apply_version_2_0(self, f, p):
-        return f(**encode_kw(p)) if type(p) is dict else f(*p)
+    def unpack_tuple_returns(
+        self, resp_view: Any
+    ) -> Tuple[Any, int, Union[Headers, Dict[str, str], Tuple[str], List[Tuple[str]]]]:
+        # https://github.com/pallets/flask/blob/d091bb00c0358e9f30006a064f3dbb671b99aeae/src/flask/app.py#L1981
+        if isinstance(resp_view, tuple):
+            len_resp_view = len(resp_view)
 
-    def apply_version_1_1(self, f, p):
-        return f(*encode_arg11(p), **encode_kw(encode_kw11(p)))
+            # a 3-tuple is unpacked directly
+            if len_resp_view == 3:
+                rv, status_code, headers = resp_view
+            # decide if a 2-tuple has status or headers
+            elif len_resp_view == 2:
+                if isinstance(resp_view[1], (Headers, dict, tuple, list)):
+                    rv, headers, status_code = resp_view + (JSONRPC_DEFAULT_HTTP_STATUS_CODE,)
+                else:
+                    rv, status_code, headers = resp_view + (JSONRPC_DEFAULT_HTTP_HEADERS,)
+            # other sized tuples are not allowed
+            else:
+                raise TypeError(
+                    'The view function did not return a valid response tuple.'
+                    ' The tuple must have the form (body, status, headers),'
+                    ' (body, status), or (body, headers).'
+                )
+            return rv, status_code, headers
 
-    def apply_version_1_0(self, f, p):
-        return f(*p)
+        return resp_view, JSONRPC_DEFAULT_HTTP_STATUS_CODE, JSONRPC_DEFAULT_HTTP_HEADERS
 
-    def response_obj(self, request, D, version_hint=JSONRPC_VERSION_DEFAULT):
-        version = version_hint
-        response = self.empty_response(version=version)
-        apply_version = {
-            '2.0': self.apply_version_2_0,
-            '1.1': self.apply_version_1_1,
-            '1.0': self.apply_version_1_0
+    def make_response(
+        self, req_json: Dict[str, Any], resp_view: Any
+    ) -> Tuple[Any, int, Union[Headers, Dict[str, str], Tuple[str], List[Tuple[str]]]]:
+        rv, status_code, headers = self.unpack_tuple_returns(resp_view)
+        if self.is_notification_request(req_json):
+            return None, 204, headers
+        resp = {'id': req_json.get('id'), 'jsonrpc': req_json.get('jsonrpc', JSONRPC_VERSION_DEFAULT), 'result': rv}
+        return resp, status_code, headers
+
+    def is_notification_request(self, req_json: Dict[str, Any]) -> bool:
+        return 'id' not in req_json
+
+    def python_type_name(self, pytype: Type[T]) -> str:
+        return str(from_python_type(pytype))
+
+    def procedure_desc(self, key: str) -> Dict[str, Any]:
+        view_func = self.view_funcs[key]
+        return {
+            'name': getattr(view_func, 'jsonrpc_method_name', None),
+            'summary': getattr(view_func, '__doc__', None),
+            'params': [
+                {'name': k, 'type': self.python_type_name(t)}
+                for k, t in getattr(view_func, 'jsonrpc_method_params', {}).items()
+            ],
+            'return': {'type': self.python_type_name(getattr(view_func, 'jsonrpc_method_return', None))},
         }
 
-        try:
-            try:
-                # determine if an object is iterable?
-                iter(D)
-            except TypeError as e:
-                raise InvalidRequestError(getattr(e, 'message', e.args[0] if len(e.args) > 0 else None))
-
-            # version: validate
-            if 'jsonrpc' in D:
-                if text_type(D['jsonrpc']) not in apply_version:
-                    raise InvalidRequestError('JSON-RPC version {0} not supported.'.format(D['jsonrpc']))
-                version = request.jsonrpc_version = response['jsonrpc'] = text_type(D['jsonrpc'])
-            elif 'version' in D:
-                if text_type(D['version']) not in apply_version:
-                    raise InvalidRequestError('JSON-RPC version {0} not supported.'.format(D['version']))
-                version = request.jsonrpc_version = response['version'] = text_type(D['version'])
-            else:
-                version = request.jsonrpc_version = JSONRPC_VERSION_DEFAULT
-
-            # params: An Array or Object, that holds the actual parameter values
-            # for the invocation of the procedure. Can be omitted if empty.
-            if 'params' not in D or not D['params']:
-                 D['params'] = []
-            if 'method' not in D or 'params' not in D:
-                raise InvalidParamsError('Request requires str:"method" and list:"params"')
-            if D['method'] not in self.urls:
-                raise MethodNotFoundError('Method not found. Available methods: {0}' \
-                    .format('\n'.join(list(self.urls.keys()))))
-
-            method = self.urls[text_type(D['method'])]
-            if getattr(method, 'json_validate', False):
-                validate_params(method, D)
-
-            if 'id' in D and D['id'] is not None: # regular request
-                response['id'] = D['id']
-                if version in ('1.1', '2.0'):
-                    response.pop('error', None)
-            else: # notification
-                return None, 204
-
-            R = apply_version[version](method, D['params'])
-
-            if 'id' not in D or ('id' in D and D['id'] is None): # notification
-                return None, 204
-
-            if isinstance(R, Response):
-                if R.status_code == 200:
-                    return R, R.status_code
-                if R.status_code == 401:
-                    raise InvalidCredentialsError(R.status)
-                raise OtherError(R.status, R.status_code)
-
-            try:
-                # New in Flask version 0.10.
-                encoder = current_app.json_encoder()
-            except AttributeError:
-                encoder = json.JSONEncoder()
-
-            # type of `R` should be one of these or...
-            if not sum([isinstance(R, e) for e in \
-                    string_types + integer_types + \
-                    (float, complex, dict, list, tuple, set, frozenset, NoneType, bool)]):
-                try:
-                    rs = encoder.default(R) # ...or something this thing supports
-                except TypeError as exc:
-                    raise TypeError('Return type not supported, for {0!r}'.format(R))
-
-            response['result'] = R
-            status = 200
-        except Error as e:
-            response['error'] = e.json_rpc_format
-            if version in ('1.1', '2.0'):
-                response.pop('result', None)
-            status = e.status
-        except HTTPException as e:
-            other_error = OtherError(e)
-            response['error'] = other_error.json_rpc_format
-            response['error']['code'] = e.code
-            if version in ('1.1', '2.0'):
-                response.pop('result', None)
-            status = e.code
-        except Exception as e:
-            other_error = OtherError(e)
-            response['error'] = other_error.json_rpc_format
-            status = other_error.status
-            if version in ('1.1', '2.0'):
-                response.pop('result', None)
-
-        # Exactly one of result or error MUST be specified. It's not
-        # allowed to specify both or none.
-        if version in ('1.1', '2.0') and 'result' in response:
-            response.pop('error', None)
-
-        return response, status
-
-    def batch_response_obj(self, request, D):
-        status = 200
-        try:
-            responses = [self.response_obj(request, d)[0] for d in D]
-            if not responses:
-                raise InvalidRequestError('Empty array')
-        except Error as e:
-            for response in responses:
-                response.pop('result', None)
-                response['error'] = e.json_rpc_format
-        except Exception as e:
-            other_error = OtherError(e)
-            for response in responses:
-                response.pop('result', None)
-                response['error'] = other_error.json_rpc_format
-
-        for response in responses:
-            if response is None:
-                continue # notification
-            # Exactly one of result or error MUST be specified. It's not
-            # allowed to specify both or none.
-            if 'result' in response:
-                response.pop('error', None)
-
-        if not responses:
-            response = self.empty_response(version='2.0')
-            response['error'] = InvalidRequestError().json_rpc_format
-            response.pop('result', None)
-            responses = response
-
-        if not all(responses):
-            return '', 204 # notification
-
-        return responses, status
-
-    def make_response(self, rv):
-        """Converts the return value from a view function to a real
-        response object that is an instance of :attr:`response_class`.
-        """
-        status_or_headers = headers = None
-        if isinstance(rv, tuple):
-            rv, status_or_headers, headers = rv + (None,) * (3 - len(rv))
-
-        if rv is None:
-            raise ValueError('View function did not return a response')
-
-        if isinstance(status_or_headers, (dict, list)):
-            headers, status_or_headers = status_or_headers, None
-
-        D = json.loads(extract_raw_data_request(request))
-        if type(D) is list:
-            raise InvalidRequestError('JSON-RPC batch with decorator (make_response) not is supported')
-        else:
-            response_obj = self.empty_response(version=D['jsonrpc'])
-            response_obj['id'] = D['id']
-            response_obj['result'] = rv
-            response_obj.pop('error', None)
-            rv = jsonify(response_obj)
-
-        if status_or_headers is not None:
-            if isinstance(status_or_headers, string_types):
-                rv.status = status_or_headers
-            else:
-                rv.status_code = status_or_headers
-        if headers:
-            rv.headers.extend(headers)
-
-        return rv
-
-    @csrf_exempt
-    def dispatch(self, request, method=''):
-        # in case we do something json doesn't like, we always get back valid
-        # json-rpc response
-        response = self.empty_response()
-        raw_data = extract_raw_data_request(request)
-
-        try:
-            if request.method == 'GET':
-                valid, D = self.validate_get(request, method)
-                if not valid:
-                    raise InvalidRequestError('The method you are trying to access is '
-                                              'not available by GET requests')
-            elif not request.method == 'POST':
-                raise RequestPostError()
-            else:
-                try:
-                    D = json.loads(raw_data)
-                except Exception as e:
-                    raise ParseError(getattr(e, 'message', e.args[0] if len(e.args) > 0 else None))
-
-            if type(D) is list:
-                return self.batch_response_obj(request, D)
-
-            response, status = self.response_obj(request, D)
-
-            if isinstance(response, Response):
-               return response, status
-
-            if response is None and (not 'id' in D or D['id'] is None): # a notification
-                response = ''
-                return response, status
-        except Error as e:
-            response.pop('result', None)
-            response['error'] = e.json_rpc_format
-            status = e.status
-        except Exception as e:
-            other_error = OtherError(e)
-            response.pop('result', None)
-            response['error'] = other_error.json_rpc_format
-            status = other_error.status
-
-        # extract id the request
-        if not response.get('id', False):
-            json_request_id = self.extract_id_request(raw_data)
-            response['id'] = json_request_id
-
-        # If there was an error in detecting the id in the Request object
-        # (e.g. Parse error/Invalid Request), it MUST be Null.
-        if not response and 'error' in response:
-            if response['error']['name'] in ('ParseError', 'InvalidRequestError', 'RequestPostError'):
-                response['id'] = None
-
-        return response, status
-
-    def procedure_desc(self, key):
-        M = self.urls[key]
-        return {
-            'name': M.json_method,
-            'summary': M.__doc__,
-            'idempotent': M.json_safe,
-            'params': [{'type': text_type(Any.kind(t)), 'name': k}
-                for k, t in iteritems(M.json_arg_types)],
-            'return': {'type': text_type(Any.kind(M.json_return_type))}}
-
-    def service_desc(self):
+    def service_desc(self) -> Dict[str, Any]:
         return {
             'sdversion': '1.0',
-            'name': self.name,
-            'id': 'urn:uuid:{0}'.format(text_type(self.uuid)),
-            'summary': self.__doc__,
+            'id': 'urn:uuid:{0}'.format(self.uuid),
             'version': self.version,
-            'procs': [self.procedure_desc(k)
-                for k in iterkeys(self.urls)
-                    if self.urls[k] != self.describe]}
+            'name': self.name,
+            'summary': self.__doc__,
+            'procs': [self.procedure_desc(k) for k in self.view_funcs if k != JSONRCP_DESCRIBE_METHOD_NAME],
+        }
 
-    def describe(self):
+    def describe(self) -> Dict[str, Any]:
         return self.service_desc()
-
-
-jsonrpc_site = JSONRPCSite()

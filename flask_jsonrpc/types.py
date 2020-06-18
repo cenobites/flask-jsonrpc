@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2009 Samuel Sutch, <sam@sutch.net>
-# Copyright (c) 2012-2015, Cenobit Technologies, Inc. http://cenobit.es/
+# Copyright (c) 2020-2020, Cenobit Technologies, Inc. http://cenobit.es/
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -26,74 +25,114 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-from flask_jsonrpc._compat import text_type, string_types, integer_types, reduce
+from typing import Any, Dict, List, Text, Tuple, Union, TypeVar, NamedTuple
+from numbers import Real, Integral, Rational
+from collections import OrderedDict, defaultdict
+from collections.abc import Mapping
 
-def _types_gen(T):
-    yield T
-    if hasattr(T, 't'):
-        for l in T.t:
-            yield l
-            if hasattr(l, 't'):
-                for ll in _types_gen(l):
-                    yield ll
+# Python 3.8+
+try:
+    from typing_extensions import Literal
+except ImportError:  # pragma: no cover
+    from typing import Literal  # type: ignore  # pylint: disable=C0412
+
+# Python 3.8+
+try:
+    from typing_extensions import Final
+except ImportError:  # pragma: no cover
+    from typing import Final  # type: ignore  # pylint: disable=C0412
+
+# Python 3.5.4+ / 3.6.2+
+try:
+    from typing import get_args  # pylint: disable=C0412
+except ImportError:  # pragma: no cover
+    from .typing_inspect import get_args  # type: ignore
+
+# Python 3.5.4+ / 3.6.2+
+try:
+    from typing import get_origin  # pylint: disable=C0412
+except ImportError:  # pragma: no cover
+    from .typing_inspect import get_origin  # type: ignore
+
+# Python 3.5.4+ / 3.6.2+
+try:
+    from typing_extensions import NoReturn  # pylint: disable=C0412
+except ImportError:  # pragma: no cover
+    try:
+        from typing import NoReturn  # pylint: disable=C0412
+    except ImportError:
+        NoReturn = None  # type: ignore
 
 
-class Type(type):
-    """ A rudimentary extension to `type` that provides polymorphic
-    types for run-time type checking of JSON data types. IE:
+class JSONRPCNewType:
+    def __init__(self, name: str, *types: Union[type, Tuple[Union[type, Tuple[Any, ...]], ...]]) -> None:
+        self.name = name
+        self.types = types
 
-    assert type(u'') == String
-    assert type('') == String
-    assert type('') == Any
-    assert Any.kind('') == String
-    assert Any.decode('str') == String
-    assert Any.kind({}) == Object
-    assert Any.kind(1) == Number
-    assert Any.kind(1.3333) == Number
-    """
+    def check_expected_type(self, expected_type: type) -> bool:
+        return any(expected_type is tp for tp in self.types)
 
-    def __init__(self, *args, **kwargs):
-        super(Type, self).__init__(*args, **kwargs)
+    def check_expected_types(self, expected_types: Any) -> bool:
+        return all(any(expt_tp is tp for tp in self.types) for expt_tp in expected_types)
 
-    def __eq__(self, other):
-        for T in _types_gen(self):
-            if isinstance(other, Type) and getattr(other, 't', False) and T in other.t:
-                return True
-            if type.__eq__(T, other) is True:
-                return True
-        return False
+    def check_type_var(self, expected_type: type) -> bool:
+        bound_type = getattr(expected_type, '__bound__', None)
+        if bound_type is None:
+            expected_types = getattr(expected_type, '__constraints__', None)
+            if not expected_types:
+                return self is Object
+            return self.check_expected_types(expected_types)
+        return self.check_expected_type(bound_type)
 
-    def __str__(self):
-        return getattr(self, '_name', 'unknown')
+    def check_union(self, expected_type: type) -> bool:
+        expected_types = [expt_tp for expt_tp in get_args(expected_type) if expt_tp is not type(None)]  # noqa: E721
+        return self.check_expected_types(expected_types)
 
-    def N(self, n):
-        self._name = n
-        return self
+    def check_literal(self, expected_type: type) -> bool:
+        expected_types = get_args(expected_type)
+        return self.check_expected_types(expected_types)
 
-    def I(self, *args):
-        self.t = list(args)
-        return self
+    def check_final(self, expected_type: type) -> bool:
+        expected_types = get_args(expected_type)
+        return self.check_expected_types(expected_types)
 
-    def kind(self, t):
-        if type(t) is Type:
-            return t
-        ty = lambda t: type(t)
-        if type(t) is type:
-            ty = lambda t: t
-        return reduce(
-            lambda L, R: R if (hasattr(R, 't') and ty(t) == R) else L,
-            [T for T in _types_gen(self) if T is not Any])
+    def check_type(self, o: type) -> bool:  # pylint: disable=R0911
+        expected_type = o
+        if expected_type is Any:
+            return self is Object
 
-    def decode(self, n):
-        return reduce(
-            lambda L, R: R if (text_type(R) == n) else L,
-            _types_gen(self))
+        if type(expected_type) is TypeVar:  # pylint: disable=C0123
+            return self.check_type_var(expected_type)
 
-# JSON primatives and data types
-Object = Type('Object', (object,), {}).I(dict).N('obj')
-Number = Type('Number', (object,), {}).I(*(integer_types + (float, complex))).N('num')
-Boolean = Type('Boolean', (object,), {}).I(bool).N('bool')
-String = Type('String', (object,), {}).I(*string_types).N('str')
-Array = Type('Array', (object,), {}).I(list, set, frozenset, tuple).N('arr')
-Nil = Type('Nil', (object,), {}).I(type(None)).N('nil')
-Any = Type('Any', (object,), {}).I(Object, Number, Boolean, String, Array, Nil).N('any')
+        if expected_type is None or expected_type is NoReturn:
+            expected_type = type(None)
+
+        origin_type = get_origin(expected_type)
+        if origin_type is not None:
+            if origin_type is Union:
+                return self.check_union(expected_type)
+
+            if origin_type is Tuple or origin_type is tuple:
+                return self is Array
+
+            if origin_type is Literal:
+                return self.check_literal(expected_type)
+
+            if origin_type is Final:
+                return self.check_final(expected_type)
+
+            expected_type = origin_type
+
+        return self.check_expected_type(expected_type)
+
+    def __str__(self) -> str:
+        return self.name
+
+
+String = JSONRPCNewType('String', str, bytes, Text)
+Number = JSONRPCNewType('Number', int, float, Real, Rational, Integral)
+Object = JSONRPCNewType('Object', dict, Dict, defaultdict, OrderedDict, Mapping)
+Array = JSONRPCNewType('Array', list, tuple, List, NamedTuple)
+Boolean = JSONRPCNewType('Boolean', bool)
+Null = JSONRPCNewType('Null', type(None))
+Types = [String, Number, Object, Array, Boolean, Null]

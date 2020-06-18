@@ -1,0 +1,61 @@
+default_language_version:
+  python: python3.8
+repos:
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: v3.1.0
+  hooks:
+    - id: check-byte-order-marker
+    - id: check-case-conflict
+    - id: check-executables-have-shebangs
+    - id: check-json
+    - id: check-merge-conflict
+    - id: check-yaml
+    - id: end-of-file-fixer
+    - id: mixed-line-ending
+      args:
+        - --fix=lf
+    - id: trailing-whitespace
+- repo: local
+  hooks:
+    - id: black
+      name: black
+      language: system
+      entry: black
+      types: [python]
+- repo: local
+  hooks:
+    - id: isort
+      name: isort
+      language: system
+      entry: isort -rc .
+      types: [python]
+- repo: local
+  hooks:
+    - id: flake8
+      name: flake8
+      language: system
+      entry: flake8
+      types: [python]
+- repo: local
+  hooks:
+    - id: pylint
+      name: pylint
+      language: system
+      entry: pylint
+      types: [python]
+- repo: local
+  hooks:
+    - id: mypy
+      name: mypy
+      language: system
+      entry: mypy
+      types: [python]
+      files: ^flask_jsonrpc/
+- repo: local
+  hooks:
+    - id: pytest
+      name: pytest
+      language: system
+      entry: pytest flask_jsonrpc/ tests/
+      types: [python]
+      pass_filenames: false

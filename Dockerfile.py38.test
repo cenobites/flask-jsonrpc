@@ -1,0 +1,36 @@
+FROM python:3.8-alpine
+
+ENV PYTHONUNBUFFERED=1 \
+    DEBUG=0
+
+WORKDIR /code
+
+COPY requirements.pip requirements_test.pip requirements_ci.pip /code/
+
+RUN set -ex \
+    && apk add --no-cache --virtual .build-deps \
+        gcc \
+        musl-dev \
+        python3-dev \
+    && pip install pip setuptools wheel --upgrade \
+    && pip install -r requirements.pip \
+    && pip install -r requirements_test.pip \
+    && pip install -r requirements_ci.pip \
+    && apk del .build-deps \
+    && addgroup -S kuchulu \
+    && adduser \
+        --disabled-password \
+        --gecos "" \
+        --ingroup kuchulu \
+        --no-create-home \
+        -s /bin/false \
+        kuchulu
+
+ARG VERSION=1
+RUN echo ${VERSION}
+
+COPY . /code/
+
+RUN chown kuchulu:kuchulu -R /code
+
+USER kuchulu

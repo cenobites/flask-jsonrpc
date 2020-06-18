@@ -24,7 +24,7 @@ Testing your service
         "jsonrpc": "2.0",
         "method": "Hello.index",
         "id": "1"
-      }' http://localhost:5000/api
+      }' http://localhost:5000/api/hello
     HTTP/1.0 200 OK
     Content-Type: application/json
     Content-Length: 74

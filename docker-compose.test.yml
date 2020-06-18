@@ -1,0 +1,30 @@
+version: '3'
+
+services:
+  python3.8:
+    build:
+      context: .
+      dockerfile: Dockerfile.py38.test
+    command: >
+      sh -c "flake8 flask_jsonrpc/ tests/ &&
+        pylint flask_jsonrpc/ tests/ &&
+        mypy flask_jsonrpc/ &&
+        pytest"
+
+  python3.7:
+    build:
+      context: .
+      dockerfile: Dockerfile.py37.test
+    command: >
+      sh -c "flake8 flask_jsonrpc/ tests/ &&
+        pylint flask_jsonrpc/ tests/ &&
+        pytest --cov-fail-under=0"
+
+  python3.6:
+    build:
+      context: .
+      dockerfile: Dockerfile.py36.test
+    command: >
+      sh -c "flake8 flask_jsonrpc/ tests/ &&
+        pylint flask_jsonrpc/ tests/ &&
+        pytest --cov-fail-under=0"

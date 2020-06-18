@@ -1,6 +1,5 @@
 [run]
 branch = True
-omit = flask_jsonrpc/_compat.py
 
 [report]
 exclude_lines =
@@ -21,8 +20,7 @@ exclude_lines =
     if current_app\.config\[.DEBUG.\]:
     if app\.config\[.DEBUG.\]
 
-    # Classes tests
-    class FakePayload
-    class TestingServiceProxy
+    # Type checker
+    if TYPE_CHECKING:
 
 ignore_errors = True

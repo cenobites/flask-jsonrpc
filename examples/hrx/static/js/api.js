@@ -4,7 +4,8 @@
     var $jsonrpc = function(config) {
     	var self = this;
 		self.defaults = {
-			url: 'http://' + window.location.host + '/api',
+            url: 'http://' + window.location.host + '/api/hello',
+            headers: {'Content-Type': 'application/json'},
 			service: undefined,
 			version: '2.0'
 		};
@@ -22,7 +23,8 @@
 			var deferred = $.ajax({
 				type: 'POST',
 				dataType: 'json',
-				url: self.defaults.url,
+                url: self.defaults.url,
+                headers: self.defaults.headers,
 				data: JSON.stringify({
 					'jsonrpc': self.defaults.version,
 					'method': name,

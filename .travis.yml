@@ -3,21 +3,22 @@ language: python
 sudo: false
 
 python:
-  - "2.7"
-  - "3.3"
-  - "3.4"
+  - "3.8"
 
 env:
   - FLASK_ENV=TESTING
 
 install:
-  - pip install --upgrade pip --quiet
-  - pip install --upgrade setuptools --quiet
+  - pip install --upgrade pip setuptools --quiet
   - pip install -r requirements.pip --quiet
+  - pip install -r requirements_ci.pip --quiet
   - pip install -r requirements_test.pip --quiet
 
 script:
-  - python setup.py test
+  - flake8 flask_jsonrpc/ tests/
+  - pylint flask_jsonrpc/ tests/
+  - mypy flask_jsonrpc/
+  - pytest
 
 after_success:
   coveralls

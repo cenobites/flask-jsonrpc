@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2012-2015, Cenobit Technologies, Inc. http://cenobit.es/
+# Copyright (c) 2020-2020, Cenobit Technologies, Inc. http://cenobit.es/
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -25,172 +25,84 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-from __future__ import unicode_literals, absolute_import
-import os
-import sys
-import time
-import argparse
-import unittest
-import subprocess
+import functools
+from typing import Any, Dict, List, Tuple, Union
 
 from flask import Flask
 
-PROJECT_DIR, PROJECT_MODULE_NAME = os.path.split(os.path.dirname(os.path.realpath(__file__)))
-FLASK_JSONRPC_PROJECT_DIR = os.path.join(PROJECT_DIR)
-if os.path.exists(FLASK_JSONRPC_PROJECT_DIR) and not FLASK_JSONRPC_PROJECT_DIR in sys.path:
-    sys.path.append(FLASK_JSONRPC_PROJECT_DIR)
+from flask_jsonrpc import JSONRPC
 
-from flask_jsonrpc import JSONRPC, make_response
 
-SERVER_HOSTNAME = 'localhost'
-SERVER_PORT = 5001
-
-app = Flask(__name__)
-app.config['DEBUG'] = False
-app.config['TESTING'] = True
-jsonrpc = JSONRPC(app, '/api', enable_web_browsable_api=True)
-
-def check_auth(username, password):
-    return True
-
-def jsonrcp_headers(fn):
+def jsonrcp_decorator(fn):
+    @functools.wraps(fn)
     def wrapped(*args, **kwargs):
-        response = make_response(fn(*args, **kwargs))
-        response.headers['X-JSONRPC-Tag'] = 'JSONRPC 2.0'
-        return response
+        rv = fn(*args, **kwargs)
+        return '{0} from decorator, ;)'.format(rv)
+
     return wrapped
 
-@jsonrpc.method('jsonrpc.echo')
-def echo(name='Flask JSON-RPC'):
-    return 'Hello {0}'.format(name)
 
-@jsonrpc.method('jsonrpc.echoMyStr')
-def echoMyStr(string):
-    return string
+def create_app(test_config=None):  # noqa: C901  pylint: disable=W0612
+    """Create and configure an instance of the Flask application."""
+    app = Flask(__name__, instance_relative_config=True)
+    if test_config:
+        app.config.update(test_config)
 
-@jsonrpc.method('jsonrpc.echoAuth', authenticated=check_auth)
-def echoAuth(string):
-    return string
+    jsonrpc = JSONRPC(app, '/api', enable_web_browsable_api=True)
 
-@jsonrpc.method('jsonrpc.echoAuthChecked(string=str) -> str', authenticated=check_auth, validate=True)
-def echoAuthChecked(string):
-    return string
+    # pylint: disable=W0612
+    @jsonrpc.method('jsonrpc.greeting')
+    def greeting(name: str = 'Flask JSON-RPC') -> str:
+        return 'Hello {0}'.format(name)
 
-@jsonrpc.method('jsonrpc.notify')
-def notify(string):
-    pass
+    # pylint: disable=W0612
+    @jsonrpc.method('jsonrpc.echo')
+    def echo(string: str, _some: Any = None) -> str:
+        return string
 
-@jsonrpc.method('jsonrpc.fails')
-def fails(string):
-    raise IndexError
+    # pylint: disable=W0612
+    @jsonrpc.method('jsonrpc.notify')
+    def notify(_string: str = None) -> None:
+        pass
 
-@jsonrpc.method('jsonrpc.strangeEcho')
-def strangeEcho(string, omg, wtf, nowai, yeswai='Default'):
-    return [string, omg, wtf, nowai, yeswai]
+    # pylint: disable=W0612
+    @jsonrpc.method('jsonrpc.fails')
+    def fails(n: int) -> int:
+        if n % 2 == 0:
+            return n
+        raise ValueError('number is odd')
 
-@jsonrpc.method('jsonrpc.safeEcho', safe=True)
-def safeEcho(string):
-    return string
+    # pylint: disable=W0612
+    @jsonrpc.method('jsonrpc.strangeEcho')
+    def strangeEcho(
+        string: str, omg: Dict[str, Any], wtf: List[str], nowai: int, yeswai: str = 'Default'
+    ) -> List[Any]:
+        return [string, omg, wtf, nowai, yeswai]
 
-@jsonrpc.method('jsonrpc.strangeSafeEcho', safe=True)
-def strangeSafeEcho(*args, **kwargs):
-    return strangeEcho(*args, **kwargs)
+    # pylint: disable=W0612
+    @jsonrpc.method('jsonrpc.sum')
+    def sum_(a: Union[int, float], b: Union[int, float]) -> Union[int, float]:
+        return a + b
 
-@jsonrpc.method('jsonrpc.checkedEcho(string=str, string2=str) -> str', safe=True, validate=True)
-def protectedEcho(string, string2):
-    return string + string2
+    # pylint: disable=W0612
+    @jsonrpc.method('jsonrpc.decorators')
+    @jsonrcp_decorator
+    def decorators(string: str) -> str:
+        return 'Hello {0}'.format(string)
 
-@jsonrpc.method('jsonrpc.checkedArgsEcho(string=str, string2=str)', validate=True)
-def protectedArgsEcho(string, string2):
-    return string + string2
+    # pylint: disable=W0612
+    @jsonrpc.method('jsonrpc.returnStatusCode')
+    def return_status_code(s: str) -> Tuple[str, int]:
+        return 'Status Code {0}'.format(s), 201
 
-@jsonrpc.method('jsonrpc.checkedReturnEcho() -> String', validate=True)
-def protectedReturnEcho():
-    return 'this is a string'
+    # pylint: disable=W0612
+    @jsonrpc.method('jsonrpc.returnHeaders')
+    def return_headers(s: str) -> Tuple[str, Dict[str, Any]]:
+        return 'Headers {0}'.format(s), {'X-JSONRPC': '1'}
 
-@jsonrpc.method('jsonrpc.authCheckedEcho(Any, Array) -> Object', validate=True)
-def authCheckedEcho(obj1, arr1):
-    return {'obj1': obj1, 'arr1': arr1}
+    # pylint: disable=W0612
+    @jsonrpc.method('jsonrpc.returnStatusCodeAndHeaders')
+    def return_status_code_and_headers(s: str) -> Tuple[str, int, Dict[str, Any]]:
+        return 'Status Code and Headers {0}'.format(s), 400, {'X-JSONRPC': '1'}
 
-@jsonrpc.method('jsonrpc.varArgs(String, String, str3=String) -> Array', validate=True)
-def checkedVarArgsEcho(*args, **kw):
-    return list(args) + list(kw.values())
-
-@jsonrpc.method('jsonrpc.sum(Number, Number) -> Number', validate=True)
-def sum_(a, b):
-    return a + b
-
-@jsonrpc.method('jsonrpc.subtract(Number, Number) -> Number', validate=True)
-def subtract(a, b):
-    return a - b
-
-@jsonrpc.method('jsonrpc.divide(Number, Number) -> Number', validate=True)
-def divide(a, b):
-    return a / float(b)
-
-@jsonrpc.method('jsonrpc.decorators(String) -> String')
-@jsonrcp_headers
-def decorators(string):
-    return 'Hello {0}'.format(string)
-
-
-class FlaskTestServer(object):
-
-    def __init__(self):
-        self.process = None
-
-    def __enter__(self):
-        return self.run()
-
-    def __exit__(self, type, value, traceback):
-        self.kill()
-
-    def run(self):
-        if not self.process is None:
-            try:
-                self.kill()
-            except OSError:
-                pass
-        exe =  os.path.join(os.path.dirname(os.path.abspath(__file__)), 'apptest.py')
-        self.process = subprocess.Popen([sys.executable, exe, '--run'])
-        time.sleep(1)
-        return self.process
-
-    def kill(self, process=None):
-        process = process if not process is None else self.process
-        if not process is None and not process.poll() is None:
-            process.wait()
-            process.terminate()
-            time.sleep(1)
-            if not process.poll() is None:
-                process.kill()
-        if not process is None and process.poll() is None:
-            process.kill()
-            time.sleep(1)
-        self.process = None
-
-
-class FlaskJSONRPCServerTestCase(unittest.TestCase):
-
-    @classmethod
-    def setUpClass(cls):
-        cls.app = app.test_client()
-        cls.service_url = 'http://{0}:{1}/api'.format(SERVER_HOSTNAME, SERVER_PORT)
-        cls.flask_server = FlaskTestServer()
-        cls.flask_server.run()
-
-    @classmethod
-    def tearDownClass(cls):
-        cls.flask_server.kill()
-
-def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-r', '--run',
-        action='store_true', dest='run', default=False,
-        help='Running Flask in subprocess')
-    options = parser.parse_args()
-    if options.run:
-        return app.run(host=SERVER_HOSTNAME, port=SERVER_PORT, debug=False)
-
-if __name__ == '__main__':
-    main()
+    return app
