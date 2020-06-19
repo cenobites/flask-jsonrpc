@@ -28,11 +28,9 @@
 # POSSIBILITY OF SUCH DAMAGE.
 from setuptools import setup
 
-import flask_jsonrpc
-
 setup(
     name='Flask-JSONRPC',
-    version=flask_jsonrpc.__version__,
+    version='1.0.0',
     url='https://github.com/cenobites/flask-jsonrpc',
     license='New BSD License',
     author='Nycholas de Oliveira e Oliveira',
