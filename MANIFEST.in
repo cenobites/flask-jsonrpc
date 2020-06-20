@@ -1,2 +1,3 @@
+include .coveragerc .pylintrc COPYING AUTHORS
 recursive-include flask_jsonrpc/contrib/browse/templates *
 recursive-include flask_jsonrpc/contrib/browse/static *

@@ -26,9 +26,12 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-from setuptools import setup
+import setuptools
 
-setup(
+with open('README.md', 'r') as fh:
+    long_description = fh.read()
+
+setuptools.setup(
     name='Flask-JSONRPC',
     version='1.0.0',
     url='https://github.com/cenobites/flask-jsonrpc',
@@ -36,8 +39,9 @@ setup(
     author='Nycholas de Oliveira e Oliveira',
     author_email='nycholas@gmail.com',
     description='Adds JSONRPC support to Flask.',
-    long_description=open('README.md').read(),
-    packages=['flask_jsonrpc', 'flask_jsonrpc.contrib', 'flask_jsonrpc.contrib.browse'],
+    long_description=long_description,
+    long_description_content_type='text/markdown',
+    packages=setuptools.find_packages(),
     zip_safe=False,
     include_package_data=True,
     platforms='any',
