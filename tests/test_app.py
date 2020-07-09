@@ -86,6 +86,46 @@ def test_app_create_with_method_without_annotation():
         def fn3(s):  # pylint: disable=W0612
             return 'Poo {0}'.format(s)
 
+def test_app_create_with_method_without_annotation_on_params():
+    with pytest.raises(ValueError, match='no type annotations present to: app.fn2'):
+        app = Flask(__name__, instance_relative_config=True)
+        jsonrpc = JSONRPC(app, '/api', enable_web_browsable_api=True)
+
+        # pylint: disable=W0612
+        @jsonrpc.method('app.fn2')
+        def fn1(s) -> str:
+            return 'Foo {0}'.format(s)
+
+        # pylint: disable=W0612
+        @jsonrpc.method('app.fn1')
+        def fn2(s: str) -> str:
+            return 'Bar {0}'.format(s)
+
+        # pylint: disable=W0612
+        @jsonrpc.method('app.fn3')
+        def fn3(s):  # pylint: disable=W0612
+            return 'Poo {0}'.format(s)
+
+def test_app_create_with_method_without_annotation_on_return():
+    with pytest.raises(ValueError, match='no type annotations present to: app.fn2'):
+        app = Flask(__name__, instance_relative_config=True)
+        jsonrpc = JSONRPC(app, '/api', enable_web_browsable_api=True)
+
+        # pylint: disable=W0612
+        @jsonrpc.method('app.fn2')
+        def fn1(s: str):
+            return 'Foo {0}'.format(s)
+
+        # pylint: disable=W0612
+        @jsonrpc.method('app.fn1')
+        def fn2(s: str) -> str:
+            return 'Bar {0}'.format(s)
+
+        # pylint: disable=W0612
+        @jsonrpc.method('app.fn3')
+        def fn3(s):  # pylint: disable=W0612
+            return 'Poo {0}'.format(s)
+
 
 def test_app_create_with_wrong_return():
     app = Flask(__name__, instance_relative_config=True)

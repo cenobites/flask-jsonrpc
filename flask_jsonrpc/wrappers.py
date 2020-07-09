@@ -35,6 +35,17 @@ if TYPE_CHECKING:
 
 
 class JSONRCPDecoratorMixin:
+    def _validate(self, fn: Callable[..., Any]) -> bool:
+        if not getattr(fn, '__annotations__', None):
+            return False
+        fn_annotations = get_type_hints(fn)
+        if 'return' not in fn_annotations:
+            return False
+        fn_annotations.pop('return', None)
+        if not fn_annotations:
+            return False
+        return True
+
     def get_jsonrpc_site(self) -> 'JSONRPCSite':
         raise NotImplementedError
 
@@ -44,11 +55,11 @@ class JSONRCPDecoratorMixin:
     def method(self, name: Optional[str] = None, validate: bool = True, **options: Any) -> Callable[..., Any]:
         def decorator(fn: Callable[..., Any]) -> Callable[..., Any]:
             method_name = fn.__name__ if not name else name
-            if validate and not getattr(fn, '__annotations__', None):
+            if validate and not self._validate(fn):
                 raise ValueError('no type annotations present to: {0}'.format(method_name))
             fn_annotations = get_type_hints(fn)
             fn.jsonrpc_method_name = method_name  # type: ignore
-            fn.jsonrpc_method_sig = fn_annotations.copy()  # type: ignore
+            fn.jsonrpc_method_sig = fn_annotations  # type: ignore
             fn.jsonrpc_method_return = fn_annotations.pop('return', None)  # type: ignore
             fn.jsonrpc_method_params = fn_annotations  # type: ignore
             fn.jsonrpc_validate = validate  # type: ignore
