@@ -11,7 +11,7 @@ pre-commit
 flake8
 flake8-quotes
 pylint
-isort
+isort<5,>=4.2.5
 black
 ipdb
 pip-tools
