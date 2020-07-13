@@ -26,6 +26,7 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 from typing import TYPE_CHECKING, Any, Type, Callable, Optional, get_type_hints
+from inspect import signature
 
 from typeguard import typechecked
 
@@ -35,15 +36,24 @@ if TYPE_CHECKING:
 
 
 class JSONRCPDecoratorMixin:
+    def _method_has_parameters(self, fn: Callable[..., Any]) -> bool:
+        fn_signature = signature(fn)
+        return bool(fn_signature.parameters)
+
+    def _method_has_return(self, fn: Callable[..., Any]) -> bool:
+        fn_annotations = get_type_hints(fn)
+        return 'return' in fn_annotations
+
     def _validate(self, fn: Callable[..., Any]) -> bool:
+        if not self._method_has_parameters(fn) and not self._method_has_return(fn):
+            return True
         if not getattr(fn, '__annotations__', None):
             return False
         fn_annotations = get_type_hints(fn)
-        if 'return' not in fn_annotations:
-            return False
         fn_annotations.pop('return', None)
-        if not fn_annotations:
-            return False
+        if self._method_has_parameters(fn):
+            if not fn_annotations:
+                return False
         return True
 
     def get_jsonrpc_site(self) -> 'JSONRPCSite':

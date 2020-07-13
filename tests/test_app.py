@@ -39,11 +39,38 @@ def test_app_create():
     jsonrpc = JSONRPC(app, '/api', enable_web_browsable_api=True)
 
     # pylint: disable=W0612
+    @jsonrpc.method('App.index')
+    def index() -> str:
+        return 'Welcome to Flask JSON-RPC'
+
+    # pylint: disable=W0612
+    @jsonrpc.method('app.fn0')
+    def fn0():
+        pass
+
+    # pylint: disable=W0612
+    @jsonrpc.method('app.fn1')
+    def fn1() -> str:
+        return 'Bar'
+
+    # pylint: disable=W0612
     @jsonrpc.method('app.fn2')
-    def fn1(s: str) -> str:
+    def fn2(s: str) -> str:
         return 'Foo {0}'.format(s)
 
     with app.test_client() as client:
+        rv = client.post('/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'App.index', 'params': []})
+        assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': 'Welcome to Flask JSON-RPC'}
+        assert rv.status_code == 200
+
+        rv = client.post('/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.fn0', 'params': []})
+        assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': None}
+        assert rv.status_code == 200
+
+        rv = client.post('/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.fn1', 'params': []})
+        assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': 'Bar'}
+        assert rv.status_code == 200
+
         rv = client.post('/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.fn2', 'params': [':)']})
         assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': 'Foo :)'}
         assert rv.status_code == 200
@@ -67,17 +94,17 @@ def test_app_create_without_register_app():
 
 
 def test_app_create_with_method_without_annotation():
-    with pytest.raises(ValueError, match='no type annotations present to: app.fn2'):
+    with pytest.raises(ValueError, match='no type annotations present to: app.fn1'):
         app = Flask(__name__, instance_relative_config=True)
         jsonrpc = JSONRPC(app, '/api', enable_web_browsable_api=True)
 
         # pylint: disable=W0612
-        @jsonrpc.method('app.fn2')
+        @jsonrpc.method('app.fn1')
         def fn1(s):
             return 'Foo {0}'.format(s)
 
         # pylint: disable=W0612
-        @jsonrpc.method('app.fn1')
+        @jsonrpc.method('app.fn2')
         def fn2(s: str) -> str:
             return 'Bar {0}'.format(s)
 
@@ -85,6 +112,7 @@ def test_app_create_with_method_without_annotation():
         @jsonrpc.method('app.fn3')
         def fn3(s):  # pylint: disable=W0612
             return 'Poo {0}'.format(s)
+
 
 def test_app_create_with_method_without_annotation_on_params():
     with pytest.raises(ValueError, match='no type annotations present to: app.fn2'):
@@ -92,39 +120,57 @@ def test_app_create_with_method_without_annotation_on_params():
         jsonrpc = JSONRPC(app, '/api', enable_web_browsable_api=True)
 
         # pylint: disable=W0612
+        @jsonrpc.method('app.fn4')
+        def fn4():
+            pass
+
+        # pylint: disable=W0612
         @jsonrpc.method('app.fn2')
-        def fn1(s) -> str:
+        def fn2(s) -> str:
             return 'Foo {0}'.format(s)
 
         # pylint: disable=W0612
         @jsonrpc.method('app.fn1')
-        def fn2(s: str) -> str:
+        def fn1(s: str) -> str:
             return 'Bar {0}'.format(s)
 
         # pylint: disable=W0612
         @jsonrpc.method('app.fn3')
         def fn3(s):  # pylint: disable=W0612
             return 'Poo {0}'.format(s)
+
 
 def test_app_create_with_method_without_annotation_on_return():
-    with pytest.raises(ValueError, match='no type annotations present to: app.fn2'):
-        app = Flask(__name__, instance_relative_config=True)
-        jsonrpc = JSONRPC(app, '/api', enable_web_browsable_api=True)
+    app = Flask(__name__, instance_relative_config=True)
+    jsonrpc = JSONRPC(app, '/api', enable_web_browsable_api=True)
 
-        # pylint: disable=W0612
-        @jsonrpc.method('app.fn2')
-        def fn1(s: str):
-            return 'Foo {0}'.format(s)
+    # pylint: disable=W0612
+    @jsonrpc.method('app.fn1')
+    def fn1(s: str):
+        return 'Foo {0}'.format(s)
 
-        # pylint: disable=W0612
-        @jsonrpc.method('app.fn1')
-        def fn2(s: str) -> str:
-            return 'Bar {0}'.format(s)
+    # pylint: disable=W0612
+    @jsonrpc.method('app.fn2')
+    def fn2(s: str) -> str:
+        return 'Bar {0}'.format(s)
 
-        # pylint: disable=W0612
-        @jsonrpc.method('app.fn3')
-        def fn3(s):  # pylint: disable=W0612
-            return 'Poo {0}'.format(s)
+    with app.test_client() as client:
+        rv = client.post('/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.fn1', 'params': [':)']})
+        assert rv.json == {
+            'error': {
+                'code': -32602,
+                'data': {'message': 'return type of str must be a type; got NoneType instead'},
+                'message': 'Invalid params',
+                'name': 'InvalidParamsError',
+            },
+            'id': 1,
+            'jsonrpc': '2.0',
+        }
+        assert rv.status_code == 400
+
+        rv = client.post('/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.fn2', 'params': [':)']})
+        assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': 'Bar :)'}
+        assert rv.status_code == 200
 
 
 def test_app_create_with_wrong_return():

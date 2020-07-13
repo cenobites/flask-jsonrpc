@@ -26,10 +26,11 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 from uuid import UUID, uuid4
-from typing import Any, Dict, List, Type, Tuple, Union, TypeVar, Callable
+from typing import Any, Dict, List, Type, Tuple, Union, TypeVar, Callable, get_type_hints
 
 from flask import json, request, current_app
 
+from typeguard import qualified_name
 from werkzeug.datastructures import Headers
 
 from .helpers import from_python_type
@@ -142,6 +143,16 @@ class JSONRPCSite:
                         'message': 'Parameter structures are by-position '
                         '(tuple, set, list) or by-name (dict): {0}'.format(params)
                     }
+                )
+
+            # TODO: Improve the checker to return type
+            view_fun_annotations = get_type_hints(view_func)
+            view_fun_return = view_fun_annotations.pop('return', None)
+            if resp_view is not None and view_fun_return is None:
+                raise TypeError(
+                    'return type of {} must be a type; got {} instead'.format(
+                        qualified_name(resp_view), qualified_name(view_fun_return)
+                    )
                 )
         except TypeError as e:
             current_app.logger.error('invalid type checked for: %s', view_func.__name__)
