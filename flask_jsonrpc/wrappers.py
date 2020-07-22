@@ -26,7 +26,7 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 from typing import TYPE_CHECKING, Any, Type, Callable, Optional, get_type_hints
-from inspect import signature
+from inspect import ismethod, signature, isfunction
 
 from typeguard import typechecked
 
@@ -56,26 +56,40 @@ class JSONRCPDecoratorMixin:
                 return False
         return True
 
+    def _get_function(self, fn: Callable[..., Any]) -> Callable[..., Any]:
+        if isfunction(fn):
+            return fn
+        if ismethod(fn) and getattr(fn, '__func__', None):
+            return fn.__func__  # type: ignore
+        raise ValueError('the view function must be either a function or a method')
+
     def get_jsonrpc_site(self) -> 'JSONRPCSite':
         raise NotImplementedError
 
     def get_jsonrpc_site_api(self) -> Type['JSONRPCView']:
         raise NotImplementedError
 
+    def register_view_function(
+        self, view_func: Callable[..., Any], name: Optional[str] = None, validate: bool = True, **options: Any
+    ) -> Callable[..., Any]:
+        fn = self._get_function(view_func)
+        fn_annotations = get_type_hints(fn)
+        method_name = getattr(fn, '__name__', '<noname>') if not name else name
+        setattr(fn, 'jsonrpc_method_name', method_name)
+        setattr(fn, 'jsonrpc_method_sig', fn_annotations)
+        setattr(fn, 'jsonrpc_method_return', fn_annotations.pop('return', None))
+        setattr(fn, 'jsonrpc_method_params', fn_annotations)
+        setattr(fn, 'jsonrpc_validate', validate)
+        setattr(fn, 'jsonrpc_options', options)
+        view_func_wrapped = typechecked(view_func) if validate else view_func
+        self.get_jsonrpc_site().register(method_name, view_func_wrapped)
+        return view_func_wrapped
+
     def method(self, name: Optional[str] = None, validate: bool = True, **options: Any) -> Callable[..., Any]:
         def decorator(fn: Callable[..., Any]) -> Callable[..., Any]:
-            method_name = fn.__name__ if not name else name
+            method_name = getattr(fn, '__name__', '<noname>') if not name else name
             if validate and not self._validate(fn):
                 raise ValueError('no type annotations present to: {0}'.format(method_name))
-            fn_annotations = get_type_hints(fn)
-            fn.jsonrpc_method_name = method_name  # type: ignore
-            fn.jsonrpc_method_sig = fn_annotations  # type: ignore
-            fn.jsonrpc_method_return = fn_annotations.pop('return', None)  # type: ignore
-            fn.jsonrpc_method_params = fn_annotations  # type: ignore
-            fn.jsonrpc_validate = validate  # type: ignore
-            fn.jsonrpc_options = options  # type: ignore
-            fn_wrapped = typechecked(fn) if validate else fn
-            self.get_jsonrpc_site().register(method_name, fn_wrapped)
-            return fn_wrapped
+            return self.register_view_function(fn, name, validate, **options)
 
         return decorator
