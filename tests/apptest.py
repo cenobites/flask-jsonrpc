@@ -33,6 +33,30 @@ from flask import Flask
 from flask_jsonrpc import JSONRPC
 
 
+class App:
+    def index(self, name: str = 'Flask JSON-RPC') -> str:
+        return 'Hello {0}'.format(name)
+
+    @staticmethod
+    def greeting(name: str = 'Flask JSON-RPC') -> str:
+        return 'Hello {0}'.format(name)
+
+    @classmethod
+    def hello(cls, name: str = 'Flask JSON-RPC') -> str:
+        return 'Hello {0}'.format(name)
+
+    def echo(self, string: str, _some: Any = None) -> str:
+        return string
+
+    def notify(self, _string: str = None) -> None:
+        pass
+
+    def fails(self, n: int) -> int:
+        if n % 2 == 0:
+            return n
+        raise ValueError('number is odd')
+
+
 def jsonrcp_decorator(fn):
     @functools.wraps(fn)
     def wrapped(*args, **kwargs):
@@ -104,5 +128,13 @@ def create_app(test_config=None):  # noqa: C901  pylint: disable=W0612
     @jsonrpc.method('jsonrpc.returnStatusCodeAndHeaders')
     def return_status_code_and_headers(s: str) -> Tuple[str, int, Dict[str, Any]]:
         return 'Status Code and Headers {0}'.format(s), 400, {'X-JSONRPC': '1'}
+
+    class_app = App()
+    jsonrpc.register(class_app.index, name='classapp.index')
+    jsonrpc.register(class_app.greeting)
+    jsonrpc.register(class_app.hello)
+    jsonrpc.register(class_app.echo)
+    jsonrpc.register(class_app.notify)
+    jsonrpc.register(class_app.fails)
 
     return app

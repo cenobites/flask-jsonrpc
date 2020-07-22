@@ -307,6 +307,40 @@ def test_app_return_status_code_and_headers(client):
     assert ('X-JSONRPC', '1') in list(rv.headers)
 
 
+def test_app_class(client):
+    rv = client.post('/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'classapp.index'})
+    assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': 'Hello Flask JSON-RPC'}
+    assert rv.status_code == 200
+
+    rv = client.post('/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'greeting', 'params': ['Python']})
+    assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': 'Hello Python'}
+    assert rv.status_code == 200
+
+    rv = client.post('/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'hello', 'params': {'name': 'Flask'}})
+    assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': 'Hello Flask'}
+    assert rv.status_code == 200
+
+    rv = client.post('/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'echo', 'params': ['Python', 1]})
+    assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': 'Python'}
+    assert rv.status_code == 200
+
+    rv = client.post('/api', json={'jsonrpc': '2.0', 'method': 'notify', 'params': ['Python']})
+    assert rv.status_code == 204
+
+    rv = client.post('/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'fails', 'params': [13]})
+    assert rv.json == {
+        'id': 1,
+        'jsonrpc': '2.0',
+        'error': {
+            'code': -32000,
+            'data': {'message': 'number is odd'},
+            'message': 'Server error',
+            'name': 'ServerError',
+        },
+    }
+    assert rv.status_code == 500
+
+
 def test_app_system_describe(client):
     rv = client.post('/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'system.describe'})
     assert rv.json['id'] == 1
@@ -382,6 +416,37 @@ def test_app_system_describe(client):
             'return': {'type': 'Array'},
             'summary': None,
         },
+        {
+            'name': 'classapp.index',
+            'params': [{'name': 'name', 'type': 'String'}],
+            'return': {'type': 'String'},
+            'summary': None,
+        },
+        {
+            'name': 'greeting',
+            'params': [{'name': 'name', 'type': 'String'}],
+            'return': {'type': 'String'},
+            'summary': None,
+        },
+        {
+            'name': 'hello',
+            'params': [{'name': 'name', 'type': 'String'}],
+            'return': {'type': 'String'},
+            'summary': None,
+        },
+        {
+            'name': 'echo',
+            'params': [{'name': 'string', 'type': 'String'}, {'name': '_some', 'type': 'Object'}],
+            'return': {'type': 'String'},
+            'summary': None,
+        },
+        {
+            'name': 'notify',
+            'params': [{'name': '_string', 'type': 'String'}],
+            'return': {'type': 'Null'},
+            'summary': None,
+        },
+        {'name': 'fails', 'params': [{'name': 'n', 'type': 'Number'}], 'return': {'type': 'Number'}, 'summary': None},
     ]
 
     assert rv.status_code == 200

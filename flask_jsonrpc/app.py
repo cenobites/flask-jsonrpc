@@ -25,7 +25,7 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-from typing import TYPE_CHECKING, Type, Union, Optional
+from typing import TYPE_CHECKING, Any, Type, Union, Callable, Optional
 
 from flask import Flask
 
@@ -75,6 +75,11 @@ class JSONRPC(JSONRCPDecoratorMixin):
             ),
         )
         self.register_browse(app, self)
+
+    def register(
+        self, view_func: Callable[..., Any], name: Optional[str] = None, validate: bool = True, **options: Any
+    ) -> None:
+        self.register_view_function(view_func, name, validate, **options)
 
     def register_blueprint(
         self, app: Flask, jsonrpc_app: 'JSONRPCBlueprint', url_prefix: str, enable_web_browsable_api: bool = False

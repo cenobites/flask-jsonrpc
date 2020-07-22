@@ -33,7 +33,7 @@ with open('README.md', 'r') as fh:
 
 setuptools.setup(
     name='Flask-JSONRPC',
-    version='1.0.2',
+    version='1.1.0-dev',
     url='https://github.com/cenobites/flask-jsonrpc',
     license='New BSD License',
     author='Nycholas de Oliveira e Oliveira',

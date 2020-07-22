@@ -185,7 +185,7 @@ class JSONRPCSite:
             # other sized tuples are not allowed
             else:
                 raise TypeError(
-                    'The view function did not return a valid response tuple.'
+                    'the view function did not return a valid response tuple.'
                     ' The tuple must have the form (body, status, headers),'
                     ' (body, status), or (body, headers).'
                 )

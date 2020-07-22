@@ -58,6 +58,12 @@ def test_app_create():
     def fn2(s: str) -> str:
         return 'Foo {0}'.format(s)
 
+    # pylint: disable=W0612
+    def fn3(s: str) -> str:
+        return 'Foo {0}'.format(s)
+
+    jsonrpc.register(fn3, name='app.fn3')
+
     with app.test_client() as client:
         rv = client.post('/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'App.index', 'params': []})
         assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': 'Welcome to Flask JSON-RPC'}
@@ -72,6 +78,10 @@ def test_app_create():
         assert rv.status_code == 200
 
         rv = client.post('/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.fn2', 'params': [':)']})
+        assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': 'Foo :)'}
+        assert rv.status_code == 200
+
+        rv = client.post('/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.fn3', 'params': [':)']})
         assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': 'Foo :)'}
         assert rv.status_code == 200
 
@@ -187,7 +197,7 @@ def test_app_create_with_wrong_return():
             'error': {
                 'code': -32000,
                 'data': {
-                    'message': 'The view function did not return a valid '
+                    'message': 'the view function did not return a valid '
                     'response tuple. The tuple must have the form '
                     '(body, status, headers), (body, status), or '
                     '(body, headers).'
@@ -199,6 +209,24 @@ def test_app_create_with_wrong_return():
             'jsonrpc': '2.0',
         }
         assert rv.status_code == 500
+
+
+def test_app_create_with_invalid_view_func():
+    app = Flask(__name__, instance_relative_config=True)
+    jsonrpc = JSONRPC(app, service_url='/api', enable_web_browsable_api=True)
+
+    # pylint: disable=W0612
+    @jsonrpc.method('app.fn2')
+    def fn1(s: str) -> str:
+        return 'Foo {0}'.format(s)
+
+    with pytest.raises(ValueError, match='the view function must be either a function or a method'):
+        jsonrpc.register(fn1.__new__, name='invalid')
+
+    with app.test_client() as client:
+        rv = client.post('/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.fn2', 'params': [':)']})
+        assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': 'Foo :)'}
+        assert rv.status_code == 200
 
 
 def test_app_create_multiple_jsonrpc_versions():
@@ -226,6 +254,18 @@ def test_app_create_multiple_jsonrpc_versions():
     def fn2(s: str) -> str:
         return 'Bar {0}'.format(s)
 
+    # pylint: disable=W0612
+    def fn4_v1(s: str) -> str:
+        return 'Poo {0}'.format(s)
+
+    jsonrpc_v1.register(fn4_v1)
+
+    # pylint: disable=W0612
+    def fn4_v2(s: str) -> str:
+        return 'Bar {0}'.format(s)
+
+    jsonrpc_v2.register(fn4_v2)
+
     with app.test_client() as client:
         rv = client.post('/api/v1', json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.fn2', 'params': [':)']})
         assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': 'v1: Foo :)'}
@@ -240,6 +280,14 @@ def test_app_create_multiple_jsonrpc_versions():
         assert rv.status_code == 200
 
         rv = client.post('/api/v2', json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.fn1', 'params': ['\\oB']})
+        assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': 'Bar \\oB'}
+        assert rv.status_code == 200
+
+        rv = client.post('/api/v1', json={'id': 1, 'jsonrpc': '2.0', 'method': 'fn4_v1', 'params': ['\\oB']})
+        assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': 'Poo \\oB'}
+        assert rv.status_code == 200
+
+        rv = client.post('/api/v2', json={'id': 1, 'jsonrpc': '2.0', 'method': 'fn4_v2', 'params': ['\\oB']})
         assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': 'Bar \\oB'}
         assert rv.status_code == 200
 
