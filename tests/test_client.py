@@ -79,6 +79,32 @@ def test_app_greeting_raise_parse_error(client):
     }
     assert rv.status_code == 400
 
+    rv = client.post(
+        '/api',
+        data="""[
+            {'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': ['Flask'], 'id': '1'},
+            {'jsonrpc': '2.0', 'method'
+        ]""",
+        headers={'Content-Type': 'application/json'},
+    )
+    assert rv.json == {
+        'id': None,
+        'jsonrpc': '2.0',
+        'error': {
+            'code': -32700,
+            'data': {
+                'message': 'Invalid JSON: b"[\\n            {\'jsonrpc\': '
+                "'2.0', 'method': 'jsonrpc.greeting', 'params': "
+                "['Flask'], 'id': '1'},\\n            "
+                "{'jsonrpc': '2.0', 'method'\\n        "
+                ']"'
+            },
+            'message': 'Parse error',
+            'name': 'ParseError',
+        },
+    }
+    assert rv.status_code == 400
+
 
 def test_app_greeting_raise_invalid_request_error(client):
     rv = client.post('/api', json={'id': 1, 'jsonrpc': '2.0'})
@@ -305,6 +331,56 @@ def test_app_return_status_code_and_headers(client):
     assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': 'Status Code and Headers OK'}
     assert rv.status_code == 400
     assert ('X-JSONRPC', '1') in list(rv.headers)
+
+
+def test_app_with_rcp_batch(client):
+    rv = client.post('/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting'})
+    assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': 'Hello Flask JSON-RPC'}
+    assert rv.status_code == 200
+
+    rv = client.post(
+        '/api',
+        json=[
+            {'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': ['Python']},
+            {'id': 2, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': ['Flask']},
+            {'id': 3, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': ['JSON-RCP']},
+        ],
+    )
+    assert rv.json == [
+        {'id': 1, 'jsonrpc': '2.0', 'result': 'Hello Python'},
+        {'id': 2, 'jsonrpc': '2.0', 'result': 'Hello Flask'},
+        {'id': 3, 'jsonrpc': '2.0', 'result': 'Hello JSON-RCP'},
+    ]
+    assert rv.status_code == 200
+
+    rv = client.post(
+        '/api',
+        json=[
+            {'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': ['Python']},
+            {'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': ['Flask']},
+            {'id': 3, 'jsonrpc': '2.0', 'params': ['Flask']},
+            {'id': 4, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': ['JSON-RCP']},
+        ],
+    )
+    assert rv.json == [
+        {'id': 1, 'jsonrpc': '2.0', 'result': 'Hello Python'},
+        {
+            'id': 3,
+            'jsonrpc': '2.0',
+            'error': {
+                'code': -32600,
+                'data': {'message': "Invalid JSON: {'id': 3, 'jsonrpc': '2.0', 'params': ['Flask']}"},
+                'message': 'Invalid Request',
+                'name': 'InvalidRequestError',
+            },
+        },
+        {'id': 4, 'jsonrpc': '2.0', 'result': 'Hello JSON-RCP'},
+    ]
+    assert rv.status_code == 200
+
+    rv = client.post('/api', json={'id': 2, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting'})
+    assert rv.json == {'id': 2, 'jsonrpc': '2.0', 'result': 'Hello Flask JSON-RPC'}
+    assert rv.status_code == 200
 
 
 def test_app_class(client):
