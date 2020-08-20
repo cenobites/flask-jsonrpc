@@ -26,7 +26,8 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 import itertools
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Dict
+from operator import getitem
 
 from .types import Types, Object
 
@@ -81,6 +82,55 @@ def from_python_type(tp: Any) -> 'JSONRPCNewType':
         if t.check_type(tp):
             return t
     return Object
+
+
+def get(obj: Dict[str, Any], path: str, default: Any = None) -> Any:
+    """Get the value at any depth of a nested object based on the path
+    described by `path`. If path doesn't exist, `default` is returned.
+    Args:
+        obj (dict): Object to process.
+        path (str): List or ``.`` delimited string of path describing
+            path.
+    Keyword Arguments:
+        default (mixed): Default value to return if path doesn't exist.
+            Defaults to ``None``.
+    Returns:
+        mixed: Value of `obj` at path.
+
+    Example:
+
+    >>> get(None, 'a')
+
+    >>> get(None, 'a', 'default')
+    'default'
+    >>> get({'a': 1}, 'a')
+    1
+    >>> get({'a': 1}, 'b')
+
+    >>> get({'a': 1}, 'b', 'default')
+    'default'
+    >>> get({'a': {'b': {'c': 1}}}, 'a.b.c')
+    1
+    >>> get({}, 'a.b.c')
+
+    >>> get([], 'a.b.c')
+
+    >>> get([], 'a.b.c', None)
+
+    """
+    if obj is None:
+        return default
+    if not isinstance(obj, dict):
+        return default
+
+    obj_val = obj
+    keys = path.split('.')
+    for key in keys:
+        try:
+            obj_val = getitem(obj_val, key)
+        except KeyError:
+            return default
+    return obj_val
 
 
 if __name__ == '__main__':

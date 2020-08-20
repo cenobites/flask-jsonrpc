@@ -27,13 +27,14 @@
 # POSSIBILITY OF SUCH DAMAGE.
 from uuid import UUID, uuid4
 from typing import Any, Dict, List, Type, Tuple, Union, TypeVar, Callable, get_type_hints
+from concurrent.futures import ThreadPoolExecutor
 
 from flask import json, request, current_app
 
 from typeguard import qualified_name
 from werkzeug.datastructures import Headers
 
-from .helpers import from_python_type
+from .helpers import get, from_python_type
 from .exceptions import (
     ParseError,
     ServerError,
@@ -73,43 +74,24 @@ class JSONRPCSite:
         self.view_funcs[name] = view_func
 
     def dispatch_request(self) -> Tuple[Any, int, Union[Headers, Dict[str, str], Tuple[str], List[Tuple[str]]]]:
-        json_data: Dict[str, Any] = {}
-        try:
-            if not self.validate_request():
-                raise ParseError(
-                    data={
-                        'message': 'Invalid mime type for JSON: {0}, use header Content-Type: application/json'.format(
-                            request.mimetype
-                        )
-                    }
-                )
+        if not self.validate_request():
+            raise ParseError(
+                data={
+                    'message': 'Invalid mime type for JSON: {0}, use header Content-Type: application/json'.format(
+                        request.mimetype
+                    )
+                }
+            )
 
-            json_data = self.to_json(request.data)
-
-            return self.dispatch(json_data)
-        except JSONRPCError as e:
-            current_app.logger.error('jsonrpc error')
-            current_app.logger.exception(e)
-            response = {
-                'id': json_data.get('id'),
-                'jsonrpc': json_data.get('jsonrpc', JSONRPC_VERSION_DEFAULT),
-                'error': e.jsonrpc_format,
-            }
-            return response, e.status_code, JSONRPC_DEFAULT_HTTP_HEADERS
-        except Exception as e:  # pylint: disable=W0703
-            current_app.logger.error('unexpected error')
-            current_app.logger.exception(e)
-            jsonrpc_error = ServerError(data={'message': str(e)})
-            response = {
-                'id': json_data.get('id'),
-                'jsonrpc': json_data.get('jsonrpc', JSONRPC_VERSION_DEFAULT),
-                'error': jsonrpc_error.jsonrpc_format,
-            }
-            return response, jsonrpc_error.status_code, JSONRPC_DEFAULT_HTTP_HEADERS
+        json_data = self.to_json(request.data)
+        if self.is_batch_request(json_data):
+            return self.batch_dispatch(json_data)
+        return self.handle_dispatch_except(json_data)
 
     def validate_request(self) -> bool:
         if not self.is_json:
-            current_app.logger.error('invalid mimetype')
+            if current_app:
+                current_app.logger.error('invalid mimetype')
             return False
         return True
 
@@ -117,16 +99,62 @@ class JSONRPCSite:
         try:
             return json.loads(request_data)
         except ValueError as e:
-            current_app.logger.error('invalid json: %s', request_data)
-            current_app.logger.exception(e)
+            if current_app:
+                current_app.logger.error('invalid json: %s', request_data)
+                current_app.logger.exception(e)
             raise ParseError(data={'message': 'Invalid JSON: {0!r}'.format(request_data)})
+
+    def handle_dispatch_except(
+        self, req_json: Dict[str, Any]
+    ) -> Tuple[Any, int, Union[Headers, Dict[str, str], Tuple[str], List[Tuple[str]]]]:
+        try:
+            if not self.validate(req_json):
+                raise InvalidRequestError(data={'message': 'Invalid JSON: {0!r}'.format(req_json)})
+            return self.dispatch(req_json)
+        except JSONRPCError as e:
+            if current_app:
+                current_app.logger.error('jsonrpc error')
+                current_app.logger.exception(e)
+            response = {
+                'id': get(req_json, 'id'),
+                'jsonrpc': get(req_json, 'jsonrpc', JSONRPC_VERSION_DEFAULT),
+                'error': e.jsonrpc_format,
+            }
+            return response, e.status_code, JSONRPC_DEFAULT_HTTP_HEADERS
+        except Exception as e:  # pylint: disable=W0703
+            if current_app:
+                current_app.logger.error('unexpected error')
+                current_app.logger.exception(e)
+            jsonrpc_error = ServerError(data={'message': str(e)})
+            response = {
+                'id': get(req_json, 'id'),
+                'jsonrpc': get(req_json, 'jsonrpc', JSONRPC_VERSION_DEFAULT),
+                'error': jsonrpc_error.jsonrpc_format,
+            }
+            return response, jsonrpc_error.status_code, JSONRPC_DEFAULT_HTTP_HEADERS
+
+    def batch_dispatch(
+        self, reqs_json: List[Dict[str, Any]]
+    ) -> Tuple[List[Any], int, Union[Headers, Dict[str, str], Tuple[str], List[Tuple[str]]]]:
+        if not reqs_json:
+            raise InvalidRequestError(data={'message': 'Empty array'})
+
+        resp_views = []
+        headers = Headers()
+        status_code = JSONRPC_DEFAULT_HTTP_STATUS_CODE
+        with ThreadPoolExecutor(max_workers=len(reqs_json) or 1) as executor:
+            for rv, _, hdrs in executor.map(self.handle_dispatch_except, reqs_json):
+                headers.update([hdrs] if isinstance(hdrs, tuple) else hdrs)  # type: ignore
+                if rv is None:
+                    continue
+                resp_views.append(rv)
+        if not resp_views:
+            status_code = 204
+        return resp_views, status_code, headers
 
     def dispatch(
         self, req_json: Dict[str, Any]
     ) -> Tuple[Any, int, Union[Headers, Dict[str, str], Tuple[str], List[Tuple[str]]]]:
-        if not self.validate(req_json):
-            raise InvalidRequestError(data={'message': 'Invalid JSON: {0}'.format(req_json)})
-
         params = req_json.get('params', {})
         view_func = self.view_funcs.get(req_json['method'])
         if not view_func:
@@ -155,14 +183,15 @@ class JSONRPCSite:
                     )
                 )
         except TypeError as e:
-            current_app.logger.error('invalid type checked for: %s', view_func.__name__)
-            current_app.logger.exception(e)
+            if current_app:
+                current_app.logger.error('invalid type checked for: %s', view_func.__name__)
+                current_app.logger.exception(e)
             raise InvalidParamsError(data={'message': str(e)})
 
         return self.make_response(req_json, resp_view)
 
     def validate(self, req_json: Dict[str, Any]) -> bool:
-        if 'method' not in req_json:
+        if not isinstance(req_json, dict) or 'method' not in req_json:
             return False
         return True
 
@@ -204,6 +233,9 @@ class JSONRPCSite:
 
     def is_notification_request(self, req_json: Dict[str, Any]) -> bool:
         return 'id' not in req_json
+
+    def is_batch_request(self, req_json: Any) -> bool:
+        return isinstance(req_json, list)
 
     def python_type_name(self, pytype: Type[T]) -> str:
         return str(from_python_type(pytype))

@@ -25,11 +25,13 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-from typing import Tuple
+import uuid
+from typing import Any, Dict, List, Tuple
 
 from flask import Flask
 
 import pytest
+from werkzeug.datastructures import Headers
 
 from flask_jsonrpc import JSONRPC, JSONRPCBlueprint
 
@@ -341,3 +343,250 @@ def test_app_create_modular_apps():
         rv = client.post('/api/b3', json={'id': 1, 'jsonrpc': '2.0', 'method': 'blue3.fn2', 'params': [':)']})
         assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': 'b3: Foo :)'}
         assert rv.status_code == 200
+
+
+# pylint: disable=R0915
+def test_app_create_with_rcp_batch():
+    app = Flask(__name__, instance_relative_config=True)
+    jsonrpc = JSONRPC(app, '/api', enable_web_browsable_api=True)
+
+    # pylint: disable=W0612
+    @jsonrpc.method('sum')
+    def sum_(a: int, b: int) -> int:
+        return a + b
+
+    # pylint: disable=W0612
+    @jsonrpc.method('subtract')
+    def subtract(a: int, b: int) -> int:
+        return a - b
+
+    # pylint: disable=W0612
+    @jsonrpc.method('get_user')
+    def get_user(uid: str) -> Dict[str, Any]:
+        return {'uid': uid, 'name': 'John Dee'}
+
+    # pylint: disable=W0612
+    @jsonrpc.method('notify_sum')
+    def notify_sum(numbers: List[int]) -> int:
+        s = sum([x ** 2 for x in numbers])
+        return s
+
+    # pylint: disable=W0612
+    @jsonrpc.method('headers1')
+    def headers1() -> Tuple[float, int, List[Tuple[str, Any]]]:
+        return 3.141592653589793, 200, [('X-Header-1-a', 'a1'), ('X-Header-1-b', 'b1')]
+
+    # pylint: disable=W0612
+    @jsonrpc.method('headers2')
+    def headers2() -> Tuple[float, int, Tuple[str, Any]]:
+        return 3.141592653589793, 201, ('X-Header-2-a', 'a2')
+
+    # pylint: disable=W0612
+    @jsonrpc.method('headers3')
+    def headers3() -> Tuple[float, int, Headers]:
+        headers = Headers()
+        headers.set('X-Header-3-a', 'a3')
+        headers.set('X-Header-3-b', 'b3')
+        headers.set('X-Header-3-c', 'c3')
+        return 3.141592653589793, 200, headers
+
+    # pylint: disable=W0612
+    @jsonrpc.method('headers4')
+    def headers4() -> Tuple[float, int, Dict[str, Any]]:
+        return 3.141592653589793, 200, {'X-Header-4-a': 'a4', 'X-Header-4-b': 'b4'}
+
+    # pylint: disable=W0612
+    @jsonrpc.method('headers_duplicate')
+    def headers_duplicate() -> Tuple[float, int, Dict[str, Any]]:
+        return (
+            3.141592653589793,
+            400,
+            {
+                'X-Header-2-a': 'a2-replaced',
+                'X-Header-4-b': 'b4-replaced',
+                'X-Header-3-c': 'c3-replaced',
+                'X-Header-1-a': 'a1-replaced',
+            },
+        )
+
+    with app.test_client() as client:
+        idx = uuid.uuid4()
+        rv = client.post('/api', json={'id': idx.hex, 'jsonrpc': '2.0', 'method': 'sum', 'params': [1, 1]})
+        assert rv.json == {'id': idx.hex, 'jsonrpc': '2.0', 'result': 2}
+        assert rv.status_code == 200
+
+        rv = client.post('/api', json=[])
+        assert rv.json == {
+            'error': {
+                'code': -32600,
+                'data': {'message': 'Empty array'},
+                'message': 'Invalid Request',
+                'name': 'InvalidRequestError',
+            },
+            'id': None,
+            'jsonrpc': '2.0',
+        }
+        assert rv.status_code == 400
+
+        rv = client.post('/api', json=[1])
+        assert rv.json == [
+            {
+                'error': {
+                    'code': -32600,
+                    'data': {'message': 'Invalid JSON: 1'},
+                    'message': 'Invalid Request',
+                    'name': 'InvalidRequestError',
+                },
+                'id': None,
+                'jsonrpc': '2.0',
+            }
+        ]
+        assert rv.status_code == 200
+
+        rv = client.post('/api', json=[1, 2, 3])
+        assert rv.json == [
+            {
+                'error': {
+                    'code': -32600,
+                    'data': {'message': 'Invalid JSON: 1'},
+                    'message': 'Invalid Request',
+                    'name': 'InvalidRequestError',
+                },
+                'id': None,
+                'jsonrpc': '2.0',
+            },
+            {
+                'error': {
+                    'code': -32600,
+                    'data': {'message': 'Invalid JSON: 2'},
+                    'message': 'Invalid Request',
+                    'name': 'InvalidRequestError',
+                },
+                'id': None,
+                'jsonrpc': '2.0',
+            },
+            {
+                'error': {
+                    'code': -32600,
+                    'data': {'message': 'Invalid JSON: 3'},
+                    'message': 'Invalid Request',
+                    'name': 'InvalidRequestError',
+                },
+                'id': None,
+                'jsonrpc': '2.0',
+            },
+        ]
+        assert rv.status_code == 200
+
+        rv = client.post(
+            '/api',
+            json=[
+                {'id': '1', 'jsonrpc': '2.0', 'method': 'sum', 'params': [1, 1]},
+                {'id': '2', 'jsonrpc': '2.0', 'method': 'subtract', 'params': [2, 2]},
+                {'id': '3', 'jsonrpc': '2.0', 'method': 'sum', 'params': [3, 3]},
+                {'id': '4', 'jsonrpc': '2.0', 'method': 'headers1'},
+            ],
+        )
+        assert rv.json == [
+            {'id': '1', 'jsonrpc': '2.0', 'result': 2},
+            {'id': '2', 'jsonrpc': '2.0', 'result': 0},
+            {'id': '3', 'jsonrpc': '2.0', 'result': 6},
+            {'id': '4', 'jsonrpc': '2.0', 'result': 3.141592653589793},
+        ]
+        assert rv.status_code == 200
+        assert len(rv.headers) == 4
+        assert 'Content-Type' in rv.headers
+        assert 'Content-Length' in rv.headers
+        assert rv.headers.get('X-Header-1-a') == 'a1'
+        assert rv.headers.get('X-Header-1-b') == 'b1'
+
+        rv = client.post(
+            '/api',
+            json=[
+                {'id': '1', 'jsonrpc': '2.0', 'method': 'sum', 'params': [1, 1]},
+                {'id': '2', 'jsonrpc': '2.0', 'method': 'subtract', 'params': [2, 2]},
+                {'id': '3', 'jsonrpc': '2.0', 'method': 'get_user', 'params': {'uid': '345'}},
+                {'jsonrpc': '2.0', 'method': 'notify_sum', 'params': [[1, 2, 3, 4, 5]]},
+                {'id': 'h1', 'jsonrpc': '2.0', 'method': 'headers1'},
+                {'id': 'h2', 'jsonrpc': '2.0', 'method': 'headers2'},
+                {'id': 'h3', 'jsonrpc': '2.0', 'method': 'headers3'},
+                {'id': 'h4', 'jsonrpc': '2.0', 'method': 'headers4'},
+            ],
+        )
+        assert rv.json == [
+            {'id': '1', 'jsonrpc': '2.0', 'result': 2},
+            {'id': '2', 'jsonrpc': '2.0', 'result': 0},
+            {'id': '3', 'jsonrpc': '2.0', 'result': {'uid': '345', 'name': 'John Dee'}},
+            {'id': 'h1', 'jsonrpc': '2.0', 'result': 3.141592653589793},
+            {'id': 'h2', 'jsonrpc': '2.0', 'result': 3.141592653589793},
+            {'id': 'h3', 'jsonrpc': '2.0', 'result': 3.141592653589793},
+            {'id': 'h4', 'jsonrpc': '2.0', 'result': 3.141592653589793},
+        ]
+        assert rv.status_code == 200
+        assert len(rv.headers) == 10
+        assert 'Content-Type' in rv.headers
+        assert 'Content-Length' in rv.headers
+        assert rv.headers.get('X-Header-1-a') == 'a1'
+        assert rv.headers.get('X-Header-1-b') == 'b1'
+        assert rv.headers.get('X-Header-2-a') == 'a2'
+        assert rv.headers.get('X-Header-3-a') == 'a3'
+        assert rv.headers.get('X-Header-3-b') == 'b3'
+        assert rv.headers.get('X-Header-3-c') == 'c3'
+        assert rv.headers.get('X-Header-4-a') == 'a4'
+        assert rv.headers.get('X-Header-4-b') == 'b4'
+
+        rv = client.post(
+            '/api',
+            json=[
+                {'jsonrpc': '2.0', 'method': 'notify_sum', 'params': [[1, 2, 3, 4, 5]]},
+                {'jsonrpc': '2.0', 'method': 'notify_sum', 'params': [[1, 2, 3, 4, 5]]},
+                {'jsonrpc': '2.0', 'method': 'notify_sum', 'params': [[1, 2, 3, 4, 5]]},
+            ],
+        )
+        assert rv.json is None
+        assert rv.status_code == 204
+
+        rv = client.post(
+            '/api',
+            json=[
+                {'id': '1', 'jsonrpc': '2.0', 'method': 'sum', 'params': [1, 1]},
+                1,
+                {'id': '2', 'jsonrpc': '2.0', 'method': 'subtract', 'params': [2, 2]},
+                {'id': 'h1', 'jsonrpc': '2.0', 'method': 'headers1'},
+                {'id': 'h2', 'jsonrpc': '2.0', 'method': 'headers2'},
+                {'id': 'h3', 'jsonrpc': '2.0', 'method': 'headers3'},
+                {'id': 'h4', 'jsonrpc': '2.0', 'method': 'headers4'},
+                {'id': 'h_duplicate', 'jsonrpc': '2.0', 'method': 'headers_duplicate'},
+            ],
+        )
+        assert rv.json == [
+            {'id': '1', 'jsonrpc': '2.0', 'result': 2},
+            {
+                'error': {
+                    'code': -32600,
+                    'data': {'message': 'Invalid JSON: 1'},
+                    'message': 'Invalid Request',
+                    'name': 'InvalidRequestError',
+                },
+                'id': None,
+                'jsonrpc': '2.0',
+            },
+            {'id': '2', 'jsonrpc': '2.0', 'result': 0},
+            {'id': 'h1', 'jsonrpc': '2.0', 'result': 3.141592653589793},
+            {'id': 'h2', 'jsonrpc': '2.0', 'result': 3.141592653589793},
+            {'id': 'h3', 'jsonrpc': '2.0', 'result': 3.141592653589793},
+            {'id': 'h4', 'jsonrpc': '2.0', 'result': 3.141592653589793},
+            {'id': 'h_duplicate', 'jsonrpc': '2.0', 'result': 3.141592653589793},
+        ]
+        assert rv.status_code == 200
+        assert len(rv.headers) == 10
+        assert 'Content-Type' in rv.headers
+        assert 'Content-Length' in rv.headers
+        assert rv.headers.get('X-Header-1-a') == 'a1-replaced'
+        assert rv.headers.get('X-Header-1-b') == 'b1'
+        assert rv.headers.get('X-Header-2-a') == 'a2-replaced'
+        assert rv.headers.get('X-Header-3-a') == 'a3'
+        assert rv.headers.get('X-Header-3-b') == 'b3'
+        assert rv.headers.get('X-Header-3-c') == 'c3-replaced'
+        assert rv.headers.get('X-Header-4-a') == 'a4'
+        assert rv.headers.get('X-Header-4-b') == 'b4-replaced'

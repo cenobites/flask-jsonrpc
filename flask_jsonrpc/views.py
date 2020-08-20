@@ -27,8 +27,11 @@
 # POSSIBILITY OF SUCH DAMAGE.
 from typing import TYPE_CHECKING, List
 
-from flask import Response, jsonify, make_response
+from flask import Response, jsonify, current_app, make_response
 from flask.views import View
+
+from .site import JSONRPC_VERSION_DEFAULT, JSONRPC_DEFAULT_HTTP_HEADERS
+from .exceptions import JSONRPCError
 
 if TYPE_CHECKING:
     from .site import JSONRPCSite
@@ -41,7 +44,18 @@ class JSONRPCView(View):
         self.jsonrpc_site = jsonrpc_site
 
     def dispatch_request(self) -> Response:  # type: ignore
-        response, status_code, headers = self.jsonrpc_site.dispatch_request()
-        if status_code == 204:
-            return make_response('', status_code, headers)
-        return make_response(jsonify(response), status_code, headers)
+        try:
+            response, status_code, headers = self.jsonrpc_site.dispatch_request()
+            if status_code == 204:
+                return make_response('', status_code, headers)
+            return make_response(jsonify(response), status_code, headers)
+        except JSONRPCError as e:
+            if current_app:
+                current_app.logger.error('jsonrpc error')
+                current_app.logger.exception(e)
+            response = {
+                'id': None,
+                'jsonrpc': JSONRPC_VERSION_DEFAULT,
+                'error': e.jsonrpc_format,
+            }
+            return make_response(jsonify(response), e.status_code, JSONRPC_DEFAULT_HTTP_HEADERS)
