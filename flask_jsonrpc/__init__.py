@@ -29,4 +29,4 @@ from .app import JSONRPC
 from .views import JSONRPCView
 from .blueprints import JSONRPCBlueprint
 
-__version__ = '1.1.0-dev'
+__version__ = '1.1.0'
