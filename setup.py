@@ -46,7 +46,12 @@ setuptools.setup(
     include_package_data=True,
     platforms='any',
     python_requires='>= 3.6',
-    install_requires=['Flask>=1.0.0', 'typeguard'],
+    install_requires=[
+        'Flask>=1.0.0',
+        'typeguard',
+        'typing;python_version<"3.5"',
+        'typing_extensions;python_version<"3.8"',
+    ],
     setup_requires=['pytest-runner'],
     tests_require=['mock', 'coverage', 'pytest', 'pytest-cov', 'pytest-sugar', 'typeguard'],
     classifiers=[
