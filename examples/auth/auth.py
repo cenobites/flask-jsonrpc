@@ -54,7 +54,7 @@ class AuthorizationView(JSONRPCView):
     def dispatch_request(self):
         if not self.check_auth():
             raise UnauthorizedError()
-        return super(AuthorizationView, self).dispatch_request()
+        return super().dispatch_request()
 
 
 app = Flask(__name__)

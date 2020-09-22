@@ -65,7 +65,7 @@ class JSONRPCError(Exception):
     ) -> None:
         """Setup the Exception and overwrite the default message
         """
-        super(JSONRPCError, self).__init__()
+        super().__init__()
         if message is not None:
             self.message = message
         if code is not None:

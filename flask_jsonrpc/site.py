@@ -102,7 +102,7 @@ class JSONRPCSite:
             if current_app:
                 current_app.logger.error('invalid json: %s', request_data)
                 current_app.logger.exception(e)
-            raise ParseError(data={'message': 'Invalid JSON: {0!r}'.format(request_data)})
+            raise ParseError(data={'message': 'Invalid JSON: {0!r}'.format(request_data)}) from e
 
     def handle_dispatch_except(
         self, req_json: Dict[str, Any]
@@ -186,7 +186,7 @@ class JSONRPCSite:
             if current_app:
                 current_app.logger.error('invalid type checked for: %s', view_func.__name__)
                 current_app.logger.exception(e)
-            raise InvalidParamsError(data={'message': str(e)})
+            raise InvalidParamsError(data={'message': str(e)}) from e
 
         return self.make_response(req_json, resp_view)
 
