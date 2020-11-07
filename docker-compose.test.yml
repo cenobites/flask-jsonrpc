@@ -9,6 +9,7 @@ services:
       sh -c "flake8 flask_jsonrpc/ tests/ &&
         pylint flask_jsonrpc/ tests/ &&
         mypy flask_jsonrpc/ &&
+        bandit -r flask_jsonrpc/ &&
         pytest"
 
   python3.7:

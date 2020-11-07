@@ -46,13 +46,13 @@ except ImportError:  # pragma: no cover
 try:
     from typing import get_args  # pylint: disable=C0412
 except ImportError:  # pragma: no cover
-    from .typing_inspect import get_args  # type: ignore
+    from typing_inspect import get_args  # type: ignore
 
 # Python 3.5.4+ / 3.6.2+
 try:
     from typing import get_origin  # pylint: disable=C0412
 except ImportError:  # pragma: no cover
-    from .typing_inspect import get_origin  # type: ignore
+    from typing_inspect import get_origin  # type: ignore
 
 # Python 3.5.4+ / 3.6.2+
 try:
@@ -101,7 +101,7 @@ class JSONRPCNewType:
         if expected_type is Any:
             return self is Object
 
-        if type(expected_type) is TypeVar:  # pylint: disable=C0123
+        if type(expected_type) is TypeVar:  # type: ignore  # pylint: disable=C0123
             return self.check_type_var(expected_type)
 
         if expected_type is None or expected_type is NoReturn:

@@ -3,10 +3,11 @@
 # using pip. Example::
 #
 #     pip install -r requirements_test.pip
-mock
-coverage
-pytest
-pytest-cov
-pytest-sugar
-coveralls
-typeguard
+mock==4.0.2
+coverage==5.3
+pytest==6.1.2
+pytest-cov==2.10.1
+pytest-xdist==2.1.0
+pytest-sugar==0.9.4
+coveralls==2.1.2
+typeguard==2.10.0

@@ -75,11 +75,6 @@
         }])
         .factory('RPC', ['$http', 'serviceUrl', 'UUID', function($http, serviceUrl, UUID) {
             return {
-                _call: function(data, options) {
-                    var options = options || {method: 'POST', url: serviceUrl};
-                    options.data = data;
-                    return $http(options);
-                },
                 getValue: function(param) {
                     if (param.type === 'Object') {
                         return eval('('+ param.value + ')');
@@ -121,9 +116,14 @@
 
                     return payload;
                 },
+                callWithPayload: function(data, options) {
+                    var options = options || {method: 'POST', url: serviceUrl};
+                    options.data = data;
+                    return $http(options);
+                },
                 call: function(module, options) {
-                    return this._call(this.payload(module, options), options);
-                }
+                    return this.callWithPayload(this.payload(module, options), options);
+                },
             };
         }]);
 

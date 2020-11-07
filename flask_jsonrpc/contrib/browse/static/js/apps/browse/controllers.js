@@ -114,10 +114,11 @@
         $scope.$emit('App:breadcrumb', module.name);
 
         var RPCCall = function(module) {
-            $scope.request_object = RPC.payload(module);
+            var payload = RPC.payload(module);
+            $scope.request_object = payload;
             $scope.response = undefined;
             $scope.response_object = undefined;
-            RPC.call(module).success(function(response_object, status, headers, config) { // success
+            RPC.callWithPayload(payload).success(function(response_object, status, headers, config) { // success
                 var headers_pretty = headers();
                 headers_pretty.data = config.data;
 

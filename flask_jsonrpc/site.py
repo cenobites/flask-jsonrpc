@@ -26,7 +26,7 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 from uuid import UUID, uuid4
-from typing import Any, Dict, List, Type, Tuple, Union, TypeVar, Callable, get_type_hints
+from typing import Any, Dict, List, Type, Tuple, Union, TypeVar, Callable, Optional, get_type_hints
 from concurrent.futures import ThreadPoolExecutor
 
 from flask import json, request, current_app
@@ -44,7 +44,35 @@ from .exceptions import (
     MethodNotFoundError,
 )
 
+# Python 3.8+
+try:
+    from typing_extensions import TypedDict
+except ImportError:  # pragma: no cover
+    from typing import TypedDict  # pylint: disable=C0412
+
 T = TypeVar('T')
+
+ServiceProcedureDescribe = TypedDict(
+    'ServiceProcedureDescribe',
+    {
+        'name': str,
+        'summary': Optional[str],
+        'params': List[Dict[str, str]],
+        'return': Dict[str, str],
+    },
+)
+
+ServiceDescribe = TypedDict(
+    'ServiceDescribe',
+    {
+        'id': str,
+        'sdversion': str,
+        'version': str,
+        'name': str,
+        'summary': Optional[str],
+        'procs': List[ServiceProcedureDescribe],
+    },
+)
 
 JSONRPC_VERSION_DEFAULT: str = '2.0'
 JSONRCP_DESCRIBE_METHOD_NAME: str = 'system.describe'
@@ -240,7 +268,7 @@ class JSONRPCSite:
     def python_type_name(self, pytype: Type[T]) -> str:
         return str(from_python_type(pytype))
 
-    def procedure_desc(self, key: str) -> Dict[str, Any]:
+    def procedure_desc(self, key: str) -> ServiceProcedureDescribe:
         view_func = self.view_funcs[key]
         return {
             'name': getattr(view_func, 'jsonrpc_method_name', None),
@@ -252,7 +280,7 @@ class JSONRPCSite:
             'return': {'type': self.python_type_name(getattr(view_func, 'jsonrpc_method_return', None))},
         }
 
-    def service_desc(self) -> Dict[str, Any]:
+    def service_desc(self) -> ServiceDescribe:
         return {
             'sdversion': '1.0',
             'id': 'urn:uuid:{0}'.format(self.uuid),
@@ -262,5 +290,5 @@ class JSONRPCSite:
             'procs': [self.procedure_desc(k) for k in self.view_funcs if k != JSONRCP_DESCRIBE_METHOD_NAME],
         }
 
-    def describe(self) -> Dict[str, Any]:
+    def describe(self) -> ServiceDescribe:
         return self.service_desc()
