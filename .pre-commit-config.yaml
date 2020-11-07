@@ -27,7 +27,7 @@ repos:
     - id: isort
       name: isort
       language: system
-      entry: isort -rc .
+      entry: isort .
       types: [python]
 - repo: local
   hooks:
@@ -49,6 +49,14 @@ repos:
       name: mypy
       language: system
       entry: mypy
+      types: [python]
+      files: ^flask_jsonrpc/
+- repo: local
+  hooks:
+    - id: bandit
+      name: bandit
+      language: system
+      entry: bandit -r flask_jsonrpc/
       types: [python]
       files: ^flask_jsonrpc/
 - repo: local

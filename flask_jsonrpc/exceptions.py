@@ -63,8 +63,7 @@ class JSONRPCError(Exception):
         data: Optional[Any] = None,
         status_code: Optional[int] = None,
     ) -> None:
-        """Setup the Exception and overwrite the default message
-        """
+        """Setup the Exception and overwrite the default message"""
         super().__init__()
         if message is not None:
             self.message = message
@@ -77,8 +76,7 @@ class JSONRPCError(Exception):
 
     @property
     def jsonrpc_format(self) -> Dict[str, Any]:
-        """Return the Exception data in a format for JSON-RPC
-        """
+        """Return the Exception data in a format for JSON-RPC"""
 
         error = {
             'name': self.__class__.__name__,
@@ -116,32 +114,28 @@ class ParseError(JSONRPCError):
 
 
 class InvalidRequestError(JSONRPCError):
-    """The JSON sent is not a valid Request object.
-    """
+    """The JSON sent is not a valid Request object."""
 
     code = -32600
     message = _('Invalid Request')
 
 
 class MethodNotFoundError(JSONRPCError):
-    """The method does not exist / is not available.
-    """
+    """The method does not exist / is not available."""
 
     code = -32601
     message = _('Method not found')
 
 
 class InvalidParamsError(JSONRPCError):
-    """Invalid method parameter(s).
-    """
+    """Invalid method parameter(s)."""
 
     code = -32602
     message = _('Invalid params')
 
 
 class InternalError(JSONRPCError):
-    """Internal JSON-RPC error.
-    """
+    """Internal JSON-RPC error."""
 
     code = -32603
     message = _('Internal error')
