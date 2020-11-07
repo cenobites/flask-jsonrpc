@@ -18,6 +18,7 @@ script:
   - flake8 flask_jsonrpc/ tests/
   - pylint flask_jsonrpc/ tests/
   - mypy flask_jsonrpc/
+  - bandit -r flask_jsonrpc/
   - pytest
 
 after_success:
