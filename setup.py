@@ -51,6 +51,7 @@ setuptools.setup(
         'typeguard',
         'typing;python_version<"3.5"',
         'typing_extensions;python_version<"3.8"',
+        'typing_inspect==0.6.0',
     ],
     setup_requires=['pytest-runner'],
     tests_require=['mock', 'coverage', 'pytest', 'pytest-cov', 'pytest-sugar', 'typeguard'],
