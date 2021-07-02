@@ -47,7 +47,7 @@ setuptools.setup(
     platforms='any',
     python_requires='>= 3.6',
     install_requires=[
-        'Flask>=1.0.0',
+        'Flask>=1.0.0,<2.0',
         'typeguard',
         'typing;python_version<"3.5"',
         'typing_extensions;python_version<"3.8"',
