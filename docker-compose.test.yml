@@ -1,6 +1,17 @@
 version: '3'
 
 services:
+  python3.9:
+    build:
+      context: .
+      dockerfile: Dockerfile.py39.test
+    command: >
+      sh -c "flake8 flask_jsonrpc/ tests/ &&
+        pylint flask_jsonrpc/ tests/ &&
+        mypy flask_jsonrpc/ &&
+        bandit -r flask_jsonrpc/ &&
+        pytest"
+
   python3.8:
     build:
       context: .
@@ -8,8 +19,6 @@ services:
     command: >
       sh -c "flake8 flask_jsonrpc/ tests/ &&
         pylint flask_jsonrpc/ tests/ &&
-        mypy flask_jsonrpc/ &&
-        bandit -r flask_jsonrpc/ &&
         pytest"
 
   python3.7:

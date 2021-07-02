@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# Copyright (c) 2012-2020, Cenobit Technologies, Inc. http://cenobit.es/
+# Copyright (c) 2012-2021, Cenobit Technologies, Inc. http://cenobit.es/
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -47,10 +47,11 @@ setuptools.setup(
     platforms='any',
     python_requires='>= 3.6',
     install_requires=[
-        'Flask>=1.0.0',
+        'Flask>=1.0.0,<2.0',
         'typeguard',
         'typing;python_version<"3.5"',
         'typing_extensions;python_version<"3.8"',
+        'typing_inspect==0.7.1',
     ],
     setup_requires=['pytest-runner'],
     tests_require=['mock', 'coverage', 'pytest', 'pytest-cov', 'pytest-sugar', 'typeguard'],
