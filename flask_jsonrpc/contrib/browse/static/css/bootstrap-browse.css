@@ -31,7 +31,7 @@ pre {
   background-color: whitesmoke;
   border: 1px solid #cccccc;
   border-radius: 4px; }
-  
+
   pre code {
     padding: 0;
     font-size: inherit;
@@ -59,7 +59,7 @@ pre {
 }
 
 /* bootstrap ui angular */
-.nav, .pagination, .carousel a { cursor: pointer; } 
+.nav, .pagination, .carousel a { cursor: pointer; }
 .modal {display: block}
 
 /* Removing The Dotted Outline */
@@ -350,7 +350,7 @@ body {
     position: absolute;
 }
 
-#viewer-entries-container, 
+#viewer-entries-container,
 #viewer-page-container {
     overflow-x: visible;
     overflow-y: auto;
@@ -402,7 +402,7 @@ body {
   .ie7 .summary {display:block;}
   .ie7 .summary ul {margin:0; padding:0; overflow:hidden; display:block;}
   .ie7 .summary li {float:left;}
-  
+
   .ielt9 .summary .last {border:none;}
 
 /* tasks */

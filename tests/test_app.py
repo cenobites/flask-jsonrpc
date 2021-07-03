@@ -37,11 +37,11 @@ from flask_jsonrpc import JSONRPC, JSONRPCBlueprint
 
 
 def test_app_create():
-    app = Flask(__name__, instance_relative_config=True)
+    app = Flask('test_app', instance_relative_config=True)
     jsonrpc = JSONRPC(app, '/api', enable_web_browsable_api=True)
 
     # pylint: disable=W0612
-    @jsonrpc.method('App.index')
+    @jsonrpc.method('app.index')
     def index() -> str:
         return 'Welcome to Flask JSON-RPC'
 
@@ -67,7 +67,7 @@ def test_app_create():
     jsonrpc.register(fn3, name='app.fn3')
 
     with app.test_client() as client:
-        rv = client.post('/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'App.index', 'params': []})
+        rv = client.post('/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.index', 'params': []})
         assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': 'Welcome to Flask JSON-RPC'}
         assert rv.status_code == 200
 
@@ -89,7 +89,7 @@ def test_app_create():
 
 
 def test_app_create_without_register_app():
-    app = Flask(__name__, instance_relative_config=True)
+    app = Flask('test_app', instance_relative_config=True)
     jsonrpc = JSONRPC(service_url='/api', enable_web_browsable_api=True)
 
     # pylint: disable=W0612
@@ -107,7 +107,7 @@ def test_app_create_without_register_app():
 
 def test_app_create_with_method_without_annotation():
     with pytest.raises(ValueError, match='no type annotations present to: app.fn1'):
-        app = Flask(__name__, instance_relative_config=True)
+        app = Flask('test_app', instance_relative_config=True)
         jsonrpc = JSONRPC(app, '/api', enable_web_browsable_api=True)
 
         # pylint: disable=W0612
@@ -128,7 +128,7 @@ def test_app_create_with_method_without_annotation():
 
 def test_app_create_with_method_without_annotation_on_params():
     with pytest.raises(ValueError, match='no type annotations present to: app.fn2'):
-        app = Flask(__name__, instance_relative_config=True)
+        app = Flask('test_app', instance_relative_config=True)
         jsonrpc = JSONRPC(app, '/api', enable_web_browsable_api=True)
 
         # pylint: disable=W0612
@@ -153,7 +153,7 @@ def test_app_create_with_method_without_annotation_on_params():
 
 
 def test_app_create_with_method_without_annotation_on_return():
-    app = Flask(__name__, instance_relative_config=True)
+    app = Flask('test_app', instance_relative_config=True)
     jsonrpc = JSONRPC(app, '/api', enable_web_browsable_api=True)
 
     # pylint: disable=W0612
@@ -186,7 +186,7 @@ def test_app_create_with_method_without_annotation_on_return():
 
 
 def test_app_create_with_wrong_return():
-    app = Flask(__name__, instance_relative_config=True)
+    app = Flask('test_app', instance_relative_config=True)
     jsonrpc = JSONRPC(app, '/api', enable_web_browsable_api=True)
 
     @jsonrpc.method('app.fn1')
@@ -214,7 +214,7 @@ def test_app_create_with_wrong_return():
 
 
 def test_app_create_with_invalid_view_func():
-    app = Flask(__name__, instance_relative_config=True)
+    app = Flask('test_app', instance_relative_config=True)
     jsonrpc = JSONRPC(app, service_url='/api', enable_web_browsable_api=True)
 
     # pylint: disable=W0612
@@ -232,7 +232,7 @@ def test_app_create_with_invalid_view_func():
 
 
 def test_app_create_multiple_jsonrpc_versions():
-    app = Flask(__name__, instance_relative_config=True)
+    app = Flask('test_app', instance_relative_config=True)
     jsonrpc_v1 = JSONRPC(app, '/api/v1', enable_web_browsable_api=True)
     jsonrpc_v2 = JSONRPC(app, '/api/v2', enable_web_browsable_api=True)
 
@@ -321,7 +321,7 @@ def test_app_create_modular_apps():
     def fn1_b3(s: str) -> str:
         return 'b3: Foo {0}'.format(s)
 
-    app = Flask(__name__, instance_relative_config=True)
+    app = Flask('test_app', instance_relative_config=True)
     jsonrpc = JSONRPC(app, '/api', enable_web_browsable_api=True)
     jsonrpc.register_blueprint(app, jsonrpc_api_1, url_prefix='/b1')
     jsonrpc.register_blueprint(app, jsonrpc_api_2, url_prefix='/b2')
@@ -347,7 +347,7 @@ def test_app_create_modular_apps():
 
 # pylint: disable=R0915
 def test_app_create_with_rcp_batch():
-    app = Flask(__name__, instance_relative_config=True)
+    app = Flask('test_app', instance_relative_config=True)
     jsonrpc = JSONRPC(app, '/api', enable_web_browsable_api=True)
 
     # pylint: disable=W0612

@@ -70,9 +70,7 @@ def test_app_greeting_raise_parse_error(client):
         'jsonrpc': '2.0',
         'error': {
             'code': -32700,
-            'data': {
-                'message': 'Invalid JSON: b"{\'id\': 1, \'jsonrpc\': \'2.0\', \'method\': \'jsonrpc.greeting\'}"'
-            },
+            'data': {'message': 'Invalid JSON: b"{\'id\': 1, \'jsonrpc\': \'2.0\', \'method\': \'jsonrpc.greeting\'}"'},
             'message': 'Parse error',
             'name': 'ParseError',
         },

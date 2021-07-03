@@ -1,0 +1,17 @@
+-r base.txt
+-r test.txt
+-r ci.txt
+
+# Debugger
+# ------------------------------------------------------------------------------
+ipdb  # https://github.com/gotcha/ipdb
+
+# Tools
+# ------------------------------------------------------------------------------
+honcho  # https://github.com/nickstenning/honcho
+bpython  # https://github.com/bpython/bpython
+rope  # https://github.com/python-rope/rope
+pip-tools  # https://github.com/jazzband/pip-tools
+pre-commit  # https://github.com/pre-commit/pre-commit
+jedi  # https://github.com/davidhalter/jedi
+rope  # https://github.com/python-rope/rope

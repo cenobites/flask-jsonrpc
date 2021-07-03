@@ -43,7 +43,7 @@ class JSONRPCView(View):
     def __init__(self, jsonrpc_site: 'JSONRPCSite') -> None:
         self.jsonrpc_site = jsonrpc_site
 
-    def dispatch_request(self) -> Response:  # type: ignore
+    def dispatch_request(self) -> Response:
         try:
             response, status_code, headers = self.jsonrpc_site.dispatch_request()
             if status_code == 204:

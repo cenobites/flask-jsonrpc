@@ -37,7 +37,7 @@ def test_urn():
         urn(None)
     with pytest.raises(ValueError, match='name is required'):
         urn('')
-    assert urn('a', 'b', 'c', 'd') == 'urn::a:b.c.d'
+    assert urn('a', 'b', 'c', 'd') == 'urn:a:b:c:d'
 
 
 def test_from_python_type():

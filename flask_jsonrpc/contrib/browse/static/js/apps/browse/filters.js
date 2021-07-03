@@ -7,5 +7,5 @@
                 return $sanitize(prettyPrintOne(input));
             };
         }]);
-	
+
 })(window.App);

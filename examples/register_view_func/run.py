@@ -71,7 +71,7 @@ class MyApp:
         return a / float(b)
 
 
-app = Flask(__name__)
+app = Flask('register_view_func')
 jsonrpc = JSONRPC(app, '/api', enable_web_browsable_api=True)
 
 

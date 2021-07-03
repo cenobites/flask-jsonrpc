@@ -39,11 +39,11 @@ def urn(name: str, *args: Any) -> str:
     """Return the URN name.
 
     >>> urn('python')
-    'urn::python'
+    'urn:python'
     >>> urn('python', 'Flask', 'JsonRPC')
-    'urn::python:flask.jsonrpc'
+    'urn:python:flask:jsonrpc'
     >>> urn('python', '/api/browse')
-    'urn::python:api.browse'
+    'urn:python:api:browse'
     >>> urn(None)
     Traceback (most recent call last):
         ...
@@ -56,10 +56,10 @@ def urn(name: str, *args: Any) -> str:
     if not name:
         raise ValueError('name is required')
     splited_args = [arg.split('/') for arg in args]
-    st = '.'.join(list(itertools.chain(*splited_args)))
-    st = st.rstrip('.').lstrip('.')
+    st = ':'.join(list(itertools.chain(*splited_args)))
+    st = st.rstrip(':').lstrip(':')
     sep = ':' if len(args) > 0 else ''
-    return 'urn::{0}{1}{2}'.format(name, sep, st.replace('..', '.')).lower()
+    return 'urn:{0}{1}{2}'.format(name, sep, st.replace('::', ':')).lower()
 
 
 def from_python_type(tp: Any) -> 'JSONRPCNewType':

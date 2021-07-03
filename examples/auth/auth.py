@@ -57,7 +57,7 @@ class AuthorizationView(JSONRPCView):
         return super().dispatch_request()
 
 
-app = Flask(__name__)
+app = Flask('auth')
 jsonrpc = JSONRPC(app, '/api', jsonrpc_site_api=AuthorizationView)
 
 

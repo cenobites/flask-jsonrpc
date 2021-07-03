@@ -1,7 +1,7 @@
 [tool.black]
-line-length = 119
+line-length = 120
 skip-string-normalization = true
-target-version = ['py38']
+target-version = ['py39']
 include = '\.pyi?$'
 exclude = '''
 (

@@ -68,7 +68,7 @@ def jsonrcp_decorator(fn):
 
 def create_app(test_config=None):  # noqa: C901  pylint: disable=W0612
     """Create and configure an instance of the Flask application."""
-    app = Flask(__name__, instance_relative_config=True)
+    app = Flask('apptest', instance_relative_config=True)
     if test_config:
         app.config.update(test_config)
 
@@ -98,9 +98,7 @@ def create_app(test_config=None):  # noqa: C901  pylint: disable=W0612
 
     # pylint: disable=W0612
     @jsonrpc.method('jsonrpc.strangeEcho')
-    def strangeEcho(
-        string: str, omg: Dict[str, Any], wtf: List[str], nowai: int, yeswai: str = 'Default'
-    ) -> List[Any]:
+    def strangeEcho(string: str, omg: Dict[str, Any], wtf: List[str], nowai: int, yeswai: str = 'Default') -> List[Any]:
         return [string, omg, wtf, nowai, yeswai]
 
     # pylint: disable=W0612

@@ -1,9 +1,9 @@
 (function(root) {
 	'use strict';
 
-	var App = angular.module('browse', ['ngRoute', 'ngResource', 'ngSanitize', 'ngAnimate', 
+	var App = angular.module('browse', ['ngRoute', 'ngResource', 'ngSanitize', 'ngAnimate',
         'ui.bootstrap', 'chieffancypants.loadingBar',
-		'core.service', 'core.directive', 'core.filter', 
+		'core.service', 'core.directive', 'core.filter',
 		'browse.service', 'browse.directive', 'browse.filter'
 		]).
 		config(['$routeProvider', 'urlPrefix', function($routeProvider, urlPrefix) {
@@ -42,7 +42,7 @@
     };
 
 	App.ready = function(E) {
-		// 
+		//
         $(window).bind('load resize scroll', function(env) {
             App.adjust();
         });

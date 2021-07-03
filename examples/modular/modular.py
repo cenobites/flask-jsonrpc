@@ -43,7 +43,7 @@ from flask_jsonrpc import JSONRPC  # noqa: E402   pylint: disable=C0413
 from api.user import user  # noqa: E402   pylint: disable=C0413,E0611
 from api.article import article  # noqa: E402   pylint: disable=C0413,E0611
 
-app = Flask(__name__)
+app = Flask('modular')
 jsonrpc = JSONRPC(app, '/api', enable_web_browsable_api=True)
 jsonrpc.register_blueprint(app, user, url_prefix='/user', enable_web_browsable_api=True)
 jsonrpc.register_blueprint(app, article, url_prefix='/article', enable_web_browsable_api=True)
