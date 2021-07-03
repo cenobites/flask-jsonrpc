@@ -14,3 +14,7 @@ typeguard==2.12.1  # https://github.com/agronholm/typeguard
 # ------------------------------------------------------------------------------
 coverage==5.5  # https://github.com/nedbat/coveragepy
 coveralls==3.1.0  # https://github.com/marketplace/coveralls
+
+# Tools
+# ------------------------------------------------------------------------------
+py==1.10.0  # https://github.com/pytest-dev/py

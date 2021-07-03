@@ -2,11 +2,21 @@ language: python
 
 sudo: false
 
+services:
+  - docker
+
 python:
   - "3.9"
 
 env:
   - FLASK_ENV=TESTING
+  - DOCKER_COMPOSE_VERSION=1.29.2
+
+before_install:
+  - sudo rm /usr/local/bin/docker-compose
+  - curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > docker-compose
+  - chmod +x docker-compose
+  - sudo mv docker-compose /usr/local/bin
 
 install:
   - pip install --upgrade pip setuptools --quiet
@@ -15,6 +25,18 @@ install:
   - pip install -r requirements/ci.txt --quiet
 
 script:
+  - docker-compose -f docker-compose.test.yml -p ci build --build-arg VERSION=$(date +%s) python3.6 python3.7 python3.8
+  - docker-compose -f docker-compose.test.yml -p ci up -d python3.6 python3.7 python3.8
+  - DOCKER_WAIT_FOR_PY36=$(docker wait ci_python3.6_1)
+  - docker logs ci_python3.6_1
+  - DOCKER_WAIT_FOR_PY37=$(docker wait ci_python3.7_1)
+  - docker logs ci_python3.7_1
+  - DOCKER_WAIT_FOR_PY38=$(docker wait ci_python3.8_1)
+  - docker logs ci_python3.8_1
+  - docker-compose -f docker-compose.test.yml -p ci down
+  - if [ $DOCKER_WAIT_FOR_PY36 -ne 0 ]; then echo "Test to Python 3.6 failed"; exit 1; fi
+  - if [ $DOCKER_WAIT_FOR_PY37 -ne 0 ]; then echo "Test to Python 3.7 failed"; exit 1; fi
+  - if [ $DOCKER_WAIT_FOR_PY38 -ne 0 ]; then echo "Test to Python 3.8 failed"; exit 1; fi
   - flake8 flask_jsonrpc/ tests/
   - pylint flask_jsonrpc/ tests/
   - mypy flask_jsonrpc/
