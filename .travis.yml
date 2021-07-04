@@ -1,6 +1,7 @@
-language: python
+os: linux
+dist: xenial
 
-sudo: false
+language: python
 
 services:
   - docker
@@ -9,8 +10,7 @@ python:
   - "3.9"
 
 env:
-  - FLASK_ENV=TESTING
-  - DOCKER_COMPOSE_VERSION=1.29.2
+  - FLASK_ENV=TESTING DOCKER_COMPOSE_VERSION=1.29.2
 
 before_install:
   - sudo rm /usr/local/bin/docker-compose
