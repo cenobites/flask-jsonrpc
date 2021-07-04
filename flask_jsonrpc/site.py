@@ -125,7 +125,7 @@ class JSONRPCSite:
 
     def to_json(self, request_data: bytes) -> Any:
         try:
-            return json.loads(request_data)
+            return json.loads(request_data)  # type: ignore
         except ValueError as e:
             if current_app:
                 current_app.logger.error('invalid json: %s', request_data)

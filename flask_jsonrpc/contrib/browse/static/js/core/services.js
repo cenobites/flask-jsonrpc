@@ -4,13 +4,13 @@
     angular.module('core.service', [])
         .value('PendingRequests', {
             counter: 0,
-            increment: function() { 
+            increment: function() {
                 this.counter += 1;
             },
             decrement: function() {
                 if (this.isPending()) {
                     this.counter -= 1;
-                } 
+                }
             },
             isPending: function() {
                 return this.counter > 0;
@@ -34,7 +34,7 @@
                     function(response) { // onSuccess
                         PendingRequests.decrement();
                         return response;
-                    }, 
+                    },
                     function(response) { // onError
                         PendingRequests.decrement();
                         return $q.reject(response);
@@ -74,5 +74,5 @@
                 }
             };
         }]);
-        
+
 })(window.App);

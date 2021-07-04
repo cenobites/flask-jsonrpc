@@ -1,0 +1,20 @@
+# Testing
+# ------------------------------------------------------------------------------
+pytest==6.2.4  # https://github.com/pytest-dev/pytest
+pytest-cov==2.12.1  # https://github.com/pytest-dev/pytest-cov
+pytest-xdist==2.3.0  # https://github.com/pytest-dev/pytest-xdist
+pytest-sugar==0.9.4  # https://github.com/Frozenball/pytest-sugar
+mock==4.0.3  # https://github.com/testing-cabal/mock
+
+# Type check
+# ------------------------------------------------------------------------------
+typeguard==2.12.1  # https://github.com/agronholm/typeguard
+
+# Code quality
+# ------------------------------------------------------------------------------
+coverage==5.5  # https://github.com/nedbat/coveragepy
+coveralls==3.1.0  # https://github.com/marketplace/coveralls
+
+# Tools
+# ------------------------------------------------------------------------------
+py==1.10.0  # https://github.com/pytest-dev/py

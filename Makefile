@@ -1,9 +1,9 @@
-.PHONY: all clean test release publish-test publish env
+.PHONY: all clean test test-release release publish-test publish env
 
 VIRTUALENV_EXISTS := $(shell [ -d .venv ] && echo 1 || echo 0)
 
 all: clean test
-	@python setup.py build
+	@python -c "print('OK')"
 
 clean:
 	@python setup.py clean
@@ -15,18 +15,24 @@ clean:
 test: clean
 	@python setup.py test
 
-release: clean
-	@python setup.py build sdist bdist_wheel
+test-release: clean test
+	@docker-compose -f docker-compose.test.yml up --build
+
+release: clean test
+	@python -m pip install --upgrade build
+	@python -m build
 
 publish-test: clean release
-	@twine upload --repository testpypi dist/*
+	@python -m pip install --upgrade twine
+	@python -m twine upload --repository testpypi dist/*
 
 publish: clean release
-	@twine upload dist/*
+	@python -m pip install --upgrade twine
+	@python -m twine upload dist/*
 
 env:
 ifeq ($(VIRTUALENV_EXISTS), 0)
 	@python -m venv .venv
 	@.venv/bin/pip install --upgrade pip setuptools
-	@.venv/bin/pip install -r requirements.pip
+	@.venv/bin/pip install -r requirements/local.txt
 endif

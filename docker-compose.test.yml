@@ -10,6 +10,7 @@ services:
         pylint flask_jsonrpc/ tests/ &&
         mypy flask_jsonrpc/ &&
         bandit -r flask_jsonrpc/ &&
+        safety check &&
         pytest"
 
   python3.8:

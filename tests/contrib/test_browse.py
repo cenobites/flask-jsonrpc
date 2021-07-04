@@ -31,7 +31,7 @@ from flask_jsonrpc import JSONRPC, JSONRPCBlueprint
 
 
 def test_browse_create():
-    app = Flask(__name__, instance_relative_config=True)
+    app = Flask('test_browse', instance_relative_config=True)
     jsonrpc = JSONRPC(app, '/api', enable_web_browsable_api=True)
 
     # pylint: disable=W0612
@@ -87,7 +87,7 @@ def test_browse_create():
 
 
 def test_browse_create_without_register_app():
-    app = Flask(__name__, instance_relative_config=True)
+    app = Flask('test_browse', instance_relative_config=True)
     jsonrpc = JSONRPC(service_url='/api', enable_web_browsable_api=True)
 
     # pylint: disable=W0612
@@ -121,7 +121,7 @@ def test_browse_create_without_register_app():
 
 
 def test_browse_create_multiple_jsonrpc_versions():
-    app = Flask(__name__, instance_relative_config=True)
+    app = Flask('test_browse', instance_relative_config=True)
     jsonrpc_v1 = JSONRPC(app, '/api/v1', enable_web_browsable_api=True)
     jsonrpc_v2 = JSONRPC(app, '/api/v2', enable_web_browsable_api=True)
 
@@ -228,7 +228,7 @@ def test_browse_create_modular_apps():
     def fn1_b3(s: str) -> str:
         return 'b3: Foo {0}'.format(s)
 
-    app = Flask(__name__, instance_relative_config=True)
+    app = Flask('test_browse', instance_relative_config=True)
     jsonrpc = JSONRPC(app, '/api', enable_web_browsable_api=True)
     jsonrpc.register_blueprint(app, jsonrpc_api_1, url_prefix='/b1', enable_web_browsable_api=True)
     jsonrpc.register_blueprint(app, jsonrpc_api_2, url_prefix='/b2', enable_web_browsable_api=True)

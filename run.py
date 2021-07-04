@@ -31,7 +31,7 @@ from flask import Flask
 from flask_jsonrpc import JSONRPC
 
 # Flask application
-app = Flask(__name__)
+app = Flask('application')
 
 # Flask-JSONRPC
 jsonrpc = JSONRPC(app, '/api', enable_web_browsable_api=True)

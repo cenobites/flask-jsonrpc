@@ -212,7 +212,7 @@ contextmanager-decorators=contextlib.contextmanager
 [FORMAT]
 
 # Maximum number of characters on a single line.
-max-line-length=119
+max-line-length=120
 
 # Regexp for a line that is allowed to be longer than the limit.
 ignore-long-lines=^\s*(# )?<?https?://\S+>?$
@@ -280,7 +280,7 @@ logging-modules=logging
 [SIMILARITIES]
 
 # Minimum lines number of a similarity.
-min-similarity-lines=4
+min-similarity-lines=6
 
 # Ignore comments when computing similarities.
 ignore-comments=yes

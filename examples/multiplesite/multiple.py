@@ -40,7 +40,7 @@ if os.path.exists(FLASK_JSONRPC_PROJECT_DIR) and FLASK_JSONRPC_PROJECT_DIR not i
 
 from flask_jsonrpc import JSONRPC  # noqa: E402   pylint: disable=C0413
 
-app = Flask(__name__)
+app = Flask('multiplesite')
 jsonrpc_v1 = JSONRPC(app, '/api/v1', enable_web_browsable_api=True)
 jsonrpc_v2 = JSONRPC(app, '/api/v2', enable_web_browsable_api=True)
 

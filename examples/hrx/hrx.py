@@ -41,8 +41,8 @@ if os.path.exists(FLASK_JSONRPC_PROJECT_DIR) and FLASK_JSONRPC_PROJECT_DIR not i
 from api.hello import hello  # noqa: E402   pylint: disable=C0413
 from flask_jsonrpc import JSONRPC  # noqa: E402   pylint: disable=C0413
 
-app = Flask(__name__)
-app.config.from_object(__name__)
+app = Flask('hrx')
+app.config.from_object('hrx')
 jsonrpc = JSONRPC(app, '/api')
 jsonrpc.register_blueprint(app, hello, url_prefix='/hello')
 

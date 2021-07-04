@@ -5,7 +5,7 @@ ENV PYTHONUNBUFFERED=1 \
 
 WORKDIR /code
 
-COPY requirements.pip requirements_test.pip requirements_ci.pip /code/
+COPY requirements/ /code/requirements/
 
 RUN set -ex \
     && apk add --no-cache --virtual .build-deps \
@@ -13,9 +13,9 @@ RUN set -ex \
         musl-dev \
         python3-dev \
     && pip install pip setuptools wheel --upgrade \
-    && pip install -r requirements.pip \
-    && pip install -r requirements_test.pip \
-    && pip install -r requirements_ci.pip \
+    && pip install -r requirements/base.txt \
+    && pip install -r requirements/test.txt \
+    && pip install -r requirements/ci.txt \
     && apk del .build-deps \
     && addgroup -S kuchulu \
     && adduser \

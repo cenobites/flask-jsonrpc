@@ -104,4 +104,6 @@ class JSONRPC(JSONRCPDecoratorMixin):
                 create_browse(urn('browse', app.name, browse_url), jsonrpc_app.get_jsonrpc_site()),
                 url_prefix=browse_url,
             )
-            app.add_url_rule(browse_url + '/static/<path:filename>', 'browse.static', view_func=app.send_static_file)
+            app.add_url_rule(
+                browse_url + '/static/<path:filename>', 'urn:browse.static', view_func=app.send_static_file
+            )
