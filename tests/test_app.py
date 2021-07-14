@@ -1,5 +1,4 @@
-# -*- coding: utf-8 -*-
-# Copyright (c) 2020-2020, Cenobit Technologies, Inc. http://cenobit.es/
+# Copyright (c) 2020-2021, Cenobit Technologies, Inc. http://cenobit.es/
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -58,11 +57,11 @@ def test_app_create():
     # pylint: disable=W0612
     @jsonrpc.method('app.fn2')
     def fn2(s: str) -> str:
-        return 'Foo {0}'.format(s)
+        return f'Foo {s}'
 
     # pylint: disable=W0612
     def fn3(s: str) -> str:
-        return 'Foo {0}'.format(s)
+        return f'Foo {s}'
 
     jsonrpc.register(fn3, name='app.fn3')
 
@@ -95,7 +94,7 @@ def test_app_create_without_register_app():
     # pylint: disable=W0612
     @jsonrpc.method('app.fn2')
     def fn1(s: str) -> str:
-        return 'Foo {0}'.format(s)
+        return f'Foo {s}'
 
     jsonrpc.init_app(app)
 
@@ -113,17 +112,17 @@ def test_app_create_with_method_without_annotation():
         # pylint: disable=W0612
         @jsonrpc.method('app.fn1')
         def fn1(s):
-            return 'Foo {0}'.format(s)
+            return f'Foo {s}'
 
         # pylint: disable=W0612
         @jsonrpc.method('app.fn2')
         def fn2(s: str) -> str:
-            return 'Bar {0}'.format(s)
+            return f'Bar {s}'
 
         # pylint: disable=W0612
         @jsonrpc.method('app.fn3')
         def fn3(s):  # pylint: disable=W0612
-            return 'Poo {0}'.format(s)
+            return f'Poo {s}'
 
 
 def test_app_create_with_method_without_annotation_on_params():
@@ -139,17 +138,17 @@ def test_app_create_with_method_without_annotation_on_params():
         # pylint: disable=W0612
         @jsonrpc.method('app.fn2')
         def fn2(s) -> str:
-            return 'Foo {0}'.format(s)
+            return f'Foo {s}'
 
         # pylint: disable=W0612
         @jsonrpc.method('app.fn1')
         def fn1(s: str) -> str:
-            return 'Bar {0}'.format(s)
+            return f'Bar {s}'
 
         # pylint: disable=W0612
         @jsonrpc.method('app.fn3')
         def fn3(s):  # pylint: disable=W0612
-            return 'Poo {0}'.format(s)
+            return f'Poo {s}'
 
 
 def test_app_create_with_method_without_annotation_on_return():
@@ -159,12 +158,12 @@ def test_app_create_with_method_without_annotation_on_return():
     # pylint: disable=W0612
     @jsonrpc.method('app.fn1')
     def fn1(s: str):
-        return 'Foo {0}'.format(s)
+        return f'Foo {s}'
 
     # pylint: disable=W0612
     @jsonrpc.method('app.fn2')
     def fn2(s: str) -> str:
-        return 'Bar {0}'.format(s)
+        return f'Bar {s}'
 
     with app.test_client() as client:
         rv = client.post('/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.fn1', 'params': [':)']})
@@ -191,7 +190,7 @@ def test_app_create_with_wrong_return():
 
     @jsonrpc.method('app.fn1')
     def fn2(s: str) -> Tuple[str, int, int, int]:  # pylint: disable=W0612
-        return 'Bar {0}'.format(s), 1, 2, 3
+        return f'Bar {s}', 1, 2, 3
 
     with app.test_client() as client:
         rv = client.post('/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.fn1', 'params': [':)']})
@@ -220,7 +219,7 @@ def test_app_create_with_invalid_view_func():
     # pylint: disable=W0612
     @jsonrpc.method('app.fn2')
     def fn1(s: str) -> str:
-        return 'Foo {0}'.format(s)
+        return f'Foo {s}'
 
     with pytest.raises(ValueError, match='the view function must be either a function or a method'):
         jsonrpc.register(fn1.__new__, name='invalid')
@@ -239,32 +238,32 @@ def test_app_create_multiple_jsonrpc_versions():
     # pylint: disable=W0612
     @jsonrpc_v1.method('app.fn2')
     def fn1_v1(s: str) -> str:
-        return 'v1: Foo {0}'.format(s)
+        return f'v1: Foo {s}'
 
     # pylint: disable=W0612
     @jsonrpc_v2.method('app.fn2')
     def fn1_v2(s: str) -> str:
-        return 'v2: Foo {0}'.format(s)
+        return f'v2: Foo {s}'
 
     # pylint: disable=W0612
     @jsonrpc_v1.method('app.fn3')
     def fn3(s: str) -> str:
-        return 'Poo {0}'.format(s)
+        return f'Poo {s}'
 
     # pylint: disable=W0612
     @jsonrpc_v2.method('app.fn1')
     def fn2(s: str) -> str:
-        return 'Bar {0}'.format(s)
+        return f'Bar {s}'
 
     # pylint: disable=W0612
     def fn4_v1(s: str) -> str:
-        return 'Poo {0}'.format(s)
+        return f'Poo {s}'
 
     jsonrpc_v1.register(fn4_v1)
 
     # pylint: disable=W0612
     def fn4_v2(s: str) -> str:
-        return 'Bar {0}'.format(s)
+        return f'Bar {s}'
 
     jsonrpc_v2.register(fn4_v2)
 
@@ -300,26 +299,26 @@ def test_app_create_modular_apps():
     # pylint: disable=W0612
     @jsonrpc_api_1.method('blue1.fn2')
     def fn1_b1(s: str) -> str:
-        return 'b1: Foo {0}'.format(s)
+        return f'b1: Foo {s}'
 
     jsonrpc_api_2 = JSONRPCBlueprint('jsonrpc_api_2', __name__)
 
     # pylint: disable=W0612
     @jsonrpc_api_2.method('blue2.fn2')
     def fn1_b2(s: str) -> str:
-        return 'b2: Foo {0}'.format(s)
+        return f'b2: Foo {s}'
 
     # pylint: disable=W0612
     @jsonrpc_api_2.method('blue2.fn1')
     def fn2_b2(s: str) -> str:
-        return 'b2: Bar {0}'.format(s)
+        return f'b2: Bar {s}'
 
     jsonrpc_api_3 = JSONRPCBlueprint('jsonrpc_api_3', __name__)
 
     # pylint: disable=W0612
     @jsonrpc_api_3.method('blue3.fn2')
     def fn1_b3(s: str) -> str:
-        return 'b3: Foo {0}'.format(s)
+        return f'b3: Foo {s}'
 
     app = Flask('test_app', instance_relative_config=True)
     jsonrpc = JSONRPC(app, '/api', enable_web_browsable_api=True)
@@ -368,7 +367,7 @@ def test_app_create_with_rcp_batch():
     # pylint: disable=W0612
     @jsonrpc.method('notify_sum')
     def notify_sum(numbers: List[int]) -> int:
-        s = sum([x ** 2 for x in numbers])
+        s = sum(x ** 2 for x in numbers)
         return s
 
     # pylint: disable=W0612

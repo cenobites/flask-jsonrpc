@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2012-2021, Cenobit Technologies, Inc. http://cenobit.es/
 # All rights reserved.
 #
@@ -37,4 +36,4 @@ def index() -> str:
 
 @hello.method('Hello.say')
 def say(name: str = '') -> str:
-    return 'Hello {0}!'.format(name)
+    return f'Hello {name}!'

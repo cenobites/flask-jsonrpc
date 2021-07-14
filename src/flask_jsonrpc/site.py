@@ -1,5 +1,4 @@
-# -*- coding: utf-8 -*-
-# Copyright (c) 2020-2020, Cenobit Technologies, Inc. http://cenobit.es/
+# Copyright (c) 2020-2021, Cenobit Technologies, Inc. http://cenobit.es/
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -62,17 +61,15 @@ ServiceProcedureDescribe = TypedDict(
     },
 )
 
-ServiceDescribe = TypedDict(
-    'ServiceDescribe',
-    {
-        'id': str,
-        'sdversion': str,
-        'version': str,
-        'name': str,
-        'summary': Optional[str],
-        'procs': List[ServiceProcedureDescribe],
-    },
-)
+
+class ServiceDescribe(TypedDict):
+    id: str
+    sdversion: str
+    version: str
+    name: str
+    summary: Optional[str]
+    procs: List[ServiceProcedureDescribe]
+
 
 JSONRPC_VERSION_DEFAULT: str = '2.0'
 JSONRCP_DESCRIBE_METHOD_NAME: str = 'system.describe'
@@ -105,7 +102,7 @@ class JSONRPCSite:
         if not self.validate_request():
             raise ParseError(
                 data={
-                    'message': 'Invalid mime type for JSON: {0}, use header Content-Type: application/json'.format(
+                    'message': 'Invalid mime type for JSON: {}, use header Content-Type: application/json'.format(
                         request.mimetype
                     )
                 }
@@ -130,14 +127,14 @@ class JSONRPCSite:
             if current_app:
                 current_app.logger.error('invalid json: %s', request_data)
                 current_app.logger.exception(e)
-            raise ParseError(data={'message': 'Invalid JSON: {0!r}'.format(request_data)}) from e
+            raise ParseError(data={'message': f'Invalid JSON: {request_data!r}'}) from e
 
     def handle_dispatch_except(
         self, req_json: Dict[str, Any]
     ) -> Tuple[Any, int, Union[Headers, Dict[str, str], Tuple[str], List[Tuple[str]]]]:
         try:
             if not self.validate(req_json):
-                raise InvalidRequestError(data={'message': 'Invalid JSON: {0!r}'.format(req_json)})
+                raise InvalidRequestError(data={'message': f'Invalid JSON: {req_json!r}'})
             return self.dispatch(req_json)
         except JSONRPCError as e:
             if current_app:
@@ -186,7 +183,7 @@ class JSONRPCSite:
         params = req_json.get('params', {})
         view_func = self.view_funcs.get(req_json['method'])
         if not view_func:
-            raise MethodNotFoundError(data={'message': 'Method not found: {0}'.format(req_json['method'])})
+            raise MethodNotFoundError(data={'message': 'Method not found: {}'.format(req_json['method'])})
 
         try:
             if isinstance(params, (tuple, set, list)):
@@ -197,7 +194,7 @@ class JSONRPCSite:
                 raise InvalidParamsError(
                     data={
                         'message': 'Parameter structures are by-position '
-                        '(tuple, set, list) or by-name (dict): {0}'.format(params)
+                        '(tuple, set, list) or by-name (dict): {}'.format(params)
                     }
                 )
 
@@ -283,7 +280,7 @@ class JSONRPCSite:
     def service_desc(self) -> ServiceDescribe:
         return {
             'sdversion': '1.0',
-            'id': 'urn:uuid:{0}'.format(self.uuid),
+            'id': f'urn:uuid:{self.uuid}',
             'version': self.version,
             'name': self.name,
             'summary': self.__doc__,

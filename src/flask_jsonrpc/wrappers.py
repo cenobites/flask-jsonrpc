@@ -1,5 +1,4 @@
-# -*- coding: utf-8 -*-
-# Copyright (c) 2020-2020, Cenobit Technologies, Inc. http://cenobit.es/
+# Copyright (c) 2020-2021, Cenobit Technologies, Inc. http://cenobit.es/
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -89,7 +88,7 @@ class JSONRCPDecoratorMixin:
         def decorator(fn: Callable[..., Any]) -> Callable[..., Any]:
             method_name = getattr(fn, '__name__', '<noname>') if not name else name
             if validate and not self._validate(fn):
-                raise ValueError('no type annotations present to: {0}'.format(method_name))
+                raise ValueError(f'no type annotations present to: {method_name}')
             return self.register_view_function(fn, name, validate, **options)
 
         return decorator

@@ -8,6 +8,7 @@ ipdb  # https://github.com/gotcha/ipdb
 
 # Tools
 # ------------------------------------------------------------------------------
+tox  # https://github.com/tox-dev/tox
 honcho  # https://github.com/nickstenning/honcho
 bpython  # https://github.com/bpython/bpython
 rope  # https://github.com/python-rope/rope

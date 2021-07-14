@@ -10,13 +10,14 @@ clean:
 	@find . -name "*.pyc" | xargs rm -rf
 	@find . -name "__pycache__" | xargs rm -rf
 	@find . -name ".coverage" | xargs rm -rf
-	@rm -rf .coverage .eggs/ .mypy_cache/ .pytest_cache/ Flask_JSONRPC.egg-info/ htmlcov/ build/ dist/
+	@rm -rf .coverage .eggs/ .mypy_cache/ .pytest_cache/ .tox/ src/Flask_JSONRPC.egg-info/ htmlcov/ build/ dist/
 
 test: clean
 	@python setup.py test
 
 test-release: clean test
-	@docker-compose -f docker-compose.test.yml up --build
+	@docker-compose -f docker-compose.test.yml build --build-arg VERSION=$(shell date +%s)
+	@docker-compose -f docker-compose.test.yml up
 
 release: clean test
 	@python -m pip install --upgrade build

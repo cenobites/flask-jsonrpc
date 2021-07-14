@@ -1,3 +1,13 @@
-include .coveragerc .pylintrc COPYING AUTHORS README.md
-recursive-include flask_jsonrpc/contrib/browse/templates *
-recursive-include flask_jsonrpc/contrib/browse/static *
+include tox.ini
+include COPYING
+include AUTHORS
+include README.md
+include requirements/*.txt
+include src/flask_jsonrpc/py.typed
+recursive-include src/flask_jsonrpc/contrib/browse/templates *
+recursive-include src/flask_jsonrpc/contrib/browse/static *
+graft docs
+prune docs/_build
+graft examples
+graft tests
+global-exclude *.pyc

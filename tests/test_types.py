@@ -4,7 +4,6 @@ from typing import (
     Set,
     Dict,
     List,
-    Text,
     Tuple,
     Union,
     AnyStr,
@@ -31,7 +30,6 @@ except ImportError:
 def test_types():
     assert types.String.check_type(str)
     assert types.String.check_type(AnyStr)
-    assert types.String.check_type(Text)
     assert str(types.String) == 'String'
 
     assert types.Number.check_type(int)

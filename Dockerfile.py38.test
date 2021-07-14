@@ -27,7 +27,7 @@ RUN set -ex \
         kuchulu
 
 ARG VERSION=1
-RUN echo ${VERSION}
+RUN echo "Vesion: ${VERSION}"
 
 COPY . /code/
 

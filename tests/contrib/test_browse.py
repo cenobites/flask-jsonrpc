@@ -1,5 +1,4 @@
-# -*- coding: utf-8 -*-
-# Copyright (c) 2020-2020, Cenobit Technologies, Inc. http://cenobit.es/
+# Copyright (c) 2020-2021, Cenobit Technologies, Inc. http://cenobit.es/
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -37,7 +36,7 @@ def test_browse_create():
     # pylint: disable=W0612
     @jsonrpc.method('app.fn2')
     def fn1(s: str) -> str:
-        return 'Foo {0}'.format(s)
+        return f'Foo {s}'
 
     with app.test_client() as client:
         rv = client.post('/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.fn2', 'params': [':)']})
@@ -93,7 +92,7 @@ def test_browse_create_without_register_app():
     # pylint: disable=W0612
     @jsonrpc.method('app.fn2')
     def fn1(s: str) -> str:
-        return 'Foo {0}'.format(s)
+        return f'Foo {s}'
 
     jsonrpc.init_app(app)
 
@@ -128,22 +127,22 @@ def test_browse_create_multiple_jsonrpc_versions():
     # pylint: disable=W0612
     @jsonrpc_v1.method('app.fn2')
     def fn1_v1(s: str) -> str:
-        return 'v1: Foo {0}'.format(s)
+        return f'v1: Foo {s}'
 
     # pylint: disable=W0612
     @jsonrpc_v1.method('app.fn3')
     def fn3(s: str) -> str:
-        return 'Poo {0}'.format(s)
+        return f'Poo {s}'
 
     # pylint: disable=W0612
     @jsonrpc_v2.method('app.fn2')
     def fn1_v2(s: str) -> str:
-        return 'v2: Foo {0}'.format(s)
+        return f'v2: Foo {s}'
 
     # pylint: disable=W0612
     @jsonrpc_v2.method('app.fn1')
     def fn2(s: str) -> str:
-        return 'Bar {0}'.format(s)
+        return f'Bar {s}'
 
     with app.test_client() as client:
         rv = client.get('/api/v1/browse/packages.json')
@@ -207,26 +206,26 @@ def test_browse_create_modular_apps():
     # pylint: disable=W0612
     @jsonrpc_api_1.method('blue1.fn2')
     def fn1_b1(s: str) -> str:
-        return 'b1: Foo {0}'.format(s)
+        return f'b1: Foo {s}'
 
     jsonrpc_api_2 = JSONRPCBlueprint('jsonrpc_api_2', __name__)
 
     # pylint: disable=W0612
     @jsonrpc_api_2.method('blue2.fn2')
     def fn1_b2(s: str) -> str:
-        return 'b2: Foo {0}'.format(s)
+        return f'b2: Foo {s}'
 
     # pylint: disable=W0612
     @jsonrpc_api_2.method('blue2.fn1')
     def fn2_b2(s: str) -> str:
-        return 'b2: Bar {0}'.format(s)
+        return f'b2: Bar {s}'
 
     jsonrpc_api_3 = JSONRPCBlueprint('jsonrpc_api_3', __name__)
 
     # pylint: disable=W0612
     @jsonrpc_api_3.method('blue3.fn2')
     def fn1_b3(s: str) -> str:
-        return 'b3: Foo {0}'.format(s)
+        return f'b3: Foo {s}'
 
     app = Flask('test_browse', instance_relative_config=True)
     jsonrpc = JSONRPC(app, '/api', enable_web_browsable_api=True)

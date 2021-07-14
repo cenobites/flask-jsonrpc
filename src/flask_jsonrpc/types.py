@@ -1,5 +1,4 @@
-# -*- coding: utf-8 -*-
-# Copyright (c) 2020-2020, Cenobit Technologies, Inc. http://cenobit.es/
+# Copyright (c) 2020-2021, Cenobit Technologies, Inc. http://cenobit.es/
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -25,7 +24,7 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-from typing import Any, Dict, List, Text, Tuple, Union, TypeVar, NamedTuple
+from typing import Any, Dict, List, Tuple, Union, TypeVar, NamedTuple
 from numbers import Real, Integral, Rational
 from collections import OrderedDict, defaultdict
 from collections.abc import Mapping
@@ -129,7 +128,7 @@ class JSONRPCNewType:
         return self.name
 
 
-String = JSONRPCNewType('String', str, bytes, Text)
+String = JSONRPCNewType('String', str, bytes)
 Number = JSONRPCNewType('Number', int, float, Real, Rational, Integral)
 Object = JSONRPCNewType('Object', dict, Dict, defaultdict, OrderedDict, Mapping)
 Array = JSONRPCNewType('Array', list, tuple, List, NamedTuple)

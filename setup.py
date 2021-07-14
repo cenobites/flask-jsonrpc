@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # Copyright (c) 2012-2021, Cenobit Technologies, Inc. http://cenobit.es/
 # All rights reserved.
 #
@@ -28,24 +27,9 @@
 # POSSIBILITY OF SUCH DAMAGE.
 import setuptools
 
-with open('README.md', 'r') as fh:
-    long_description = fh.read()
-
+# Metadata goes in setup.cfg. These are here for GitHub's dependency graph.
 setuptools.setup(
     name='Flask-JSONRPC',
-    version='2.0.0',
-    url='https://github.com/cenobites/flask-jsonrpc',
-    license='New BSD License',
-    author='Nycholas de Oliveira e Oliveira',
-    author_email='nycholas@gmail.com',
-    description='Adds JSONRPC support to Flask.',
-    long_description=long_description,
-    long_description_content_type='text/markdown',
-    packages=setuptools.find_packages(),
-    zip_safe=False,
-    include_package_data=True,
-    platforms='any',
-    python_requires='>=3.6',
     install_requires=[
         'Flask>=1.0.0,<3.0',
         'typeguard==2.12.1',
@@ -55,15 +39,4 @@ setuptools.setup(
     ],
     setup_requires=['pytest-runner'],
     tests_require=['mock', 'coverage', 'pytest', 'pytest-cov', 'pytest-xdist', 'pytest-sugar', 'typeguard'],
-    classifiers=[
-        'Environment :: Web Environment',
-        'Intended Audience :: Developers',
-        'License :: OSI Approved :: BSD License',
-        'Operating System :: OS Independent',
-        'Programming Language :: Python',
-        'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: Implementation :: CPython',
-        'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
-        'Topic :: Software Development :: Libraries :: Python Modules',
-    ],
 )
