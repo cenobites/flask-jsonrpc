@@ -37,6 +37,9 @@ setuptools.setup(
         'typing_extensions;python_version<"3.8"',
         'typing_inspect==0.7.1',
     ],
+    extras_require={
+        'async': ['Flask[async]>=1.0.0,<3.0'],
+    },
     setup_requires=['pytest-runner'],
     tests_require=['mock', 'coverage', 'pytest', 'pytest-cov', 'pytest-xdist', 'pytest-sugar', 'typeguard'],
 )
