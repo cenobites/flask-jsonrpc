@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2012-2021, Cenobit Technologies, Inc. http://cenobit.es/
 # All rights reserved.
 #

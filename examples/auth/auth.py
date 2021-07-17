@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # Copyright (c) 2012-2021, Cenobit Technologies, Inc. http://cenobit.es/
 # All rights reserved.
 #
@@ -32,13 +31,15 @@ import sys
 
 from flask import Flask, request
 
-PROJECT_DIR, PROJECT_MODULE_NAME = os.path.split(os.path.dirname(os.path.realpath(__file__)))
+try:
+    from flask_jsonrpc import JSONRPC, JSONRPCView
+except ModuleNotFoundError:
+    project_dir, project_module_name = os.path.split(os.path.dirname(os.path.realpath(__file__)))
+    flask_jsonrpc_project_dir = os.path.join(project_dir, os.pardir, 'src')
+    if os.path.exists(flask_jsonrpc_project_dir) and flask_jsonrpc_project_dir not in sys.path:
+        sys.path.append(flask_jsonrpc_project_dir)
 
-FLASK_JSONRPC_PROJECT_DIR = os.path.join(PROJECT_DIR, os.pardir)
-if os.path.exists(FLASK_JSONRPC_PROJECT_DIR) and FLASK_JSONRPC_PROJECT_DIR not in sys.path:
-    sys.path.append(FLASK_JSONRPC_PROJECT_DIR)
-
-from flask_jsonrpc import JSONRPC, JSONRPCView  # noqa: E402   pylint: disable=C0413
+    from flask_jsonrpc import JSONRPC, JSONRPCView
 
 
 class UnauthorizedError(Exception):
@@ -68,7 +69,7 @@ def index() -> str:
 
 @jsonrpc.method('App.echo')
 def echo(name: str = 'Flask JSON-RPC') -> str:
-    return 'Hello {0}'.format(name)
+    return f'Hello {name}'
 
 
 if __name__ == '__main__':

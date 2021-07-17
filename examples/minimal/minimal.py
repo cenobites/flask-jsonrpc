@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # Copyright (c) 2012-2021, Cenobit Technologies, Inc. http://cenobit.es/
 # All rights reserved.
 #
@@ -34,13 +33,15 @@ from numbers import Real
 
 from flask import Flask
 
-PROJECT_DIR, PROJECT_MODULE_NAME = os.path.split(os.path.dirname(os.path.realpath(__file__)))
+try:
+    from flask_jsonrpc import JSONRPC
+except ModuleNotFoundError:
+    project_dir, project_module_name = os.path.split(os.path.dirname(os.path.realpath(__file__)))
+    flask_jsonrpc_project_dir = os.path.join(project_dir, os.pardir, 'src')
+    if os.path.exists(flask_jsonrpc_project_dir) and flask_jsonrpc_project_dir not in sys.path:
+        sys.path.append(flask_jsonrpc_project_dir)
 
-FLASK_JSONRPC_PROJECT_DIR = os.path.join(PROJECT_DIR, os.pardir)
-if os.path.exists(FLASK_JSONRPC_PROJECT_DIR) and FLASK_JSONRPC_PROJECT_DIR not in sys.path:
-    sys.path.append(FLASK_JSONRPC_PROJECT_DIR)
-
-from flask_jsonrpc import JSONRPC  # noqa: E402   pylint: disable=C0413
+    from flask_jsonrpc import JSONRPC
 
 app = Flask('minimal')
 jsonrpc = JSONRPC(app, '/api', enable_web_browsable_api=True)
@@ -53,17 +54,17 @@ def index() -> str:
 
 @jsonrpc.method('App.greeting')
 def greeting(name: str) -> str:
-    return 'Hello {0}'.format(name)
+    return f'Hello {name}'
 
 
 @jsonrpc.method('App.helloDefaultArgs')
 def hello_default_args(string: str = 'Flask JSON-RPC') -> str:
-    return 'We salute you {0}'.format(string)
+    return f'We salute you {string}'
 
 
 @jsonrpc.method('App.argsValidate')
 def args_validate(a1: int, a2: str, a3: bool, a4: List[Any], a5: Dict[Any, Any]) -> str:
-    return 'Number: {0}, String: {1}, Boolean: {2}, Array: {3}, Object: {4}'.format(a1, a2, a3, a4, a5)
+    return f'Number: {a1}, String: {a2}, Boolean: {a3}, Array: {a4}, Object: {a5}'
 
 
 @jsonrpc.method('App.notify')

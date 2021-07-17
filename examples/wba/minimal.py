@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # Copyright (c) 2012-2021, Cenobit Technologies, Inc. http://cenobit.es/
 # All rights reserved.
 #
@@ -33,13 +32,15 @@ from typing import NoReturn, Optional
 
 from flask import Flask
 
-PROJECT_DIR, PROJECT_MODULE_NAME = os.path.split(os.path.dirname(os.path.realpath(__file__)))
+try:
+    from flask_jsonrpc import JSONRPC
+except ModuleNotFoundError:
+    project_dir, project_module_name = os.path.split(os.path.dirname(os.path.realpath(__file__)))
+    flask_jsonrpc_project_dir = os.path.join(project_dir, os.pardir, 'src')
+    if os.path.exists(flask_jsonrpc_project_dir) and flask_jsonrpc_project_dir not in sys.path:
+        sys.path.append(flask_jsonrpc_project_dir)
 
-FLASK_JSONRPC_PROJECT_DIR = os.path.join(PROJECT_DIR, os.pardir)
-if os.path.exists(FLASK_JSONRPC_PROJECT_DIR) and FLASK_JSONRPC_PROJECT_DIR not in sys.path:
-    sys.path.append(FLASK_JSONRPC_PROJECT_DIR)
-
-from flask_jsonrpc import JSONRPC  # noqa: E402   pylint: disable=C0413
+    from flask_jsonrpc import JSONRPC
 
 app = Flask('wba')
 jsonrpc = JSONRPC(app, '/api', enable_web_browsable_api=True)
@@ -52,22 +53,22 @@ def index() -> str:
 
 @jsonrpc.method('App.hello')
 def hello(name: str) -> str:
-    return 'Hello {0}'.format(name)
+    return f'Hello {name}'
 
 
 @jsonrpc.method('App.helloDefaultArgs')
 def hello_default_args(string: str = 'Flask JSON-RPC') -> str:
-    return 'We salute you {0}'.format(string)
+    return f'We salute you {string}'
 
 
 @jsonrpc.method('App.helloDefaultArgsValidate')
 def hello_default_args_validate(string: str = 'Flask JSON-RPC') -> str:
-    return 'We salute you {0}'.format(string)
+    return f'We salute you {string}'
 
 
 @jsonrpc.method('App.args')
 def args_validate_python_mode(a1: int, a2: str, a3: bool, a4: list, a5: dict) -> str:
-    return 'int: {0}, str: {1}, bool: {2}, list: {3}, dict: {4}'.format(a1, a2, a3, a4, a5)
+    return f'int: {a1}, str: {a2}, bool: {a3}, list: {a4}, dict: {a5}'
 
 
 @jsonrpc.method('App.notify')
@@ -76,7 +77,7 @@ def notify(_string: Optional[str]) -> None:
 
 
 @jsonrpc.method('App.fails')
-def fails(string: Optional[str]) -> NoReturn:
+def fails(_string: Optional[str]) -> NoReturn:
     raise ValueError('example of fail')
 
 

@@ -1,5 +1,4 @@
-# -*- coding: utf-8 -*-
-# Copyright (c) 2020-2020, Cenobit Technologies, Inc. http://cenobit.es/
+# Copyright (c) 2020-2021, Cenobit Technologies, Inc. http://cenobit.es/
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -59,7 +58,7 @@ def urn(name: str, *args: Any) -> str:
     st = ':'.join(list(itertools.chain(*splited_args)))
     st = st.rstrip(':').lstrip(':')
     sep = ':' if len(args) > 0 else ''
-    return 'urn:{0}{1}{2}'.format(name, sep, st.replace('::', ':')).lower()
+    return 'urn:{}{}{}'.format(name, sep, st.replace('::', ':')).lower()
 
 
 def from_python_type(tp: Any) -> 'JSONRPCNewType':

@@ -1,0 +1,10 @@
+# Documentation
+# ------------------------------------------------------------------------------
+Sphinx
+sphinx-tabs
+sphinx-issues
+sphinxcontrib-log-cabinet
+
+# Pallets
+# ------------------------------------------------------------------------------
+Pallets-Sphinx-Themes

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2012-2021, Cenobit Technologies, Inc. http://cenobit.es/
 # All rights reserved.
 #
@@ -27,18 +26,130 @@
 # POSSIBILITY OF SUCH DAMAGE.
 import os
 import sys
+import functools
+from typing import Any, Dict, List, Tuple, Union
+
+from flask import Flask
 
 import pytest
 
-from .apptest import create_app  # noqa: E402  pylint: disable=C0413
+try:
+    from flask_jsonrpc import JSONRPC
+except ModuleNotFoundError:
+    project_dir, project_module_name = os.path.split(os.path.dirname(os.path.realpath(__file__)))
+    flask_jsonrpc_project_dir = os.path.join(project_dir, 'src')
+    if os.path.exists(flask_jsonrpc_project_dir) and flask_jsonrpc_project_dir not in sys.path:
+        sys.path.append(flask_jsonrpc_project_dir)
 
-PROJECT_DIR, PROJECT_MODULE_NAME = os.path.split(os.path.dirname(os.path.realpath(__file__)))
-FLASK_JSONRPC_PROJECT_DIR = os.path.join(PROJECT_DIR)
-if os.path.exists(FLASK_JSONRPC_PROJECT_DIR) and FLASK_JSONRPC_PROJECT_DIR not in sys.path:
-    sys.path.append(FLASK_JSONRPC_PROJECT_DIR)
+    from flask_jsonrpc import JSONRPC
 
 
-@pytest.fixture
+class App:
+    def index(self, name: str = 'Flask JSON-RPC') -> str:
+        return f'Hello {name}'
+
+    @staticmethod
+    def greeting(name: str = 'Flask JSON-RPC') -> str:
+        return f'Hello {name}'
+
+    @classmethod
+    def hello(cls, name: str = 'Flask JSON-RPC') -> str:
+        return f'Hello {name}'
+
+    def echo(self, string: str, _some: Any = None) -> str:
+        return string
+
+    def notify(self, _string: str = None) -> None:
+        pass
+
+    def fails(self, n: int) -> int:
+        if n % 2 == 0:
+            return n
+        raise ValueError('number is odd')
+
+
+def jsonrcp_decorator(fn):
+    @functools.wraps(fn)
+    def wrapped(*args, **kwargs):
+        rv = fn(*args, **kwargs)
+        return f'{rv} from decorator, ;)'
+
+    return wrapped
+
+
+def create_app(test_config=None):  # noqa: C901  pylint: disable=W0612
+    """Create and configure an instance of the Flask application."""
+    flask_app = Flask('apptest', instance_relative_config=True)
+    if test_config:
+        flask_app.config.update(test_config)
+
+    jsonrpc = JSONRPC(flask_app, '/api', enable_web_browsable_api=True)
+
+    # pylint: disable=W0612
+    @jsonrpc.method('jsonrpc.greeting')
+    def greeting(name: str = 'Flask JSON-RPC') -> str:
+        return f'Hello {name}'
+
+    # pylint: disable=W0612
+    @jsonrpc.method('jsonrpc.echo')
+    def echo(string: str, _some: Any = None) -> str:
+        return string
+
+    # pylint: disable=W0612
+    @jsonrpc.method('jsonrpc.notify')
+    def notify(_string: str = None) -> None:
+        pass
+
+    # pylint: disable=W0612
+    @jsonrpc.method('jsonrpc.fails')
+    def fails(n: int) -> int:
+        if n % 2 == 0:
+            return n
+        raise ValueError('number is odd')
+
+    # pylint: disable=W0612
+    @jsonrpc.method('jsonrpc.strangeEcho')
+    def strangeEcho(string: str, omg: Dict[str, Any], wtf: List[str], nowai: int, yeswai: str = 'Default') -> List[Any]:
+        return [string, omg, wtf, nowai, yeswai]
+
+    # pylint: disable=W0612
+    @jsonrpc.method('jsonrpc.sum')
+    def sum_(a: Union[int, float], b: Union[int, float]) -> Union[int, float]:
+        return a + b
+
+    # pylint: disable=W0612
+    @jsonrpc.method('jsonrpc.decorators')
+    @jsonrcp_decorator
+    def decorators(string: str) -> str:
+        return f'Hello {string}'
+
+    # pylint: disable=W0612
+    @jsonrpc.method('jsonrpc.returnStatusCode')
+    def return_status_code(s: str) -> Tuple[str, int]:
+        return f'Status Code {s}', 201
+
+    # pylint: disable=W0612
+    @jsonrpc.method('jsonrpc.returnHeaders')
+    def return_headers(s: str) -> Tuple[str, Dict[str, Any]]:
+        return f'Headers {s}', {'X-JSONRPC': '1'}
+
+    # pylint: disable=W0612
+    @jsonrpc.method('jsonrpc.returnStatusCodeAndHeaders')
+    def return_status_code_and_headers(s: str) -> Tuple[str, int, Dict[str, Any]]:
+        return f'Status Code and Headers {s}', 400, {'X-JSONRPC': '1'}
+
+    class_app = App()
+    jsonrpc.register(class_app.index, name='classapp.index')
+    jsonrpc.register(class_app.greeting)
+    jsonrpc.register(class_app.hello)
+    jsonrpc.register(class_app.echo)
+    jsonrpc.register(class_app.notify)
+    jsonrpc.register(class_app.fails)
+
+    return flask_app
+
+
+@pytest.fixture(scope='module')
 def app():
     """Create and configure a new app instance for each test."""
     flask_app = create_app()
@@ -47,7 +158,7 @@ def app():
 
 
 # pylint: disable=W0621
-@pytest.fixture
+@pytest.fixture(scope='module')
 def client(app):
     """A test client for the app."""
     return app.test_client()

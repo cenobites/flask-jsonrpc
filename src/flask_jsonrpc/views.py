@@ -1,5 +1,4 @@
-# -*- coding: utf-8 -*-
-# Copyright (c) 2012-2021, Cenobit Technologies, Inc. http://cenobit.es/
+# Copyright (c) 2020-2021, Cenobit Technologies, Inc. http://cenobit.es/
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -25,3 +24,36 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
+from typing import TYPE_CHECKING, List
+
+from flask import Response, jsonify, current_app, make_response
+from flask.views import View
+
+from .site import JSONRPC_VERSION_DEFAULT, JSONRPC_DEFAULT_HTTP_HEADERS
+from .exceptions import JSONRPCError
+
+if TYPE_CHECKING:
+    from .site import JSONRPCSite
+
+
+class JSONRPCView(View):
+    methods: List[str] = ['POST']
+
+    def __init__(self, jsonrpc_site: 'JSONRPCSite') -> None:
+        self.jsonrpc_site = jsonrpc_site
+
+    def dispatch_request(self) -> Response:
+        try:
+            response, status_code, headers = self.jsonrpc_site.dispatch_request()
+            if status_code == 204:
+                return make_response('', status_code, headers)
+            return make_response(jsonify(response), status_code, headers)
+        except JSONRPCError as e:
+            current_app.logger.error('jsonrpc error')
+            current_app.logger.exception(e)
+            response = {
+                'id': None,
+                'jsonrpc': JSONRPC_VERSION_DEFAULT,
+                'error': e.jsonrpc_format,
+            }
+            return make_response(jsonify(response), e.status_code, JSONRPC_DEFAULT_HTTP_HEADERS)

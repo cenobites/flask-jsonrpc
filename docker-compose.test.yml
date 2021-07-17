@@ -6,10 +6,10 @@ services:
       context: .
       dockerfile: Dockerfile.py39.test
     command: >
-      sh -c "flake8 flask_jsonrpc/ tests/ &&
-        pylint flask_jsonrpc/ tests/ &&
-        mypy flask_jsonrpc/ &&
-        bandit -r flask_jsonrpc/ &&
+      sh -c "flake8 src/ tests/ &&
+        pylint src/ tests/ &&
+        mypy --install-types --non-interactive src/ &&
+        bandit -r src/ &&
         safety check &&
         pytest"
 
@@ -18,8 +18,8 @@ services:
       context: .
       dockerfile: Dockerfile.py38.test
     command: >
-      sh -c "flake8 flask_jsonrpc/ tests/ &&
-        pylint flask_jsonrpc/ tests/ &&
+      sh -c "flake8 src/ tests/ &&
+        pylint src/ tests/ &&
         pytest"
 
   python3.7:
@@ -27,8 +27,8 @@ services:
       context: .
       dockerfile: Dockerfile.py37.test
     command: >
-      sh -c "flake8 flask_jsonrpc/ tests/ &&
-        pylint flask_jsonrpc/ tests/ &&
+      sh -c "flake8 src/ tests/ &&
+        pylint src/ tests/ &&
         pytest --cov-fail-under=0"
 
   python3.6:
@@ -36,6 +36,6 @@ services:
       context: .
       dockerfile: Dockerfile.py36.test
     command: >
-      sh -c "flake8 flask_jsonrpc/ tests/ &&
-        pylint flask_jsonrpc/ tests/ &&
+      sh -c "flake8 src/ tests/ &&
+        pylint src/ tests/ &&
         pytest --cov-fail-under=0"
