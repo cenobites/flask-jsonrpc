@@ -26,6 +26,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 import os
 import sys
+import asyncio
 import functools
 from typing import Any, Dict, List, Tuple, Union
 
@@ -149,10 +150,110 @@ def create_app(test_config=None):  # noqa: C901  pylint: disable=W0612
     return flask_app
 
 
+def async_jsonrcp_decorator(fn):
+    @functools.wraps(fn)
+    async def wrapped(*args, **kwargs):
+        rv = await fn(*args, **kwargs)
+        return f'{rv} from decorator, ;)'
+
+    return wrapped
+
+
+def create_async_app(test_config=None):  # noqa: C901  pylint: disable=W0612
+    """Create and configure an instance of the Flask application."""
+    flask_app = Flask('apptest', instance_relative_config=True)
+    if test_config:
+        flask_app.config.update(test_config)
+
+    jsonrpc = JSONRPC(flask_app, '/api', enable_web_browsable_api=True)
+
+    # pylint: disable=W0612
+    @jsonrpc.method('jsonrpc.greeting')
+    async def greeting(name: str = 'Flask JSON-RPC') -> str:
+        await asyncio.sleep(0)
+        return f'Hello {name}'
+
+    # pylint: disable=W0612
+    @jsonrpc.method('jsonrpc.echo')
+    async def echo(string: str, _some: Any = None) -> str:
+        await asyncio.sleep(0)
+        return string
+
+    # pylint: disable=W0612
+    @jsonrpc.method('jsonrpc.notify')
+    async def notify(_string: str = None) -> None:
+        await asyncio.sleep(0)
+
+    # pylint: disable=W0612
+    @jsonrpc.method('jsonrpc.fails')
+    async def fails(n: int) -> int:
+        await asyncio.sleep(0)
+        if n % 2 == 0:
+            return n
+        raise ValueError('number is odd')
+
+    # pylint: disable=W0612
+    @jsonrpc.method('jsonrpc.strangeEcho')
+    async def strangeEcho(
+        string: str, omg: Dict[str, Any], wtf: List[str], nowai: int, yeswai: str = 'Default'
+    ) -> List[Any]:
+        await asyncio.sleep(0)
+        return [string, omg, wtf, nowai, yeswai]
+
+    # pylint: disable=W0612
+    @jsonrpc.method('jsonrpc.sum')
+    async def sum_(a: Union[int, float], b: Union[int, float]) -> Union[int, float]:
+        await asyncio.sleep(0)
+        return a + b
+
+    # pylint: disable=W0612
+    @jsonrpc.method('jsonrpc.decorators')
+    @async_jsonrcp_decorator
+    async def decorators(string: str) -> str:
+        await asyncio.sleep(0)
+        return f'Hello {string}'
+
+    # pylint: disable=W0612
+    @jsonrpc.method('jsonrpc.returnStatusCode')
+    async def return_status_code(s: str) -> Tuple[str, int]:
+        await asyncio.sleep(0)
+        return f'Status Code {s}', 201
+
+    # pylint: disable=W0612
+    @jsonrpc.method('jsonrpc.returnHeaders')
+    async def return_headers(s: str) -> Tuple[str, Dict[str, Any]]:
+        await asyncio.sleep(0)
+        return f'Headers {s}', {'X-JSONRPC': '1'}
+
+    # pylint: disable=W0612
+    @jsonrpc.method('jsonrpc.returnStatusCodeAndHeaders')
+    async def return_status_code_and_headers(s: str) -> Tuple[str, int, Dict[str, Any]]:
+        await asyncio.sleep(0)
+        return f'Status Code and Headers {s}', 400, {'X-JSONRPC': '1'}
+
+    class_app = App()
+    jsonrpc.register(class_app.index, name='classapp.index')
+    jsonrpc.register(class_app.greeting)
+    jsonrpc.register(class_app.hello)
+    jsonrpc.register(class_app.echo)
+    jsonrpc.register(class_app.notify)
+    jsonrpc.register(class_app.fails)
+
+    return flask_app
+
+
 @pytest.fixture(scope='module')
 def app():
     """Create and configure a new app instance for each test."""
     flask_app = create_app()
+
+    yield flask_app
+
+
+@pytest.fixture(scope='module')
+def async_app():
+    """Create and configure a new async app instance for each test."""
+    flask_app = create_async_app()
 
     yield flask_app
 
@@ -162,6 +263,14 @@ def app():
 def client(app):
     """A test client for the app."""
     return app.test_client()
+
+
+# pylint: disable=W0621
+@pytest.fixture(scope='module')
+def async_client(async_app):
+    """A test async client for the app."""
+    with async_app.test_client() as testing_client:
+        yield testing_client
 
 
 # pylint: disable=W0621

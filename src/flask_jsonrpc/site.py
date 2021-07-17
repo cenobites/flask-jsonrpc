@@ -26,7 +26,6 @@
 # POSSIBILITY OF SUCH DAMAGE.
 from uuid import UUID, uuid4
 from typing import Any, Dict, List, Type, Tuple, Union, TypeVar, Callable, Optional, get_type_hints
-from concurrent.futures import ThreadPoolExecutor
 
 from flask import json, request, current_app
 
@@ -115,8 +114,7 @@ class JSONRPCSite:
 
     def validate_request(self) -> bool:
         if not self.is_json:
-            if current_app:
-                current_app.logger.error('invalid mimetype')
+            current_app.logger.error('invalid mimetype')
             return False
         return True
 
@@ -124,9 +122,8 @@ class JSONRPCSite:
         try:
             return json.loads(request_data)  # type: ignore
         except ValueError as e:
-            if current_app:
-                current_app.logger.error('invalid json: %s', request_data)
-                current_app.logger.exception(e)
+            current_app.logger.error('invalid json: %s', request_data)
+            current_app.logger.exception(e)
             raise ParseError(data={'message': f'Invalid JSON: {request_data!r}'}) from e
 
     def handle_dispatch_except(
@@ -137,9 +134,8 @@ class JSONRPCSite:
                 raise InvalidRequestError(data={'message': f'Invalid JSON: {req_json!r}'})
             return self.dispatch(req_json)
         except JSONRPCError as e:
-            if current_app:
-                current_app.logger.error('jsonrpc error')
-                current_app.logger.exception(e)
+            current_app.logger.error('jsonrpc error')
+            current_app.logger.exception(e)
             response = {
                 'id': get(req_json, 'id'),
                 'jsonrpc': get(req_json, 'jsonrpc', JSONRPC_VERSION_DEFAULT),
@@ -147,9 +143,8 @@ class JSONRPCSite:
             }
             return response, e.status_code, JSONRPC_DEFAULT_HTTP_HEADERS
         except Exception as e:  # pylint: disable=W0703
-            if current_app:
-                current_app.logger.error('unexpected error')
-                current_app.logger.exception(e)
+            current_app.logger.error('unexpected error')
+            current_app.logger.exception(e)
             jsonrpc_error = ServerError(data={'message': str(e)})
             response = {
                 'id': get(req_json, 'id'),
@@ -167,12 +162,11 @@ class JSONRPCSite:
         resp_views = []
         headers = Headers()
         status_code = JSONRPC_DEFAULT_HTTP_STATUS_CODE
-        with ThreadPoolExecutor(max_workers=len(reqs_json) or 1) as executor:
-            for rv, _, hdrs in executor.map(self.handle_dispatch_except, reqs_json):
-                headers.update([hdrs] if isinstance(hdrs, tuple) else hdrs)  # type: ignore
-                if rv is None:
-                    continue
-                resp_views.append(rv)
+        for rv, _, hdrs in (self.handle_dispatch_except(rq) for rq in reqs_json):
+            headers.update([hdrs] if isinstance(hdrs, tuple) else hdrs)  # type: ignore
+            if rv is None:
+                continue
+            resp_views.append(rv)
         if not resp_views:
             status_code = 204
         return resp_views, status_code, headers
@@ -187,9 +181,9 @@ class JSONRPCSite:
 
         try:
             if isinstance(params, (tuple, set, list)):
-                resp_view = view_func(*params)
+                resp_view = current_app.ensure_sync(view_func)(*params)
             elif isinstance(params, dict):
-                resp_view = view_func(**params)
+                resp_view = current_app.ensure_sync(view_func)(**params)
             else:
                 raise InvalidParamsError(
                     data={
@@ -208,9 +202,8 @@ class JSONRPCSite:
                     )
                 )
         except TypeError as e:
-            if current_app:
-                current_app.logger.error('invalid type checked for: %s', view_func.__name__)
-                current_app.logger.exception(e)
+            current_app.logger.error('invalid type checked for: %s', view_func.__name__)
+            current_app.logger.exception(e)
             raise InvalidParamsError(data={'message': str(e)}) from e
 
         return self.make_response(req_json, resp_view)
