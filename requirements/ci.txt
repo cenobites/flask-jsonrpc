@@ -14,7 +14,7 @@ flake8-implicit-str-concat==0.2.0  # https://github.com/keisheiled/flake8-implic
 
 # Code linter
 # ------------------------------------------------------------------------------
-pylint==2.9.4  # https://github.com/PyCQA/pylint
+pylint==2.9.5  # https://github.com/PyCQA/pylint
 
 # Type check
 # ------------------------------------------------------------------------------
