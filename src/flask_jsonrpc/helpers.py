@@ -58,7 +58,7 @@ def urn(name: str, *args: Any) -> str:
     st = ':'.join(list(itertools.chain(*splited_args)))
     st = st.rstrip(':').lstrip(':')
     sep = ':' if len(args) > 0 else ''
-    return 'urn:{}{}{}'.format(name, sep, st.replace('::', ':')).lower()
+    return f"urn:{name}{sep}{st.replace('::', ':')}".lower()
 
 
 def from_python_type(tp: Any) -> 'JSONRPCNewType':

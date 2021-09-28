@@ -69,7 +69,8 @@ def jsonrcp_headers(fn: Callable[..., Any]):
 @jsonrpc.method('App.index')
 @check_terminal_id
 def index() -> str:
-    return 'Terminal ID: {}'.format(request.get_json(silent=True).get('terminal_id', 0))
+    terminal_id = request.get_json(silent=True).get('terminal_id', 0)
+    return f'Terminal ID: {terminal_id}'
 
 
 @jsonrpc.method('App.decorators')
