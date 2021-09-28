@@ -101,9 +101,8 @@ class JSONRPCSite:
         if not self.validate_request():
             raise ParseError(
                 data={
-                    'message': 'Invalid mime type for JSON: {}, use header Content-Type: application/json'.format(
-                        request.mimetype
-                    )
+                    'message': f'Invalid mime type for JSON: {request.mimetype}, '
+                    'use header Content-Type: application/json'
                 }
             )
 
@@ -177,7 +176,7 @@ class JSONRPCSite:
         params = req_json.get('params', {})
         view_func = self.view_funcs.get(req_json['method'])
         if not view_func:
-            raise MethodNotFoundError(data={'message': 'Method not found: {}'.format(req_json['method'])})
+            raise MethodNotFoundError(data={'message': f"Method not found: {req_json['method']}"})
 
         try:
             if isinstance(params, (tuple, set, list)):
@@ -188,7 +187,7 @@ class JSONRPCSite:
                 raise InvalidParamsError(
                     data={
                         'message': 'Parameter structures are by-position '
-                        '(tuple, set, list) or by-name (dict): {}'.format(params)
+                        f'(tuple, set, list) or by-name (dict): {params}'
                     }
                 )
 
@@ -196,11 +195,9 @@ class JSONRPCSite:
             view_fun_annotations = get_type_hints(view_func)
             view_fun_return = view_fun_annotations.pop('return', None)
             if resp_view is not None and view_fun_return is None:
-                raise TypeError(
-                    'return type of {} must be a type; got {} instead'.format(
-                        qualified_name(resp_view), qualified_name(view_fun_return)
-                    )
-                )
+                resp_view_qn = qualified_name(resp_view)
+                view_fun_return_qn = qualified_name(view_fun_return)
+                raise TypeError(f'return type of {resp_view_qn} must be a type; got {view_fun_return_qn} instead')
         except TypeError as e:
             current_app.logger.error('invalid type checked for: %s', view_func.__name__)
             current_app.logger.exception(e)
