@@ -8,7 +8,7 @@ Basic JSON-RPC implementation for your Flask-powered sites.
 Some reasons you might want to use:
 
 * Simple, powerful, flexible, and pythonic API.
-* Support ![JSON-RPC 2.0](https://www.jsonrpc.org/specification) version.
+* Support ![JSON-RPC 2.0](https://www.jsonrpc.org/specification "JSON-RPC 2.0") version.
 * Support python 3.6 or later.
 * The web browsable API.
 * Run-time type checking functions defined with [PEP 484](https://www.python.org/dev/peps/pep-0484/) argument (and return) type annotations.
