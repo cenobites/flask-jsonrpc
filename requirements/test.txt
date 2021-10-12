@@ -12,7 +12,7 @@ typeguard==2.12.1  # https://github.com/agronholm/typeguard
 
 # Code quality
 # ------------------------------------------------------------------------------
-coverage==5.5  # https://github.com/nedbat/coveragepy
+coverage==6.0.2  # https://github.com/nedbat/coveragepy
 coveralls==3.2.0  # https://github.com/marketplace/coveralls
 
 # Tools
