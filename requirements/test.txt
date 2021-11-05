@@ -17,4 +17,4 @@ coveralls==3.3.0  # https://github.com/marketplace/coveralls
 
 # Tools
 # ------------------------------------------------------------------------------
-py==1.10.0  # https://github.com/pytest-dev/py
+py==1.11.0  # https://github.com/pytest-dev/py
