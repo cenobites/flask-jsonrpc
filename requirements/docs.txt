@@ -7,4 +7,4 @@ sphinxcontrib-log-cabinet==1.0.1
 
 # Pallets
 # ------------------------------------------------------------------------------
-Pallets-Sphinx-Themes==2.0.1
+Pallets-Sphinx-Themes==2.0.2
