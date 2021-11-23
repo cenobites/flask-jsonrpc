@@ -8,7 +8,7 @@ mock==4.0.3  # https://github.com/testing-cabal/mock
 
 # Type check
 # ------------------------------------------------------------------------------
-typeguard==2.13.0  # https://github.com/agronholm/typeguard
+typeguard==2.13.2  # https://github.com/agronholm/typeguard
 
 # Code quality
 # ------------------------------------------------------------------------------
