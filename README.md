@@ -24,16 +24,16 @@ There is a live example API for testing purposes, [available here](http://flask-
 
 1. Installation
 
-```
-    $ pip install Flask-JSONRPC
+```console
+$ pip install Flask-JSONRPC
 ```
 
 or
 
-```
-    $ git clone git://github.com/cenobites/flask-jsonrpc.git
-    $ cd flask-jsonrpc
-    $ python setup.py install
+```console
+$ git clone git://github.com/cenobites/flask-jsonrpc.git
+$ cd flask-jsonrpc
+$ python setup.py install
 ```
 
 
@@ -41,20 +41,20 @@ or
 
 Create your application and initialize the Flask-JSONRPC.
 
-```
-    from flask import Flask
-    from flask_jsonrpc import JSONRPC
+```python
+from flask import Flask
+from flask_jsonrpc import JSONRPC
 
-    app = Flask('application')
-    jsonrpc = JSONRPC(app, '/api', enable_web_browsable_api=True)
+app = Flask('application')
+jsonrpc = JSONRPC(app, '/api', enable_web_browsable_api=True)
 ```
 
 Write JSON-RPC methods.
 
-```
-    @jsonrpc.method('App.index')
-    def index() -> str:
-        return 'Welcome to Flask JSON-RPC'
+```python
+@jsonrpc.method('App.index')
+def index() -> str:
+    return 'Welcome to Flask JSON-RPC'
 ```
 
 All code of example [run.py](https://github.com/cenobites/flask-jsonrpc/blob/master/run.py).
@@ -62,33 +62,34 @@ All code of example [run.py](https://github.com/cenobites/flask-jsonrpc/blob/mas
 
 3. Running
 
-```
-    $ python run.py
-     * Running on http://0.0.0.0:5000/
+```console
+$ python run.py
+ * Running on http://0.0.0.0:5000/
 ```
 
 4. Testing
 
-```
-    $ curl -i -X POST \
-       -H "Content-Type: application/json; indent=4" \
-       -d '{
-        "jsonrpc": "2.0",
-        "method": "App.index",
-        "params": {},
-        "id": "1"
-    }' http://localhost:5000/api
-    HTTP/1.0 200 OK
-    Content-Type: application/json
-    Content-Length: 77
-    Server: Werkzeug/0.8.3 Python/2.7.3
-    Date: Fri, 14 Dec 2012 19:26:56 GMT
+```console
+$ curl -i -X POST \
+   -H "Content-Type: application/json; indent=4" \
+   -d '{
+    "jsonrpc": "2.0",
+    "method": "App.index",
+    "params": {},
+    "id": "1"
+}' http://localhost:5000/api
 
-    {
-      "jsonrpc": "2.0",
-      "id": "1",
-      "result": "Welcome to Flask JSON-RPC"
-    }
+HTTP/1.0 200 OK
+Content-Type: application/json
+Content-Length: 77
+Server: Werkzeug/0.8.3 Python/2.7.3
+Date: Fri, 14 Dec 2012 19:26:56 GMT
+
+{
+  "jsonrpc": "2.0",
+  "id": "1",
+  "result": "Welcome to Flask JSON-RPC"
+}
 ```
 
 
