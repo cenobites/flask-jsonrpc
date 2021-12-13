@@ -2,7 +2,7 @@
 # ------------------------------------------------------------------------------
 pytest==6.2.5  # https://github.com/pytest-dev/pytest
 pytest-cov==3.0.0  # https://github.com/pytest-dev/pytest-cov
-pytest-xdist==2.4.0  # https://github.com/pytest-dev/pytest-xdist
+pytest-xdist==2.5.0  # https://github.com/pytest-dev/pytest-xdist
 pytest-sugar==0.9.4  # https://github.com/Frozenball/pytest-sugar
 mock==4.0.3  # https://github.com/testing-cabal/mock
 
