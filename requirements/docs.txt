@@ -2,7 +2,7 @@
 # ------------------------------------------------------------------------------
 Sphinx==4.3.2
 sphinx-tabs==3.2.0
-sphinx-issues==1.2.0
+sphinx-issues==2.0.0
 sphinxcontrib-log-cabinet==1.0.1
 
 # Pallets
