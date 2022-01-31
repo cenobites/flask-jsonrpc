@@ -1,6 +1,6 @@
 # Code formatter
 # ------------------------------------------------------------------------------
-black==21.12b0  # https://github.com/psf/black
+black==22.1.0  # https://github.com/psf/black
 pyupgrade==2.31.0  # https://github.com/asottile/pyupgrade
 
 # Code quality
