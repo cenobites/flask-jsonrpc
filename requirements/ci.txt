@@ -24,7 +24,7 @@ typeguard==2.13.3  # https://github.com/agronholm/typeguard
 
 # Security check
 # ------------------------------------------------------------------------------
-bandit==1.7.3  # https://github.com/PyCQA/bandit
+bandit==1.7.4  # https://github.com/PyCQA/bandit
 safety==1.10.3  # https://github.com/pyupio/safety
 
 # Code quality
