@@ -1,24 +1,24 @@
 # Code formatter
 # ------------------------------------------------------------------------------
 black==22.1.0  # https://github.com/psf/black
-pyupgrade==2.31.1  # https://github.com/asottile/pyupgrade
+pyupgrade==2.32.0  # https://github.com/asottile/pyupgrade
 
 # Code quality
 # ------------------------------------------------------------------------------
 flake8==4.0.1  # https://github.com/PyCQA/flake8
 flake8-isort==4.1.1  # https://github.com/gforcada/flake8-isort
-flake8-bugbear==22.3.20  # https://github.com/PyCQA/flake8-bugbear
-flake8-pyi==22.2.0  # https://github.com/ambv/flake8-pyi
+flake8-bugbear==22.3.23  # https://github.com/PyCQA/flake8-bugbear
+flake8-pyi==22.4.1  # https://github.com/ambv/flake8-pyi
 flake8-quotes==3.3.1  # https://github.com/zheller/flake8-quotes
 flake8-implicit-str-concat==0.3.0  # https://github.com/keisheiled/flake8-implicit-str-concat
 
 # Code linter
 # ------------------------------------------------------------------------------
-pylint==2.12.2  # https://github.com/PyCQA/pylint
+pylint==2.13.5  # https://github.com/PyCQA/pylint
 
 # Type check
 # ------------------------------------------------------------------------------
-mypy==0.941  # https://github.com/python/mypy
+mypy==0.942  # https://github.com/python/mypy
 types_setuptools==57.4.11  # https://github.com/python/typeshed
 typeguard==2.13.3  # https://github.com/agronholm/typeguard
 
