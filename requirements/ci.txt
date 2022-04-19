@@ -18,7 +18,7 @@ pylint==2.13.5  # https://github.com/PyCQA/pylint
 
 # Type check
 # ------------------------------------------------------------------------------
-mypy==0.941  # https://github.com/python/mypy
+mypy==0.942  # https://github.com/python/mypy
 types_setuptools==57.4.11  # https://github.com/python/typeshed
 typeguard==2.13.3  # https://github.com/agronholm/typeguard
 
