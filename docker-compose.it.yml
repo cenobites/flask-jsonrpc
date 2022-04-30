@@ -1,0 +1,58 @@
+version: '3'
+
+services:
+  async_sut:
+    build:
+      context: .
+      dockerfile: Dockerfile.it
+    environment:
+      - FLASK_ENV=TESTING
+      - SITE_DOMAIN=async_app
+      - SITE_PORT=5000
+      - WEB_URL=http://async_app:5000
+      - API_URL=http://async_app:5000/api
+      - BROWSABLE_API_URL=http://async_app:5000/browse
+    user: ${UID:-0}:${GID:-0}
+    depends_on:
+      - async_app
+
+  async_app:
+    build:
+      context: .
+      dockerfile: Dockerfile.local
+      args:
+        - FLASK_ASYNC=1
+    environment:
+      - FLASK_ENV=TESTING
+    user: ${UID:-0}:${GID:-0}
+    command: >
+      python async_app.py
+    ports:
+      - '5001:5000'
+
+  sut:
+    build:
+      context: .
+      dockerfile: Dockerfile.it
+    environment:
+      - FLASK_ENV=TESTING
+      - SITE_DOMAIN=app
+      - SITE_PORT=5000
+      - WEB_URL=http://app:5000
+      - API_URL=http://app:5000/api
+      - BROWSABLE_API_URL=http://app:5000/browse
+    user: ${UID:-0}:${GID:-0}
+    depends_on:
+      - app
+      
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.local
+    environment:
+      - FLASK_ENV=TESTING
+    user: ${UID:-0}:${GID:-0}
+    command: >
+      python app.py
+    ports:
+      - '5000:5000'

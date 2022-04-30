@@ -367,7 +367,7 @@ def test_app_create_with_rcp_batch():
     # pylint: disable=W0612
     @jsonrpc.method('notify_sum')
     def notify_sum(numbers: List[int]) -> int:
-        s = sum(x ** 2 for x in numbers)
+        s = sum(x**2 for x in numbers)
         return s
 
     # pylint: disable=W0612

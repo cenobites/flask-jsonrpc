@@ -24,10 +24,19 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-from typing import Any, Dict, List, Tuple, Union, TypeVar, NamedTuple
+from typing import Any, Set, Dict, List, Tuple, Union, TypeVar, FrozenSet, NamedTuple
 from numbers import Real, Integral, Rational
 from collections import OrderedDict, defaultdict
 from collections.abc import Mapping
+
+from typing_inspect import is_new_type  # type: ignore
+
+# Python 3.10+
+try:
+    from types import NoneType, UnionType
+except ImportError:  # pragma: no cover
+    UnionType = None  # type: ignore
+    NoneType = type(None)  # type: ignore
 
 # Python 3.8+
 try:
@@ -45,13 +54,13 @@ except ImportError:  # pragma: no cover
 try:
     from typing import get_args  # pylint: disable=C0412
 except ImportError:  # pragma: no cover
-    from typing_inspect import get_args  # type: ignore
+    from typing_inspect import get_args  # type: ignore  # pylint: disable=C0412
 
 # Python 3.5.4+ / 3.6.2+
 try:
     from typing import get_origin  # pylint: disable=C0412
 except ImportError:  # pragma: no cover
-    from typing_inspect import get_origin  # type: ignore
+    from typing_inspect import get_origin  # type: ignore  # pylint: disable=C0412
 
 # Python 3.5.4+ / 3.6.2+
 try:
@@ -64,17 +73,17 @@ except ImportError:  # pragma: no cover
 
 
 class JSONRPCNewType:
-    def __init__(self, name: str, *types: Union[type, Tuple[Union[type, Tuple[Any, ...]], ...]]) -> None:
+    def __init__(self, name: str, *types: Union[type, Tuple[Union[type, Tuple[type, ...]], ...]]) -> None:
         self.name = name
         self.types = types
 
-    def check_expected_type(self, expected_type: type) -> bool:
+    def check_expected_type(self, expected_type: Any) -> bool:
         return any(expected_type is tp for tp in self.types)
 
     def check_expected_types(self, expected_types: Any) -> bool:
         return all(any(expt_tp is tp for tp in self.types) for expt_tp in expected_types)
 
-    def check_type_var(self, expected_type: type) -> bool:
+    def check_type_var(self, expected_type: Any) -> bool:  # pragma: no cover py3.6
         bound_type = getattr(expected_type, '__bound__', None)
         if bound_type is None:
             expected_types = getattr(expected_type, '__constraints__', None)
@@ -83,42 +92,45 @@ class JSONRPCNewType:
             return self.check_expected_types(expected_types)
         return self.check_expected_type(bound_type)
 
-    def check_union(self, expected_type: type) -> bool:
+    def check_new_type(self, expected_type: Any) -> bool:  # pragma: no cover py3.6
+        super_type = getattr(expected_type, '__supertype__', None)
+        return self.check_expected_type(super_type)
+
+    def check_union(self, expected_type: Any) -> bool:
         expected_types = [expt_tp for expt_tp in get_args(expected_type) if expt_tp is not type(None)]  # noqa: E721
         return self.check_expected_types(expected_types)
 
-    def check_literal(self, expected_type: type) -> bool:
+    def check_args_type(self, expected_type: Any) -> bool:  # pragma: no cover py3.6
         expected_types = get_args(expected_type)
         return self.check_expected_types(expected_types)
 
-    def check_final(self, expected_type: type) -> bool:
-        expected_types = get_args(expected_type)
-        return self.check_expected_types(expected_types)
-
-    def check_type(self, o: type) -> bool:  # pylint: disable=R0911
+    def check_type(self, o: Any) -> bool:  # pylint: disable=R0911
         expected_type = o
         if expected_type is Any:
             return self is Object
 
-        if type(expected_type) is TypeVar:  # type: ignore  # pylint: disable=C0123
-            return self.check_type_var(expected_type)
-
         if expected_type is None or expected_type is NoReturn:
             expected_type = type(None)
 
+        if type(expected_type) is TypeVar:  # pylint: disable=C0123
+            return self.check_type_var(expected_type)
+
+        if is_new_type(expected_type):
+            return self.check_new_type(expected_type)
+
         origin_type = get_origin(expected_type)
         if origin_type is not None:
-            if origin_type is Union:
+            if origin_type is Union or origin_type is UnionType:
                 return self.check_union(expected_type)
 
             if origin_type is Tuple or origin_type is tuple:
                 return self is Array
 
-            if origin_type is Literal:
-                return self.check_literal(expected_type)
+            if origin_type is Literal:  # pragma: no cover py3.6
+                return self.check_args_type(expected_type)
 
-            if origin_type is Final:
-                return self.check_final(expected_type)
+            if origin_type is Final:  # pragma: no cover py3.6
+                return self.check_args_type(expected_type)
 
             expected_type = origin_type
 
@@ -128,10 +140,10 @@ class JSONRPCNewType:
         return self.name
 
 
-String = JSONRPCNewType('String', str, bytes)
+String = JSONRPCNewType('String', str, bytes, bytearray)
 Number = JSONRPCNewType('Number', int, float, Real, Rational, Integral)
 Object = JSONRPCNewType('Object', dict, Dict, defaultdict, OrderedDict, Mapping)
-Array = JSONRPCNewType('Array', list, tuple, List, NamedTuple)
+Array = JSONRPCNewType('Array', list, set, Set, tuple, List, NamedTuple, frozenset, FrozenSet)
 Boolean = JSONRPCNewType('Boolean', bool)
-Null = JSONRPCNewType('Null', type(None))
+Null = JSONRPCNewType('Null', type(None), NoneType)
 Types = [String, Number, Object, Array, Boolean, Null]

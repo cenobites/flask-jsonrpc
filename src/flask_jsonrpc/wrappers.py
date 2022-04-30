@@ -50,16 +50,15 @@ class JSONRCPDecoratorMixin:
             return False
         fn_annotations = get_type_hints(fn)
         fn_annotations.pop('return', None)
-        if self._method_has_parameters(fn):
-            if not fn_annotations:
-                return False
+        if self._method_has_parameters(fn) and not fn_annotations:
+            return False
         return True
 
     def _get_function(self, fn: Callable[..., Any]) -> Callable[..., Any]:
         if isfunction(fn):
             return fn
         if ismethod(fn) and getattr(fn, '__func__', None):
-            return fn.__func__  # type: ignore
+            return fn.__func__
         raise ValueError('the view function must be either a function or a method')
 
     def get_jsonrpc_site(self) -> 'JSONRPCSite':

@@ -411,7 +411,7 @@ def test_app_create_with_rcp_batch():
     @jsonrpc.method('notify_sum')
     async def notify_sum(numbers: List[int]) -> int:
         await asyncio.sleep(0)
-        s = sum(x ** 2 for x in numbers)
+        s = sum(x**2 for x in numbers)
         return s
 
     # pylint: disable=W0612

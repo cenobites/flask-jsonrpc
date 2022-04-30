@@ -1,22 +1,22 @@
 os: linux
 dist: xenial
 
+sudo: false
 language: python
 
-services:
-  - docker
-
-python:
-  - "3.9"
-
-env:
-  - FLASK_ENV=TESTING DOCKER_COMPOSE_VERSION=1.29.2
-
-before_install:
-  - sudo rm /usr/local/bin/docker-compose
-  - curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > docker-compose
-  - chmod +x docker-compose
-  - sudo mv docker-compose /usr/local/bin
+matrix:
+  fast_finish: true
+  include:
+    - python: 3.10
+      env: FLASK_ENV=TESTING PRAGMA_VERSION=py3.10
+    - python: 3.9
+      env: FLASK_ENV=TESTING PRAGMA_VERSION=py3.9
+    - python: 3.8
+      env: FLASK_ENV=TESTING PRAGMA_VERSION=py3.8
+    - python: 3.7
+      env: FLASK_ENV=TESTING PRAGMA_VERSION=py3.7
+    - python: 3.6
+      env: FLASK_ENV=TESTING PRAGMA_VERSION=py3.6
 
 install:
   - pip install --upgrade pip setuptools --quiet
@@ -25,24 +25,12 @@ install:
   - pip install -r requirements/ci.txt --quiet
 
 script:
-  - docker-compose -f docker-compose.test.yml -p ci build --build-arg VERSION=$(date +%s) python3.6 python3.7 python3.8
-  - docker-compose -f docker-compose.test.yml -p ci up -d python3.6 python3.7 python3.8
-  - DOCKER_WAIT_FOR_PY36=$(docker wait ci_python3.6_1)
-  - docker logs ci_python3.6_1
-  - DOCKER_WAIT_FOR_PY37=$(docker wait ci_python3.7_1)
-  - docker logs ci_python3.7_1
-  - DOCKER_WAIT_FOR_PY38=$(docker wait ci_python3.8_1)
-  - docker logs ci_python3.8_1
-  - docker-compose -f docker-compose.test.yml -p ci down
-  - if [ $DOCKER_WAIT_FOR_PY36 -ne 0 ]; then echo "Test to Python 3.6 failed"; exit 1; fi
-  - if [ $DOCKER_WAIT_FOR_PY37 -ne 0 ]; then echo "Test to Python 3.7 failed"; exit 1; fi
-  - if [ $DOCKER_WAIT_FOR_PY38 -ne 0 ]; then echo "Test to Python 3.8 failed"; exit 1; fi
+  - if [[ $TRAVIS_PYTHON_VERSION == '3.10' ]]; then mypy --install-types --non-interactive src/; fi
+  - if [[ $TRAVIS_PYTHON_VERSION == '3.10' ]]; then bandit -r src/; fi
+  - if [[ $TRAVIS_PYTHON_VERSION == '3.10' ]]; then safety check; fi
   - flake8 src/ tests/
   - pylint src/ tests/
-  - mypy --install-types --non-interactive src/
-  - bandit -r src/
-  - safety check
-  - pytest
+  - py.test
 
 after_success:
-  coveralls
+  - coveralls

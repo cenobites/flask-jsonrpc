@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # Copyright (c) 2012-2021, Cenobit Technologies, Inc. http://cenobit.es/
 # All rights reserved.
 #
@@ -25,34 +24,19 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-import setuptools
+import os
+import unittest
 
-# Metadata goes in setup.cfg. These are here for GitHub's dependency graph.
-setuptools.setup(
-    name='Flask-JSONRPC',
-    install_requires=[
-        'Flask>=1.0.0,<3.0',
-        'typeguard==2.13.3',
-        'typing>=3.7.4;python_version<"3.5"',
-        'typing_extensions>=3.7.4;python_version>="3.6"',
-        'typing_extensions>=3.7.4,<3.10;python_version<"3.6"',
-        'typing_inspect==0.7.1',
-    ],
-    extras_require={
-        'async': ['Flask[async]>=1.0.0,<3.0'],
-        'dotenv': ['Flask[dotenv]>=1.0.0,<3.0'],
-    },
-    setup_requires=['pytest-runner'],
-    tests_require=[
-        'mock==4.0.3',
-        'coverage==6.3.2;python_version>"3.6"',
-        'coverage<6.2;python_version<="3.6"',
-        'pytest==7.1.2;python_version>"3.6"',
-        'pytest<7;python_version<="3.6"',
-        'pytest-cov==3.0.0',
-        'pytest-xdist==2.5.0',
-        'pytest-sugar==0.9.4',
-        'pytest-env==0.6.2',
-        'typeguard==2.13.3',
-    ],
-)
+import requests
+
+
+class APITestCase(unittest.TestCase):
+    def setUp(self):
+        session = requests.Session()
+        session.headers.update(
+            {
+                'Content-Type': 'application/json',
+            }
+        )
+        self.requests = session
+        self.api_url = os.environ['API_URL']
