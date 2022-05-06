@@ -28,6 +28,15 @@ import itertools
 from typing import TYPE_CHECKING, Any, Dict
 from operator import getitem
 
+# Python 3.5.4+ / 3.6.2+
+try:
+    from typing_extensions import NoReturn  # pylint: disable=C0412,W0611
+except ImportError:  # pragma: no cover
+    try:
+        from typing import NoReturn  # pylint: disable=C0412,W0611
+    except ImportError:
+        NoReturn = None  # type: ignore
+
 from .types import Types, Object
 
 if TYPE_CHECKING:
@@ -75,6 +84,8 @@ def from_python_type(tp: Any) -> 'JSONRPCNewType':
     >>> str(from_python_type(bool))
     'Boolean'
     >>> str(from_python_type(None))
+    'Null'
+    >>> str(from_python_type(NoReturn))
     'Null'
     """
     for t in Types:

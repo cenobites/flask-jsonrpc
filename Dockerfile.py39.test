@@ -1,6 +1,7 @@
 FROM python:3.9-alpine
 
 ENV PYTHONUNBUFFERED=1 \
+    PRAGMA_VERSION=py3.9 \
     DEBUG=0
 
 WORKDIR /code

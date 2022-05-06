@@ -119,7 +119,7 @@ class JSONRPCSite:
 
     def to_json(self, request_data: bytes) -> Any:
         try:
-            return json.loads(request_data)  # type: ignore
+            return json.loads(request_data)
         except ValueError as e:
             current_app.logger.error('invalid json: %s', request_data)
             current_app.logger.exception(e)
@@ -258,24 +258,24 @@ class JSONRPCSite:
     def procedure_desc(self, key: str) -> ServiceProcedureDescribe:
         view_func = self.view_funcs[key]
         return {
-            'name': getattr(view_func, 'jsonrpc_method_name', None),
+            'name': getattr(view_func, 'jsonrpc_method_name', key),
             'summary': getattr(view_func, '__doc__', None),
             'params': [
                 {'name': k, 'type': self.python_type_name(t)}
                 for k, t in getattr(view_func, 'jsonrpc_method_params', {}).items()
             ],
-            'return': {'type': self.python_type_name(getattr(view_func, 'jsonrpc_method_return', None))},
+            'return': {'type': self.python_type_name(getattr(view_func, 'jsonrpc_method_return', type(None)))},
         }
 
     def service_desc(self) -> ServiceDescribe:
-        return {
-            'sdversion': '1.0',
-            'id': f'urn:uuid:{self.uuid}',
-            'version': self.version,
-            'name': self.name,
-            'summary': self.__doc__,
-            'procs': [self.procedure_desc(k) for k in self.view_funcs if k != JSONRCP_DESCRIBE_METHOD_NAME],
-        }
+        return ServiceDescribe(
+            sdversion='1.0',
+            id=f'urn:uuid:{self.uuid}',
+            version=self.version,
+            name=self.name,
+            summary=self.__doc__,
+            procs=[self.procedure_desc(k) for k in self.view_funcs if k != JSONRCP_DESCRIBE_METHOD_NAME],
+        )
 
     def describe(self) -> ServiceDescribe:
         return self.service_desc()

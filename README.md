@@ -45,16 +45,16 @@ Create your application and initialize the Flask-JSONRPC.
 from flask import Flask
 from flask_jsonrpc import JSONRPC
 
-app = Flask('application')
-jsonrpc = JSONRPC(app, '/api', enable_web_browsable_api=True)
+app = Flask("application")
+jsonrpc = JSONRPC(app, "/api", enable_web_browsable_api=True)
 ```
 
 Write JSON-RPC methods.
 
 ```python
-@jsonrpc.method('App.index')
+@jsonrpc.method("App.index")
 def index() -> str:
-    return 'Welcome to Flask JSON-RPC'
+    return "Welcome to Flask JSON-RPC"
 ```
 
 All code of example [run.py](https://github.com/cenobites/flask-jsonrpc/blob/master/run.py).

@@ -1,6 +1,7 @@
 FROM python:3.8-alpine
 
 ENV PYTHONUNBUFFERED=1 \
+    PRAGMA_VERSION=py3.8 \
     DEBUG=0
 
 WORKDIR /code

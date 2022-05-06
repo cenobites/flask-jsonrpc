@@ -8,7 +8,7 @@ build-backend = 'setuptools.build_meta'
 [tool.black]
 line-length = 120
 skip-string-normalization = true
-target-version = ['py39']
+target-version = ['py310']
 include = '\.pyi?$'
 exclude = '''
 (
@@ -17,12 +17,14 @@ exclude = '''
     | \.git
     | \.hg
     | \.mypy_cache
+    | \.pytest_cache
     | \.tox
     | \.venv
     | _build
     | buck-out
     | build
     | dist
+    | htmlcov
   )/
   | settings.py
 
