@@ -44,7 +44,7 @@ services:
     user: ${UID:-0}:${GID:-0}
     depends_on:
       - app
-      
+
   app:
     build:
       context: .

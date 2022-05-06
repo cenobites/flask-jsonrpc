@@ -1,4 +1,4 @@
-# Copyright (c) 2020-2021, Cenobit Technologies, Inc. http://cenobit.es/
+# Copyright (c) 2020-2022, Cenobit Technologies, Inc. http://cenobit.es/
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -28,4 +28,4 @@ from .app import JSONRPC
 from .views import JSONRPCView
 from .blueprints import JSONRPCBlueprint
 
-__version__ = '2.2.0.beta'
+__version__ = '2.2.0'
