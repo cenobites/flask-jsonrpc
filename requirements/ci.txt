@@ -8,7 +8,7 @@ pyupgrade==2.32.1;python_version>"3.6"  # https://github.com/asottile/pyupgrade
 flake8==4.0.1  # https://github.com/PyCQA/flake8
 flake8-isort==4.1.1  # https://github.com/gforcada/flake8-isort
 flake8-bugbear==22.4.25  # https://github.com/PyCQA/flake8-bugbear
-flake8-pyi==22.4.1;python_version>"3.6"  # https://github.com/ambv/flake8-pyi
+flake8-pyi==22.5.0;python_version>"3.6"  # https://github.com/ambv/flake8-pyi
 flake8-pyi<22.4;python_version<="3.6"
 flake8-quotes==3.3.1  # https://github.com/zheller/flake8-quotes
 flake8-implicit-str-concat==0.3.0;python_version>"3.6"  # https://github.com/keisheiled/flake8-implicit-str-concat
