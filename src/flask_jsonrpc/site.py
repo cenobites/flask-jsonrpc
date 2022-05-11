@@ -92,7 +92,7 @@ class JSONRPCSite:
         https://github.com/pallets/werkzeug/blob/master/src/werkzeug/wrappers/json.py#L54
         """
         mt = request.mimetype
-        return mt == 'application/json' or mt.startswith('application/') and mt.endswith('+json')
+        return mt == 'application/json' or mt == 'application/json-rpc' or mt.startswith('application/') and mt.endswith('+json')
 
     def register(self, name: str, view_func: Callable[..., Any]) -> None:
         self.view_funcs[name] = view_func
