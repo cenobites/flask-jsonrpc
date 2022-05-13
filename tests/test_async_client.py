@@ -25,6 +25,7 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 import sys
+import json
 
 import pytest
 
@@ -43,6 +44,32 @@ def test_app_greeting(async_client):
 
     rv = async_client.post(
         '/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': {'name': 'Flask'}}
+    )
+    assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': 'Hello Flask'}
+    assert rv.status_code == 200
+
+
+def test_app_greeting_with_different_content_types(async_client):
+    rv = async_client.post(
+        '/api',
+        data=json.dumps({'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting'}),
+        headers={'Content-Type': 'application/json-rpc'},
+    )
+    assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': 'Hello Flask JSON-RPC'}
+    assert rv.status_code == 200
+
+    rv = async_client.post(
+        '/api',
+        data=json.dumps({'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': ['Python']}),
+        headers={'Content-Type': 'application/jsonrequest'},
+    )
+    assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': 'Hello Python'}
+    assert rv.status_code == 200
+
+    rv = async_client.post(
+        '/api',
+        data=json.dumps({'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': {'name': 'Flask'}}),
+        headers={'Content-Type': 'application/json'},
     )
     assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': 'Hello Flask'}
     assert rv.status_code == 200

@@ -24,6 +24,7 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
+import json
 import uuid
 from typing import Any, Dict, List, Tuple
 
@@ -84,6 +85,30 @@ def test_app_create():
 
         rv = client.post('/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.fn3', 'params': [':)']})
         assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': 'Foo :)'}
+        assert rv.status_code == 200
+
+        rv = client.post(
+            '/api',
+            data=json.dumps({'id': 1, 'jsonrpc': '2.0', 'method': 'app.index'}),
+            headers={'Content-Type': 'application/json-rpc'},
+        )
+        assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': 'Welcome to Flask JSON-RPC'}
+        assert rv.status_code == 200
+
+        rv = client.post(
+            '/api',
+            data=json.dumps({'id': 1, 'jsonrpc': '2.0', 'method': 'app.index', 'params': []}),
+            headers={'Content-Type': 'application/jsonrequest'},
+        )
+        assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': 'Welcome to Flask JSON-RPC'}
+        assert rv.status_code == 200
+
+        rv = client.post(
+            '/api',
+            data=json.dumps({'id': 1, 'jsonrpc': '2.0', 'method': 'app.index', 'params': []}),
+            headers={'Content-Type': 'application/json'},
+        )
+        assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': 'Welcome to Flask JSON-RPC'}
         assert rv.status_code == 200
 
 

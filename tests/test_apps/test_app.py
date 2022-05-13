@@ -25,6 +25,8 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 # pylint: disable=duplicate-code
+import json
+
 from .conftest import APITestCase
 
 
@@ -42,6 +44,31 @@ class APITest(APITestCase):
 
         rv = self.requests.post(
             self.api_url, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': {'name': 'Flask'}}
+        )
+        self.assertEqual({'id': 1, 'jsonrpc': '2.0', 'result': 'Hello Flask'}, rv.json())
+        self.assertEqual(200, rv.status_code)
+
+    def test_app_greeting_with_different_content_types(self):
+        rv = self.requests.post(
+            self.api_url,
+            data=json.dumps({'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting'}),
+            headers={'Content-Type': 'application/json-rpc'},
+        )
+        self.assertEqual({'id': 1, 'jsonrpc': '2.0', 'result': 'Hello Flask JSON-RPC'}, rv.json())
+        self.assertEqual(200, rv.status_code)
+
+        rv = self.requests.post(
+            self.api_url,
+            data=json.dumps({'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': ['Python']}),
+            headers={'Content-Type': 'application/jsonrequest'},
+        )
+        self.assertEqual({'id': 1, 'jsonrpc': '2.0', 'result': 'Hello Python'}, rv.json())
+        self.assertEqual(200, rv.status_code)
+
+        rv = self.requests.post(
+            self.api_url,
+            data=json.dumps({'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': {'name': 'Flask'}}),
+            headers={'Content-Type': 'application/json'},
         )
         self.assertEqual({'id': 1, 'jsonrpc': '2.0', 'result': 'Hello Flask'}, rv.json())
         self.assertEqual(200, rv.status_code)
