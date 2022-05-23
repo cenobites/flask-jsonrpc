@@ -31,6 +31,6 @@ safety==1.10.3;python_version>"3.6"  # https://github.com/pyupio/safety
 
 # Code quality
 # ------------------------------------------------------------------------------
-coverage==6.3.3;python_version>"3.6"  # https://github.com/nedbat/coveragepy
+coverage==6.4;python_version>"3.6"  # https://github.com/nedbat/coveragepy
 coverage<6.2;python_version<="3.6"
 coveralls==3.3.1  # https://github.com/marketplace/coveralls
