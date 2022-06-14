@@ -42,8 +42,8 @@ setuptools.setup(
         'async': ['Flask[async]>=1.0.0,<3.0'],
         'dotenv': ['Flask[dotenv]>=1.0.0,<3.0'],
     },
-    setup_requires=['pytest-runner'],
     tests_require=[
+        'tox==3.25.0',
         'mock==4.0.3',
         'coverage==6.3.2;python_version>"3.6"',
         'coverage<6.2;python_version<="3.6"',
