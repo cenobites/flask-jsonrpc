@@ -20,5 +20,5 @@ coveralls==3.3.1  # https://github.com/marketplace/coveralls
 
 # Tools
 # ------------------------------------------------------------------------------
-requests==2.28.0  # https://github.com/psf/requests
+requests==2.28.1  # https://github.com/psf/requests
 py==1.11.0  # https://github.com/pytest-dev/py
