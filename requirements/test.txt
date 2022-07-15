@@ -4,7 +4,7 @@ pytest==7.1.2;python_version>"3.6"  # https://github.com/pytest-dev/pytest
 pytest<7;python_version<="3.6"
 pytest-cov==3.0.0  # https://github.com/pytest-dev/pytest-cov
 pytest-xdist==2.5.0  # https://github.com/pytest-dev/pytest-xdist
-pytest-sugar==0.9.4  # https://github.com/Frozenball/pytest-sugar
+pytest-sugar==0.9.5  # https://github.com/Frozenball/pytest-sugar
 pytest-env==0.6.2  # https://github.com/MobileDynasty/pytest-env
 mock==4.0.3  # https://github.com/testing-cabal/mock
 
