@@ -51,7 +51,7 @@ setuptools.setup(
         'pytest<7;python_version<="3.6"',
         'pytest-cov==3.0.0',
         'pytest-xdist==2.5.0',
-        'pytest-sugar==0.9.4',
+        'pytest-sugar==0.9.5',
         'pytest-env==0.6.2',
         'typeguard==2.13.3',
     ],
