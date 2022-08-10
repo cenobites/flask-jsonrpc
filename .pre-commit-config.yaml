@@ -1,4 +1,4 @@
-exclude: '.git|.tox|.venv|.vscode|__pycache__|.pytest_cache|.eggs|.mypy_cache|htmlcov'
+exclude: '.git|.tox|.venv|.vscode|__pycache__|.pytest_cache|.eggs|.mypy_cache|htmlcov|junit|htmldoc'
 default_stages: [commit]
 fail_fast: true
 default_language_version:
@@ -15,7 +15,6 @@ repos:
     - id: check-yaml
     - id: end-of-file-fixer
     - id: mixed-line-ending
-      args: ['--fix=lf']
     - id: trailing-whitespace
 - repo: https://github.com/asottile/pyupgrade
   rev: v2.37.3

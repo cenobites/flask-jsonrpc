@@ -25,6 +25,8 @@ exclude = '''
     | build
     | dist
     | htmlcov
+    | junit
+    | htmldoc
   )/
   | settings.py
 
