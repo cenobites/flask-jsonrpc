@@ -24,7 +24,7 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING, ClassVar, Optional, Collection
 
 from flask import Response, jsonify, current_app, make_response
 from flask.views import View
@@ -37,7 +37,7 @@ if TYPE_CHECKING:
 
 
 class JSONRPCView(View):
-    methods: List[str] = ['POST']
+    methods: ClassVar[Optional[Collection[str]]] = ['POST']
 
     def __init__(self, jsonrpc_site: 'JSONRPCSite') -> None:
         self.jsonrpc_site = jsonrpc_site
