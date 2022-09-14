@@ -3,7 +3,7 @@ a, a:hover, a:active, a:focus, object, embed {outline: 0;}
 input::-moz-focus-inner {border: 0;}
 
 body{
-  font-family:'PT Sans', Helvetica, Arial, sans-serif;
+  font-family:'PT Sans', Helvetica, Arial, sans-serif !important;
   color:#7f7f7f;
   background-attachment:fixed;
 }
@@ -5416,7 +5416,7 @@ html {
 
 
 body {
-  font: normal 12px 'Open Sans', HelveticaNeue, Helvetica, Arial;
+  font: normal 12px 'PT Sans', 'Open Sans', HelveticaNeue, Helvetica, Arial;
   background: url("../img/bg.png");
   min-height: 100%;
   color: #707070;
@@ -5425,7 +5425,7 @@ body {
 
 h1, h2, h3, h4, h5, h6,
 .h1, .h2, .h3, .h4, .h5, .h6 {
-  font-family: 'Open Sans', HelveticaNeue, Helvetica, Arial;
+  font-family: 'PT Sans', 'Open Sans', HelveticaNeue, Helvetica, Arial;
   line-height: 20px; }
 
 
@@ -11862,7 +11862,7 @@ disabled look for disabled choices in the results dropdown
   stroke-width: 1px; }
 
 .xchart .axis text {
-  font-family: Helvetica, Arial, Verdana, sans-serif;
+  font-family: 'PT Sans', Helvetica, Arial, Verdana, sans-serif;
   fill: #666;
   font-size: 12px; }
 
