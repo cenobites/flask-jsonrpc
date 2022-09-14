@@ -47,7 +47,7 @@ setuptools.setup(
         'mock==4.0.3',
         'coverage==6.4.4;python_version>"3.6"',
         'coverage<6.2;python_version<="3.6"',
-        'pytest==7.1.2;python_version>"3.6"',
+        'pytest==7.1.3;python_version>"3.6"',
         'pytest<7;python_version<="3.6"',
         'pytest-cov==3.0.0',
         'pytest-xdist==2.5.0',

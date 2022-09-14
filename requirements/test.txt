@@ -1,6 +1,6 @@
 # Testing
 # ------------------------------------------------------------------------------
-pytest==7.1.2;python_version>"3.6"  # https://github.com/pytest-dev/pytest
+pytest==7.1.3;python_version>"3.6"  # https://github.com/pytest-dev/pytest
 pytest<7;python_version<="3.6"
 pytest-cov==3.0.0  # https://github.com/pytest-dev/pytest-cov
 pytest-xdist==2.5.0  # https://github.com/pytest-dev/pytest-xdist
