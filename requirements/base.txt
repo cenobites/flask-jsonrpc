@@ -8,4 +8,4 @@ typeguard==2.13.3  # https://github.com/agronholm/typeguard
 typing>=3.7.4;python_version<"3.5"  # https://github.com/python/typing
 typing_extensions>=4.3.0;python_version>"3.6"  # https://github.com/python/typing/blob/master/typing_extensions/README.rst
 typing_extensions>=3.7.4,<3.10;python_version<="3.6"
-typing_inspect==0.7.1  # https://github.com/ilevkivskyi/typing_inspect
+typing_inspect==0.8.0  # https://github.com/ilevkivskyi/typing_inspect
