@@ -123,8 +123,7 @@ class JSONRPCSite:
         try:
             return json.loads(request_data)
         except ValueError as e:
-            current_app.logger.error('invalid json: %s', request_data)
-            current_app.logger.exception(e)
+            current_app.logger.exception('invalid json: %s', request_data)
             raise ParseError(data={'message': f'Invalid JSON: {request_data!r}'}) from e
 
     def handle_dispatch_except(
@@ -135,8 +134,7 @@ class JSONRPCSite:
                 raise InvalidRequestError(data={'message': f'Invalid JSON: {req_json!r}'})
             return self.dispatch(req_json)
         except JSONRPCError as e:
-            current_app.logger.error('jsonrpc error')
-            current_app.logger.exception(e)
+            current_app.logger.exception('jsonrpc error')
             response = {
                 'id': get(req_json, 'id'),
                 'jsonrpc': get(req_json, 'jsonrpc', JSONRPC_VERSION_DEFAULT),
@@ -144,8 +142,7 @@ class JSONRPCSite:
             }
             return response, e.status_code, JSONRPC_DEFAULT_HTTP_HEADERS
         except Exception as e:  # pylint: disable=W0703
-            current_app.logger.error('unexpected error')
-            current_app.logger.exception(e)
+            current_app.logger.exception('unexpected error')
             jsonrpc_error = ServerError(data={'message': str(e)})
             response = {
                 'id': get(req_json, 'id'),
@@ -201,8 +198,7 @@ class JSONRPCSite:
                 view_fun_return_qn = qualified_name(view_fun_return)
                 raise TypeError(f'return type of {resp_view_qn} must be a type; got {view_fun_return_qn} instead')
         except TypeError as e:
-            current_app.logger.error('invalid type checked for: %s', view_func.__name__)
-            current_app.logger.exception(e)
+            current_app.logger.exception('invalid type checked for: %s', view_func.__name__)
             raise InvalidParamsError(data={'message': str(e)}) from e
 
         return self.make_response(req_json, resp_view)

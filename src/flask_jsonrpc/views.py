@@ -49,8 +49,7 @@ class JSONRPCView(View):
                 return make_response('', status_code, headers)
             return make_response(jsonify(response), status_code, headers)
         except JSONRPCError as e:
-            current_app.logger.error('jsonrpc error')
-            current_app.logger.exception(e)
+            current_app.logger.exception('jsonrpc error')
             response = {
                 'id': None,
                 'jsonrpc': JSONRPC_VERSION_DEFAULT,
