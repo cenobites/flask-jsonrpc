@@ -119,6 +119,7 @@ coverage.xml
 .hypothesis/
 .pytest_cache/
 cover/
+junit/
 
 # Translations
 *.mo
@@ -192,6 +193,7 @@ venv.*
 
 # mkdocs documentation
 /site
+htmldoc/
 
 # mypy
 .mypy_cache/

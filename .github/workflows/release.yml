@@ -1,0 +1,52 @@
+name: Build and publish release
+
+on:
+  push:
+    tags:
+      - v**
+
+permissions:
+  contents: write
+
+jobs:
+  build-n-publish:
+    name: Build and publish to PyPI
+    runs-on: ${{ matrix.platform }}
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      matrix:
+        platform:
+          - ubuntu-latest
+        python-version: ["3.10"]
+    steps:
+    - name: Checkout source at ${{ matrix.platform }}
+      uses: actions/checkout@v3
+    - name: Setup Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Build source and wheel distributions to version ${{ github.ref_name }}
+      run: |
+        python -m pip install --upgrade pip setuptools build twine
+        python -m build
+        twine check --strict dist/*
+    - name: Publish distribution to PyPI
+      uses: pypa/gh-action-pypi-publish@v1.5.1
+      with:
+        user: __token__
+        password: ${{ secrets.PYPI_API_TOKEN }}
+    - name: Create GitHub Pre Release
+      id: create_release
+      uses: softprops/action-gh-release@v1
+      with:
+        draft: false
+        prerelease: false
+        generate_release_notes: true
+        files: |
+          COPYING
+          LICENSE
+          AUTHORS
+          README.md
+          dist/*
