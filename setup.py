@@ -45,7 +45,7 @@ setuptools.setup(
     tests_require=[
         'tox==3.25.1',
         'mock==4.0.3',
-        'coverage==6.4.3;python_version>"3.6"',
+        'coverage==6.4.4;python_version>"3.6"',
         'coverage<6.2;python_version<="3.6"',
         'pytest==7.1.2;python_version>"3.6"',
         'pytest<7;python_version<="3.6"',
