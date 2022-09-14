@@ -22,7 +22,7 @@ pylint<=2.13.9;python_version<="3.6"
 # Type check
 # ------------------------------------------------------------------------------
 mypy==0.971;python_version>"3.6"  # https://github.com/python/mypy
-types_setuptools==64.0.0  # https://github.com/python/typeshed
+types_setuptools==65.3.0  # https://github.com/python/typeshed
 typeguard==2.13.3  # https://github.com/agronholm/typeguard
 
 # Security check
