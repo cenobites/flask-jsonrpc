@@ -1,6 +1,6 @@
 # Documentation
 # ------------------------------------------------------------------------------
-Sphinx==5.1.1
+Sphinx==5.2.2
 sphinx-tabs==3.4.1
 sphinx-issues==3.0.1
 sphinxcontrib-log-cabinet==1.0.1
