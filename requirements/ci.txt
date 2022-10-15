@@ -28,7 +28,7 @@ typeguard==2.13.3  # https://github.com/agronholm/typeguard
 # Security check
 # ------------------------------------------------------------------------------
 bandit==1.7.4;python_version>"3.6"  # https://github.com/PyCQA/bandit
-safety==2.1.1;python_version>"3.6"  # https://github.com/pyupio/safety
+safety==2.3.1;python_version>"3.6"  # https://github.com/pyupio/safety
 
 # Code quality
 # ------------------------------------------------------------------------------
