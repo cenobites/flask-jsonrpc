@@ -25,8 +25,8 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 import sys
+import typing as t
 import traceback
-from typing import Any, Dict, Optional
 
 from flask import current_app
 
@@ -51,16 +51,16 @@ class JSONRPCError(Exception):
     """
 
     code: int = 0
-    message: Optional[str] = None
-    data: Optional[Any] = None
+    message: t.Optional[str] = None
+    data: t.Optional[t.Any] = None
     status_code: int = 400
 
     def __init__(
         self,
-        message: Optional[str] = None,
-        code: Optional[int] = None,
-        data: Optional[Any] = None,
-        status_code: Optional[int] = None,
+        message: t.Optional[str] = None,
+        code: t.Optional[int] = None,
+        data: t.Optional[t.Any] = None,
+        status_code: t.Optional[int] = None,
     ) -> None:
         """Setup the Exception and overwrite the default message"""
         super().__init__()
@@ -74,7 +74,7 @@ class JSONRPCError(Exception):
             self.status_code = status_code
 
     @property
-    def jsonrpc_format(self) -> Dict[str, Any]:
+    def jsonrpc_format(self) -> t.Dict[str, t.Any]:
         """Return the Exception data in a format for JSON-RPC"""
 
         error = {

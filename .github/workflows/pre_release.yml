@@ -67,6 +67,9 @@ jobs:
     - name: Static type check with MyPy
       run: |
         mypy --install-types --non-interactive src/
+    - name: Static type check with Pytype
+      run: |
+        pytype
 
   security:
     name: Security

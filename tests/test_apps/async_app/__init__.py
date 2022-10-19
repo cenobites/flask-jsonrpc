@@ -27,9 +27,9 @@
 # POSSIBILITY OF SUCH DAMAGE.
 import os
 import sys
+import typing as t
 import asyncio
 import functools
-from typing import Any, Dict, List, Tuple, Union
 
 from flask import Flask
 
@@ -56,7 +56,7 @@ class App:
     def hello(cls, name: str = 'Flask JSON-RPC') -> str:
         return f'Hello {name}'
 
-    def echo(self, string: str, _some: Any = None) -> str:
+    def echo(self, string: str, _some: t.Any = None) -> str:
         return string
 
     def notify(self, _string: str = None) -> None:
@@ -93,7 +93,7 @@ def create_async_app(test_config=None):  # noqa: C901  pylint: disable=W0612
 
     # pylint: disable=W0612
     @jsonrpc.method('jsonrpc.echo')
-    async def echo(string: str, _some: Any = None) -> str:
+    async def echo(string: str, _some: t.Any = None) -> str:
         await asyncio.sleep(0)
         return string
 
@@ -113,14 +113,14 @@ def create_async_app(test_config=None):  # noqa: C901  pylint: disable=W0612
     # pylint: disable=W0612
     @jsonrpc.method('jsonrpc.strangeEcho')
     async def strange_echo(
-        string: str, omg: Dict[str, Any], wtf: List[str], nowai: int, yeswai: str = 'Default'
-    ) -> List[Any]:
+        string: str, omg: t.Dict[str, t.Any], wtf: t.List[str], nowai: int, yeswai: str = 'Default'
+    ) -> t.List[t.Any]:
         await asyncio.sleep(0)
         return [string, omg, wtf, nowai, yeswai]
 
     # pylint: disable=W0612
     @jsonrpc.method('jsonrpc.sum')
-    async def sum_(a: Union[int, float], b: Union[int, float]) -> Union[int, float]:
+    async def sum_(a: t.Union[int, float], b: t.Union[int, float]) -> t.Union[int, float]:
         await asyncio.sleep(0)
         return a + b
 
@@ -133,19 +133,19 @@ def create_async_app(test_config=None):  # noqa: C901  pylint: disable=W0612
 
     # pylint: disable=W0612
     @jsonrpc.method('jsonrpc.returnStatusCode')
-    async def return_status_code(s: str) -> Tuple[str, int]:
+    async def return_status_code(s: str) -> t.Tuple[str, int]:
         await asyncio.sleep(0)
         return f'Status Code {s}', 201
 
     # pylint: disable=W0612
     @jsonrpc.method('jsonrpc.returnHeaders')
-    async def return_headers(s: str) -> Tuple[str, Dict[str, Any]]:
+    async def return_headers(s: str) -> t.Tuple[str, t.Dict[str, t.Any]]:
         await asyncio.sleep(0)
         return f'Headers {s}', {'X-JSONRPC': '1'}
 
     # pylint: disable=W0612
     @jsonrpc.method('jsonrpc.returnStatusCodeAndHeaders')
-    async def return_status_code_and_headers(s: str) -> Tuple[str, int, Dict[str, Any]]:
+    async def return_status_code_and_headers(s: str) -> t.Tuple[str, int, t.Dict[str, t.Any]]:
         await asyncio.sleep(0)
         return f'Status Code and Headers {s}', 400, {'X-JSONRPC': '1'}
 

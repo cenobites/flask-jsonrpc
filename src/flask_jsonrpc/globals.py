@@ -24,10 +24,10 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-from typing import Type
+import typing as t
 
 from .site import JSONRPCSite
 from .views import JSONRPCView
 
-default_jsonrpc_site: Type[JSONRPCSite] = JSONRPCSite
-default_jsonrpc_site_api: Type[JSONRPCView] = JSONRPCView
+default_jsonrpc_site: t.Type[JSONRPCSite] = JSONRPCSite
+default_jsonrpc_site_api: t.Type[JSONRPCView] = JSONRPCView

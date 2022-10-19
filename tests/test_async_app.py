@@ -27,8 +27,8 @@
 import sys
 import json
 import uuid
+import typing as t
 import asyncio
-from typing import Any, Dict, List, Tuple
 
 from flask import Flask
 
@@ -238,7 +238,7 @@ def test_app_create_with_wrong_return():
     jsonrpc = JSONRPC(app, '/api', enable_web_browsable_api=True)
 
     @jsonrpc.method('app.fn1')
-    async def fn2(s: str) -> Tuple[str, int, int, int]:  # pylint: disable=W0612
+    async def fn2(s: str) -> t.Tuple[str, int, int, int]:  # pylint: disable=W0612
         await asyncio.sleep(0)
         return f'Bar {s}', 1, 2, 3
 
@@ -428,32 +428,32 @@ def test_app_create_with_rcp_batch():
 
     # pylint: disable=W0612
     @jsonrpc.method('get_user')
-    async def get_user(uid: str) -> Dict[str, Any]:
+    async def get_user(uid: str) -> t.Dict[str, t.Any]:
         await asyncio.sleep(0)
         return {'uid': uid, 'name': 'John Dee'}
 
     # pylint: disable=W0612
     @jsonrpc.method('notify_sum')
-    async def notify_sum(numbers: List[int]) -> int:
+    async def notify_sum(numbers: t.List[int]) -> int:
         await asyncio.sleep(0)
         s = sum(x**2 for x in numbers)
         return s
 
     # pylint: disable=W0612
     @jsonrpc.method('headers1')
-    async def headers1() -> Tuple[float, int, List[Tuple[str, Any]]]:
+    async def headers1() -> t.Tuple[float, int, t.List[t.Tuple[str, t.Any]]]:
         await asyncio.sleep(0)
         return 3.141592653589793, 200, [('X-Header-1-a', 'a1'), ('X-Header-1-b', 'b1')]
 
     # pylint: disable=W0612
     @jsonrpc.method('headers2')
-    async def headers2() -> Tuple[float, int, Tuple[str, Any]]:
+    async def headers2() -> t.Tuple[float, int, t.Tuple[str, t.Any]]:
         await asyncio.sleep(0)
         return 3.141592653589793, 201, ('X-Header-2-a', 'a2')
 
     # pylint: disable=W0612
     @jsonrpc.method('headers3')
-    async def headers3() -> Tuple[float, int, Headers]:
+    async def headers3() -> t.Tuple[float, int, Headers]:
         await asyncio.sleep(0)
         headers = Headers()
         headers.set('X-Header-3-a', 'a3')
@@ -463,13 +463,13 @@ def test_app_create_with_rcp_batch():
 
     # pylint: disable=W0612
     @jsonrpc.method('headers4')
-    async def headers4() -> Tuple[float, int, Dict[str, Any]]:
+    async def headers4() -> t.Tuple[float, int, t.Dict[str, t.Any]]:
         await asyncio.sleep(0)
         return 3.141592653589793, 200, {'X-Header-4-a': 'a4', 'X-Header-4-b': 'b4'}
 
     # pylint: disable=W0612
     @jsonrpc.method('headers_duplicate')
-    async def headers_duplicate() -> Tuple[float, int, Dict[str, Any]]:
+    async def headers_duplicate() -> t.Tuple[float, int, t.Dict[str, t.Any]]:
         await asyncio.sleep(0)
         return (
             3.141592653589793,

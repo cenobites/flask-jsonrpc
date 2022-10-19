@@ -24,54 +24,54 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-from typing import TYPE_CHECKING, Any, Type, Callable, Optional, get_type_hints
+import typing as t
 from inspect import ismethod, signature, isfunction
 
 from typeguard import typechecked
 
-if TYPE_CHECKING:
+if t.TYPE_CHECKING:
     from .site import JSONRPCSite
     from .views import JSONRPCView
 
 
-class JSONRCPDecoratorMixin:
-    def _method_has_parameters(self, fn: Callable[..., Any]) -> bool:
+class JSONRPCDecoratorMixin:
+    def _method_has_parameters(self, fn: t.Callable[..., t.Any]) -> bool:
         fn_signature = signature(fn)
         return bool(fn_signature.parameters)
 
-    def _method_has_return(self, fn: Callable[..., Any]) -> bool:
-        fn_annotations = get_type_hints(fn)
+    def _method_has_return(self, fn: t.Callable[..., t.Any]) -> bool:
+        fn_annotations = t.get_type_hints(fn)
         return 'return' in fn_annotations
 
-    def _validate(self, fn: Callable[..., Any]) -> bool:
+    def _validate(self, fn: t.Callable[..., t.Any]) -> bool:
         if not self._method_has_parameters(fn) and not self._method_has_return(fn):
             return True
         if not getattr(fn, '__annotations__', None):
             return False
-        fn_annotations = get_type_hints(fn)
+        fn_annotations = t.get_type_hints(fn)
         fn_annotations.pop('return', None)
         if self._method_has_parameters(fn) and not fn_annotations:
             return False
         return True
 
-    def _get_function(self, fn: Callable[..., Any]) -> Callable[..., Any]:
+    def _get_function(self, fn: t.Callable[..., t.Any]) -> t.Callable[..., t.Any]:
         if isfunction(fn):
             return fn
         if ismethod(fn) and getattr(fn, '__func__', None):
-            return fn.__func__
+            return fn.__func__  # pytype: disable=attribute-error
         raise ValueError('the view function must be either a function or a method')
 
     def get_jsonrpc_site(self) -> 'JSONRPCSite':
         raise NotImplementedError
 
-    def get_jsonrpc_site_api(self) -> Type['JSONRPCView']:
+    def get_jsonrpc_site_api(self) -> t.Type['JSONRPCView']:
         raise NotImplementedError
 
     def register_view_function(
-        self, view_func: Callable[..., Any], name: Optional[str] = None, validate: bool = True, **options: Any
-    ) -> Callable[..., Any]:
+        self, view_func: t.Callable[..., t.Any], name: t.Optional[str] = None, validate: bool = True, **options: t.Any
+    ) -> t.Callable[..., t.Any]:
         fn = self._get_function(view_func)
-        fn_annotations = get_type_hints(fn)
+        fn_annotations = t.get_type_hints(fn)
         method_name = getattr(fn, '__name__', '<noname>') if not name else name
         setattr(fn, 'jsonrpc_method_name', method_name)  # noqa: B010
         setattr(fn, 'jsonrpc_method_sig', fn_annotations)  # noqa: B010
@@ -83,8 +83,8 @@ class JSONRCPDecoratorMixin:
         self.get_jsonrpc_site().register(method_name, view_func_wrapped)
         return view_func_wrapped
 
-    def method(self, name: Optional[str] = None, validate: bool = True, **options: Any) -> Callable[..., Any]:
-        def decorator(fn: Callable[..., Any]) -> Callable[..., Any]:
+    def method(self, name: t.Optional[str] = None, validate: bool = True, **options: t.Any) -> t.Callable[..., t.Any]:
+        def decorator(fn: t.Callable[..., t.Any]) -> t.Callable[..., t.Any]:
             method_name = getattr(fn, '__name__', '<noname>') if not name else name
             if validate and not self._validate(fn):
                 raise ValueError(f'no type annotations present to: {method_name}')

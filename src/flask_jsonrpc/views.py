@@ -24,25 +24,24 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-from typing import TYPE_CHECKING, ClassVar, Optional, Collection
+import typing as t
 
-from flask import Response, jsonify, current_app, make_response
-from flask.views import View
+from flask import typing as ft
+from flask import jsonify, current_app, make_response
+from flask.views import MethodView
 
 from .site import JSONRPC_VERSION_DEFAULT, JSONRPC_DEFAULT_HTTP_HEADERS
 from .exceptions import JSONRPCError
 
-if TYPE_CHECKING:
+if t.TYPE_CHECKING:
     from .site import JSONRPCSite
 
 
-class JSONRPCView(View):
-    methods: ClassVar[Optional[Collection[str]]] = ['POST']
-
+class JSONRPCView(MethodView):
     def __init__(self, jsonrpc_site: 'JSONRPCSite') -> None:
         self.jsonrpc_site = jsonrpc_site
 
-    def dispatch_request(self) -> Response:
+    def post(self) -> ft.ResponseReturnValue:
         try:
             response, status_code, headers = self.jsonrpc_site.dispatch_request()
             if status_code == 204:
