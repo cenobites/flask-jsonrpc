@@ -54,5 +54,5 @@ setuptools.setup(
         'pytest-sugar==0.9.5',
         'pytest-env==0.6.2',
         'typeguard==2.13.3',
-    ]
+    ],
 )

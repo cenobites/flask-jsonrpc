@@ -89,4 +89,5 @@ class JSONRPCDecoratorMixin:
             if validate and not self._validate(fn):
                 raise ValueError(f'no type annotations present to: {method_name}')
             return self.register_view_function(fn, name, validate, **options)
+
         return decorator
