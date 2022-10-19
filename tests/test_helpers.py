@@ -24,7 +24,7 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-from typing import AnyStr
+import typing as t
 
 import pytest
 
@@ -41,7 +41,7 @@ def test_urn():
 
 def test_from_python_type():
     assert str(from_python_type(str)) == 'String'
-    assert str(from_python_type(AnyStr)) == 'String'
+    assert str(from_python_type(t.AnyStr)) == 'String'
     assert str(from_python_type(int)) == 'Number'
     assert str(from_python_type(float)) == 'Number'
     assert str(from_python_type(dict)) == 'Object'

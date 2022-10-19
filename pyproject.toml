@@ -17,6 +17,7 @@ exclude = '''
     | \.git
     | \.hg
     | \.mypy_cache
+    | \.pytype
     | \.pytest_cache
     | \.tox
     | \.venv

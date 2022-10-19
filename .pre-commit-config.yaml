@@ -1,4 +1,4 @@
-exclude: '.git|.tox|.venv|.vscode|__pycache__|.pytest_cache|.eggs|.mypy_cache|htmlcov|junit|htmldoc'
+exclude: '.git|.tox|.venv|.vscode|__pycache__|.pytest_cache|.eggs|.mypy_cache|.pytype|htmlcov|junit|htmldoc'
 default_stages: [commit]
 fail_fast: true
 default_language_version:

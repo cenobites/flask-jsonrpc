@@ -24,11 +24,13 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-from typing import TYPE_CHECKING, Any, Dict
+import typing as t
 
 from flask import Blueprint, jsonify, request, render_template
 
-if TYPE_CHECKING:
+if t.TYPE_CHECKING:
+    from flask import typing as ft
+
     from flask_jsonrpc.site import JSONRPCSite
 
 
@@ -45,10 +47,10 @@ def create_browse(name: str, jsonrpc_site: 'JSONRPCSite') -> Blueprint:
 
     # pylint: disable=W0612
     @browse.route('/packages.json')
-    def json_packages() -> Any:
+    def json_packages() -> 'ft.ResponseReturnValue':
         jsonrpc_describe = jsonrpc_site.describe()
         packages = sorted(jsonrpc_describe['procs'], key=lambda proc: proc['name'])
-        packages_tree: Dict[str, Any] = {}
+        packages_tree: t.Dict[str, t.Any] = {}
         for package in packages:
             package_name = package['name'].split('.')[0]
             packages_tree.setdefault(package_name, []).append(package)
@@ -56,7 +58,7 @@ def create_browse(name: str, jsonrpc_site: 'JSONRPCSite') -> Blueprint:
 
     # pylint: disable=W0612
     @browse.route('/<method_name>.json')
-    def json_method(method_name: str) -> Any:
+    def json_method(method_name: str) -> 'ft.ResponseReturnValue':
         jsonrpc_describe = jsonrpc_site.describe()
         method = [method for method in jsonrpc_describe['procs'] if method['name'] == method_name][0]
         return jsonify(method)

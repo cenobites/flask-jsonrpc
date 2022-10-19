@@ -131,6 +131,9 @@ htmldoc/
 .dmypy.json
 dmypy.json
 
+# pytype
+.pytype/
+
 # Pyre type checker
 .pyre/
 

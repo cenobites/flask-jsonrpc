@@ -24,5 +24,6 @@ exclude_lines =
 
     # Type checker
     if TYPE_CHECKING:
+    if t.TYPE_CHECKING:
 
 ignore_errors = True

@@ -24,8 +24,8 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
+import typing as t
 import itertools
-from typing import TYPE_CHECKING, Any, Dict
 from operator import getitem
 
 # Python 3.5.4+ / 3.6.2+
@@ -39,11 +39,11 @@ except ImportError:  # pragma: no cover
 
 from .types import Types, Object
 
-if TYPE_CHECKING:
+if t.TYPE_CHECKING:
     from .types import JSONRPCNewType
 
 
-def urn(name: str, *args: Any) -> str:
+def urn(name: str, *args: t.Any) -> str:
     """Return the URN name.
 
     >>> urn('python')
@@ -63,14 +63,14 @@ def urn(name: str, *args: Any) -> str:
     """
     if not name:
         raise ValueError('name is required')
-    splited_args = [arg.split('/') for arg in args]
-    st = ':'.join(list(itertools.chain(*splited_args)))
+    splitted_args = [arg.split('/') for arg in args]
+    st = ':'.join(list(itertools.chain(*splitted_args)))
     st = st.rstrip(':').lstrip(':')
     sep = ':' if len(args) > 0 else ''
     return f"urn:{name}{sep}{st.replace('::', ':')}".lower()
 
 
-def from_python_type(tp: Any) -> 'JSONRPCNewType':
+def from_python_type(tp: t.Any) -> 'JSONRPCNewType':
     """Convert Python type to JSONRPCNewType.
 
     >>> str(from_python_type(str))
@@ -88,13 +88,13 @@ def from_python_type(tp: Any) -> 'JSONRPCNewType':
     >>> str(from_python_type(NoReturn))
     'Null'
     """
-    for t in Types:
-        if t.check_type(tp):
-            return t
+    for typ in Types:
+        if typ.check_type(tp):
+            return typ
     return Object
 
 
-def get(obj: Dict[str, Any], path: str, default: Any = None) -> Any:
+def get(obj: t.Dict[str, t.Any], path: str, default: t.Any = None) -> t.Any:
     """Get the value at any depth of a nested object based on the path
     described by `path`. If path doesn't exist, `default` is returned.
     Args:

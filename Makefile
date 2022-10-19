@@ -10,7 +10,7 @@ clean:
 	@find . -name "*.pyc" | xargs rm -rf
 	@find . -name "__pycache__" | xargs rm -rf
 	@find . -name ".coverage" | xargs rm -rf
-	@rm -rf .coverage .eggs/ .mypy_cache/ .pytest_cache/ .tox/ src/Flask_JSONRPC.egg-info/ htmlcov/ junit/ htmldoc/ build/ dist/
+	@rm -rf .coverage .eggs/ .mypy_cache/ .pytype/ .pytest_cache/ .tox/ src/Flask_JSONRPC.egg-info/ htmlcov/ junit/ htmldoc/ build/ dist/
 
 test: clean
 	@python -m tox
