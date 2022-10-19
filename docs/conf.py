@@ -5,8 +5,8 @@ from pallets_sphinx_themes import ProjectLink
 project = 'Flask-JSONRPC'
 copyright = '2021, Nycholas de Oliveira e Oliveira'  # pylint: disable=W0622
 author = 'Nycholas de Oliveira e Oliveira'
-release = '2.2.2beta'
-version = '2.2.2beta'
+release = '2.2.2'
+version = '2.2.2'
 
 # -- General configuration ---------------------------------------------------
 
