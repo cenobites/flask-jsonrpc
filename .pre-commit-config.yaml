@@ -17,12 +17,12 @@ repos:
     - id: mixed-line-ending
     - id: trailing-whitespace
 - repo: https://github.com/asottile/pyupgrade
-  rev: v2.37.3
+  rev: v3.1.0
   hooks:
     - id: pyupgrade
       args: ['--py36-plus']
 - repo: https://github.com/psf/black
-  rev: 22.8.0
+  rev: 22.10.0
   hooks:
     - id: black
       args: ['--safe']
@@ -41,13 +41,13 @@ repos:
   hooks:
     - id: flake8
       additional_dependencies:
-        - flake8-isort==4.2.0
+        - flake8-isort==5.0.0
         - flake8-bugbear==22.9.11
-        - flake8-pyi==22.8.2
+        - flake8-pyi==22.10.0
         - flake8-quotes==3.3.1
         - flake8-implicit-str-concat==0.3.0
       args: ['--config=setup.cfg']
 - repo: https://github.com/PyCQA/pylint
-  rev: v2.15.2
+  rev: v2.15.4
   hooks:
     - id: pylint
