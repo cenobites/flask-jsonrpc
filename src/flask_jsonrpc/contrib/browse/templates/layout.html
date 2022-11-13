@@ -17,7 +17,6 @@
 
   {% block style %}
   {% block bootstrap_theme %}
-    <!-- <link rel="stylesheet" type="text/css" href="{{ url_for('urn:browse.static', filename='css/bootstrap.min.css') }}"/> -->
     <link href="{{ url_for('urn:browse.static', filename='css/bootstrap-theme.css') }}" rel="stylesheet"/>
   {% endblock %}
   <link href="{{ url_for('urn:browse.static', filename='css/fonts.css') }}" rel="stylesheet"/>
@@ -68,9 +67,8 @@
   <script type="text/javascript" src="{{ url_for('urn:browse.static', filename='js/libs/angular/ui-bootstrap-0.7.0.min.js') }}"></script>
   <script type="text/javascript" src="{{ url_for('urn:browse.static', filename='js/libs/angular/ui-bootstrap-tpls-0.7.0.min.js') }}"></script>
   <script type="text/javascript" src="{{ url_for('urn:browse.static', filename='js/libs/angular/loading-bar.min.js') }}"></script>
-  <!--<script type="text/javascript" src="{{ url_for('urn:browse.static', filename='js/libs/angular/dialogs.min.js') }}"></script>-->
   <script type="text/javascript" src="{{ url_for('urn:browse.static', filename='js/libs/bootstrap/bootstrap.min.js') }}"></script>
-  <script type="text/javascript" src="{{ url_for('urn:browse.static', filename='js/libs/handlebars-v1.1.2.js') }}"></script>
+  <script type="text/javascript" src="{{ url_for('urn:browse.static', filename='js/libs/handlebars-v4.7.7.min.js') }}"></script>
   <script type="text/javascript" src="{{ url_for('urn:browse.static', filename='js/libs/prettify-min.js') }}"></script>
   <script type="text/javascript" src="{{ url_for('urn:browse.static', filename='js/core/directives.js') }}"></script>
   <script type="text/javascript" src="{{ url_for('urn:browse.static', filename='js/core/filters.js') }}"></script>
