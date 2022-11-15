@@ -41,7 +41,7 @@ class JSONRPCDecoratorMixin:
 
     def _method_has_return(self, fn: t.Callable[..., t.Any]) -> bool:
         fn_annotations = t.get_type_hints(fn)
-        return 'return' in fn_annotations
+        return 'return' in fn_annotations and fn_annotations['return'] is not type(None)
 
     def _validate(self, fn: t.Callable[..., t.Any]) -> bool:
         if not self._method_has_parameters(fn) and not self._method_has_return(fn):

@@ -47,7 +47,7 @@ def test_app_create():
 
     # pylint: disable=W0612
     @jsonrpc.method('app.fn0')
-    def fn0():
+    def fn0() -> None:
         pass
 
     # pylint: disable=W0612
@@ -157,7 +157,7 @@ def test_app_create_with_method_without_annotation_on_params():
 
         # pylint: disable=W0612
         @jsonrpc.method('app.fn4')
-        def fn4():
+        def fn4() -> None:
             pass
 
         # pylint: disable=W0612
