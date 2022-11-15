@@ -23,7 +23,7 @@ pylint<=2.13.9;python_version<="3.6"
 
 # Type check
 # ------------------------------------------------------------------------------
-mypy==0.990;python_version>"3.6"  # https://github.com/python/mypy
+mypy==0.991;python_version>"3.6"  # https://github.com/python/mypy
 pytype==2022.10.13;python_version>"3.6"  # https://github.com/google/pytype
 types_setuptools==65.5.0.3  # https://github.com/python/typeshed
 typeguard==2.13.3  # https://github.com/agronholm/typeguard
