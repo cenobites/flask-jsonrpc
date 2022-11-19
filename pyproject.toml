@@ -30,6 +30,5 @@ exclude = '''
     | htmldoc
   )/
   | settings.py
-
 )
 '''
