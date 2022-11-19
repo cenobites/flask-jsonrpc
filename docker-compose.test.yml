@@ -61,5 +61,5 @@ services:
       - PRAGMA_VERSION=py3.6
     command: >
       sh -c "flake8 src/ tests/ &&
-        pylint src/ tests/ &&
+        pylint -d unused-import,no-self-use,bad-option-value src/ tests/ &&
         pytest"
