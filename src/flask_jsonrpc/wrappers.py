@@ -73,13 +73,13 @@ class JSONRPCDecoratorMixin:
         fn = self._get_function(view_func)
         fn_annotations = t.get_type_hints(fn)
         method_name = getattr(fn, '__name__', '<noname>') if not name else name
-        setattr(fn, 'jsonrpc_method_name', method_name)  # noqa: B010
-        setattr(fn, 'jsonrpc_method_sig', fn_annotations)  # noqa: B010
-        setattr(fn, 'jsonrpc_method_return', fn_annotations.pop('return', None))  # noqa: B010
-        setattr(fn, 'jsonrpc_method_params', fn_annotations)  # noqa: B010
-        setattr(fn, 'jsonrpc_validate', validate)  # noqa: B010
-        setattr(fn, 'jsonrpc_options', options)  # noqa: B010
         view_func_wrapped = typechecked(view_func) if validate else view_func
+        setattr(view_func_wrapped, 'jsonrpc_method_name', method_name)  # noqa: B010
+        setattr(view_func_wrapped, 'jsonrpc_method_sig', fn_annotations)  # noqa: B010
+        setattr(view_func_wrapped, 'jsonrpc_method_return', fn_annotations.pop('return', None))  # noqa: B010
+        setattr(view_func_wrapped, 'jsonrpc_method_params', fn_annotations)  # noqa: B010
+        setattr(view_func_wrapped, 'jsonrpc_validate', validate)  # noqa: B010
+        setattr(view_func_wrapped, 'jsonrpc_options', options)  # noqa: B010
         self.get_jsonrpc_site().register(method_name, view_func_wrapped)
         return view_func_wrapped
 
