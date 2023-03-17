@@ -5,33 +5,34 @@ pyupgrade==3.2.2;python_version>"3.6"  # https://github.com/asottile/pyupgrade
 
 # Code quality
 # ------------------------------------------------------------------------------
-flake8==5.0.4  # https://github.com/PyCQA/flake8
-flake8-isort==5.0.0;python_version>"3.6"  # https://github.com/gforcada/flake8-isort
+flake8==6.0.0;python_version>"3.7"  # https://github.com/PyCQA/flake8
+flake8<6.0.0;python_version<="3.7"
+flake8-isort==6.0.0;python_version>"3.6"  # https://github.com/gforcada/flake8-isort
 flake8-isort<5.0.0;python_version<="3.6"
 isort>=4.2.5,<6;python_version<="3.6"  # https://github.com/PyCQA/isort
 flake8-bugbear==22.10.27;python_version>"3.6"  # https://github.com/PyCQA/flake8-bugbear
 flake8-bugbear<22.10;python_version<="3.6"
-flake8-pyi==22.10.0;python_version>"3.6"  # https://github.com/ambv/flake8-pyi
-flake8-quotes==3.3.1  # https://github.com/zheller/flake8-quotes
+flake8-pyi==23.3.0;python_version>"3.6"  # https://github.com/ambv/flake8-pyi
+flake8-quotes==3.3.2  # https://github.com/zheller/flake8-quotes
 flake8-implicit-str-concat==0.3.0;python_version>"3.6"  # https://github.com/keisheiled/flake8-implicit-str-concat
 flake8-implicit-str-concat<0.3.0;python_version<="3.6"
 
 # Code linter
 # ------------------------------------------------------------------------------
-pylint==2.15.5;python_version>"3.6"  # https://github.com/PyCQA/pylint
+pylint==2.16.4;python_version>"3.6"  # https://github.com/PyCQA/pylint
 pylint<2.14.0;python_version<="3.6"
 
 # Type check
 # ------------------------------------------------------------------------------
 mypy==0.991;python_version>"3.6"  # https://github.com/python/mypy
 pytype==2022.10.13;python_version>"3.6"  # https://github.com/google/pytype
-types_setuptools==65.5.0.3  # https://github.com/python/typeshed
+types_setuptools==67.6.0.3  # https://github.com/python/typeshed
 typeguard==2.13.3  # https://github.com/agronholm/typeguard
 
 # Security check
 # ------------------------------------------------------------------------------
 bandit==1.7.4;python_version>"3.6"  # https://github.com/PyCQA/bandit
-safety==2.3.1;python_version>"3.6"  # https://github.com/pyupio/safety
+safety==2.3.5;python_version>"3.6"  # https://github.com/pyupio/safety
 
 # Code quality
 # ------------------------------------------------------------------------------
