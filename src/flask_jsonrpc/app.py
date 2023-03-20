@@ -75,10 +75,8 @@ class JSONRPC(JSONRPCDecoratorMixin):
         )
         self.register_browse(app, self)
 
-    def register(
-        self, view_func: t.Callable[..., t.Any], name: t.Optional[str] = None, validate: bool = True, **options: t.Any
-    ) -> None:
-        self.register_view_function(view_func, name, validate, **options)
+    def register(self, view_func: t.Callable[..., t.Any], name: t.Optional[str] = None, **options: t.Any) -> None:
+        self.register_view_function(view_func, name, **options)
 
     def register_blueprint(
         self, app: Flask, jsonrpc_app: 'JSONRPCBlueprint', url_prefix: str, enable_web_browsable_api: bool = False

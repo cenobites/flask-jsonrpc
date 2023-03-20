@@ -62,6 +62,9 @@ class App:
     def notify(self, _string: str = None) -> None:
         pass
 
+    def not_allow_notify(self, _string: str = None) -> str:
+        return 'Now allow notify'
+
     def fails(self, n: int) -> int:
         if n % 2 == 0:
             return n
@@ -99,6 +102,11 @@ def create_app(test_config=None):  # noqa: C901  pylint: disable=W0612
     @jsonrpc.method('jsonrpc.notify')
     def notify(_string: str = None) -> None:
         pass
+
+    # pylint: disable=W0612
+    @jsonrpc.method('jsonrpc.not_allow_notify', notification=False)
+    def not_allow_notify(_string: str = None) -> str:
+        return 'Not allow notify'
 
     # pylint: disable=W0612
     @jsonrpc.method('jsonrpc.fails')
@@ -146,6 +154,7 @@ def create_app(test_config=None):  # noqa: C901  pylint: disable=W0612
     jsonrpc.register(class_app.hello)
     jsonrpc.register(class_app.echo)
     jsonrpc.register(class_app.notify)
+    jsonrpc.register(class_app.not_allow_notify, notification=False)
     jsonrpc.register(class_app.fails)
 
     return flask_app

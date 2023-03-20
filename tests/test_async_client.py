@@ -285,6 +285,30 @@ def test_app_notify(async_client):
     assert rv.status_code == 204
 
 
+def test_app_not_allow_notify(client):
+    rv = client.post('/api', json={'jsonrpc': '2.0', 'method': 'jsonrpc.not_allow_notify'})
+    assert rv.json == {
+        'error': {
+            'code': -32600,
+            'data': {
+                'message': "The method 'jsonrpc.not_allow_notify' doesn't allow Notification Request "
+                "object (without an 'id' member)"
+            },
+            'message': 'Invalid Request',
+            'name': 'InvalidRequestError',
+        },
+        'id': None,
+        'jsonrpc': '2.0',
+    }
+    assert rv.status_code == 400
+
+    rv = client.post(
+        '/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.not_allow_notify', 'params': ['Some string']}
+    )
+    assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': 'Not allow notify'}
+    assert rv.status_code == 200
+
+
 def test_app_fails(async_client):
     rv = async_client.post('/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.fails', 'params': [2]})
     assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': 2}
@@ -466,30 +490,42 @@ def test_app_system_describe(async_client):
     assert rv.json['result']['procs'] == [
         {
             'name': 'jsonrpc.greeting',
+            'options': {'notification': True, 'validate': True},
             'params': [{'name': 'name', 'type': 'String'}],
             'return': {'type': 'String'},
             'summary': None,
         },
         {
             'name': 'jsonrpc.echo',
+            'options': {'notification': True, 'validate': True},
             'params': [{'name': 'string', 'type': 'String'}, {'name': '_some', 'type': 'Object'}],
             'return': {'type': 'String'},
             'summary': None,
         },
         {
             'name': 'jsonrpc.notify',
+            'options': {'notification': True, 'validate': True},
             'params': [{'name': '_string', 'type': 'String'}],
             'return': {'type': 'Null'},
             'summary': None,
         },
         {
+            'name': 'jsonrpc.not_allow_notify',
+            'options': {'notification': False, 'validate': True},
+            'params': [{'name': '_string', 'type': 'String'}],
+            'return': {'type': 'String'},
+            'summary': None,
+        },
+        {
             'name': 'jsonrpc.fails',
+            'options': {'notification': True, 'validate': True},
             'params': [{'name': 'n', 'type': 'Number'}],
             'return': {'type': 'Number'},
             'summary': None,
         },
         {
             'name': 'jsonrpc.strangeEcho',
+            'options': {'notification': True, 'validate': True},
             'params': [
                 {'name': 'string', 'type': 'String'},
                 {'name': 'omg', 'type': 'Object'},
@@ -502,65 +538,88 @@ def test_app_system_describe(async_client):
         },
         {
             'name': 'jsonrpc.sum',
+            'options': {'notification': True, 'validate': True},
             'params': [{'name': 'a', 'type': 'Number'}, {'name': 'b', 'type': 'Number'}],
             'return': {'type': 'Number'},
             'summary': None,
         },
         {
             'name': 'jsonrpc.decorators',
+            'options': {'notification': True, 'validate': True},
             'params': [{'name': 'string', 'type': 'String'}],
             'return': {'type': 'String'},
             'summary': None,
         },
         {
             'name': 'jsonrpc.returnStatusCode',
+            'options': {'notification': True, 'validate': True},
             'params': [{'name': 's', 'type': 'String'}],
             'return': {'type': 'Array'},
             'summary': None,
         },
         {
             'name': 'jsonrpc.returnHeaders',
+            'options': {'notification': True, 'validate': True},
             'params': [{'name': 's', 'type': 'String'}],
             'return': {'type': 'Array'},
             'summary': None,
         },
         {
             'name': 'jsonrpc.returnStatusCodeAndHeaders',
+            'options': {'notification': True, 'validate': True},
             'params': [{'name': 's', 'type': 'String'}],
             'return': {'type': 'Array'},
             'summary': None,
         },
         {
             'name': 'classapp.index',
+            'options': {'notification': True, 'validate': True},
             'params': [{'name': 'name', 'type': 'String'}],
             'return': {'type': 'String'},
             'summary': None,
         },
         {
             'name': 'greeting',
+            'options': {'notification': True, 'validate': True},
             'params': [{'name': 'name', 'type': 'String'}],
             'return': {'type': 'String'},
             'summary': None,
         },
         {
             'name': 'hello',
+            'options': {'notification': True, 'validate': True},
             'params': [{'name': 'name', 'type': 'String'}],
             'return': {'type': 'String'},
             'summary': None,
         },
         {
             'name': 'echo',
+            'options': {'notification': True, 'validate': True},
             'params': [{'name': 'string', 'type': 'String'}, {'name': '_some', 'type': 'Object'}],
             'return': {'type': 'String'},
             'summary': None,
         },
         {
             'name': 'notify',
+            'options': {'notification': True, 'validate': True},
             'params': [{'name': '_string', 'type': 'String'}],
             'return': {'type': 'Null'},
             'summary': None,
         },
-        {'name': 'fails', 'params': [{'name': 'n', 'type': 'Number'}], 'return': {'type': 'Number'}, 'summary': None},
+        {
+            'name': 'not_allow_notify',
+            'options': {'notification': False, 'validate': True},
+            'params': [{'name': '_string', 'type': 'String'}],
+            'return': {'type': 'String'},
+            'summary': None,
+        },
+        {
+            'name': 'fails',
+            'options': {'notification': True, 'validate': True},
+            'params': [{'name': 'n', 'type': 'Number'}],
+            'return': {'type': 'Number'},
+            'summary': None,
+        },
     ]
 
     assert rv.status_code == 200

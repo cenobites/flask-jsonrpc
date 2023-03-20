@@ -16,9 +16,10 @@
         $scope.showFakeIntro = true;
         $scope.showContentLoaded = true;
         $scope.showToolbar = false;
+        $scope.showToolbarNotifyButton = true;
         $scope.breadcrumbs = breadcrumbs('Dashboard');
         $scope.response = responseExample;
-        $scope.response_object = responseObjectExample;
+        $scope.responseObject = responseObjectExample;
 
         $scope.$on('App:displayFakeIntro', function(event, display) {
             $scope.showFakeIntro = display;
@@ -34,6 +35,10 @@
 
         $scope.$on('App:displayToolbar', function(event, display) {
             $scope.showToolbar = display;
+        });
+
+        $scope.$on('App:displayToolbarNotifyButton', function(event, display) {
+            $scope.showToolbarNotifyButton = display;
         });
 
         $scope.showSpinner = function() {
@@ -67,11 +72,17 @@
             }, 750);
         });
 
+        $scope.goToDashboard = function() {
+            $scope.$emit('App:displayToolbar', false);
+            $scope.$emit('App:breadcrumb', 'Dashboard');
+            $location.path('/');
+        };
+
         $scope.showTooltip = function(module) {
             return Handlebars.template('menu-module-tooltip', module);
         };
 
-        $scope.showReponseObject = function(module) {
+        $scope.showResponseObject = function(module) {
             return $location.path(module.name);
         };
     }]);
@@ -98,7 +109,7 @@
         };
 
         $scope.hitEnter = function(evt) {
-            if (angular.equals(evt.keyCode,13) && !(angular.equals($scope.name,null) || angular.equals($scope.name,''))) {
+            if (angular.equals(evt.keyCode, 13) && !(angular.equals($scope.name, null) || angular.equals($scope.name, ''))) {
                 $scope.ok();
             }
         };
@@ -112,25 +123,26 @@
         $scope.module = module;
         $scope.$emit('App:displayToolbar', true);
         $scope.$emit('App:breadcrumb', module.name);
+        $scope.$emit('App:displayToolbarNotifyButton', module.options.notification);
 
         var RPCCall = function(module) {
             var payload = RPC.payload(module);
-            $scope.request_object = payload;
+            $scope.requestObject = payload;
             $scope.response = undefined;
-            $scope.response_object = undefined;
-            RPC.callWithPayload(payload).success(function(response_object, status, headers, config) { // success
-                var headers_pretty = headers();
-                headers_pretty.data = config.data;
+            $scope.responseObject = undefined;
+            RPC.callWithPayload(payload).success(function(responseObject, status, headers, config) { // success
+                var headersPretty = headers();
+                headersPretty.data = config.data;
 
-                $scope.response = {status: status, headers: headers_pretty, config: config};
-                $scope.response_object = response_object;
+                $scope.response = {status: status, headers: headersPretty, config: config};
+                $scope.responseObject = responseObject;
                 $scope.$emit('App:displayContentLoaded', false);
-            }).error(function(response_object, status, headers, config) { // error
-                var headers_pretty = headers();
-                headers_pretty.data = config.data;
+            }).error(function(responseObject, status, headers, config) { // error
+                var headersPretty = headers();
+                headersPretty.data = config.data;
 
-                $scope.response = {status_code: status, headers: headers_pretty, config: config};
-                $scope.response_object = response_object;
+                $scope.response = {statusCode: status, headers: headersPretty, config: config};
+                $scope.responseObject = responseObject;
                 $scope.$emit('App:displayContentLoaded', false);
             });
         },

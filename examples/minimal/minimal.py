@@ -72,6 +72,11 @@ def notify(_string: Optional[str] = None) -> None:
     pass
 
 
+@jsonrpc.method('App.notNotify', notification=False)
+def not_notify(string: str) -> str:
+    return f'Not allow notification: {string}'
+
+
 @jsonrpc.method('App.fails')
 def fails(_string: Optional[str] = None) -> NoReturn:
     raise ValueError('example of fail')

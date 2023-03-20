@@ -34,14 +34,47 @@ def test_browse_create():
     jsonrpc = JSONRPC(app, '/api', enable_web_browsable_api=True)
 
     # pylint: disable=W0612
-    @jsonrpc.method('app.fn2')
-    def fn1(s: str) -> str:
+    @jsonrpc.method('app.fn1', validate=False)
+    def fn1(s):
+        return f'Foo {s}'
+
+    # pylint: disable=W0612
+    @jsonrpc.method('app.fn2', notification=True)
+    def fn2(s: str) -> str:
+        return f'Foo {s}'
+
+    # pylint: disable=W0612
+    @jsonrpc.method('app.fn3', notification=False)
+    def fn3(s: str) -> str:
         return f'Foo {s}'
 
     with app.test_client() as client:
+        rv = client.post('/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.fn1', 'params': [1]})
+        assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': 'Foo 1'}
+        assert rv.status_code == 200
+
         rv = client.post('/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.fn2', 'params': [':)']})
         assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': 'Foo :)'}
         assert rv.status_code == 200
+
+        rv = client.post('/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.fn3', 'params': [':)']})
+        assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': 'Foo :)'}
+        assert rv.status_code == 200
+
+        rv = client.post('/api', json={'jsonrpc': '2.0', 'method': 'app.fn3', 'params': [':)']})
+        assert rv.json == {
+            'error': {
+                'code': -32600,
+                'data': {
+                    'message': "The method 'app.fn3' doesn't allow Notification Request object (without an 'id' member)"
+                },
+                'message': 'Invalid Request',
+                'name': 'InvalidRequestError',
+            },
+            'id': None,
+            'jsonrpc': '2.0',
+        }
+        assert rv.status_code == 400
 
         rv = client.get('/api/browse')
         assert rv.status_code == 308
@@ -54,11 +87,26 @@ def test_browse_create():
         assert rv.json == {
             'app': [
                 {
+                    'name': 'app.fn1',
+                    'options': {'notification': True, 'validate': False},
+                    'params': [],
+                    'return': {'type': 'Null'},
+                    'summary': None,
+                },
+                {
                     'name': 'app.fn2',
+                    'options': {'notification': True, 'validate': True},
                     'params': [{'name': 's', 'type': 'String'}],
                     'return': {'type': 'String'},
                     'summary': None,
-                }
+                },
+                {
+                    'name': 'app.fn3',
+                    'options': {'notification': False, 'validate': True},
+                    'params': [{'name': 's', 'type': 'String'}],
+                    'return': {'type': 'String'},
+                    'summary': None,
+                },
             ]
         }
         assert rv.status_code == 200
@@ -66,6 +114,7 @@ def test_browse_create():
         rv = client.get('/api/browse/app.fn2.json')
         assert rv.json == {
             'name': 'app.fn2',
+            'options': {'notification': True, 'validate': True},
             'params': [{'name': 's', 'type': 'String'}],
             'return': {'type': 'String'},
             'summary': None,
@@ -102,6 +151,7 @@ def test_browse_create_without_register_app():
             'app': [
                 {
                     'name': 'app.fn2',
+                    'options': {'notification': True, 'validate': True},
                     'params': [{'name': 's', 'type': 'String'}],
                     'return': {'type': 'String'},
                     'summary': None,
@@ -150,12 +200,14 @@ def test_browse_create_multiple_jsonrpc_versions():
             'app': [
                 {
                     'name': 'app.fn2',
+                    'options': {'notification': True, 'validate': True},
                     'params': [{'name': 's', 'type': 'String'}],
                     'return': {'type': 'String'},
                     'summary': None,
                 },
                 {
                     'name': 'app.fn3',
+                    'options': {'notification': True, 'validate': True},
                     'params': [{'name': 's', 'type': 'String'}],
                     'return': {'type': 'String'},
                     'summary': None,
@@ -177,12 +229,14 @@ def test_browse_create_multiple_jsonrpc_versions():
             'app': [
                 {
                     'name': 'app.fn1',
+                    'options': {'notification': True, 'validate': True},
                     'params': [{'name': 's', 'type': 'String'}],
                     'return': {'type': 'String'},
                     'summary': None,
                 },
                 {
                     'name': 'app.fn2',
+                    'options': {'notification': True, 'validate': True},
                     'params': [{'name': 's', 'type': 'String'}],
                     'return': {'type': 'String'},
                     'summary': None,
@@ -220,12 +274,17 @@ def test_browse_create_modular_apps():
     def fn2_b2(s: str) -> str:
         return f'b2: Bar {s}'
 
+    # pylint: disable=W0612
+    @jsonrpc_api_2.method('blue2.not_notify', notification=False)
+    def fn3_b2(s: str) -> str:
+        return f'fn3 b2: Foo {s}'
+
     jsonrpc_api_3 = JSONRPCBlueprint('jsonrpc_api_3', __name__)
 
     # pylint: disable=W0612
     @jsonrpc_api_3.method('blue3.fn2')
     def fn1_b3(s: str) -> str:
-        return f'b3: Foo {s}'
+        return f'fn1 b3: Foo {s}'
 
     app = Flask('test_browse', instance_relative_config=True)
     jsonrpc = JSONRPC(app, '/api', enable_web_browsable_api=True)
@@ -239,6 +298,7 @@ def test_browse_create_modular_apps():
             'blue1': [
                 {
                     'name': 'blue1.fn2',
+                    'options': {'notification': True, 'validate': True},
                     'params': [{'name': 's', 'type': 'String'}],
                     'return': {'type': 'String'},
                     'summary': None,
@@ -260,12 +320,21 @@ def test_browse_create_modular_apps():
             'blue2': [
                 {
                     'name': 'blue2.fn1',
+                    'options': {'notification': True, 'validate': True},
                     'params': [{'name': 's', 'type': 'String'}],
                     'return': {'type': 'String'},
                     'summary': None,
                 },
                 {
                     'name': 'blue2.fn2',
+                    'options': {'notification': True, 'validate': True},
+                    'params': [{'name': 's', 'type': 'String'}],
+                    'return': {'type': 'String'},
+                    'summary': None,
+                },
+                {
+                    'name': 'blue2.not_notify',
+                    'options': {'notification': False, 'validate': True},
                     'params': [{'name': 's', 'type': 'String'}],
                     'return': {'type': 'String'},
                     'summary': None,

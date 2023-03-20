@@ -74,6 +74,11 @@ def test_app_create():
         await asyncio.sleep(0)
         return f'Foo {s}'
 
+    # pylint: disable=W0612
+    @jsonrpc.method('app.fn4', notification=False)
+    def fn4(s: str) -> str:
+        return f'Goo {s}'
+
     jsonrpc.register(fn3, name='app.fn3')
 
     with app.test_client() as client:
@@ -96,6 +101,26 @@ def test_app_create():
         rv = client.post('/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.fn3', 'params': [':)']})
         assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': 'Foo :)'}
         assert rv.status_code == 200
+
+        rv = client.post('/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.fn4', 'params': [':)']})
+        assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': 'Goo :)'}
+        assert rv.status_code == 200
+
+        rv = client.post('/api', json={'jsonrpc': '2.0', 'method': 'app.fn4', 'params': [':)']})
+        assert rv.json == {
+            'error': {
+                'code': -32600,
+                'data': {
+                    'message': "The method 'app.fn4' doesn't allow Notification Request "
+                    "object (without an 'id' member)"
+                },
+                'message': 'Invalid Request',
+                'name': 'InvalidRequestError',
+            },
+            'id': None,
+            'jsonrpc': '2.0',
+        }
+        assert rv.status_code == 400
 
         rv = client.post(
             '/api',

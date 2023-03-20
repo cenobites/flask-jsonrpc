@@ -30,7 +30,7 @@
       <div class="row">
         <div id="logo-section">
           <div id="logo-loading-box"><div id="logo-loading" ng-show="showSpinner()"></div></div>
-          <a id="logo-link" class="title" href="#/">Web browsable API</a>
+          <a id="logo-link" class="title" href="#/" ng-click="goToDashboard()">Web browsable API</a>
         </div>
       </div>
       <div id="box-subscribe" class="row box-subscribe">
@@ -38,14 +38,14 @@
       </div>
       <div id="scrollable-sections">
         <ul class="nav nav-tabs nav-stacked">
-          <li><a id="logo-link" href="#/" ng-class="{active:routeIs('/')}"><i class="icon icon-home"></i> Dashboard</a></li>
+          <li><a id="logo-link" href="#/" ng-click="goToDashboard()" ng-class="{active:routeIs('/')}"><i class="icon icon-home"></i> Dashboard</a></li>
           {% raw %}
-          <li class="dropdown" ng-repeat="(package_name, modules) in packages">
-            <a data-toggle="collapse" data-target="#{{package_name}}"><i class="icon icon-folder-open"></i> {{package_name}}</a>
-            <div id="{{package_name}}" class="accordion-body collapse" ng-class="{in:$first}">
+          <li class="dropdown" ng-repeat="(packageName, modules) in packages">
+            <a data-toggle="collapse" data-target="#{{packageName}}"><i class="icon icon-folder-open"></i> {{packageName}}</a>
+            <div id="{{packageName}}" class="accordion-body collapse" ng-class="{in:$first}">
               <ul class="dropdown-submenu">
                 <li ng-repeat="module in modules">
-                  <a ng-click="showReponseObject(module)" ng-class="{active:routeIs(module.name)}" class="disableable" data-placement="bottom" data-toggle="tooltip" tooltip="{{showTooltip(module)}}"><i class="icon icon-caret-right"></i> {{module.name}}</a>
+                  <a ng-click="showResponseObject(module)" ng-class="{active:routeIs(module.name)}" class="disableable" data-placement="bottom" data-toggle="tooltip" tooltip="{{showTooltip(module)}}"><i class="icon icon-caret-right"></i> {{module.name}}</a>
                 </li>
               </ul>
             </div>
@@ -72,7 +72,7 @@
                   <li>
                     <h4 class="blue"><button ng-click="changeParameters()" class="btn btn-green">Change parameters</button></h4>
                   </li>
-                  <li>
+                  <li ng-show="showToolbarNotifyButton">
                     <h4 class="green"><button ng-click="notify()" class="btn btn-gold">Notify</button></h4>
                   </li>
                 </ul>

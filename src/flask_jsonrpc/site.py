@@ -33,6 +33,7 @@ from typeguard import qualified_name
 from werkzeug.datastructures import Headers
 
 from .helpers import get, from_python_type
+from .settings import settings
 from .exceptions import (
     ParseError,
     ServerError,
@@ -52,6 +53,7 @@ ServiceProcedureDescribe = TypedDict(
     'ServiceProcedureDescribe',
     {
         'name': str,
+        'options': t.Dict[str, t.Any],
         'summary': t.Optional[str],
         'params': t.List[t.Dict[str, str]],
         'return': t.Dict[str, str],
@@ -173,9 +175,20 @@ class JSONRPCSite:
         self, req_json: t.Dict[str, t.Any]
     ) -> t.Tuple[t.Any, int, t.Union[Headers, t.Dict[str, str], t.Tuple[str], t.List[t.Tuple[str]]]]:
         params = req_json.get('params', {})
-        view_func = self.view_funcs.get(req_json['method'])
+        method_name = req_json['method']
+        view_func = self.view_funcs.get(method_name)
+        validate = getattr(view_func, 'jsonrpc_validate', settings.DEFAULT_JSONRPC_METHOD['VALIDATE'])
+        notification = getattr(view_func, 'jsonrpc_notification', settings.DEFAULT_JSONRPC_METHOD['NOTIFICATION'])
         if not view_func:
-            raise MethodNotFoundError(data={'message': f"Method not found: {req_json['method']}"})
+            raise MethodNotFoundError(data={'message': f"Method not found: {method_name}"})
+
+        if self.is_notification_request(req_json) and not notification:
+            raise InvalidRequestError(
+                data={
+                    'message': f"The method '{method_name}' doesn't allow Notification "
+                    "Request object (without an 'id' member)"
+                }
+            )
 
         try:
             if isinstance(params, (tuple, set, list)):
@@ -193,7 +206,7 @@ class JSONRPCSite:
             # TODO: Improve the checker to return type
             view_fun_annotations = t.get_type_hints(view_func)
             view_fun_return: t.Optional[t.Any] = view_fun_annotations.pop('return', None)
-            if resp_view is not None and view_fun_return is None:
+            if validate and resp_view is not None and view_fun_return is None:
                 resp_view_qn = qualified_name(resp_view)
                 view_fun_return_qn = qualified_name(view_fun_return)
                 raise TypeError(f'return type of {resp_view_qn} must be a type; got {view_fun_return_qn} instead')
@@ -258,6 +271,7 @@ class JSONRPCSite:
         return {
             'name': getattr(view_func, 'jsonrpc_method_name', key),
             'summary': getattr(view_func, '__doc__', None),
+            'options': getattr(view_func, 'jsonrpc_options', {}),
             'params': [
                 {'name': k, 'type': self.python_type_name(t)}
                 for k, t in getattr(view_func, 'jsonrpc_method_params', {}).items()
