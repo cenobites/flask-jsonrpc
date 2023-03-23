@@ -19,7 +19,7 @@ flake8-implicit-str-concat<0.3.0;python_version<="3.6"
 
 # Code linter
 # ------------------------------------------------------------------------------
-pylint==2.16.4;python_version>"3.6"  # https://github.com/PyCQA/pylint
+pylint==2.17.1;python_version>"3.6"  # https://github.com/PyCQA/pylint
 pylint<2.14.0;python_version<="3.6"
 
 # Type check
