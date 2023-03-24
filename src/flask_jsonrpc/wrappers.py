@@ -29,12 +29,21 @@ from inspect import ismethod, signature, isfunction
 
 from typeguard import typechecked
 
+from .settings import settings
+
 if t.TYPE_CHECKING:
     from .site import JSONRPCSite
     from .views import JSONRPCView
 
 
 class JSONRPCDecoratorMixin:
+    def _method_options(self, options: t.Dict[str, t.Any]) -> t.Dict[str, t.Any]:
+        default_options = {
+            'validate': settings.DEFAULT_JSONRPC_METHOD['VALIDATE'],
+            'notification': settings.DEFAULT_JSONRPC_METHOD['NOTIFICATION'],
+        }
+        return {**default_options, **options}
+
     def _method_has_parameters(self, fn: t.Callable[..., t.Any]) -> bool:
         fn_signature = signature(fn)
         return bool(fn_signature.parameters)
@@ -68,26 +77,30 @@ class JSONRPCDecoratorMixin:
         raise NotImplementedError
 
     def register_view_function(
-        self, view_func: t.Callable[..., t.Any], name: t.Optional[str] = None, validate: bool = True, **options: t.Any
+        self, view_func: t.Callable[..., t.Any], name: t.Optional[str] = None, **options: t.Dict[str, t.Any]
     ) -> t.Callable[..., t.Any]:
         fn = self._get_function(view_func)
+        fn_options = self._method_options(options)
         fn_annotations = t.get_type_hints(fn)
         method_name = getattr(fn, '__name__', '<noname>') if not name else name
-        view_func_wrapped = typechecked(view_func) if validate else view_func
+        view_func_wrapped = typechecked(view_func) if fn_options['validate'] else view_func
         setattr(view_func_wrapped, 'jsonrpc_method_name', method_name)  # noqa: B010
         setattr(view_func_wrapped, 'jsonrpc_method_sig', fn_annotations)  # noqa: B010
         setattr(view_func_wrapped, 'jsonrpc_method_return', fn_annotations.pop('return', None))  # noqa: B010
         setattr(view_func_wrapped, 'jsonrpc_method_params', fn_annotations)  # noqa: B010
-        setattr(view_func_wrapped, 'jsonrpc_validate', validate)  # noqa: B010
-        setattr(view_func_wrapped, 'jsonrpc_options', options)  # noqa: B010
+        setattr(view_func_wrapped, 'jsonrpc_validate', fn_options['validate'])  # noqa: B010
+        setattr(view_func_wrapped, 'jsonrpc_notification', fn_options['notification'])  # noqa: B010
+        setattr(view_func_wrapped, 'jsonrpc_options', fn_options)  # noqa: B010
         self.get_jsonrpc_site().register(method_name, view_func_wrapped)
         return view_func_wrapped
 
-    def method(self, name: t.Optional[str] = None, validate: bool = True, **options: t.Any) -> t.Callable[..., t.Any]:
+    def method(self, name: t.Optional[str] = None, **options: t.Dict[str, t.Any]) -> t.Callable[..., t.Any]:
+        validate = options.get('validate', settings.DEFAULT_JSONRPC_METHOD['VALIDATE'])
+
         def decorator(fn: t.Callable[..., t.Any]) -> t.Callable[..., t.Any]:
             method_name = getattr(fn, '__name__', '<noname>') if not name else name
             if validate and not self._validate(fn):
                 raise ValueError(f'no type annotations present to: {method_name}')
-            return self.register_view_function(fn, name, validate, **options)
+            return self.register_view_function(fn, name, **options)
 
         return decorator

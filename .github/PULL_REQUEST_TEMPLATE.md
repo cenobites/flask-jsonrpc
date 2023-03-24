@@ -1,3 +1,4 @@
+<!--
 ## The seven rules of a great Git commit message
 
 :: Keep in mind: This has all been said before.
@@ -43,3 +44,4 @@ See also: #456, #789
 ```
 
 More details: https://chris.beams.io/posts/git-commit/.
+-->
