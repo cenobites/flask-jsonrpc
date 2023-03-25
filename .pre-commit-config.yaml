@@ -42,12 +42,12 @@ repos:
     - id: flake8
       additional_dependencies:
         - flake8-isort==6.0.0
-        - flake8-bugbear==22.10.27
+        - flake8-bugbear==23.3.23
         - flake8-pyi==23.3.0
         - flake8-quotes==3.3.2
-        - flake8-implicit-str-concat==0.3.0
+        - flake8-implicit-str-concat==0.4.0
       args: ['--config=setup.cfg']
 - repo: https://github.com/PyCQA/pylint
-  rev: v2.17.0
+  rev: v2.17.1
   hooks:
     - id: pylint

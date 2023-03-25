@@ -24,28 +24,13 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-import typing as t
+import pytest
 
-DEFAULTS = {
-    'DEFAULT_JSONRPC_METHOD': {
-        'VALIDATE': True,
-        'NOTIFICATION': True,
-    },
-}
+from flask_jsonrpc.settings import JSONRPCSettings
 
 
-class JSONRPCSettings:
-    def __init__(self, defaults: t.Optional[t.Dict[str, t.Any]] = None):
-        self.defaults = defaults or DEFAULTS
-
-    def __getattr__(self, attr: str) -> t.Any:
-        if attr not in self.defaults:
-            raise AttributeError(f"Invalid setting: {attr!r}")
-
-        val = self.defaults[attr]
-
-        setattr(self, attr, val)
-        return val
-
-
-settings = JSONRPCSettings(DEFAULTS)
+def test_settings():
+    settings = JSONRPCSettings({'setting': True})
+    assert settings.setting is True
+    with pytest.raises(AttributeError, match="Invalid setting: 'xxx'"):
+        assert settings.xxx is None

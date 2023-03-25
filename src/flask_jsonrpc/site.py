@@ -199,7 +199,7 @@ class JSONRPCSite:
         if self.is_notification_request(req_json) and not notification:
             raise InvalidRequestError(
                 data={
-                    'message': f"The method '{method_name}' doesn't allow Notification "
+                    'message': f"The method {method_name!r} doesn't allow Notification "
                     "Request object (without an 'id' member)"
                 }
             )
