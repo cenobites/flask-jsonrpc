@@ -137,6 +137,22 @@ def test_app_create():
         assert rv.status_code == 200
 
 
+def test_app_create_with_server_name():
+    app = Flask('test_app', instance_relative_config=True)
+    app.config.update({'SERVER_NAME': 'domain:80'})
+    jsonrpc = JSONRPC(app, '/api', enable_web_browsable_api=True)
+
+    # pylint: disable=W0612
+    @jsonrpc.method('app.index')
+    def index() -> str:
+        return 'Welcome to Flask JSON-RPC'
+
+    with app.test_client() as client:
+        rv = client.post('/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.index', 'params': []})
+        assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': 'Welcome to Flask JSON-RPC'}
+        assert rv.status_code == 200
+
+
 def test_app_create_without_register_app():
     app = Flask('test_app', instance_relative_config=True)
     jsonrpc = JSONRPC(service_url='/api', enable_web_browsable_api=True)
@@ -152,6 +168,15 @@ def test_app_create_without_register_app():
         rv = client.post('/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.fn2', 'params': [':)']})
         assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': 'Foo :)'}
         assert rv.status_code == 200
+
+
+def test_app_create_without_register_browse():
+    jsonrpc = JSONRPC(service_url='/api', enable_web_browsable_api=True)
+
+    with pytest.raises(
+        RuntimeError, match='You need to init the Browse app before register the Site, see JSONRPC.init_browse_app(...)'
+    ):
+        jsonrpc.register_browse(jsonrpc)
 
 
 def test_app_create_with_method_without_annotation():

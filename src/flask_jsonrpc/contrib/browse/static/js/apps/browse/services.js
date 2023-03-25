@@ -3,7 +3,7 @@
 
     angular.module('browse.service', ['ngResource'])
         .constant('urlPrefix', _URL_PREFIX)
-        .constant('serviceUrl', _SERVICE_URL)
+        .constant('serverUrls', _SERVER_URLS)
         .constant('responseExample', {
           'status': 200,
           'headers': {
@@ -73,7 +73,7 @@
                 }
             };
         }])
-        .factory('RPC', ['$http', 'serviceUrl', 'UUID', function($http, serviceUrl, UUID) {
+        .factory('RPC', ['$http', '$location', 'serverUrls', 'UUID', function($http, $location, serverUrls, UUID) {
             return {
                 getValue: function(param) {
                     if (param.type === 'Object') {
@@ -117,6 +117,7 @@
                     return payload;
                 },
                 callWithPayload: function(data, options) {
+                    var serviceUrl = serverUrls[data.method];
                     var options = options || {method: 'POST', url: serviceUrl};
                     options.data = data;
                     return $http(options);

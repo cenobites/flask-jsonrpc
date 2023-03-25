@@ -5,7 +5,7 @@ DOCKER_COMPOSE_FILE_PATH=../${DOCKER_COMPOSE_FILE_NAME}
 [ -f ${DOCKER_COMPOSE_FILE_PATH} ] || DOCKER_COMPOSE_FILE_PATH=${DOCKER_COMPOSE_FILE_NAME}
 
 docker-compose -f ${DOCKER_COMPOSE_FILE_PATH} -p ci build --build-arg VERSION=$(date +%s)
-docker-compose -f ${DOCKER_COMPOSE_FILE_PATH} -p ci up -d
+docker-compose -f ${DOCKER_COMPOSE_FILE_PATH} -p ci --compatibility up -d
 
 DOCKER_WAIT_FOR_PY36=$(docker wait ci_python3.6_1)
 docker logs ci_python3.6_1

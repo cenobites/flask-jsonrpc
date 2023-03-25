@@ -24,7 +24,7 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-# pylint: disable=duplicate-code
+# pylint: disable=duplicate-code,too-many-public-methods
 import json
 
 from .conftest import APITestCase
@@ -328,6 +328,39 @@ class APITest(APITestCase):
         self.assertEqual('', rv.text)
         self.assertEqual(204, rv.status_code)
 
+    def test_not_allow_notify(self):
+        rv = self.requests.post(self.api_url, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.not_allow_notify'})
+        self.assertEqual({'id': 1, 'jsonrpc': '2.0', 'result': 'Not allow notify'}, rv.json())
+        self.assertEqual(200, rv.status_code)
+
+        rv = self.requests.post(
+            self.api_url,
+            json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.not_allow_notify', 'params': ['Some string']},
+        )
+        self.assertEqual({'id': 1, 'jsonrpc': '2.0', 'result': 'Not allow notify'}, rv.json())
+        self.assertEqual(200, rv.status_code)
+
+        rv = self.requests.post(
+            self.api_url, json={'jsonrpc': '2.0', 'method': 'jsonrpc.not_allow_notify', 'params': ['Some string']}
+        )
+        self.assertEqual(
+            {
+                'error': {
+                    'code': -32600,
+                    'data': {
+                        'message': "The method 'jsonrpc.not_allow_notify' doesn't allow Notification Request "
+                        "object (without an 'id' member)"
+                    },
+                    'message': 'Invalid Request',
+                    'name': 'InvalidRequestError',
+                },
+                'id': None,
+                'jsonrpc': '2.0',
+            },
+            rv.json(),
+        )
+        self.assertEqual(400, rv.status_code)
+
     def test_fails(self):
         rv = self.requests.post(
             self.api_url, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.fails', 'params': [2]}
@@ -418,6 +451,14 @@ class APITest(APITestCase):
         self.assertEqual({'id': 1, 'jsonrpc': '2.0', 'result': 'Status Code and Headers OK'}, rv.json())
         self.assertEqual(400, rv.status_code)
         self.assertEqual('1', rv.headers['X-JSONRPC'])
+
+    def test_not_validate_method(self):
+        rv = self.requests.post(
+            self.api_url,
+            json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.not_validate', 'params': ['OK']},
+        )
+        self.assertEqual({'id': 1, 'jsonrpc': '2.0', 'result': 'Not validate: OK'}, rv.json())
+        self.assertEqual(200, rv.status_code)
 
     def test_with_rcp_batch(self):
         rv = self.requests.post(self.api_url, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting'})
@@ -525,34 +566,48 @@ class APITest(APITestCase):
         self.assertEqual('1.0', json_data['result']['sdversion'])
         self.assertIsNone(json_data['result']['summary'])
         self.assertEqual('2.0', json_data['result']['version'])
+        self.assertIsNotNone(json_data['result']['servers'])
+        self.maxDiff = None
         self.assertEqual(
             [
                 {
                     'name': 'jsonrpc.greeting',
+                    'options': {'notification': True, 'validate': True},
                     'params': [{'name': 'name', 'type': 'String'}],
                     'return': {'type': 'String'},
                     'summary': None,
                 },
                 {
                     'name': 'jsonrpc.echo',
+                    'options': {'notification': True, 'validate': True},
                     'params': [{'name': 'string', 'type': 'String'}, {'name': '_some', 'type': 'Object'}],
                     'return': {'type': 'String'},
                     'summary': None,
                 },
                 {
                     'name': 'jsonrpc.notify',
+                    'options': {'notification': True, 'validate': True},
                     'params': [{'name': '_string', 'type': 'String'}],
                     'return': {'type': 'Null'},
                     'summary': None,
                 },
                 {
+                    'name': 'jsonrpc.not_allow_notify',
+                    'options': {'notification': False, 'validate': True},
+                    'params': [{'name': '_string', 'type': 'String'}],
+                    'return': {'type': 'String'},
+                    'summary': None,
+                },
+                {
                     'name': 'jsonrpc.fails',
+                    'options': {'notification': True, 'validate': True},
                     'params': [{'name': 'n', 'type': 'Number'}],
                     'return': {'type': 'Number'},
                     'summary': None,
                 },
                 {
                     'name': 'jsonrpc.strangeEcho',
+                    'options': {'notification': True, 'validate': True},
                     'params': [
                         {'name': 'string', 'type': 'String'},
                         {'name': 'omg', 'type': 'Object'},
@@ -565,66 +620,91 @@ class APITest(APITestCase):
                 },
                 {
                     'name': 'jsonrpc.sum',
+                    'options': {'notification': True, 'validate': True},
                     'params': [{'name': 'a', 'type': 'Number'}, {'name': 'b', 'type': 'Number'}],
                     'return': {'type': 'Number'},
                     'summary': None,
                 },
                 {
                     'name': 'jsonrpc.decorators',
+                    'options': {'notification': True, 'validate': True},
                     'params': [{'name': 'string', 'type': 'String'}],
                     'return': {'type': 'String'},
                     'summary': None,
                 },
                 {
                     'name': 'jsonrpc.returnStatusCode',
+                    'options': {'notification': True, 'validate': True},
                     'params': [{'name': 's', 'type': 'String'}],
                     'return': {'type': 'Array'},
                     'summary': None,
                 },
                 {
                     'name': 'jsonrpc.returnHeaders',
+                    'options': {'notification': True, 'validate': True},
                     'params': [{'name': 's', 'type': 'String'}],
                     'return': {'type': 'Array'},
                     'summary': None,
                 },
                 {
                     'name': 'jsonrpc.returnStatusCodeAndHeaders',
+                    'options': {'notification': True, 'validate': True},
                     'params': [{'name': 's', 'type': 'String'}],
                     'return': {'type': 'Array'},
                     'summary': None,
                 },
                 {
+                    'name': 'jsonrpc.not_validate',
+                    'options': {'notification': True, 'validate': False},
+                    'params': [],
+                    'return': {'type': 'Null'},
+                    'summary': None,
+                },
+                {
                     'name': 'classapp.index',
+                    'options': {'notification': True, 'validate': True},
                     'params': [{'name': 'name', 'type': 'String'}],
                     'return': {'type': 'String'},
                     'summary': None,
                 },
                 {
                     'name': 'greeting',
+                    'options': {'notification': True, 'validate': True},
                     'params': [{'name': 'name', 'type': 'String'}],
                     'return': {'type': 'String'},
                     'summary': None,
                 },
                 {
                     'name': 'hello',
+                    'options': {'notification': True, 'validate': True},
                     'params': [{'name': 'name', 'type': 'String'}],
                     'return': {'type': 'String'},
                     'summary': None,
                 },
                 {
                     'name': 'echo',
+                    'options': {'notification': True, 'validate': True},
                     'params': [{'name': 'string', 'type': 'String'}, {'name': '_some', 'type': 'Object'}],
                     'return': {'type': 'String'},
                     'summary': None,
                 },
                 {
                     'name': 'notify',
+                    'options': {'notification': True, 'validate': True},
                     'params': [{'name': '_string', 'type': 'String'}],
                     'return': {'type': 'Null'},
                     'summary': None,
                 },
                 {
+                    'name': 'not_allow_notify',
+                    'options': {'notification': False, 'validate': True},
+                    'params': [{'name': '_string', 'type': 'String'}],
+                    'return': {'type': 'String'},
+                    'summary': None,
+                },
+                {
                     'name': 'fails',
+                    'options': {'notification': True, 'validate': True},
                     'params': [{'name': 'n', 'type': 'Number'}],
                     'return': {'type': 'Number'},
                     'summary': None,

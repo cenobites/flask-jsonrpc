@@ -25,13 +25,14 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 import typing as t
+from urllib.parse import urlsplit
 
 from flask import Flask
 
 from .globals import default_jsonrpc_site, default_jsonrpc_site_api
 from .helpers import urn
 from .wrappers import JSONRPCDecoratorMixin
-from .contrib.browse import create_browse
+from .contrib.browse import JSONRPCBrowse
 
 if t.TYPE_CHECKING:
     from .site import JSONRPCSite
@@ -49,10 +50,11 @@ class JSONRPC(JSONRPCDecoratorMixin):
         enable_web_browsable_api: bool = False,
     ) -> None:
         self.app = app
-        self.service_url = service_url
+        self.path = service_url
+        self.base_url: t.Optional[str] = None
         self.jsonrpc_site = jsonrpc_site()
         self.jsonrpc_site_api = jsonrpc_site_api
-        self.browse_url = self._make_browse_url(service_url)
+        self.jsonrpc_browse: t.Optional[JSONRPCBrowse] = None
         self.enable_web_browsable_api = enable_web_browsable_api
         if app:
             self.init_app(app)
@@ -63,44 +65,70 @@ class JSONRPC(JSONRPCDecoratorMixin):
     def get_jsonrpc_site_api(self) -> t.Type['JSONRPCView']:
         return self.jsonrpc_site_api
 
-    def _make_browse_url(self, service_url: str) -> str:
-        return ''.join([service_url, '/browse']) if not service_url.endswith('/') else ''.join([service_url, 'browse'])
+    def _make_jsonrpc_browse_url(self, path: str) -> str:
+        return ''.join([path.rstrip('/'), '/browse'])
 
     def init_app(self, app: Flask) -> None:
+        http_host = app.config.get('SERVER_NAME')
+        app_root = app.config['APPLICATION_ROOT']
+        url_scheme = app.config['PREFERRED_URL_SCHEME']
+        url = urlsplit(self.path)
+
+        self.path = f"{app_root.rstrip('/')}{url.path}"
+        self.base_url = (
+            f"{url.scheme or url_scheme}://{url.netloc or http_host}/{self.path.lstrip('/')}" if http_host else None
+        )
+
+        self.get_jsonrpc_site().set_path(self.path)
+        self.get_jsonrpc_site().set_base_url(self.base_url)
+
         app.add_url_rule(
-            self.service_url,
+            self.path,
             view_func=self.get_jsonrpc_site_api().as_view(
-                urn('app', app.name, self.service_url), jsonrpc_site=self.get_jsonrpc_site()
+                urn('app', app.name, self.path), jsonrpc_site=self.get_jsonrpc_site()
             ),
         )
-        self.register_browse(app, self)
+
+        if app.config['DEBUG'] or self.enable_web_browsable_api:
+            self.init_browse_app(app)
 
     def register(self, view_func: t.Callable[..., t.Any], name: t.Optional[str] = None, **options: t.Any) -> None:
         self.register_view_function(view_func, name, **options)
 
     def register_blueprint(
-        self, app: Flask, jsonrpc_app: 'JSONRPCBlueprint', url_prefix: str, enable_web_browsable_api: bool = False
+        self,
+        app: Flask,
+        jsonrpc_app: 'JSONRPCBlueprint',
+        url_prefix: t.Optional[str] = None,
+        enable_web_browsable_api: bool = False,
     ) -> None:
-        service_url = ''.join([self.service_url, url_prefix]) if url_prefix else self.service_url
+        path = ''.join([self.path, '/', url_prefix.lstrip('/')]) if url_prefix else self.path
+        path_url = urlsplit(path)
+
+        url = urlsplit(self.base_url or path)
+        base_url = f"{url.scheme}://{url.netloc}/{url.path.lstrip('/')}" if self.base_url else None
+
+        jsonrpc_app.get_jsonrpc_site().set_path(path_url.path)
+        jsonrpc_app.get_jsonrpc_site().set_base_url(base_url)
+
         app.add_url_rule(
-            service_url,
+            path,
             view_func=jsonrpc_app.get_jsonrpc_site_api().as_view(
-                urn('blueprint', app.name, jsonrpc_app.name, service_url), jsonrpc_site=jsonrpc_app.get_jsonrpc_site()
+                urn('blueprint', app.name, jsonrpc_app.name, path), jsonrpc_site=jsonrpc_app.get_jsonrpc_site()
             ),
         )
 
-        if enable_web_browsable_api:
-            self.register_browse(app, jsonrpc_app, url_prefix=url_prefix)
+        if app.config['DEBUG'] or enable_web_browsable_api:
+            self.register_browse(jsonrpc_app)
 
-    def register_browse(
-        self, app: Flask, jsonrpc_app: t.Union['JSONRPC', 'JSONRPCBlueprint'], url_prefix: t.Optional[str] = None
-    ) -> None:
-        browse_url = ''.join([self.service_url, url_prefix, '/browse']) if url_prefix else self.browse_url
-        if app.config['DEBUG'] or self.enable_web_browsable_api:
-            app.register_blueprint(
-                create_browse(urn('browse', app.name, browse_url), jsonrpc_app.get_jsonrpc_site()),
-                url_prefix=browse_url,
+    def init_browse_app(self, app: Flask, path: t.Optional[str] = None, base_url: t.Optional[str] = None) -> None:
+        browse_url = self._make_jsonrpc_browse_url(path or self.path)
+        self.jsonrpc_browse = JSONRPCBrowse(app, url_prefix=browse_url, base_url=base_url or self.base_url)
+        self.jsonrpc_browse.register_jsonrpc_site(self.get_jsonrpc_site())
+
+    def register_browse(self, jsonrpc_app: t.Union['JSONRPC', 'JSONRPCBlueprint']) -> None:
+        if not self.jsonrpc_browse:
+            raise RuntimeError(
+                'You need to init the Browse app before register the Site, see JSONRPC.init_browse_app(...)'
             )
-            app.add_url_rule(
-                browse_url + '/static/<path:filename>', 'urn:browse.static', view_func=app.send_static_file
-            )
+        self.jsonrpc_browse.register_jsonrpc_site(jsonrpc_app.get_jsonrpc_site())

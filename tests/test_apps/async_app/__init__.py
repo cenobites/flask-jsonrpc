@@ -80,7 +80,7 @@ def async_jsonrcp_decorator(fn):
     return wrapped
 
 
-def create_async_app(test_config=None):  # noqa: C901  pylint: disable=W0612
+def create_async_app(test_config: t.Dict[str, t.Any] = None):  # noqa: C901  pylint: disable=W0612
     """Create and configure an instance of the Flask application."""
     flask_app = Flask('apptest', instance_relative_config=True)
     if test_config:
@@ -158,6 +158,11 @@ def create_async_app(test_config=None):  # noqa: C901  pylint: disable=W0612
         await asyncio.sleep(0)
         return f'Status Code and Headers {s}', 400, {'X-JSONRPC': '1'}
 
+    # pylint: disable=W0612
+    @jsonrpc.method('jsonrpc.not_validate', validate=False)
+    def not_validate(s='Oops!'):
+        return f'Not validate: {s}'
+
     class_app = App()
     jsonrpc.register(class_app.index, name='classapp.index')
     jsonrpc.register(class_app.greeting)
@@ -171,5 +176,5 @@ def create_async_app(test_config=None):  # noqa: C901  pylint: disable=W0612
 
 
 if __name__ == '__main__':
-    app = create_async_app()
+    app = create_async_app({'SERVER_NAME': os.getenv('FLASK_SERVER_NAME')})
     app.run(host='0.0.0.0')

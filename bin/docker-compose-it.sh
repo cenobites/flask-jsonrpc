@@ -5,7 +5,7 @@ DOCKER_COMPOSE_FILE_PATH=../${DOCKER_COMPOSE_FILE_NAME}
 [ -f ${DOCKER_COMPOSE_FILE_PATH} ] || DOCKER_COMPOSE_FILE_PATH=${DOCKER_COMPOSE_FILE_NAME}
 
 docker-compose -f ${DOCKER_COMPOSE_FILE_PATH} -p ci_it build --build-arg VERSION=$(date +%s)
-docker-compose -f ${DOCKER_COMPOSE_FILE_PATH} -p ci_it up -d
+docker-compose -f ${DOCKER_COMPOSE_FILE_PATH} -p ci_it --compatibility up -d
 
 DOCKER_WAIT_FOR_SUT=$(docker wait ci_it_sut_1)
 docker logs ci_it_sut_1

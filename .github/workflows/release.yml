@@ -23,6 +23,8 @@ jobs:
     steps:
     - name: Checkout source at ${{ matrix.platform }}
       uses: actions/checkout@v3
+      with:
+        ref: ${{ github.ref_name }}
     - name: Setup Python ${{ matrix.python-version }}
       uses: actions/setup-python@v4
       with:

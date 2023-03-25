@@ -27,6 +27,7 @@
 from flask import Flask
 
 from flask_jsonrpc import JSONRPC, JSONRPCBlueprint
+from flask_jsonrpc.contrib.browse import JSONRPCBrowse
 
 
 def test_browse_create():
@@ -81,6 +82,7 @@ def test_browse_create():
 
         rv = client.get('/api/browse/')
         assert b'Flask JSON-RPC | Web Browsable API' in rv.data
+        assert b'/api' in rv.data
         assert rv.status_code == 200
 
         rv = client.get('/api/browse/packages.json')
@@ -121,12 +123,36 @@ def test_browse_create():
         }
         assert rv.status_code == 200
 
+        rv = client.get('/api/browse/app.not_found.json')
+        assert rv.status_code == 404
+
         rv = client.get('/api/browse/partials/dashboard.html')
         assert b'Welcome to web browsable API' in rv.data
         assert rv.status_code == 200
 
         rv = client.get('/api/browse/partials/response_object.html')
         assert b'module_dialog.html' in rv.data
+        assert rv.status_code == 200
+
+        rv = client.get('/api/browse/static/js/main.js')
+        assert b'App' in rv.data
+        assert rv.status_code == 200
+
+
+def test_jsonrpc_browse():
+    app = Flask('test_browse', instance_relative_config=True)
+    jsonrpc_browse = JSONRPCBrowse()
+    jsonrpc_browse.init_app(app)
+
+    with app.test_client() as client:
+        rv = client.get('/api/browse/packages.json')
+        assert rv.json == {}
+
+        rv = client.get('/api/browse/App.index.json')
+        assert rv.status_code == 404
+
+        rv = client.get('/api/browse/')
+        assert b'Flask JSON-RPC | Web Browsable API' in rv.data
         assert rv.status_code == 200
 
         rv = client.get('/api/browse/static/js/main.js')
@@ -162,6 +188,7 @@ def test_browse_create_without_register_app():
 
         rv = client.get('/api/browse/')
         assert b'Flask JSON-RPC | Web Browsable API' in rv.data
+        assert b'/api' in rv.data
         assert rv.status_code == 200
 
         rv = client.get('/api/browse/static/js/main.js')
@@ -218,11 +245,26 @@ def test_browse_create_multiple_jsonrpc_versions():
 
         rv = client.get('/api/v1/browse/')
         assert b'Flask JSON-RPC | Web Browsable API' in rv.data
+        assert b'/api/v1' in rv.data
+        assert b'/api/v2' not in rv.data
         assert rv.status_code == 200
 
         rv = client.get('/api/v1/browse/static/js/main.js')
         assert b'App' in rv.data
         assert rv.status_code == 200
+
+        rv = client.get('/api/v1/browse/app.fn3.json')
+        assert rv.json == {
+            'name': 'app.fn3',
+            'options': {'notification': True, 'validate': True},
+            'params': [{'name': 's', 'type': 'String'}],
+            'return': {'type': 'String'},
+            'summary': None,
+        }
+        assert rv.status_code == 200
+
+        rv = client.get('/api/v1/browse/app.fn1.json')
+        assert rv.status_code == 404
 
         rv = client.get('/api/v2/browse/packages.json')
         assert rv.json == {
@@ -245,8 +287,24 @@ def test_browse_create_multiple_jsonrpc_versions():
         }
         assert rv.status_code == 200
 
+        rv = client.get('/api/v2/browse/app.fn1.json')
+        assert rv.json == {
+            'name': 'app.fn1',
+            'options': {'notification': True, 'validate': True},
+            'params': [{'name': 's', 'type': 'String'}],
+            'return': {'type': 'String'},
+            'summary': None,
+        }
+        assert rv.status_code == 200
+
+        rv = client.get('/api/v2/browse/app.fn3.json')
+        assert rv.status_code == 404
+
         rv = client.get('/api/v2/browse/')
         assert b'Flask JSON-RPC | Web Browsable API' in rv.data
+        assert b'/api/v2/browse' in rv.data
+        assert b'/api/v2' in rv.data
+        assert b'/api/v1/browse/static/' in rv.data
         assert rv.status_code == 200
 
         rv = client.get('/api/v2/browse/static/js/main.js')
@@ -293,7 +351,7 @@ def test_browse_create_modular_apps():
     jsonrpc.register_blueprint(app, jsonrpc_api_3, url_prefix='/b3')
 
     with app.test_client() as client:
-        rv = client.get('/api/b1/browse/packages.json')
+        rv = client.get('/api/browse/packages.json')
         assert rv.json == {
             'blue1': [
                 {
@@ -303,20 +361,7 @@ def test_browse_create_modular_apps():
                     'return': {'type': 'String'},
                     'summary': None,
                 }
-            ]
-        }
-        assert rv.status_code == 200
-
-        rv = client.get('/api/b1/browse/')
-        assert b'Flask JSON-RPC | Web Browsable API' in rv.data
-        assert rv.status_code == 200
-
-        rv = client.get('/api/b1/browse/static/js/main.js')
-        assert b'App' in rv.data
-        assert rv.status_code == 200
-
-        rv = client.get('/api/b2/browse/packages.json')
-        assert rv.json == {
+            ],
             'blue2': [
                 {
                     'name': 'blue2.fn1',
@@ -339,17 +384,49 @@ def test_browse_create_modular_apps():
                     'return': {'type': 'String'},
                     'summary': None,
                 },
-            ]
+            ],
         }
         assert rv.status_code == 200
 
-        rv = client.get('/api/b2/browse/')
+        rv = client.get('/api/browse/')
         assert b'Flask JSON-RPC | Web Browsable API' in rv.data
+        assert b'/api/b1' in rv.data
+        assert b'/api/b2' in rv.data
+        assert b'/api/b3' not in rv.data
         assert rv.status_code == 200
 
-        rv = client.get('/api/b2/browse/static/js/main.js')
+        rv = client.get('/api/browse/static/js/main.js')
         assert b'App' in rv.data
         assert rv.status_code == 200
 
-        rv = client.get('/api/b3/browse/packages.json')
+        rv = client.get('/api/b1/browse/packages.json')
+        assert rv.status_code == 404
+
+        rv = client.get('/api/b2/browse/packages.json')
+        assert rv.status_code == 404
+
+        rv = client.get('/api/b3/browse')
+        assert rv.status_code == 404
+
+        rv = client.get('/api/browse/blue2.fn1.json')
+        assert rv.status_code == 200
+        assert rv.json == {
+            'name': 'blue2.fn1',
+            'options': {'notification': True, 'validate': True},
+            'params': [{'name': 's', 'type': 'String'}],
+            'return': {'type': 'String'},
+            'summary': None,
+        }
+
+        rv = client.get('/api/browse/blue2.fn2.json')
+        assert rv.status_code == 200
+        assert rv.json == {
+            'name': 'blue2.fn2',
+            'options': {'notification': True, 'validate': True},
+            'params': [{'name': 's', 'type': 'String'}],
+            'return': {'type': 'String'},
+            'summary': None,
+        }
+
+        rv = client.get('/api/browse/blue3.fn3.json')
         assert rv.status_code == 404
