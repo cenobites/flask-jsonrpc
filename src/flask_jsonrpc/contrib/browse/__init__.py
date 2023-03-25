@@ -25,52 +25,81 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 import typing as t
+from itertools import chain
 
 from flask import Blueprint, jsonify, request, render_template
 
+from flask_jsonrpc.helpers import urn
+
 if t.TYPE_CHECKING:
+    from flask import Flask
     from flask import typing as ft
 
-    from flask_jsonrpc.site import JSONRPCSite
+    from flask_jsonrpc.site import JSONRPCSite, ServiceProcedureDescribe
 
 
-def create_browse(name: str, jsonrpc_site: 'JSONRPCSite') -> Blueprint:
-    browse = Blueprint(name, __name__, template_folder='templates', static_folder='static')
+class JSONRPCBrowse:
+    def __init__(
+        self, app: t.Optional['Flask'] = None, url_prefix: str = '/api/browse', base_url: t.Optional[str] = None
+    ) -> None:
+        self.app = app
+        self.url_prefix = url_prefix
+        self.base_url = base_url
+        self.jsonrpc_sites: t.Set['JSONRPCSite'] = set()
+        if app:
+            self.init_app(app)
 
-    # pylint: disable=W0612
-    @browse.route('/')
-    def index() -> str:
-        url_prefix = request.script_root + request.path
-        url_prefix = url_prefix.rstrip('/')
-        service_url = url_prefix.replace('/browse', '')
-        return render_template('browse/index.html', service_url=service_url, url_prefix=url_prefix)
+    def _service_desc_procedures(self) -> t.Dict[str, 'ServiceProcedureDescribe']:
+        service_procs = list(chain(*[site.describe()['procs'] for site in self.jsonrpc_sites]))
+        return {proc['name']: proc for proc in service_procs}
 
-    # pylint: disable=W0612
-    @browse.route('/packages.json')
-    def json_packages() -> 'ft.ResponseReturnValue':
-        jsonrpc_describe = jsonrpc_site.describe()
-        packages = sorted(jsonrpc_describe['procs'], key=lambda proc: proc['name'])
+    def init_app(self, app: 'Flask') -> None:
+        name = urn('browse', app.name, self.url_prefix)
+        browse = Blueprint(name, __name__, template_folder='templates', static_folder='static')
+        browse.add_url_rule('/', view_func=self.vf_index)
+        browse.add_url_rule('/packages.json', view_func=self.vf_json_packages)
+        browse.add_url_rule('/<method_name>.json', view_func=self.vf_json_method)
+        browse.add_url_rule('/partials/dashboard.html', view_func=self.vf_partials_dashboard)
+        browse.add_url_rule('/partials/response_object.html', view_func=self.vf_partials_response_object)
+
+        app.register_blueprint(browse, url_prefix=self.url_prefix)
+        app.add_url_rule(
+            f'{self.url_prefix}/static/<path:filename>', 'urn:browse.static', view_func=app.send_static_file
+        )
+
+    def register_jsonrpc_site(self, jsonrpc_site: 'JSONRPCSite') -> None:
+        self.jsonrpc_sites.add(jsonrpc_site)
+
+    def vf_index(self) -> str:
+        server_urls = {}
+        service_describes = [site.describe() for site in self.jsonrpc_sites]
+        for service_describe in service_describes:
+            server_urls.update(
+                {
+                    name: service_describe['servers'][0]['url']
+                    for name in [proc['name'] for proc in service_describe['procs']]
+                }
+            )
+        url_prefix = f"{request.script_root}{request.path.rstrip('/')}"
+        return render_template('browse/index.html', url_prefix=url_prefix, server_urls=server_urls)
+
+    def vf_json_packages(self) -> 'ft.ResponseReturnValue':
+        service_procedures = self._service_desc_procedures()
+        packages = sorted(service_procedures.values(), key=lambda proc: proc['name'])
         packages_tree: t.Dict[str, t.Any] = {}
         for package in packages:
             package_name = package['name'].split('.')[0]
             packages_tree.setdefault(package_name, []).append(package)
         return jsonify(packages_tree)
 
-    # pylint: disable=W0612
-    @browse.route('/<method_name>.json')
-    def json_method(method_name: str) -> 'ft.ResponseReturnValue':
-        jsonrpc_describe = jsonrpc_site.describe()
-        method = [method for method in jsonrpc_describe['procs'] if method['name'] == method_name][0]
-        return jsonify(method)
+    def vf_json_method(self, method_name: str) -> 'ft.ResponseReturnValue':
+        service_procedures = self._service_desc_procedures()
+        if method_name not in service_procedures:
+            return jsonify({'message': 'Not found'}), 404
+        return jsonify(service_procedures[method_name])
 
-    # pylint: disable=W0612
-    @browse.route('/partials/dashboard.html')
-    def partials_dashboard() -> str:
+    def vf_partials_dashboard(self) -> str:
         return render_template('browse/partials/dashboard.html')
 
-    # pylint: disable=W0612
-    @browse.route('/partials/response_object.html')
-    def partials_response_object() -> str:
+    def vf_partials_response_object(self) -> str:
         return render_template('browse/partials/response_object.html')
-
-    return browse

@@ -473,6 +473,7 @@ def test_app_system_describe(client):
     assert rv.json['result']['sdversion'] == '1.0'
     assert rv.json['result']['summary'] is None
     assert rv.json['result']['version'] == '2.0'
+    assert rv.json['result']['servers'] is not None
     assert rv.json['result']['procs'] == [
         {
             'name': 'jsonrpc.greeting',
@@ -555,6 +556,13 @@ def test_app_system_describe(client):
             'options': {'notification': True, 'validate': True},
             'params': [{'name': 's', 'type': 'String'}],
             'return': {'type': 'Array'},
+            'summary': None,
+        },
+        {
+            'name': 'jsonrpc.not_validate',
+            'options': {'notification': True, 'validate': False},
+            'params': [],
+            'return': {'type': 'Null'},
             'summary': None,
         },
         {

@@ -26,6 +26,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 import typing as t
 from uuid import UUID, uuid4
+from urllib.parse import urlsplit
 
 from flask import json, request, current_app
 
@@ -67,6 +68,7 @@ class ServiceDescribe(TypedDict):
     version: str
     name: str
     summary: t.Optional[str]
+    servers: t.List[t.Dict[str, str]]
     procs: t.List[ServiceProcedureDescribe]  # pytype: disable=invalid-annotation
 
 
@@ -77,12 +79,18 @@ JSONRPC_DEFAULT_HTTP_STATUS_CODE: int = 200
 
 
 class JSONRPCSite:
-    def __init__(self) -> None:
+    def __init__(self, path: t.Optional[str] = None, base_url: t.Optional[str] = None) -> None:
+        self.path = path
+        self.base_url = base_url
         self.view_funcs: t.Dict[str, t.Callable[..., t.Any]] = {}
         self.uuid: UUID = uuid4()
         self.name: str = 'Flask-JSONRPC'
         self.version: str = JSONRPC_VERSION_DEFAULT
         self.register(JSONRCP_DESCRIBE_METHOD_NAME, self.describe)
+
+    def server_url(self) -> str:
+        url = urlsplit(self.base_url or self.path)
+        return f"{url.scheme!r}://{url.netloc!r}/{(self.path or '').lstrip('/')}" if self.base_url else str(url.path)
 
     @property
     def is_json(self) -> bool:
@@ -95,6 +103,12 @@ class JSONRPCSite:
         return mt in ('application/json', 'application/json-rpc', 'application/jsonrequest') or (
             mt.startswith('application/') and mt.endswith('+json')
         )
+
+    def set_path(self, path: str) -> None:
+        self.path = path
+
+    def set_base_url(self, base_url: t.Optional[str]) -> None:
+        self.base_url = base_url
 
     def register(self, name: str, view_func: t.Callable[..., t.Any]) -> None:
         self.view_funcs[name] = view_func
@@ -286,6 +300,11 @@ class JSONRPCSite:
             version=self.version,
             name=self.name,
             summary=self.__doc__,
+            servers=[
+                {
+                    'url': self.server_url(),
+                }
+            ],
             procs=[self.procedure_desc(k) for k in self.view_funcs if k != JSONRCP_DESCRIBE_METHOD_NAME],
         )
 

@@ -27,7 +27,7 @@
 
   <script type="text/javascript">
     var _URL_PREFIX = '{{url_prefix}}',
-        _SERVICE_URL = '{{service_url}}';
+        _SERVER_URLS = JSON.parse('{{server_urls | tojson | safe}}');
   </script>
 
   {% block templates_js %}{% endblock %}

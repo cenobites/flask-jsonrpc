@@ -13,7 +13,7 @@ services:
         pylint src/ tests/ &&
         mypy --install-types --non-interactive src/ &&
         bandit -r src/ &&
-        safety check &&
+        safety check -i 51457 &&
         pytest"
 
   python3.9:

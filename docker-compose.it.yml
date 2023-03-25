@@ -11,7 +11,7 @@ services:
       - SITE_PORT=5000
       - WEB_URL=http://async_app:5000
       - API_URL=http://async_app:5000/api
-      - BROWSABLE_API_URL=http://async_app:5000/browse
+      - BROWSABLE_API_URL=http://async_app:5000/api/browse
     user: ${UID:-0}:${GID:-0}
     depends_on:
       - async_app
@@ -24,6 +24,7 @@ services:
         - FLASK_ASYNC=1
     environment:
       - FLASK_ENV=TESTING
+      - FLASK_SERVER_NAME=async_app:5000
     user: ${UID:-0}:${GID:-0}
     command: >
       python async_app.py
@@ -40,7 +41,7 @@ services:
       - SITE_PORT=5000
       - WEB_URL=http://app:5000
       - API_URL=http://app:5000/api
-      - BROWSABLE_API_URL=http://app:5000/browse
+      - BROWSABLE_API_URL=http://app:5000/api/browse
     user: ${UID:-0}:${GID:-0}
     depends_on:
       - app
@@ -51,6 +52,7 @@ services:
       dockerfile: Dockerfile.local
     environment:
       - FLASK_ENV=TESTING
+      - FLASK_SERVER_NAME=app:5000
     user: ${UID:-0}:${GID:-0}
     command: >
       python app.py
