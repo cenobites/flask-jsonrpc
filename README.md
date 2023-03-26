@@ -1,5 +1,5 @@
-![Release Status](https://github.com/cenobites/flask-jsonrpc/actions/workflows/release/badge.svg)
-![Tests Status](https://github.com/cenobites/flask-jsonrpc/actions/workflows/tests/badge.svg?branch=master)
+![Release Status](https://github.com/cenobites/flask-jsonrpc/actions/workflows/release.yml/badge.svg)
+![Tests Status](https://github.com/cenobites/flask-jsonrpc/actions/workflows/tests.yml/badge.svg?branch=master)
 [![Coverage Status](https://coveralls.io/repos/github/cenobites/flask-jsonrpc/badge.svg?branch=master)](https://coveralls.io/github/cenobites/flask-jsonrpc?branch=master)
 [![Documentation Status](https://readthedocs.org/projects/flask-jsonrpc/badge/?version=latest)](https://flask-jsonrpc.readthedocs.io/en/latest/?badge=latest)
 # Flask JSON-RPC
