@@ -51,15 +51,3 @@ services:
       sh -c "flake8 src/ tests/ &&
         pylint src/ tests/ &&
         pytest"
-
-  python3.6:
-    build:
-      context: .
-      dockerfile: Dockerfile.py36.test
-    environment:
-      - FLASK_ENV=TESTING
-      - PRAGMA_VERSION=py3.6
-    command: >
-      sh -c "flake8 src/ tests/ &&
-        pylint -d unused-import,no-self-use,bad-option-value src/ tests/ &&
-        pytest"

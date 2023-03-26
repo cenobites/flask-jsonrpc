@@ -1,0 +1,43 @@
+name: Tests
+
+on:
+  push:
+    branches: ["master"]
+    tags-ignore:
+      - v**
+  pull_request:
+    branches: ["master"]
+
+permissions:
+  contents: read
+
+jobs:
+  unit-tests:
+    name: Unit tests
+    runs-on: ${{ matrix.platform }}
+    strategy:
+      fail-fast: false
+      matrix:
+        platform:
+          - ubuntu-latest
+    steps:
+    - name: Checkout source at ${{ matrix.platform }}
+      uses: actions/checkout@v3
+    - name: Run tests
+      run: |
+        bash ./bin/docker-compose-test.sh
+
+  integration-tests:
+    name: Integration tests
+    runs-on: ${{ matrix.platform }}
+    strategy:
+      fail-fast: false
+      matrix:
+        platform:
+          - ubuntu-latest
+    steps:
+    - name: Checkout source at ${{ matrix.platform }}
+      uses: actions/checkout@v3
+    - name: Run tests
+      run: |
+        bash ./bin/docker-compose-it.sh
