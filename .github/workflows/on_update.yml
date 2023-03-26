@@ -1,9 +1,6 @@
 name: On update
 
 on:
-  pull_request:
-    types:
-      - opened
   push:
     branches-ignore:
       - master
