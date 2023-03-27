@@ -6,15 +6,20 @@ services:
       context: .
       dockerfile: Dockerfile.it
     environment:
-      - FLASK_ENV=TESTING
-      - SITE_DOMAIN=async_app
-      - SITE_PORT=5000
-      - WEB_URL=http://async_app:5000
-      - API_URL=http://async_app:5000/api
-      - BROWSABLE_API_URL=http://async_app:5000/api/browse
+      - PYTEST_CACHE_DIR=.pytest_cache
+      - SITE_DOMAIN=async-app.flask-jsonrpc.cenobit.es
+      - SITE_PORT=80
+      - WEB_URL=https://async-app.flask-jsonrpc.cenobit.es
+      - API_URL=https://async-app.flask-jsonrpc.cenobit.es/api
+      - BROWSABLE_API_URL=https://async-app.flask-jsonrpc.cenobit.es/api/browse
     user: ${UID:-0}:${GID:-0}
+    volumes:
+      - .pytest_cache/test-results/async_app:/app/test-results
+      - .pytest_cache/screnshots/async_app:/app/.pytest_cache/screnshots
     depends_on:
-      - async_app
+      - nginx
+    networks:
+      - default
 
   async_app:
     build:
@@ -23,38 +28,66 @@ services:
       args:
         - FLASK_ASYNC=1
     environment:
-      - FLASK_ENV=TESTING
       - FLASK_SERVER_NAME=async_app:5000
     user: ${UID:-0}:${GID:-0}
     command: >
       python async_app.py
     ports:
       - '5001:5000'
+    networks:
+      - default
 
   sut:
     build:
       context: .
       dockerfile: Dockerfile.it
     environment:
-      - FLASK_ENV=TESTING
-      - SITE_DOMAIN=app
-      - SITE_PORT=5000
-      - WEB_URL=http://app:5000
-      - API_URL=http://app:5000/api
-      - BROWSABLE_API_URL=http://app:5000/api/browse
+      - PYTEST_CACHE_DIR=.pytest_cache
+      - SITE_DOMAIN=app.flask-jsonrpc.cenobit.es
+      - SITE_PORT=80
+      - WEB_URL=https://app.flask-jsonrpc.cenobit.es
+      - API_URL=https://app.flask-jsonrpc.cenobit.es/api
+      - BROWSABLE_API_URL=https://app.flask-jsonrpc.cenobit.es/api/browse
     user: ${UID:-0}:${GID:-0}
+    volumes:
+      - .pytest_cache/test-results/app:/app/test-results
+      - .pytest_cache/screnshots/app:/app/.pytest_cache/screnshots
     depends_on:
-      - app
+      - nginx
+    networks:
+      - default
 
   app:
     build:
       context: .
       dockerfile: Dockerfile.local
     environment:
-      - FLASK_ENV=TESTING
       - FLASK_SERVER_NAME=app:5000
     user: ${UID:-0}:${GID:-0}
     command: >
       python app.py
     ports:
       - '5000:5000'
+    networks:
+      - default
+
+  nginx:
+    image: nginx:mainline-alpine
+    ports:
+      - '80:80'
+      - '443:443'
+    volumes:
+      - .docker/nginx/conf.d:/etc/nginx/conf.d
+      - .docker/nginx/ssl:/etc/nginx/ssl
+      - .docker/nginx/nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - app
+      - async_app
+    networks:
+      default:
+        aliases:
+          - app.flask-jsonrpc.cenobit.es
+          - async-app.flask-jsonrpc.cenobit.es
+
+networks:
+  default:

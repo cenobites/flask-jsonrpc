@@ -26,7 +26,8 @@ RUN pip install pip setuptools wheel --upgrade \
 FROM python:3.10-alpine
 
 ENV PYTHONUNBUFFERED=1 \
-    DEBUG=0
+    DEBUG=0 \
+    FLASK_SERVER_NAME="app:5000"
 
 RUN apk add --no-cache --update \
     && rm -rf /var/cache/* \

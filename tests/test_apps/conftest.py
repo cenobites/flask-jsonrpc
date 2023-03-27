@@ -25,18 +25,48 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 import os
+import time
 import unittest
+from pathlib import Path
 
+import urllib3
 import requests
+from selenium import webdriver
+
+WEB_DRIVER_SCREENSHOT_DIR = Path(os.environ['PYTEST_CACHE_DIR']) / 'screenshots'
 
 
 class APITestCase(unittest.TestCase):
-    def setUp(self):
+    def setUp(self) -> None:
+        urllib3.disable_warnings()
         session = requests.Session()
         session.headers.update(
             {
                 'Content-Type': 'application/json',
             }
         )
+        session.verify = False
         self.requests = session
-        self.api_url = os.environ['API_URL']
+
+
+class WebDriverTestCase(unittest.TestCase):
+    def setUp(self) -> None:
+        chrome_prefs = {}
+        chrome_options = webdriver.ChromeOptions()
+        chrome_options.add_argument('--no-sandbox')
+        chrome_options.add_argument('--headless')
+        chrome_options.add_argument('--disable-gpu')
+        chrome_options.add_argument('--allow-insecure-localhost')
+        chrome_options.add_argument('--ignore-certificate-errors')
+        chrome_options.add_experimental_option('prefs', chrome_prefs)
+        chrome_options.accept_insecure_certs = True
+        self.driver = webdriver.Chrome(options=chrome_options)
+        self.driver.delete_all_cookies()
+        self.driver.implicitly_wait(10)
+        self.addCleanup(self.driver.quit)
+        self.addCleanup(self.take_screenshot)
+        if not WEB_DRIVER_SCREENSHOT_DIR.exists():
+            WEB_DRIVER_SCREENSHOT_DIR.mkdir(parents=True)
+
+    def take_screenshot(self):
+        self.driver.get_screenshot_as_file(str(WEB_DRIVER_SCREENSHOT_DIR / f'{self.id()}-{time.time()}.png'))

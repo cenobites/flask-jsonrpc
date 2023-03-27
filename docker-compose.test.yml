@@ -6,7 +6,6 @@ services:
       context: .
       dockerfile: Dockerfile.py310.test
     environment:
-      - FLASK_ENV=TESTING
       - PRAGMA_VERSION=py3.10
     command: >
       sh -c "flake8 src/ tests/ &&
@@ -21,7 +20,6 @@ services:
       context: .
       dockerfile: Dockerfile.py39.test
     environment:
-      - FLASK_ENV=TESTING
       - PRAGMA_VERSION=py3.9
     command: >
       sh -c "flake8 src/ tests/ &&
@@ -33,7 +31,6 @@ services:
       context: .
       dockerfile: Dockerfile.py38.test
     environment:
-      - FLASK_ENV=TESTING
       - PRAGMA_VERSION=py3.8
     command: >
       sh -c "flake8 src/ tests/ &&
@@ -45,7 +42,6 @@ services:
       context: .
       dockerfile: Dockerfile.py37.test
     environment:
-      - FLASK_ENV=TESTING
       - PRAGMA_VERSION=py3.7
     command: >
       sh -c "flake8 src/ tests/ &&
