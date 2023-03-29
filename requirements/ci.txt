@@ -27,7 +27,7 @@ pylint<2.14.0;python_version<="3.6"
 mypy==1.1.1;python_version>="3.10"  # https://github.com/python/mypy
 pytype==2022.10.13;python_version>="3.10"  # https://github.com/google/pytype
 types_setuptools==67.6.0.5  # https://github.com/python/typeshed
-typeguard==2.13.3  # https://github.com/agronholm/typeguard
+typeguard==3.0.2  # https://github.com/agronholm/typeguard
 
 # Security check
 # ------------------------------------------------------------------------------
