@@ -13,9 +13,11 @@ RUN set -ex \
         gcc \
         musl-dev \
         python3-dev \
+        git \
     && pip install pip setuptools wheel --upgrade \
     && pip install -r requirements/base.txt \
     && pip install -r requirements/test.txt \
+        poetry-core>=1.0.0 \
     && pip install -r requirements/ci.txt \
     && apk del .build-deps \
     && addgroup -S kuchulu \

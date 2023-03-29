@@ -25,32 +25,35 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 # pylint: disable=duplicate-code,too-many-public-methods
+import os
 import json
 
 from .conftest import APITestCase
 
+API_URL = os.environ['API_URL']
+
 
 class APITest(APITestCase):
     def test_greeting(self):
-        rv = self.requests.post(self.api_url, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting'})
+        rv = self.requests.post(API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting'})
         self.assertEqual({'id': 1, 'jsonrpc': '2.0', 'result': 'Hello Flask JSON-RPC'}, rv.json())
         self.assertEqual(200, rv.status_code)
 
         rv = self.requests.post(
-            self.api_url, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': ['Python']}
+            API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': ['Python']}
         )
         self.assertEqual({'id': 1, 'jsonrpc': '2.0', 'result': 'Hello Python'}, rv.json())
         self.assertEqual(200, rv.status_code)
 
         rv = self.requests.post(
-            self.api_url, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': {'name': 'Flask'}}
+            API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': {'name': 'Flask'}}
         )
         self.assertEqual({'id': 1, 'jsonrpc': '2.0', 'result': 'Hello Flask'}, rv.json())
         self.assertEqual(200, rv.status_code)
 
     def test_app_greeting_with_different_content_types(self):
         rv = self.requests.post(
-            self.api_url,
+            API_URL,
             data=json.dumps({'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting'}),
             headers={'Content-Type': 'application/json-rpc'},
         )
@@ -58,7 +61,7 @@ class APITest(APITestCase):
         self.assertEqual(200, rv.status_code)
 
         rv = self.requests.post(
-            self.api_url,
+            API_URL,
             data=json.dumps({'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': ['Python']}),
             headers={'Content-Type': 'application/jsonrequest'},
         )
@@ -66,7 +69,7 @@ class APITest(APITestCase):
         self.assertEqual(200, rv.status_code)
 
         rv = self.requests.post(
-            self.api_url,
+            API_URL,
             data=json.dumps({'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': {'name': 'Flask'}}),
             headers={'Content-Type': 'application/json'},
         )
@@ -74,7 +77,7 @@ class APITest(APITestCase):
         self.assertEqual(200, rv.status_code)
 
     def test_greeting_raise_parse_error(self):
-        rv = self.requests.post(self.api_url, data={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting'})
+        rv = self.requests.post(API_URL, data={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting'})
         self.assertEqual(
             {
                 'id': None,
@@ -91,7 +94,7 @@ class APITest(APITestCase):
         self.assertEqual(400, rv.status_code)
 
         rv = self.requests.post(
-            self.api_url,
+            API_URL,
             data="{'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting'}",
             headers={'Content-Type': 'application/json'},
         )
@@ -115,7 +118,7 @@ class APITest(APITestCase):
         self.assertEqual(400, rv.status_code)
 
         rv = self.requests.post(
-            self.api_url,
+            API_URL,
             data="""[
                 {'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': ['Flask'], 'id': '1'},
                 {'jsonrpc': '2.0', 'method'
@@ -143,7 +146,7 @@ class APITest(APITestCase):
         self.assertEqual(400, rv.status_code)
 
     def test_greeting_raise_invalid_request_error(self):
-        rv = self.requests.post(self.api_url, json={'id': 1, 'jsonrpc': '2.0'})
+        rv = self.requests.post(API_URL, json={'id': 1, 'jsonrpc': '2.0'})
         self.assertEqual(
             {
                 'id': 1,
@@ -161,7 +164,7 @@ class APITest(APITestCase):
 
     def test_greeting_raise_invalid_params_error(self):
         rv = self.requests.post(
-            self.api_url, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': 'Wrong'}
+            API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': 'Wrong'}
         )
         self.assertEqual(
             {
@@ -180,9 +183,7 @@ class APITest(APITestCase):
         )
         self.assertEqual(400, rv.status_code)
 
-        rv = self.requests.post(
-            self.api_url, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': [1]}
-        )
+        rv = self.requests.post(API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': [1]})
         self.assertEqual(
             {
                 'id': 1,
@@ -199,7 +200,7 @@ class APITest(APITestCase):
         self.assertEqual(400, rv.status_code)
 
         rv = self.requests.post(
-            self.api_url, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': {'name': 2}}
+            API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': {'name': 2}}
         )
         self.assertEqual(
             {
@@ -217,7 +218,7 @@ class APITest(APITestCase):
         self.assertEqual(400, rv.status_code)
 
     def test_greeting_raise_method_not_found_error(self):
-        rv = self.requests.post(self.api_url, json={'id': 1, 'jsonrpc': '2.0', 'method': 'method-not-found'})
+        rv = self.requests.post(API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'method-not-found'})
         self.assertEqual(
             {
                 'id': 1,
@@ -235,21 +236,19 @@ class APITest(APITestCase):
 
     def test_echo(self):
         rv = self.requests.post(
-            self.api_url, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.echo', 'params': ['Python']}
+            API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.echo', 'params': ['Python']}
         )
         self.assertEqual({'id': 1, 'jsonrpc': '2.0', 'result': 'Python'}, rv.json())
         self.assertEqual(200, rv.status_code)
 
         rv = self.requests.post(
-            self.api_url, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.echo', 'params': {'string': 'Flask'}}
+            API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.echo', 'params': {'string': 'Flask'}}
         )
         self.assertEqual({'id': 1, 'jsonrpc': '2.0', 'result': 'Flask'}, rv.json())
         self.assertEqual(200, rv.status_code)
 
     def test_echo_raise_invalid_params_error(self):
-        rv = self.requests.post(
-            self.api_url, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.echo', 'params': 'Wrong'}
-        )
+        rv = self.requests.post(API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.echo', 'params': 'Wrong'})
         self.assertEqual(
             {
                 'id': 1,
@@ -267,7 +266,7 @@ class APITest(APITestCase):
         )
         self.assertEqual(400, rv.status_code)
 
-        rv = self.requests.post(self.api_url, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.echo', 'params': [1]})
+        rv = self.requests.post(API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.echo', 'params': [1]})
         self.assertEqual(
             {
                 'id': 1,
@@ -284,7 +283,7 @@ class APITest(APITestCase):
         self.assertEqual(400, rv.status_code)
 
         rv = self.requests.post(
-            self.api_url, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.echo', 'params': {'name': 2}}
+            API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.echo', 'params': {'name': 2}}
         )
         self.assertEqual(
             {
@@ -301,7 +300,7 @@ class APITest(APITestCase):
         )
         self.assertEqual(400, rv.status_code)
 
-        rv = self.requests.post(self.api_url, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.echo'})
+        rv = self.requests.post(API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.echo'})
         self.assertEqual(
             {
                 'id': 1,
@@ -318,30 +317,28 @@ class APITest(APITestCase):
         self.assertEqual(400, rv.status_code)
 
     def test_notify(self):
-        rv = self.requests.post(self.api_url, json={'jsonrpc': '2.0', 'method': 'jsonrpc.notify'})
+        rv = self.requests.post(API_URL, json={'jsonrpc': '2.0', 'method': 'jsonrpc.notify'})
         self.assertEqual('', rv.text)
         self.assertEqual(204, rv.status_code)
 
-        rv = self.requests.post(
-            self.api_url, json={'jsonrpc': '2.0', 'method': 'jsonrpc.notify', 'params': ['Some string']}
-        )
+        rv = self.requests.post(API_URL, json={'jsonrpc': '2.0', 'method': 'jsonrpc.notify', 'params': ['Some string']})
         self.assertEqual('', rv.text)
         self.assertEqual(204, rv.status_code)
 
     def test_not_allow_notify(self):
-        rv = self.requests.post(self.api_url, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.not_allow_notify'})
+        rv = self.requests.post(API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.not_allow_notify'})
         self.assertEqual({'id': 1, 'jsonrpc': '2.0', 'result': 'Not allow notify'}, rv.json())
         self.assertEqual(200, rv.status_code)
 
         rv = self.requests.post(
-            self.api_url,
+            API_URL,
             json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.not_allow_notify', 'params': ['Some string']},
         )
         self.assertEqual({'id': 1, 'jsonrpc': '2.0', 'result': 'Not allow notify'}, rv.json())
         self.assertEqual(200, rv.status_code)
 
         rv = self.requests.post(
-            self.api_url, json={'jsonrpc': '2.0', 'method': 'jsonrpc.not_allow_notify', 'params': ['Some string']}
+            API_URL, json={'jsonrpc': '2.0', 'method': 'jsonrpc.not_allow_notify', 'params': ['Some string']}
         )
         self.assertEqual(
             {
@@ -362,15 +359,11 @@ class APITest(APITestCase):
         self.assertEqual(400, rv.status_code)
 
     def test_fails(self):
-        rv = self.requests.post(
-            self.api_url, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.fails', 'params': [2]}
-        )
+        rv = self.requests.post(API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.fails', 'params': [2]})
         self.assertEqual({'id': 1, 'jsonrpc': '2.0', 'result': 2}, rv.json())
         self.assertEqual(200, rv.status_code)
 
-        rv = self.requests.post(
-            self.api_url, json={'id': '1', 'jsonrpc': '2.0', 'method': 'jsonrpc.fails', 'params': [1]}
-        )
+        rv = self.requests.post(API_URL, json={'id': '1', 'jsonrpc': '2.0', 'method': 'jsonrpc.fails', 'params': [1]})
         self.assertEqual(
             {
                 'id': '1',
@@ -393,7 +386,7 @@ class APITest(APITestCase):
             'method': 'jsonrpc.strangeEcho',
             'params': ['string', {'a': 1}, ['a', 'b', 'c'], 23, 'Flask'],
         }
-        rv = self.requests.post(self.api_url, json=data)
+        rv = self.requests.post(API_URL, json=data)
         self.assertEqual(
             {'id': 1, 'jsonrpc': '2.0', 'result': ['string', {'a': 1}, ['a', 'b', 'c'], 23, 'Flask']}, rv.json()
         )
@@ -405,7 +398,7 @@ class APITest(APITestCase):
             'method': 'jsonrpc.strangeEcho',
             'params': ['string', {'a': 1}, ['a', 'b', 'c'], 23],
         }
-        rv = self.requests.post(self.api_url, json=data)
+        rv = self.requests.post(API_URL, json=data)
         self.assertEqual(
             {'id': 1, 'jsonrpc': '2.0', 'result': ['string', {'a': 1}, ['a', 'b', 'c'], 23, 'Default']}, rv.json()
         )
@@ -413,31 +406,31 @@ class APITest(APITestCase):
 
     def test_sum(self):
         data = {'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.sum', 'params': [1, 3]}
-        rv = self.requests.post(self.api_url, json=data)
+        rv = self.requests.post(API_URL, json=data)
         self.assertEqual({'id': 1, 'jsonrpc': '2.0', 'result': 4}, rv.json())
         self.assertEqual(200, rv.status_code)
 
         data = {'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.sum', 'params': [0.5, 1.5]}
-        rv = self.requests.post(self.api_url, json=data)
+        rv = self.requests.post(API_URL, json=data)
         self.assertEqual({'id': 1, 'jsonrpc': '2.0', 'result': 2.0}, rv.json())
         self.assertEqual(200, rv.status_code)
 
     def test_decorators(self):
         data = {'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.decorators', 'params': ['Python']}
-        rv = self.requests.post(self.api_url, json=data)
+        rv = self.requests.post(API_URL, json=data)
         self.assertEqual({'id': 1, 'jsonrpc': '2.0', 'result': 'Hello Python from decorator, ;)'}, rv.json())
         self.assertEqual(200, rv.status_code)
 
     def test_return_status_code(self):
         rv = self.requests.post(
-            self.api_url, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.returnStatusCode', 'params': ['OK']}
+            API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.returnStatusCode', 'params': ['OK']}
         )
         self.assertEqual({'id': 1, 'jsonrpc': '2.0', 'result': 'Status Code OK'}, rv.json())
         self.assertEqual(201, rv.status_code)
 
     def test_return_headers(self):
         rv = self.requests.post(
-            self.api_url, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.returnHeaders', 'params': ['OK']}
+            API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.returnHeaders', 'params': ['OK']}
         )
         self.assertEqual({'id': 1, 'jsonrpc': '2.0', 'result': 'Headers OK'}, rv.json())
         self.assertEqual(200, rv.status_code)
@@ -445,7 +438,7 @@ class APITest(APITestCase):
 
     def test_return_status_code_and_headers(self):
         rv = self.requests.post(
-            self.api_url,
+            API_URL,
             json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.returnStatusCodeAndHeaders', 'params': ['OK']},
         )
         self.assertEqual({'id': 1, 'jsonrpc': '2.0', 'result': 'Status Code and Headers OK'}, rv.json())
@@ -454,19 +447,19 @@ class APITest(APITestCase):
 
     def test_not_validate_method(self):
         rv = self.requests.post(
-            self.api_url,
+            API_URL,
             json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.not_validate', 'params': ['OK']},
         )
         self.assertEqual({'id': 1, 'jsonrpc': '2.0', 'result': 'Not validate: OK'}, rv.json())
         self.assertEqual(200, rv.status_code)
 
     def test_with_rcp_batch(self):
-        rv = self.requests.post(self.api_url, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting'})
+        rv = self.requests.post(API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting'})
         self.assertEqual({'id': 1, 'jsonrpc': '2.0', 'result': 'Hello Flask JSON-RPC'}, rv.json())
         self.assertEqual(200, rv.status_code)
 
         rv = self.requests.post(
-            self.api_url,
+            API_URL,
             json=[
                 {'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': ['Python']},
                 {'id': 2, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': ['Flask']},
@@ -484,7 +477,7 @@ class APITest(APITestCase):
         self.assertEqual(200, rv.status_code)
 
         rv = self.requests.post(
-            self.api_url,
+            API_URL,
             json=[
                 {'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': ['Python']},
                 {'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': ['Flask']},
@@ -511,37 +504,33 @@ class APITest(APITestCase):
         )
         self.assertEqual(200, rv.status_code)
 
-        rv = self.requests.post(self.api_url, json={'id': 2, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting'})
+        rv = self.requests.post(API_URL, json={'id': 2, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting'})
         self.assertEqual({'id': 2, 'jsonrpc': '2.0', 'result': 'Hello Flask JSON-RPC'}, rv.json())
         self.assertEqual(200, rv.status_code)
 
     def test_class(self):
-        rv = self.requests.post(self.api_url, json={'id': 1, 'jsonrpc': '2.0', 'method': 'classapp.index'})
+        rv = self.requests.post(API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'classapp.index'})
         self.assertEqual({'id': 1, 'jsonrpc': '2.0', 'result': 'Hello Flask JSON-RPC'}, rv.json())
         self.assertEqual(200, rv.status_code)
 
-        rv = self.requests.post(
-            self.api_url, json={'id': 1, 'jsonrpc': '2.0', 'method': 'greeting', 'params': ['Python']}
-        )
+        rv = self.requests.post(API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'greeting', 'params': ['Python']})
         self.assertEqual({'id': 1, 'jsonrpc': '2.0', 'result': 'Hello Python'}, rv.json())
         self.assertEqual(200, rv.status_code)
 
         rv = self.requests.post(
-            self.api_url, json={'id': 1, 'jsonrpc': '2.0', 'method': 'hello', 'params': {'name': 'Flask'}}
+            API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'hello', 'params': {'name': 'Flask'}}
         )
         self.assertEqual({'id': 1, 'jsonrpc': '2.0', 'result': 'Hello Flask'}, rv.json())
         self.assertEqual(200, rv.status_code)
 
-        rv = self.requests.post(
-            self.api_url, json={'id': 1, 'jsonrpc': '2.0', 'method': 'echo', 'params': ['Python', 1]}
-        )
+        rv = self.requests.post(API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'echo', 'params': ['Python', 1]})
         self.assertEqual({'id': 1, 'jsonrpc': '2.0', 'result': 'Python'}, rv.json())
         self.assertEqual(200, rv.status_code)
 
-        rv = self.requests.post(self.api_url, json={'jsonrpc': '2.0', 'method': 'notify', 'params': ['Python']})
+        rv = self.requests.post(API_URL, json={'jsonrpc': '2.0', 'method': 'notify', 'params': ['Python']})
         self.assertEqual(204, rv.status_code)
 
-        rv = self.requests.post(self.api_url, json={'id': 1, 'jsonrpc': '2.0', 'method': 'fails', 'params': [13]})
+        rv = self.requests.post(API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'fails', 'params': [13]})
         self.assertEqual(
             {
                 'id': 1,
@@ -558,7 +547,7 @@ class APITest(APITestCase):
         self.assertEqual(500, rv.status_code)
 
     def test_system_describe(self):
-        rv = self.requests.post(self.api_url, json={'id': 1, 'jsonrpc': '2.0', 'method': 'system.describe'})
+        rv = self.requests.post(API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'system.describe'})
         json_data = rv.json()
         self.assertEqual(1, json_data['id'])
         self.assertEqual('2.0', json_data['jsonrpc'])
