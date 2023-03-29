@@ -24,13 +24,11 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-import sys
 import json
 
 import pytest
 
 pytest.importorskip('asgiref')
-pyminversion = pytest.mark.skipif(sys.version_info < (3, 7), reason='requires python3.7 or higher')
 
 
 def test_app_greeting(async_client):

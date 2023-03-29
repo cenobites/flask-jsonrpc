@@ -16,8 +16,8 @@ jobs:
       fail-fast: false
       matrix:
         platform:
-          - ubuntu-20.04
-        python-version: ["3.6", "3.7", "3.8", "3.9", "3.10"]
+          - ubuntu-latest
+        python-version: ["3.7", "3.8", "3.9", "3.10"]
     steps:
     - name: Checkout source at ${{ matrix.platform }}
       uses: actions/checkout@v3
@@ -35,11 +35,9 @@ jobs:
         pip install -r requirements/base.txt
         pip install -r requirements/ci.txt
     - name: Lint with Flake8
-      if: ${{ matrix.python-version != '3.6' }}
       run: |
         flake8 src/ tests/
     - name: Lint with PyLint
-      if: ${{ matrix.python-version != '3.6' }}
       run: |
         pylint src/ tests/
 
@@ -115,10 +113,10 @@ jobs:
       fail-fast: false
       matrix:
         platform:
-          - ubuntu-20.04
+          - ubuntu-latest
           - macos-latest
           - windows-latest
-        python-version: ["3.6", "3.7", "3.8", "3.9", "3.10"]
+        python-version: ["3.7", "3.8", "3.9", "3.10"]
     steps:
     - name: Checkout source at ${{ matrix.platform }}
       uses: actions/checkout@v3
@@ -191,10 +189,10 @@ jobs:
       fail-fast: false
       matrix:
         platform:
-          - ubuntu-20.04
+          - ubuntu-latest
           - macos-latest
           - windows-latest
-        python-version: ["3.6", "3.7", "3.8", "3.9", "3.10"]
+        python-version: ["3.7", "3.8", "3.9", "3.10"]
     steps:
     - name: Checkout source at ${{ matrix.platform }}
       uses: actions/checkout@v3
