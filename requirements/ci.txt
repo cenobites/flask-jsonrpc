@@ -1,26 +1,23 @@
 # Code formatter
 # ------------------------------------------------------------------------------
-black==23.3.0;python_version>"3.6"  # https://github.com/psf/black
-pyupgrade==3.3.1;python_version>"3.6"  # https://github.com/asottile/pyupgrade
+black==23.3.0  # https://github.com/psf/black
+pyupgrade==3.3.1  # https://github.com/asottile/pyupgrade
 
 # Code quality
 # ------------------------------------------------------------------------------
 flake8==6.0.0;python_version>"3.7"  # https://github.com/PyCQA/flake8
 flake8<6.0.0;python_version<="3.7"
-flake8-isort==6.0.0;python_version>"3.6"  # https://github.com/gforcada/flake8-isort
-flake8-isort<5.0.0;python_version<="3.6"
-isort>=4.2.5,<6;python_version<="3.6"  # https://github.com/PyCQA/isort
+flake8-isort==6.0.0  # https://github.com/gforcada/flake8-isort
+isort>=4.2.5,<6  # https://github.com/PyCQA/isort
 flake8-bugbear==23.3.23;python_version>"3.7"  # https://github.com/PyCQA/flake8-bugbear
 flake8-bugbear<22.10;python_version<="3.7"
-flake8-pyi==23.3.1;python_version>"3.6"  # https://github.com/ambv/flake8-pyi
+flake8-pyi==23.3.1  # https://github.com/ambv/flake8-pyi
 flake8-quotes==3.3.2  # https://github.com/zheller/flake8-quotes
-flake8-implicit-str-concat==0.4.0;python_version>"3.6"  # https://github.com/keisheiled/flake8-implicit-str-concat
-flake8-implicit-str-concat<0.3.0;python_version<="3.6"
+flake8-implicit-str-concat==0.4.0  # https://github.com/keisheiled/flake8-implicit-str-concat
 
 # Code linter
 # ------------------------------------------------------------------------------
-pylint==2.17.1;python_version>"3.6"  # https://github.com/PyCQA/pylint
-pylint<2.14.0;python_version<="3.6"
+pylint==2.17.1  # https://github.com/PyCQA/pylint
 
 # Type check
 # ------------------------------------------------------------------------------
@@ -36,6 +33,5 @@ safety@git+https://github.com/pyupio/safety;python_version>="3.10"  # https://gi
 
 # Code quality
 # ------------------------------------------------------------------------------
-coverage==6.5.0;python_version>"3.6"  # https://github.com/nedbat/coveragepy
-coverage<6.2;python_version<="3.6"
+coverage==6.5.0  # https://github.com/nedbat/coveragepy
 coveralls==3.3.1  # https://github.com/marketplace/coveralls

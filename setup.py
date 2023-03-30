@@ -33,9 +33,7 @@ setuptools.setup(
     install_requires=[
         'Flask>=1.0.0,<3.0',
         'typeguard==2.13.3',
-        'typing>=3.7.4;python_version<"3.5"',
-        'typing_extensions>=4.3.0;python_version>"3.6"',
-        'typing_extensions>=3.7.4,<3.10;python_version<="3.6"',
+        'typing_extensions>=4.3.0',
         'typing_inspect==0.8.0',
     ],
     extras_require={

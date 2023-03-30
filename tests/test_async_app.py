@@ -24,7 +24,6 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-import sys
 import json
 import uuid
 import typing as t
@@ -38,10 +37,8 @@ from werkzeug.datastructures import Headers
 from flask_jsonrpc import JSONRPC, JSONRPCBlueprint
 
 pytest.importorskip('asgiref')
-pyminversion = pytest.mark.skipif(sys.version_info < (3, 7), reason='requires python3.7 or higher')
 
 
-@pyminversion
 def test_app_create():
     app = Flask('test_app', instance_relative_config=True)
     jsonrpc = JSONRPC(app, '/api', enable_web_browsable_api=True)
@@ -147,7 +144,6 @@ def test_app_create():
         assert rv.status_code == 200
 
 
-@pyminversion
 def test_app_create_with_server_name():
     app = Flask('test_app', instance_relative_config=True)
     app.config.update({'SERVER_NAME': 'domain:80'})
@@ -164,7 +160,6 @@ def test_app_create_with_server_name():
         assert rv.status_code == 200
 
 
-@pyminversion
 def test_app_create_without_register_app():
     app = Flask('test_app', instance_relative_config=True)
     jsonrpc = JSONRPC(service_url='/api', enable_web_browsable_api=True)
@@ -183,7 +178,6 @@ def test_app_create_without_register_app():
         assert rv.status_code == 200
 
 
-@pyminversion
 def test_app_create_with_method_without_annotation():
     with pytest.raises(ValueError, match='no type annotations present to: app.fn1'):
         app = Flask('test_app', instance_relative_config=True)
@@ -208,7 +202,6 @@ def test_app_create_with_method_without_annotation():
             return f'Poo {s}'
 
 
-@pyminversion
 def test_app_create_with_method_without_annotation_on_params():
     with pytest.raises(ValueError, match='no type annotations present to: app.fn2'):
         app = Flask('test_app', instance_relative_config=True)
@@ -238,7 +231,6 @@ def test_app_create_with_method_without_annotation_on_params():
             return f'Poo {s}'
 
 
-@pyminversion
 def test_app_create_with_method_without_annotation_on_return():
     app = Flask('test_app', instance_relative_config=True)
     jsonrpc = JSONRPC(app, '/api', enable_web_browsable_api=True)
@@ -274,7 +266,6 @@ def test_app_create_with_method_without_annotation_on_return():
         assert rv.status_code == 200
 
 
-@pyminversion
 def test_app_create_with_wrong_return():
     app = Flask('test_app', instance_relative_config=True)
     jsonrpc = JSONRPC(app, '/api', enable_web_browsable_api=True)
@@ -304,7 +295,6 @@ def test_app_create_with_wrong_return():
         assert rv.status_code == 500
 
 
-@pyminversion
 def test_app_create_with_invalid_view_func():
     app = Flask('test_app', instance_relative_config=True)
     jsonrpc = JSONRPC(app, service_url='/api', enable_web_browsable_api=True)
@@ -324,7 +314,6 @@ def test_app_create_with_invalid_view_func():
         assert rv.status_code == 200
 
 
-@pyminversion
 def test_app_create_multiple_jsonrpc_versions():
     app = Flask('test_app', instance_relative_config=True)
     jsonrpc_v1 = JSONRPC(app, '/api/v1', enable_web_browsable_api=True)
@@ -394,7 +383,6 @@ def test_app_create_multiple_jsonrpc_versions():
         assert rv.status_code == 200
 
 
-@pyminversion
 def test_app_create_modular_apps():
     jsonrpc_api_1 = JSONRPCBlueprint('jsonrpc_api_1', __name__)
 
@@ -451,7 +439,8 @@ def test_app_create_modular_apps():
 
 
 # pylint: disable=R0915
-@pyminversion
+
+
 def test_app_create_with_rcp_batch():
     app = Flask('test_app', instance_relative_config=True)
     jsonrpc = JSONRPC(app, '/api', enable_web_browsable_api=True)
