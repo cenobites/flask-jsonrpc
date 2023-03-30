@@ -19,7 +19,7 @@ jobs:
       matrix:
         platform:
           - ubuntu-latest
-        python-version: ["3.6", "3.7", "3.8", "3.9"]
+        python-version: ["3.7", "3.8", "3.9"]
     steps:
     - name: Checkout source at ${{ matrix.platform }}
       uses: actions/checkout@v3
@@ -36,11 +36,6 @@ jobs:
       run: |
         flake8 src/ tests/
     - name: Run pylint
-      if: ${{ matrix.python-version == '3.6' }}
-      run: |
-        pylint -d unused-import,no-self-use,bad-option-value src/ tests/
-    - name: Run pylint
-      if: ${{ matrix.python-version != '3.6' }}
       run: |
         pylint src/ tests/
 
@@ -52,7 +47,7 @@ jobs:
       matrix:
         platform:
           - ubuntu-latest
-        python-version: ["3.6", "3.7", "3.8", "3.9"]
+        python-version: ["3.7", "3.8", "3.9"]
     steps:
     - name: Checkout source at ${{ matrix.platform }}
       uses: actions/checkout@v3

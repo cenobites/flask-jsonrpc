@@ -1,13 +1,10 @@
 # Testing
 # ------------------------------------------------------------------------------
-pytest==7.2.2;python_version>"3.6"  # https://github.com/pytest-dev/pytest
-pytest<7;python_version<="3.6"
+pytest==7.2.2  # https://github.com/pytest-dev/pytest
 pytest-cov==4.0.0  # https://github.com/pytest-dev/pytest-cov
-pytest-xdist==3.2.1;python_version>"3.6"  # https://github.com/pytest-dev/pytest-xdist
-pytest-xdist<=3.0.2;python_version<="3.6"
+pytest-xdist==3.2.1  # https://github.com/pytest-dev/pytest-xdist
 pytest-sugar==0.9.6  # https://github.com/Frozenball/pytest-sugar
-pytest-env==0.8.1;python_version>"3.6"  # https://github.com/MobileDynasty/pytest-env
-pytest-env<0.7.0;python_version<="3.6"
+pytest-env==0.8.1  # https://github.com/MobileDynasty/pytest-env
 pytest-selenium@git+https://github.com/pytest-dev/pytest-selenium.git;python_version>"3.7"  # https://github.com/pytest-dev/pytest-selenium
 mock==5.0.1  # https://github.com/testing-cabal/mock
 
@@ -17,12 +14,10 @@ typeguard==2.13.3  # https://github.com/agronholm/typeguard
 
 # Code quality
 # ------------------------------------------------------------------------------
-coverage==6.5.0;python_version>"3.6"  # https://github.com/nedbat/coveragepy
-coverage<6.2;python_version<="3.6"
+coverage==6.5.0  # https://github.com/nedbat/coveragepy
 coveralls==3.3.1  # https://github.com/marketplace/coveralls
 
 # Tools
 # ------------------------------------------------------------------------------
-requests==2.28.2;python_version>"3.6"  # https://github.com/psf/requests
-requests<2.28.0;python_version<="3.6"
+requests==2.28.2  # https://github.com/psf/requests
 py==1.11.0  # https://github.com/pytest-dev/py
