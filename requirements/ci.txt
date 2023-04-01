@@ -21,15 +21,15 @@ pylint==2.17.1  # https://github.com/PyCQA/pylint
 
 # Type check
 # ------------------------------------------------------------------------------
-mypy==1.1.1;python_version>="3.10"  # https://github.com/python/mypy
-pytype==2022.10.13;python_version>="3.10"  # https://github.com/google/pytype
+mypy==1.1.1;python_version>="3.11"  # https://github.com/python/mypy
+pytype==2022.10.13;python_version>="3.10" and python_version<"3.11"  # https://github.com/google/pytype
 types_setuptools==67.6.0.6  # https://github.com/python/typeshed
 typeguard==2.13.3  # https://github.com/agronholm/typeguard
 
 # Security check
 # ------------------------------------------------------------------------------
-bandit==1.7.5;python_version>="3.10"  # https://github.com/PyCQA/bandit
-safety@git+https://github.com/pyupio/safety;python_version>="3.10"  # https://github.com/pyupio/safety
+bandit==1.7.5;python_version>="3.11" # https://github.com/PyCQA/bandit
+safety@git+https://github.com/pyupio/safety;python_version>="3.11"  # https://github.com/pyupio/safety
 
 # Code quality
 # ------------------------------------------------------------------------------

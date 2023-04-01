@@ -1,4 +1,4 @@
-FROM python:3.10-alpine as builder
+FROM python:3.11-alpine as builder
 
 RUN apk add --no-cache --update --virtual .build-deps \
         build-base \
@@ -18,7 +18,7 @@ RUN pip install pip setuptools wheel --upgrade \
     && pip wheel --wheel-dir=/svc/wheels -r test.txt \
         poetry-core>=1.0.0
 
-FROM python:3.10-alpine
+FROM python:3.11-alpine
 
 ENV PYTHONUNBUFFERED=1 \
     DEBUG=0 \

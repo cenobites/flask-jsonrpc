@@ -1,4 +1,4 @@
-FROM python:3.10-alpine as builder
+FROM python:3.11-alpine as builder
 
 RUN apk add --no-cache --update --virtual .build-deps \
         build-base \
@@ -23,7 +23,7 @@ RUN pip install pip setuptools wheel --upgrade \
     && [[ ${FLASK_ASYNC} = 1 ]] && PROJECT_PATH=".[async]" || PROJECT_PATH="." \
     && pip wheel --wheel-dir=/svc/wheels -e ${PROJECT_PATH}
 
-FROM python:3.10-alpine
+FROM python:3.11-alpine
 
 ENV PYTHONUNBUFFERED=1 \
     DEBUG=0 \
