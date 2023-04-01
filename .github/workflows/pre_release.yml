@@ -41,6 +41,35 @@ jobs:
       run: |
         pylint src/ tests/
 
+  pytype:
+    name: Typing
+    runs-on: ${{ matrix.platform }}
+    strategy:
+      fail-fast: false
+      matrix:
+        platform:
+          - ubuntu-latest
+        python-version: ["3.10"]
+    steps:
+    - name: Checkout source at ${{ matrix.platform }}
+      uses: actions/checkout@v3
+      with:
+        ref: ${{ github.ref_name }}
+    - name: Setup Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+        cache: 'pip'
+        cache-dependency-path: 'requirements/*.txt'
+    - name: Install dependencies
+      run: |
+        pip install --upgrade pip
+        pip install -r requirements/base.txt
+        pip install -r requirements/ci.txt
+    - name: Static type check with Pytype
+      run: |
+        pytype
+
   typing:
     name: Typing
     runs-on: ${{ matrix.platform }}
@@ -69,9 +98,6 @@ jobs:
     - name: Static type check with MyPy
       run: |
         mypy --install-types --non-interactive src/
-    - name: Static type check with Pytype
-      run: |
-        pytype
 
   security:
     name: Security
