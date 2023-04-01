@@ -453,6 +453,26 @@ class APITest(APITestCase):
         self.assertEqual({'id': 1, 'jsonrpc': '2.0', 'result': 'Not validate: OK'}, rv.json())
         self.assertEqual(200, rv.status_code)
 
+    def test_no_return_method(self):
+        rv = self.requests.post(
+            API_URL,
+            json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.noReturn', 'params': []},
+        )
+        self.assertEqual(
+            {
+                'error': {
+                    'code': -32000,
+                    'data': {'message': 'no return'},
+                    'message': 'Server error',
+                    'name': 'ServerError',
+                },
+                'id': 1,
+                'jsonrpc': '2.0',
+            },
+            rv.json(),
+        )
+        self.assertEqual(500, rv.status_code)
+
     def test_with_rcp_batch(self):
         rv = self.requests.post(API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting'})
         self.assertEqual({'id': 1, 'jsonrpc': '2.0', 'result': 'Hello Flask JSON-RPC'}, rv.json())
@@ -646,6 +666,13 @@ class APITest(APITestCase):
                     'name': 'jsonrpc.not_validate',
                     'options': {'notification': True, 'validate': False},
                     'params': [],
+                    'return': {'type': 'Null'},
+                    'summary': None,
+                },
+                {
+                    'name': 'jsonrpc.noReturn',
+                    'options': {'notification': True, 'validate': True},
+                    'params': [{'name': '_string', 'type': 'String'}],
                     'return': {'type': 'Null'},
                     'summary': None,
                 },

@@ -240,6 +240,11 @@ def test_app_create_with_method_without_annotation_on_return():
     def fn2(s: str) -> str:
         return f'Bar {s}'
 
+    # pylint: disable=W0612
+    @jsonrpc.method('app.fn3')
+    def fn3(s: str) -> t.NoReturn:
+        raise ValueError(f'no return: {s}')
+
     with app.test_client() as client:
         rv = client.post('/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.fn1', 'params': [':)']})
         assert rv.json == {
@@ -257,6 +262,19 @@ def test_app_create_with_method_without_annotation_on_return():
         rv = client.post('/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.fn2', 'params': [':)']})
         assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': 'Bar :)'}
         assert rv.status_code == 200
+
+        rv = client.post('/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.fn3', 'params': ['OK']})
+        assert rv.json == {
+            'error': {
+                'code': -32000,
+                'data': {'message': 'no return: OK'},
+                'message': 'Server error',
+                'name': 'ServerError',
+            },
+            'id': 1,
+            'jsonrpc': '2.0',
+        }
+        assert rv.status_code == 500
 
 
 def test_app_create_with_wrong_return():

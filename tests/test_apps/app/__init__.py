@@ -36,7 +36,6 @@ try:
     from flask_jsonrpc import JSONRPC
 except ModuleNotFoundError:
     project_dir, project_module_name = os.path.split(os.path.dirname(os.path.realpath(__file__)))
-    print(project_dir, project_module_name)
     flask_jsonrpc_project_dir = os.path.join(project_dir, os.pardir, os.pardir, 'src')
     if os.path.exists(flask_jsonrpc_project_dir) and flask_jsonrpc_project_dir not in sys.path:
         sys.path.append(flask_jsonrpc_project_dir)
@@ -152,6 +151,10 @@ def create_app(test_config: t.Dict[str, t.Any] = None):  # noqa: C901  pylint: d
     @jsonrpc.method('jsonrpc.not_validate', validate=False)
     def not_validate(s='Oops!'):
         return f'Not validate: {s}'
+
+    @jsonrpc.method('jsonrpc.noReturn')
+    def no_return(_string: t.Optional[str] = None) -> t.NoReturn:
+        raise ValueError('no return')
 
     class_app = App()
     jsonrpc.register(class_app.index, name='classapp.index')

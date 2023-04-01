@@ -45,27 +45,33 @@ except ModuleNotFoundError:
 
 
 class App:
-    def index(self, name: str = 'Flask JSON-RPC') -> str:
+    async def index(self, name: str = 'Flask JSON-RPC') -> str:
+        await asyncio.sleep(0)
         return f'Hello {name}'
 
     @staticmethod
-    def greeting(name: str = 'Flask JSON-RPC') -> str:
+    async def greeting(name: str = 'Flask JSON-RPC') -> str:
+        await asyncio.sleep(0)
         return f'Hello {name}'
 
     @classmethod
-    def hello(cls, name: str = 'Flask JSON-RPC') -> str:
+    async def hello(cls, name: str = 'Flask JSON-RPC') -> str:
+        await asyncio.sleep(0)
         return f'Hello {name}'
 
-    def echo(self, string: str, _some: t.Any = None) -> str:
+    async def echo(self, string: str, _some: t.Any = None) -> str:
+        await asyncio.sleep(0)
         return string
 
-    def notify(self, _string: str = None) -> None:
-        pass
+    async def notify(self, _string: str = None) -> None:
+        await asyncio.sleep(0)
 
-    def not_allow_notify(self, _string: str = None) -> str:
+    async def not_allow_notify(self, _string: str = None) -> str:
+        await asyncio.sleep(0)
         return 'Now allow notify'
 
-    def fails(self, n: int) -> int:
+    async def fails(self, n: int) -> int:
+        await asyncio.sleep(0)
         if n % 2 == 0:
             return n
         raise ValueError('number is odd')
@@ -160,8 +166,14 @@ def create_async_app(test_config: t.Dict[str, t.Any] = None):  # noqa: C901  pyl
 
     # pylint: disable=W0612
     @jsonrpc.method('jsonrpc.not_validate', validate=False)
-    def not_validate(s='Oops!'):
+    async def not_validate(s='Oops!'):
+        await asyncio.sleep(0)
         return f'Not validate: {s}'
+
+    @jsonrpc.method('jsonrpc.noReturn')
+    async def no_return(_string: t.Optional[str] = None) -> t.NoReturn:
+        await asyncio.sleep(0)
+        raise ValueError('no return')
 
     class_app = App()
     jsonrpc.register(class_app.index, name='classapp.index')

@@ -1,6 +1,17 @@
 version: '3'
 
 services:
+  python3.11:
+    build:
+      context: .
+      dockerfile: Dockerfile.py311.test
+    environment:
+      - PRAGMA_VERSION=py3.11
+    command: >
+      sh -c "flake8 src/ tests/ &&
+        pylint src/ tests/ &&
+        pytest"
+
   python3.10:
     build:
       context: .
@@ -10,9 +21,6 @@ services:
     command: >
       sh -c "flake8 src/ tests/ &&
         pylint src/ tests/ &&
-        mypy --install-types --non-interactive src/ &&
-        bandit -r src/ &&
-        safety check -i 51457 &&
         pytest"
 
   python3.9:

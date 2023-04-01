@@ -2,7 +2,7 @@ exclude: '.git|.tox|.venv|.vscode|__pycache__|.pytest_cache|.eggs|.mypy_cache|.p
 default_stages: [commit]
 fail_fast: true
 default_language_version:
-  python: python3.10
+  python: python3.11
 repos:
 - repo: https://github.com/pre-commit/pre-commit-hooks
   rev: v4.4.0

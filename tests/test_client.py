@@ -299,6 +299,21 @@ def test_app_not_allow_notify(client):
     assert rv.status_code == 200
 
 
+def test_app_no_return(client):
+    rv = client.post('/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.noReturn'})
+    assert rv.json == {
+        'error': {
+            'code': -32000,
+            'data': {'message': 'no return'},
+            'message': 'Server error',
+            'name': 'ServerError',
+        },
+        'id': 1,
+        'jsonrpc': '2.0',
+    }
+    assert rv.status_code == 500
+
+
 def test_app_fails(client):
     rv = client.post('/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.fails', 'params': [2]})
     assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': 2}
@@ -562,6 +577,13 @@ def test_app_system_describe(client):
             'name': 'jsonrpc.not_validate',
             'options': {'notification': True, 'validate': False},
             'params': [],
+            'return': {'type': 'Null'},
+            'summary': None,
+        },
+        {
+            'name': 'jsonrpc.noReturn',
+            'options': {'notification': True, 'validate': True},
+            'params': [{'name': '_string', 'type': 'String'}],
             'return': {'type': 'Null'},
             'summary': None,
         },

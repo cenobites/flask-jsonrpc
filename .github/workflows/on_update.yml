@@ -19,7 +19,7 @@ jobs:
       matrix:
         platform:
           - ubuntu-latest
-        python-version: ["3.7", "3.8", "3.9"]
+        python-version: ["3.7", "3.8", "3.9", "3.10"]
     steps:
     - name: Checkout source at ${{ matrix.platform }}
       uses: actions/checkout@v3
@@ -47,7 +47,7 @@ jobs:
       matrix:
         platform:
           - ubuntu-latest
-        python-version: ["3.7", "3.8", "3.9"]
+        python-version: ["3.7", "3.8", "3.9", "3.10"]
     steps:
     - name: Checkout source at ${{ matrix.platform }}
       uses: actions/checkout@v3
@@ -72,7 +72,7 @@ jobs:
       matrix:
         platform:
           - ubuntu-latest
-        python-version: ["3.10"]
+        python-version: ["3.11"]
     steps:
     - name: Checkout source at ${{ matrix.platform }}
       uses: actions/checkout@v3

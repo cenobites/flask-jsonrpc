@@ -283,8 +283,8 @@ def test_app_notify(async_client):
     assert rv.status_code == 204
 
 
-def test_app_not_allow_notify(client):
-    rv = client.post('/api', json={'jsonrpc': '2.0', 'method': 'jsonrpc.not_allow_notify'})
+def test_app_not_allow_notify(async_client):
+    rv = async_client.post('/api', json={'jsonrpc': '2.0', 'method': 'jsonrpc.not_allow_notify'})
     assert rv.json == {
         'error': {
             'code': -32600,
@@ -300,11 +300,26 @@ def test_app_not_allow_notify(client):
     }
     assert rv.status_code == 400
 
-    rv = client.post(
+    rv = async_client.post(
         '/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.not_allow_notify', 'params': ['Some string']}
     )
     assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': 'Not allow notify'}
     assert rv.status_code == 200
+
+
+def test_app_no_return(async_client):
+    rv = async_client.post('/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.noReturn'})
+    assert rv.json == {
+        'error': {
+            'code': -32000,
+            'data': {'message': 'no return'},
+            'message': 'Server error',
+            'name': 'ServerError',
+        },
+        'id': 1,
+        'jsonrpc': '2.0',
+    }
+    assert rv.status_code == 500
 
 
 def test_app_fails(async_client):
@@ -574,6 +589,13 @@ def test_app_system_describe(async_client):
             'name': 'jsonrpc.not_validate',
             'options': {'notification': True, 'validate': False},
             'params': [],
+            'return': {'type': 'Null'},
+            'summary': None,
+        },
+        {
+            'name': 'jsonrpc.noReturn',
+            'options': {'notification': True, 'validate': True},
+            'params': [{'name': '_string', 'type': 'String'}],
             'return': {'type': 'Null'},
             'summary': None,
         },

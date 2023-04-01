@@ -1,7 +1,7 @@
-FROM python:3.10-alpine
+FROM python:3.11-alpine
 
 ENV PYTHONUNBUFFERED=1 \
-    PRAGMA_VERSION=py3.10 \
+    PRAGMA_VERSION=py3.11 \
     DEBUG=0
 
 WORKDIR /code

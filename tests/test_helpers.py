@@ -49,3 +49,4 @@ def test_from_python_type():
     assert str(from_python_type(tuple)) == 'Array'
     assert str(from_python_type(bool)) == 'Boolean'
     assert str(from_python_type(type(None))) == 'Null'
+    assert str(from_python_type(type)) == 'Object'
