@@ -28,7 +28,7 @@
 # isort:skip_file
 import os
 import sys
-from typing import Any, Dict, List, Union, NoReturn, Optional
+import typing as t
 from numbers import Real
 
 from flask import Flask
@@ -63,12 +63,12 @@ def hello_default_args(string: str = 'Flask JSON-RPC') -> str:
 
 
 @jsonrpc.method('App.argsValidate')
-def args_validate(a1: int, a2: str, a3: bool, a4: List[Any], a5: Dict[Any, Any]) -> str:
+def args_validate(a1: int, a2: str, a3: bool, a4: t.List[t.Any], a5: t.Dict[t.Any, t.Any]) -> str:
     return f'Number: {a1}, String: {a2}, Boolean: {a3}, Array: {a4}, Object: {a5}'
 
 
 @jsonrpc.method('App.notify')
-def notify(_string: Optional[str] = None) -> None:
+def notify(_string: t.Optional[str] = None) -> None:
     pass
 
 
@@ -78,7 +78,7 @@ def not_notify(string: str) -> str:
 
 
 @jsonrpc.method('App.fails')
-def fails(_string: Optional[str] = None) -> NoReturn:
+def fails(_string: t.Optional[str] = None) -> t.NoReturn:
     raise ValueError('example of fail')
 
 
@@ -88,7 +88,7 @@ def sum_(a: Real, b: Real) -> Real:
 
 
 @jsonrpc.method('App.subtract')
-def subtract(a: Union[int, float], b: Union[int, float]) -> Union[int, float]:
+def subtract(a: t.Union[int, float], b: t.Union[int, float]) -> t.Union[int, float]:
     return a - b
 
 

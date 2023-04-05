@@ -57,7 +57,7 @@ def check_terminal_id(fn: Callable[..., Any]):
     return wrapped
 
 
-def jsonrcp_headers(fn: Callable[..., Any]):
+def jsonrpc_headers(fn: Callable[..., Any]):
     def wrapped(*args: Any, **kwargs: Any) -> Any:
         headers = {'X-JSONRPC-Tag': 'JSONRPC 2.0'}
         rv = fn(*args, **kwargs)
@@ -75,7 +75,7 @@ def index() -> str:
 
 @jsonrpc.method('App.decorators')
 @check_terminal_id
-@jsonrcp_headers
+@jsonrpc_headers
 def decorators() -> dict:
     return {'terminal_id': request.get_json(silent=True).get('terminal_id', 0), 'headers': str(request.headers)}
 

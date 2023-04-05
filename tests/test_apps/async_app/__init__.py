@@ -77,7 +77,7 @@ class App:
         raise ValueError('number is odd')
 
 
-def async_jsonrcp_decorator(fn):
+def async_jsonrpc_decorator(fn):
     @functools.wraps(fn)
     async def wrapped(*args, **kwargs):
         rv = await fn(*args, **kwargs)
@@ -141,7 +141,7 @@ def create_async_app(test_config: t.Dict[str, t.Any] = None):  # noqa: C901  pyl
 
     # pylint: disable=W0612
     @jsonrpc.method('jsonrpc.decorators')
-    @async_jsonrcp_decorator
+    @async_jsonrpc_decorator
     async def decorators(string: str) -> str:
         await asyncio.sleep(0)
         return f'Hello {string}'
