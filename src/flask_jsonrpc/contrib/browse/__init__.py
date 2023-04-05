@@ -25,7 +25,7 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 import typing as t
-from itertools import chain
+from collections import ChainMap
 
 from flask import Blueprint, jsonify, request, render_template
 
@@ -35,7 +35,8 @@ if t.TYPE_CHECKING:
     from flask import Flask
     from flask import typing as ft
 
-    from flask_jsonrpc.site import JSONRPCSite, ServiceProcedureDescribe
+    from flask_jsonrpc.site import JSONRPCSite
+    from flask_jsonrpc.typing import ServiceMethodDescribe
 
 
 class JSONRPCBrowse:
@@ -49,9 +50,8 @@ class JSONRPCBrowse:
         if app:
             self.init_app(app)
 
-    def _service_desc_procedures(self) -> t.Dict[str, 'ServiceProcedureDescribe']:
-        service_procs = list(chain(*[site.describe()['procs'] for site in self.jsonrpc_sites]))
-        return {proc['name']: proc for proc in service_procs}
+    def _service_methods_desc(self) -> t.Dict[str, 'ServiceMethodDescribe']:
+        return dict(ChainMap(*[site.describe()['methods'] for site in self.jsonrpc_sites]))
 
     def init_app(self, app: 'Flask') -> None:
         name = urn('browse', app.name, self.url_prefix)
@@ -71,32 +71,29 @@ class JSONRPCBrowse:
         self.jsonrpc_sites.add(jsonrpc_site)
 
     def vf_index(self) -> str:
-        server_urls = {}
+        server_urls: t.Dict[str, str] = {}
         service_describes = [site.describe() for site in self.jsonrpc_sites]
         for service_describe in service_describes:
             server_urls.update(
-                {
-                    name: service_describe['servers'][0]['url']
-                    for name in [proc['name'] for proc in service_describe['procs']]
-                }
+                {name: service_describe['servers'][0]['url'] for name in service_describe['methods'].keys()}
             )
         url_prefix = f"{request.script_root}{request.path.rstrip('/')}"
         return render_template('browse/index.html', url_prefix=url_prefix, server_urls=server_urls)
 
     def vf_json_packages(self) -> 'ft.ResponseReturnValue':
-        service_procedures = self._service_desc_procedures()
-        packages = sorted(service_procedures.values(), key=lambda proc: proc['name'])
-        packages_tree: t.Dict[str, t.Any] = {}
+        service_methods = self._service_methods_desc()
+        packages = sorted(service_methods.keys())
+        packages_tree: t.Dict[str, t.List[t.Dict[str, t.Any]]] = {}
         for package in packages:
-            package_name = package['name'].split('.')[0]
-            packages_tree.setdefault(package_name, []).append(package)
+            package_name = package.split('.')[0]
+            packages_tree.setdefault(package_name, []).append({'name': package, **service_methods[package]})
         return jsonify(packages_tree)
 
     def vf_json_method(self, method_name: str) -> 'ft.ResponseReturnValue':
-        service_procedures = self._service_desc_procedures()
+        service_procedures = self._service_methods_desc()
         if method_name not in service_procedures:
             return jsonify({'message': 'Not found'}), 404
-        return jsonify(service_procedures[method_name])
+        return jsonify({'name': method_name, **service_procedures[method_name]})
 
     def vf_partials_dashboard(self) -> str:
         return render_template('browse/partials/dashboard.html')

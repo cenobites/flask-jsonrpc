@@ -24,6 +24,7 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
+# pylint: disable=R0904
 import typing as t
 from uuid import UUID, uuid4
 from urllib.parse import urlsplit
@@ -33,6 +34,7 @@ from flask import json, request, current_app
 from typeguard import qualified_name
 from werkzeug.datastructures import Headers
 
+from . import typing as fjt  # pylint: disable=W0404
 from .helpers import get, from_python_type
 from .settings import settings
 from .exceptions import (
@@ -44,36 +46,9 @@ from .exceptions import (
     MethodNotFoundError,
 )
 
-# Python 3.8+
-try:
-    from typing_extensions import TypedDict
-except ImportError:  # pragma: no cover
-    from typing import TypedDict  # pylint: disable=C0412
-
-ServiceProcedureDescribe = TypedDict(
-    'ServiceProcedureDescribe',
-    {
-        'name': str,
-        'options': t.Dict[str, t.Any],
-        'summary': t.Optional[str],
-        'params': t.List[t.Dict[str, str]],
-        'return': t.Dict[str, str],
-    },
-)
-
-
-class ServiceDescribe(TypedDict):
-    id: str
-    sdversion: str
-    version: str
-    name: str
-    summary: t.Optional[str]
-    servers: t.List[t.Dict[str, str]]
-    procs: t.List[ServiceProcedureDescribe]  # pytype: disable=invalid-annotation
-
-
 JSONRPC_VERSION_DEFAULT: str = '2.0'
-JSONRCP_DESCRIBE_METHOD_NAME: str = 'system.describe'
+JSONRPC_DESCRIBE_METHOD_NAME: str = 'rpc.describe'
+JSONRPC_DESCRIBE_SERVICE_METHOD_TYPE: str = 'method'
 JSONRPC_DEFAULT_HTTP_HEADERS: t.Dict[str, str] = {}
 JSONRPC_DEFAULT_HTTP_STATUS_CODE: int = 200
 
@@ -86,11 +61,7 @@ class JSONRPCSite:
         self.uuid: UUID = uuid4()
         self.name: str = 'Flask-JSONRPC'
         self.version: str = JSONRPC_VERSION_DEFAULT
-        self.register(JSONRCP_DESCRIBE_METHOD_NAME, self.describe)
-
-    def server_url(self) -> str:
-        url = urlsplit(self.base_url or self.path)
-        return f"{url.scheme!r}://{url.netloc!r}/{(self.path or '').lstrip('/')}" if self.base_url else str(url.path)
+        self.register(JSONRPC_DESCRIBE_METHOD_NAME, self.describe)
 
     @property
     def is_json(self) -> bool:
@@ -188,8 +159,8 @@ class JSONRPCSite:
     def dispatch(
         self, req_json: t.Dict[str, t.Any]
     ) -> t.Tuple[t.Any, int, t.Union[Headers, t.Dict[str, str], t.Tuple[str], t.List[t.Tuple[str]]]]:
-        params = req_json.get('params', {})
         method_name = req_json['method']
+        params = req_json.get('params', {})
         view_func = self.view_funcs.get(method_name)
         validate = getattr(view_func, 'jsonrpc_validate', settings.DEFAULT_JSONRPC_METHOD['VALIDATE'])
         notification = getattr(view_func, 'jsonrpc_notification', settings.DEFAULT_JSONRPC_METHOD['NOTIFICATION'])
@@ -280,33 +251,47 @@ class JSONRPCSite:
     def python_type_name(self, pytype: t.Any) -> str:
         return str(from_python_type(pytype))
 
-    def procedure_desc(self, key: str) -> ServiceProcedureDescribe:  # pytype: disable=invalid-annotation
-        view_func = self.view_funcs[key]
-        return {
-            'name': getattr(view_func, 'jsonrpc_method_name', key),
-            'summary': getattr(view_func, '__doc__', None),
-            'options': getattr(view_func, 'jsonrpc_options', {}),
-            'params': [
-                {'name': k, 'type': self.python_type_name(t)}
-                for k, t in getattr(view_func, 'jsonrpc_method_params', {}).items()
-            ],
-            'return': {'type': self.python_type_name(getattr(view_func, 'jsonrpc_method_return', type(None)))},
-        }
+    def service_method_params_desc(self, view_func: t.Callable[..., t.Any]) -> t.List[fjt.ServiceMethodParamsDescribe]:
+        return [
+            fjt.ServiceMethodParamsDescribe(  # pytype: disable=missing-parameter
+                name=name,
+                type=self.python_type_name(tp),
+                required=False,
+                nullable=False,
+            )
+            for name, tp in getattr(view_func, 'jsonrpc_method_params', {}).items()
+        ]
 
-    def service_desc(self) -> ServiceDescribe:
-        return ServiceDescribe(
-            sdversion='1.0',
+    def service_methods_desc(self) -> t.Dict[str, fjt.ServiceMethodDescribe]:
+        methods: t.Dict[str, fjt.ServiceMethodDescribe] = {}
+        for key, view_func in self.view_funcs.items():
+            if key == JSONRPC_DESCRIBE_METHOD_NAME:
+                continue
+            name = getattr(view_func, 'jsonrpc_method_name', key)
+            methods[name] = fjt.ServiceMethodDescribe(  # pytype: disable=missing-parameter
+                type=JSONRPC_DESCRIBE_SERVICE_METHOD_TYPE,
+                description=getattr(view_func, '__doc__', None),
+                options=getattr(view_func, 'jsonrpc_options', {}),
+                params=self.service_method_params_desc(view_func),
+                returns=fjt.ServiceMethodReturnsDescribe(
+                    type=self.python_type_name(getattr(view_func, 'jsonrpc_method_return', type(None))),
+                ),
+            )
+        return methods
+
+    def service_server_url(self) -> str:
+        url = urlsplit(self.base_url or self.path)
+        return f"{url.scheme!r}://{url.netloc!r}/{(self.path or '').lstrip('/')}" if self.base_url else str(url.path)
+
+    def service_desc(self) -> fjt.ServiceDescribe:
+        return fjt.ServiceDescribe(
             id=f'urn:uuid:{self.uuid}',
             version=self.version,
             name=self.name,
-            summary=self.__doc__,
-            servers=[
-                {
-                    'url': self.server_url(),
-                }
-            ],
-            procs=[self.procedure_desc(k) for k in self.view_funcs if k != JSONRCP_DESCRIBE_METHOD_NAME],
+            description=self.__doc__,
+            servers=[fjt.ServiceServersDescribe(url=self.service_server_url())],  # pytype: disable=missing-parameter
+            methods=self.service_methods_desc(),
         )
 
-    def describe(self) -> ServiceDescribe:
+    def describe(self) -> fjt.ServiceDescribe:
         return self.service_desc()

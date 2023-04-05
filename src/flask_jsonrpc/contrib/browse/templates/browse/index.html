@@ -18,7 +18,7 @@
 {% block templates_js %}
 {% raw %}
 <script id="menu-module-tooltip" type="text/x-handlebars-template">
-    {{name}}({{#each params}}{{this.name}}: {{this.type}}{{#unless @last}}, {{/unless}}{{/each}}) -> {{return.type}}
+    {{name}}({{#each params}}{{this.name}}: {{this.type}}{{#unless @last}}, {{/unless}}{{/each}}) -> {{returns.type}}
 </script>
 {% endraw %}
 {% endblock %}

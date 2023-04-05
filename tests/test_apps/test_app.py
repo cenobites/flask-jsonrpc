@@ -567,166 +567,173 @@ class APITest(APITestCase):
         self.assertEqual(500, rv.status_code)
 
     def test_system_describe(self):
-        rv = self.requests.post(API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'system.describe'})
+        rv = self.requests.post(API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'rpc.describe'})
         json_data = rv.json()
         self.assertEqual(1, json_data['id'])
         self.assertEqual('2.0', json_data['jsonrpc'])
         self.assertEqual('Flask-JSONRPC', json_data['result']['name'])
-        self.assertEqual('1.0', json_data['result']['sdversion'])
-        self.assertIsNone(json_data['result']['summary'])
+        self.assertIsNone(json_data['result']['description'])
         self.assertEqual('2.0', json_data['result']['version'])
         self.assertIsNotNone(json_data['result']['servers'])
-        self.maxDiff = None
         self.assertEqual(
-            [
-                {
-                    'name': 'jsonrpc.greeting',
+            {
+                'jsonrpc.greeting': {
+                    'type': 'method',
                     'options': {'notification': True, 'validate': True},
-                    'params': [{'name': 'name', 'type': 'String'}],
-                    'return': {'type': 'String'},
-                    'summary': None,
+                    'params': [{'name': 'name', 'type': 'String', 'required': False, 'nullable': False}],
+                    'returns': {'type': 'String'},
+                    'description': None,
                 },
-                {
-                    'name': 'jsonrpc.echo',
-                    'options': {'notification': True, 'validate': True},
-                    'params': [{'name': 'string', 'type': 'String'}, {'name': '_some', 'type': 'Object'}],
-                    'return': {'type': 'String'},
-                    'summary': None,
-                },
-                {
-                    'name': 'jsonrpc.notify',
-                    'options': {'notification': True, 'validate': True},
-                    'params': [{'name': '_string', 'type': 'String'}],
-                    'return': {'type': 'Null'},
-                    'summary': None,
-                },
-                {
-                    'name': 'jsonrpc.not_allow_notify',
-                    'options': {'notification': False, 'validate': True},
-                    'params': [{'name': '_string', 'type': 'String'}],
-                    'return': {'type': 'String'},
-                    'summary': None,
-                },
-                {
-                    'name': 'jsonrpc.fails',
-                    'options': {'notification': True, 'validate': True},
-                    'params': [{'name': 'n', 'type': 'Number'}],
-                    'return': {'type': 'Number'},
-                    'summary': None,
-                },
-                {
-                    'name': 'jsonrpc.strangeEcho',
+                'jsonrpc.echo': {
+                    'type': 'method',
                     'options': {'notification': True, 'validate': True},
                     'params': [
-                        {'name': 'string', 'type': 'String'},
-                        {'name': 'omg', 'type': 'Object'},
-                        {'name': 'wtf', 'type': 'Array'},
-                        {'name': 'nowai', 'type': 'Number'},
-                        {'name': 'yeswai', 'type': 'String'},
+                        {'name': 'string', 'type': 'String', 'required': False, 'nullable': False},
+                        {'name': '_some', 'type': 'Object', 'required': False, 'nullable': False},
                     ],
-                    'return': {'type': 'Array'},
-                    'summary': None,
+                    'returns': {'type': 'String'},
+                    'description': None,
                 },
-                {
-                    'name': 'jsonrpc.sum',
+                'jsonrpc.notify': {
+                    'type': 'method',
                     'options': {'notification': True, 'validate': True},
-                    'params': [{'name': 'a', 'type': 'Number'}, {'name': 'b', 'type': 'Number'}],
-                    'return': {'type': 'Number'},
-                    'summary': None,
+                    'params': [{'name': '_string', 'type': 'String', 'required': False, 'nullable': False}],
+                    'returns': {'type': 'Null'},
+                    'description': None,
                 },
-                {
-                    'name': 'jsonrpc.decorators',
+                'jsonrpc.not_allow_notify': {
+                    'type': 'method',
+                    'options': {'notification': False, 'validate': True},
+                    'params': [{'name': '_string', 'type': 'String', 'required': False, 'nullable': False}],
+                    'returns': {'type': 'String'},
+                    'description': None,
+                },
+                'jsonrpc.fails': {
+                    'type': 'method',
                     'options': {'notification': True, 'validate': True},
-                    'params': [{'name': 'string', 'type': 'String'}],
-                    'return': {'type': 'String'},
-                    'summary': None,
+                    'params': [{'name': 'n', 'type': 'Number', 'required': False, 'nullable': False}],
+                    'returns': {'type': 'Number'},
+                    'description': None,
                 },
-                {
-                    'name': 'jsonrpc.returnStatusCode',
+                'jsonrpc.strangeEcho': {
+                    'type': 'method',
                     'options': {'notification': True, 'validate': True},
-                    'params': [{'name': 's', 'type': 'String'}],
-                    'return': {'type': 'Array'},
-                    'summary': None,
+                    'params': [
+                        {'name': 'string', 'type': 'String', 'required': False, 'nullable': False},
+                        {'name': 'omg', 'type': 'Object', 'required': False, 'nullable': False},
+                        {'name': 'wtf', 'type': 'Array', 'required': False, 'nullable': False},
+                        {'name': 'nowai', 'type': 'Number', 'required': False, 'nullable': False},
+                        {'name': 'yeswai', 'type': 'String', 'required': False, 'nullable': False},
+                    ],
+                    'returns': {'type': 'Array'},
+                    'description': None,
                 },
-                {
-                    'name': 'jsonrpc.returnHeaders',
+                'jsonrpc.sum': {
+                    'type': 'method',
                     'options': {'notification': True, 'validate': True},
-                    'params': [{'name': 's', 'type': 'String'}],
-                    'return': {'type': 'Array'},
-                    'summary': None,
+                    'params': [
+                        {'name': 'a', 'type': 'Number', 'required': False, 'nullable': False},
+                        {'name': 'b', 'type': 'Number', 'required': False, 'nullable': False},
+                    ],
+                    'returns': {'type': 'Number'},
+                    'description': None,
                 },
-                {
-                    'name': 'jsonrpc.returnStatusCodeAndHeaders',
+                'jsonrpc.decorators': {
+                    'type': 'method',
                     'options': {'notification': True, 'validate': True},
-                    'params': [{'name': 's', 'type': 'String'}],
-                    'return': {'type': 'Array'},
-                    'summary': None,
+                    'params': [{'name': 'string', 'type': 'String', 'required': False, 'nullable': False}],
+                    'returns': {'type': 'String'},
+                    'description': None,
                 },
-                {
-                    'name': 'jsonrpc.not_validate',
+                'jsonrpc.returnStatusCode': {
+                    'type': 'method',
+                    'options': {'notification': True, 'validate': True},
+                    'params': [{'name': 's', 'type': 'String', 'required': False, 'nullable': False}],
+                    'returns': {'type': 'Array'},
+                    'description': None,
+                },
+                'jsonrpc.returnHeaders': {
+                    'type': 'method',
+                    'options': {'notification': True, 'validate': True},
+                    'params': [{'name': 's', 'type': 'String', 'required': False, 'nullable': False}],
+                    'returns': {'type': 'Array'},
+                    'description': None,
+                },
+                'jsonrpc.returnStatusCodeAndHeaders': {
+                    'type': 'method',
+                    'options': {'notification': True, 'validate': True},
+                    'params': [{'name': 's', 'type': 'String', 'required': False, 'nullable': False}],
+                    'returns': {'type': 'Array'},
+                    'description': None,
+                },
+                'jsonrpc.not_validate': {
+                    'type': 'method',
                     'options': {'notification': True, 'validate': False},
                     'params': [],
-                    'return': {'type': 'Null'},
-                    'summary': None,
+                    'returns': {'type': 'Null'},
+                    'description': None,
                 },
-                {
-                    'name': 'jsonrpc.noReturn',
+                'jsonrpc.noReturn': {
+                    'type': 'method',
                     'options': {'notification': True, 'validate': True},
-                    'params': [{'name': '_string', 'type': 'String'}],
-                    'return': {'type': 'Null'},
-                    'summary': None,
+                    'params': [{'name': '_string', 'type': 'String', 'required': False, 'nullable': False}],
+                    'returns': {'type': 'Null'},
+                    'description': None,
                 },
-                {
-                    'name': 'classapp.index',
+                'classapp.index': {
+                    'type': 'method',
                     'options': {'notification': True, 'validate': True},
-                    'params': [{'name': 'name', 'type': 'String'}],
-                    'return': {'type': 'String'},
-                    'summary': None,
+                    'params': [{'name': 'name', 'type': 'String', 'required': False, 'nullable': False}],
+                    'returns': {'type': 'String'},
+                    'description': None,
                 },
-                {
-                    'name': 'greeting',
+                'greeting': {
+                    'type': 'method',
                     'options': {'notification': True, 'validate': True},
-                    'params': [{'name': 'name', 'type': 'String'}],
-                    'return': {'type': 'String'},
-                    'summary': None,
+                    'params': [{'name': 'name', 'type': 'String', 'required': False, 'nullable': False}],
+                    'returns': {'type': 'String'},
+                    'description': None,
                 },
-                {
-                    'name': 'hello',
+                'hello': {
+                    'type': 'method',
                     'options': {'notification': True, 'validate': True},
-                    'params': [{'name': 'name', 'type': 'String'}],
-                    'return': {'type': 'String'},
-                    'summary': None,
+                    'params': [{'name': 'name', 'type': 'String', 'required': False, 'nullable': False}],
+                    'returns': {'type': 'String'},
+                    'description': None,
                 },
-                {
-                    'name': 'echo',
+                'echo': {
+                    'type': 'method',
                     'options': {'notification': True, 'validate': True},
-                    'params': [{'name': 'string', 'type': 'String'}, {'name': '_some', 'type': 'Object'}],
-                    'return': {'type': 'String'},
-                    'summary': None,
+                    'params': [
+                        {'name': 'string', 'type': 'String', 'required': False, 'nullable': False},
+                        {'name': '_some', 'type': 'Object', 'required': False, 'nullable': False},
+                    ],
+                    'returns': {'type': 'String'},
+                    'description': None,
                 },
-                {
-                    'name': 'notify',
+                'notify': {
+                    'type': 'method',
                     'options': {'notification': True, 'validate': True},
-                    'params': [{'name': '_string', 'type': 'String'}],
-                    'return': {'type': 'Null'},
-                    'summary': None,
+                    'params': [{'name': '_string', 'type': 'String', 'required': False, 'nullable': False}],
+                    'returns': {'type': 'Null'},
+                    'description': None,
                 },
-                {
-                    'name': 'not_allow_notify',
+                'not_allow_notify': {
+                    'type': 'method',
                     'options': {'notification': False, 'validate': True},
-                    'params': [{'name': '_string', 'type': 'String'}],
-                    'return': {'type': 'String'},
-                    'summary': None,
+                    'params': [{'name': '_string', 'type': 'String', 'required': False, 'nullable': False}],
+                    'returns': {'type': 'String'},
+                    'description': None,
                 },
-                {
-                    'name': 'fails',
+                'fails': {
+                    'type': 'method',
                     'options': {'notification': True, 'validate': True},
-                    'params': [{'name': 'n', 'type': 'Number'}],
-                    'return': {'type': 'Number'},
-                    'summary': None,
+                    'params': [{'name': 'n', 'type': 'Number', 'required': False, 'nullable': False}],
+                    'returns': {'type': 'Number'},
+                    'description': None,
                 },
-            ],
-            json_data['result']['procs'],
+            },
+            json_data['result']['methods'],
         )
 
         self.assertEqual(200, rv.status_code)

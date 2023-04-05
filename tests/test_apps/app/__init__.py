@@ -70,7 +70,7 @@ class App:
         raise ValueError('number is odd')
 
 
-def jsonrcp_decorator(fn):
+def jsonrpc_decorator(fn):
     @functools.wraps(fn)
     def wrapped(*args, **kwargs):
         rv = fn(*args, **kwargs)
@@ -128,7 +128,7 @@ def create_app(test_config: t.Dict[str, t.Any] = None):  # noqa: C901  pylint: d
 
     # pylint: disable=W0612
     @jsonrpc.method('jsonrpc.decorators')
-    @jsonrcp_decorator
+    @jsonrpc_decorator
     def decorators(string: str) -> str:
         return f'Hello {string}'
 

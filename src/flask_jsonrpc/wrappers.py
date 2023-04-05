@@ -71,10 +71,10 @@ class JSONRPCDecoratorMixin:
         raise ValueError('the view function must be either a function or a method')
 
     def get_jsonrpc_site(self) -> 'JSONRPCSite':
-        raise NotImplementedError
+        raise NotImplementedError('.get_jsonrpc_site must be overridden')
 
     def get_jsonrpc_site_api(self) -> t.Type['JSONRPCView']:
-        raise NotImplementedError
+        raise NotImplementedError('.get_jsonrpc_site_api must be overridden')
 
     def register_view_function(
         self, view_func: t.Callable[..., t.Any], name: t.Optional[str] = None, **options: t.Dict[str, t.Any]
