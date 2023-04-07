@@ -33,5 +33,5 @@ safety@git+https://github.com/pyupio/safety;python_version>="3.11"  # https://gi
 
 # Code quality
 # ------------------------------------------------------------------------------
-coverage==6.5.0  # https://github.com/nedbat/coveragepy
+coverage==7.2.3  # https://github.com/nedbat/coveragepy
 coveralls==3.3.1  # https://github.com/marketplace/coveralls
