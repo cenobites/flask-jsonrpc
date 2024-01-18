@@ -33,4 +33,3 @@ safety==3.0.0;python_version>="3.11"  # https://github.com/pyupio/safety
 # Code quality
 # ------------------------------------------------------------------------------
 coverage==7.4.0  # https://github.com/nedbat/coveragepy
-python-coveralls==2.9.3  # https://github.com/z4r/python-coveralls

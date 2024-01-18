@@ -184,30 +184,14 @@ jobs:
           - ubuntu-latest
         python-version: ["3.12"]
     steps:
-    - name: Checkout source at ${{ matrix.platform }}
-      uses: actions/checkout@v4
-      with:
-        ref: ${{ github.ref_name }}
-    - name: Setup Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v5
-      with:
-        python-version: ${{ matrix.python-version }}
-        cache: 'pip'
-        cache-dependency-path: 'requirements/*.txt'
-    - name: Install dependencies
-      run: |
-        pip install --upgrade pip
-        pip install -r requirements/test.txt
     - name: Download a coverage artifact
       uses: actions/download-artifact@v4
       with:
         name: test-n-coverage-report
     - name: Send coverage stats to Coveralls
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
-      run: |
-        coveralls
+      uses: coverallsapp/github-action@v2
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
 
   build:
     name: Build source

@@ -15,7 +15,6 @@ typeguard==2.13.3  # https://github.com/agronholm/typeguard
 # Code quality
 # ------------------------------------------------------------------------------
 coverage==7.4.0  # https://github.com/nedbat/coveragepy
-python-coveralls==2.9.3  # https://github.com/z4r/python-coveralls
 
 # Tools
 # ------------------------------------------------------------------------------
