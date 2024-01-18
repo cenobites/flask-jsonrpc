@@ -16,9 +16,9 @@ RUN set -ex \
         git \
     && pip install pip setuptools wheel --upgrade \
     && pip install -r requirements/base.txt \
-    && pip install -r requirements/test.txt \
+    && pip install -r requirements/style.txt \
+    && pip install -r requirements/tests.txt \
         poetry-core>=1.0.0 \
-    && pip install -r requirements/ci.txt \
     && apk del .build-deps \
     && addgroup -S kuchulu \
     && adduser \

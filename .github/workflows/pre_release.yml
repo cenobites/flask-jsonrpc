@@ -5,20 +5,22 @@ on:
     branches:
       - master
       - release/**
+    tags-ignore:
+      - v**
 
 permissions:
   contents: read
 
 jobs:
-  lint:
-    name: Lint
+  run-tox:
+    name: Tox | Test, Style, Lint, Typing, Pytype, Security and Docs
     runs-on: ${{ matrix.platform }}
     strategy:
       fail-fast: false
       matrix:
         platform:
           - ubuntu-latest
-        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
+        python-version: ["3.11", "3.12"]
     steps:
     - name: Checkout source at ${{ matrix.platform }}
       uses: actions/checkout@v4
@@ -28,113 +30,20 @@ jobs:
       uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
-        cache: 'pip'
-        cache-dependency-path: 'requirements/*.txt'
     - name: Install dependencies
       run: |
-        pip install --upgrade pip
-        pip install -r requirements/base.txt
-        pip install -r requirements/ci.txt
-    - name: Lint with Flake8
+        python -m pip install --upgrade pip tox
+    - name: Run tox
+      if: ${{ matrix.platform == 'ubuntu-latest' && matrix.python-version == '3.12' }}
       run: |
-        flake8 src/ tests/
-    - name: Lint with PyLint
+        tox -e py,py-async,style,typing,security,docs
+    - name: Run tox (Pytype)
+      if: ${{ matrix.platform == 'ubuntu-latest' && matrix.python-version == '3.11' }}
       run: |
-        pylint src/ tests/
-
-  pytype:
-    name: Typing
-    runs-on: ${{ matrix.platform }}
-    strategy:
-      fail-fast: false
-      matrix:
-        platform:
-          - ubuntu-latest
-        python-version: ["3.11"]
-    steps:
-    - name: Checkout source at ${{ matrix.platform }}
-      uses: actions/checkout@v4
-      with:
-        ref: ${{ github.ref_name }}
-    - name: Setup Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v5
-      with:
-        python-version: ${{ matrix.python-version }}
-        cache: 'pip'
-        cache-dependency-path: 'requirements/*.txt'
-    - name: Install dependencies
-      run: |
-        pip install --upgrade pip
-        pip install -r requirements/base.txt
-        pip install -r requirements/ci.txt
-    - name: Static type check with Pytype
-      run: |
-        pytype
-
-  typing:
-    name: Typing
-    runs-on: ${{ matrix.platform }}
-    strategy:
-      fail-fast: false
-      matrix:
-        platform:
-          - ubuntu-latest
-        python-version: ["3.12"]
-    steps:
-    - name: Checkout source at ${{ matrix.platform }}
-      uses: actions/checkout@v4
-      with:
-        ref: ${{ github.ref_name }}
-    - name: Setup Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v5
-      with:
-        python-version: ${{ matrix.python-version }}
-        cache: 'pip'
-        cache-dependency-path: 'requirements/*.txt'
-    - name: Install dependencies
-      run: |
-        pip install --upgrade pip
-        pip install -r requirements/base.txt
-        pip install -r requirements/ci.txt
-    - name: Static type check with MyPy
-      run: |
-        mypy --install-types --non-interactive src/
-
-  security:
-    name: Security
-    runs-on: ${{ matrix.platform }}
-    strategy:
-      fail-fast: false
-      matrix:
-        platform:
-          - ubuntu-latest
-        python-version: ["3.12"]
-    steps:
-    - name: Checkout source at ${{ matrix.platform }}
-      uses: actions/checkout@v4
-      with:
-        ref: ${{ github.ref_name }}
-    - name: Setup Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v5
-      with:
-        python-version: ${{ matrix.python-version }}
-        cache: 'pip'
-        cache-dependency-path: 'requirements/*.txt'
-    - name: Install dependencies
-      run: |
-        pip install --upgrade pip
-        pip install -r requirements/base.txt
-        pip install -r requirements/ci.txt
-    - name: Check security issue in code with Bandit
-      run: |
-        bandit -r src/
-    - name: Check dependencies for known security vulnerabilities with Safety
-      run: |
-        safety check
+        tox -e pytype
 
   test:
     name: Test
-    needs: [lint, typing, security]
     runs-on: ${{ matrix.platform }}
     strategy:
       fail-fast: false
@@ -159,7 +68,7 @@ jobs:
       run: |
         pip install --upgrade pip
         pip install -r requirements/base.txt
-        pip install -r requirements/test.txt
+        pip install -r requirements/tests.txt
     - name: Test and and run coverage with PyTest
       run: |
         py.test
@@ -170,6 +79,7 @@ jobs:
         name: test-n-coverage-report
         path: |
           .coverage
+          coverage.lcov
           junit/
           htmlcov/
 
@@ -192,10 +102,13 @@ jobs:
       uses: coverallsapp/github-action@v2
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
+        format: lcov
+        file: coverage.lcov
+        allow-empty: true
 
   build:
     name: Build source
-    needs: coverage
+    needs: [run-tox, coverage]
     runs-on: ${{ matrix.platform }}
     strategy:
       fail-fast: false
@@ -216,19 +129,16 @@ jobs:
         python-version: ${{ matrix.python-version }}
     - name: Build source and wheel distributions
       run: |
-        python -m pip install --upgrade pip setuptools build
+        python -m pip install build
         python -m build --outdir dist-${{ matrix.platform }}-${{ matrix.python-version }}
     - name: Tar build and wheel distributions files
-      if: ${{  matrix.platform == 'ubuntu-latest' && matrix.python-version == '3.12' }}
       run: |
-        mv dist-${{ matrix.platform }}-${{ matrix.python-version }} dist
-        tar -cvf dist.tar dist
+        tar -cvf dist-${{ matrix.platform }}-${{ matrix.python-version }}.tar dist-${{ matrix.platform }}-${{ matrix.python-version }}
     - name: Upload build and wheel distributions files
-      if: ${{  matrix.platform == 'ubuntu-latest' && matrix.python-version == '3.12' }}
       uses: actions/upload-artifact@v4
       with:
-        name: pre-release-build
-        path: dist.tar
+        name: pre-release-build-${{ matrix.platform }}-${{ matrix.python-version }}
+        path: dist-${{ matrix.platform }}-${{ matrix.python-version }}.tar
 
   publish-testpypi:
     name: Publish to TestPyPI
@@ -254,30 +164,17 @@ jobs:
     - name: Download build and wheel distributions files
       uses: actions/download-artifact@v4
       with:
-        name: pre-release-build
+        name: pre-release-build-${{ matrix.platform }}-${{ matrix.python-version }}
     - name: Build source and wheel distributions to version ${{ github.ref_name }}
       run: |
-        python -m pip install --upgrade pip setuptools twine
-        tar -xvf dist.tar
-        twine check --strict dist/*
+        python -m pip install twine
+        tar -xvf dist-${{ matrix.platform }}-${{ matrix.python-version }}.tar
+        twine check --strict dist-${{ matrix.platform }}-${{ matrix.python-version }}/*
     - name: Publish distribution to TestPyPI
       uses: pypa/gh-action-pypi-publish@v1.8.11
       with:
         user: __token__
         password: ${{ secrets.TEST_PYPI_API_TOKEN }}
-        repository_url: https://test.pypi.org/legacy/
-        skip_existing: true
-    # - name: Create GitHub Pre Release
-    #   id: create_release
-    #   uses: softprops/action-gh-release@v1
-    #   with:
-    #     name: ${{ github.ref_name }}
-    #     draft: false
-    #     prerelease: true
-    #     generate_release_notes: true
-    #     files: |
-    #       COPYING
-    #       LICENSE
-    #       AUTHORS
-    #       README.md
-    #       dist/*
+        repository-url: https://test.pypi.org/legacy/
+        packages-dir: dist-${{ matrix.platform }}-${{ matrix.python-version }}/
+        skip-existing: true

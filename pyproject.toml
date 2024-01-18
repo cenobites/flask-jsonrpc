@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "Flask-JSONRPC"
-version = "2.2.2"
+version = "3.0.0"
 description = "Adds JSONRPC support to Flask."
 readme = {file = "README.md", content-type = "text/markdown"}
 license = {file = "LICENSE"}
@@ -98,7 +98,7 @@ max-line-length = 120
 exclude = ".git,.tox,.docker,.github,.venv,__pycache__,docs,old,build,dist,htmlcov,junit,.pytest_cache,htmldoc"
 
 [tool.pytest.ini_options]
-addopts = "--pyargs --doctest-modules --junitxml=junit/test-results.xml --cov-report=html --cov-report=term --cov=flask_jsonrpc --cov-fail-under=100"
+addopts = "--pyargs --doctest-modules --junitxml=junit/test-results.xml --cov-report=html --cov-report=term --cov-report=lcov --cov=flask_jsonrpc --cov-fail-under=100"
 junit_family = "xunit2"
 python_files = ["tests.py", "test_*.py", "*_tests.py"]
 pythonpath = "src/"
