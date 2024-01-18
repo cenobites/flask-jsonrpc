@@ -117,7 +117,11 @@ def create_app(test_config: t.Dict[str, t.Any] = None):  # noqa: C901  pylint: d
     # pylint: disable=W0612
     @jsonrpc.method('jsonrpc.strangeEcho')
     def strange_echo(
-        string: str, omg: t.Dict[str, t.Any], wtf: t.List[str], nowai: int, yeswai: str = 'Default'
+        string: str,
+        omg: t.Dict[str, t.Any],
+        wtf: t.List[str],
+        nowai: int,
+        yeswai: str = 'Default',
     ) -> t.List[t.Any]:
         return [string, omg, wtf, nowai, yeswai]
 

@@ -2,10 +2,10 @@ exclude: '.git|.tox|.venv|.vscode|__pycache__|.pytest_cache|.eggs|.mypy_cache|.p
 default_stages: [commit]
 fail_fast: true
 default_language_version:
-  python: python3.11
+  python: python3.12
 repos:
 - repo: https://github.com/pre-commit/pre-commit-hooks
-  rev: v4.4.0
+  rev: v4.5.0
   hooks:
     - id: check-byte-order-marker
     - id: check-case-conflict
@@ -17,37 +17,38 @@ repos:
     - id: mixed-line-ending
     - id: trailing-whitespace
 - repo: https://github.com/asottile/pyupgrade
-  rev: v3.3.1
+  rev: v3.15.0
   hooks:
     - id: pyupgrade
       args: ['--py37-plus']
 - repo: https://github.com/psf/black
-  rev: 23.3.0
+  rev: 23.12.1
   hooks:
     - id: black
       args: ['--safe']
 - repo: https://github.com/asottile/blacken-docs
-  rev: 1.13.0
+  rev: 1.16.0
   hooks:
     - id: blacken-docs
       additional_dependencies:
-        - black==23.3.0
+        - black==23.12.1
 - repo: https://github.com/PyCQA/isort
-  rev: 5.12.0
+  rev: 5.13.2
   hooks:
     - id: isort
 - repo: https://github.com/PyCQA/flake8
-  rev: 6.0.0
+  rev: 7.0.0
   hooks:
     - id: flake8
       additional_dependencies:
-        - flake8-isort==6.0.0
-        - flake8-bugbear==23.3.23
-        - flake8-pyi==23.3.1
+        - flake8-isort==6.1.1
+        - flake8-bugbear==24.1.17
+        - flake8-pyi==24.1.0
         - flake8-quotes==3.3.2
         - flake8-implicit-str-concat==0.4.0
-      args: ['--config=setup.cfg']
+        - flake8-pyproject==1.2.3
+      args: ['--toml-config=pyproject.toml']
 - repo: https://github.com/PyCQA/pylint
-  rev: v2.17.1
+  rev: v3.0.3
   hooks:
     - id: pylint

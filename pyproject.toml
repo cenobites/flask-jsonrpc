@@ -1,26 +1,68 @@
 [build-system]
-requires = [
-    'setuptools>=42',
-    'wheel'
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "Flask-JSONRPC"
+version = "2.2.2"
+description = "Adds JSONRPC support to Flask."
+readme = {file = "README.md", content-type = "text/markdown"}
+license = {file = "LICENSE"}
+authors = [{name = "Nycholas Oliveira", email = "nycholas@cenobit.es"}]
+maintainers = [{name = "Cenobit Technologies Inc.", email = "hi@cenobit.es"}]
+keywords = ["flask", "flask-extensions", "jsonrpc"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Web Environment",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: BSD License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
+    "Topic :: Software Development :: Libraries :: Application Frameworks",
 ]
-build-backend = 'setuptools.build_meta'
+requires-python = ">=3.8"
+dependencies = [
+  "Flask>=3.0.0,<4.0",
+  "typeguard==2.13.3",
+  "typing_extensions>=4.3.0",
+  "typing_inspect==0.9.0",
+]
+
+[project.optional-dependencies]
+async = ["Flask[async]>=3.0.0,<4.0"]
+dotenv = ["Flask[dotenv]>=3.0.0,<4.0"]
+
+[project.urls]
+Donate = "https://github.com/sponsors/nycholas"
+Documentation = "https://flask-jsonrpc.readthedocs.io/"
+"Source Code" = "https://github.com/cenobites/flask-jsonrpc"
+"Issue Tracker" = "https://github.com/cenobites/flask-jsonrpc/issues/"
+Website = "https://flask-jsonrpc.readthedocs.io/"
 
 [tool.black]
 line-length = 120
 skip-string-normalization = true
-target-version = ['py310']
-include = '\.pyi?$'
-exclude = '''
+target-version = ["py312"]
+include = ".pyi?$"
+exclude = """
 (
   /(
-      \.eggs
-    | \.git
-    | \.hg
-    | \.mypy_cache
-    | \.pytype
-    | \.pytest_cache
-    | \.tox
-    | \.venv
+      .eggs
+    | .git
+    | .hg
+    | .mypy_cache
+    | .pytype
+    | .pytest_cache
+    | .tox
+    | .venv
     | _build
     | buck-out
     | build
@@ -31,4 +73,105 @@ exclude = '''
   )/
   | settings.py
 )
-'''
+"""
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3
+include_trailing_comma = true
+force_grid_wrap = 0
+use_parentheses = true
+length_sort = true
+line_length = 120
+known_flask = "flask"
+sections = "FUTURE,STDLIB,FLASK,THIRDPARTY,FIRSTPARTY,LOCALFOLDER"
+
+[tool.flake8]
+select = "B,E,F,W,B9,Y0,ISC,I0"
+ignore = "D203,E302,F401,F403,F405,W503"
+exclude = ".git,.tox,.docker,.github,.venv,__pycache__,docs,old,build,dist,htmlcov,junit,.pytest_cache,htmldoc"
+max-complexity = 10
+max-line-length = 120
+
+[tool.pycodestyle]
+max-line-length = 120
+exclude = ".git,.tox,.docker,.github,.venv,__pycache__,docs,old,build,dist,htmlcov,junit,.pytest_cache,htmldoc"
+
+[tool.pytest.ini_options]
+addopts = "--pyargs --doctest-modules --junitxml=junit/test-results.xml --cov-report=html --cov-report=term --cov=flask_jsonrpc --cov-fail-under=100"
+junit_family = "xunit2"
+python_files = ["tests.py", "test_*.py", "*_tests.py"]
+pythonpath = "src/"
+testpaths = [
+    "src/flask_jsonrpc",
+    "tests",
+]
+norecursedirs = [
+    "tests/test_apps",
+    "tests/integration",
+]
+required_plugins = [
+    "pytest-cov",
+    "pytest-xdist",
+    "pytest-sugar",
+    "pytest-env",
+]
+
+[tool.coverage.run]
+branch = true
+source = [
+    "src/flask_jsonrpc",
+    "tests",
+]
+omit = [
+    "*/settings.py",
+    "*/fixtures.py",
+    "*/tests.py",
+    "*/test_*.py",
+    "*/*_tests.py",
+]
+
+[tool.coverage.paths]
+source = [
+    "src",
+    "*/site-packages",
+]
+
+[tool.coverage.report]
+fail_under = 100
+ignore_errors = true
+skip_covered = true
+exclude_lines = [
+    "pragma: no cover",
+    "pragma: no cover ${PRAGMA_VERSION}",
+    "def __repr__",
+    "if self\\.debug",
+    "if settings\\.DEBUG",
+    "if current_app\\.config\\['DEBUG'\\]",
+    "if app\\.config\\['DEBUG'\\]",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if 0:",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+    "if t\\.TYPE_CHECKING:",
+]
+
+[tool.mypy]
+files = ["src/flask_jsonrpc"]
+python_version = "3.12"
+check_untyped_defs = true
+ignore_errors = false
+ignore_missing_imports = false
+strict = true
+
+[[tool.mypy.overrides]]
+module = [
+    "dotenv.*",
+    "importlib_metadata",
+]
+ignore_missing_imports = true
+
+[tool.pytype]
+inputs = ["src/flask_jsonrpc"]
+python_version = "3.11"

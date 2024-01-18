@@ -128,7 +128,11 @@ def create_async_app(test_config: t.Dict[str, t.Any] = None):  # noqa: C901  pyl
     # pylint: disable=W0612
     @jsonrpc.method('jsonrpc.strangeEcho')
     async def strange_echo(
-        string: str, omg: t.Dict[str, t.Any], wtf: t.List[str], nowai: int, yeswai: str = 'Default'
+        string: str,
+        omg: t.Dict[str, t.Any],
+        wtf: t.List[str],
+        nowai: int,
+        yeswai: str = 'Default',
     ) -> t.List[t.Any]:
         await asyncio.sleep(0)
         return [string, omg, wtf, nowai, yeswai]
@@ -160,7 +164,9 @@ def create_async_app(test_config: t.Dict[str, t.Any] = None):  # noqa: C901  pyl
 
     # pylint: disable=W0612
     @jsonrpc.method('jsonrpc.returnStatusCodeAndHeaders')
-    async def return_status_code_and_headers(s: str) -> t.Tuple[str, int, t.Dict[str, t.Any]]:
+    async def return_status_code_and_headers(
+        s: str,
+    ) -> t.Tuple[str, int, t.Dict[str, t.Any]]:
         await asyncio.sleep(0)
         return f'Status Code and Headers {s}', 400, {'X-JSONRPC': '1'}
 

@@ -1,4 +1,4 @@
-FROM python:3.11-alpine as builder
+FROM python:3.12-alpine as builder
 
 RUN apk add --no-cache --update --virtual .build-deps \
         build-base \
@@ -18,7 +18,7 @@ RUN pip install pip setuptools wheel --upgrade \
     && pip wheel --wheel-dir=/svc/wheels -r test.txt \
         poetry-core>=1.0.0
 
-FROM python:3.11-alpine
+FROM python:3.12-alpine
 
 ENV PYTHONUNBUFFERED=1 \
     DEBUG=0 \
@@ -56,7 +56,7 @@ WORKDIR /app
 ARG VERSION=1
 RUN echo "Version: ${VERSION}"
 
-COPY .docker/* requirements/test.txt tests/test_apps/*.py tests/test_apps/*.ini /app/
+COPY .docker/* requirements/test.txt tests/integration/*.py tests/integration/*.ini /app/
 
 RUN pip install pip setuptools wheel --upgrade \
     && pip install --no-index --find-links=/svc/wheels -r test.txt \

@@ -92,7 +92,12 @@ class JSONRPC(JSONRPCDecoratorMixin):
         if app.config['DEBUG'] or self.enable_web_browsable_api:
             self.init_browse_app(app)
 
-    def register(self, view_func: t.Callable[..., t.Any], name: t.Optional[str] = None, **options: t.Any) -> None:
+    def register(
+        self,
+        view_func: t.Callable[..., t.Any],
+        name: t.Optional[str] = None,
+        **options: t.Any,
+    ) -> None:
         self.register_view_function(view_func, name, **options)
 
     def register_blueprint(
@@ -114,7 +119,8 @@ class JSONRPC(JSONRPCDecoratorMixin):
         app.add_url_rule(
             path,
             view_func=jsonrpc_app.get_jsonrpc_site_api().as_view(
-                urn('blueprint', app.name, jsonrpc_app.name, path), jsonrpc_site=jsonrpc_app.get_jsonrpc_site()
+                urn('blueprint', app.name, jsonrpc_app.name, path),
+                jsonrpc_site=jsonrpc_app.get_jsonrpc_site(),
             ),
         )
 

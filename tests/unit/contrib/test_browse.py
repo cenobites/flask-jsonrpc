@@ -55,11 +55,17 @@ def test_browse_create():
         assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': 'Foo 1'}
         assert rv.status_code == 200
 
-        rv = client.post('/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.fn2', 'params': [':)']})
+        rv = client.post(
+            '/api',
+            json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.fn2', 'params': [':)']},
+        )
         assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': 'Foo :)'}
         assert rv.status_code == 200
 
-        rv = client.post('/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.fn3', 'params': [':)']})
+        rv = client.post(
+            '/api',
+            json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.fn3', 'params': [':)']},
+        )
         assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': 'Foo :)'}
         assert rv.status_code == 200
 
@@ -101,7 +107,14 @@ def test_browse_create():
                     'name': 'app.fn2',
                     'type': 'method',
                     'options': {'notification': True, 'validate': True},
-                    'params': [{'name': 's', 'type': 'String', 'required': False, 'nullable': False}],
+                    'params': [
+                        {
+                            'name': 's',
+                            'type': 'String',
+                            'required': False,
+                            'nullable': False,
+                        }
+                    ],
                     'returns': {'type': 'String'},
                     'description': None,
                 },
@@ -109,7 +122,14 @@ def test_browse_create():
                     'name': 'app.fn3',
                     'type': 'method',
                     'options': {'notification': False, 'validate': True},
-                    'params': [{'name': 's', 'type': 'String', 'required': False, 'nullable': False}],
+                    'params': [
+                        {
+                            'name': 's',
+                            'type': 'String',
+                            'required': False,
+                            'nullable': False,
+                        }
+                    ],
                     'returns': {'type': 'String'},
                     'description': None,
                 },
@@ -184,7 +204,14 @@ def test_browse_create_without_register_app():
                     'name': 'app.fn2',
                     'type': 'method',
                     'options': {'notification': True, 'validate': True},
-                    'params': [{'name': 's', 'type': 'String', 'required': False, 'nullable': False}],
+                    'params': [
+                        {
+                            'name': 's',
+                            'type': 'String',
+                            'required': False,
+                            'nullable': False,
+                        }
+                    ],
                     'returns': {'type': 'String'},
                     'description': None,
                 }
@@ -235,7 +262,14 @@ def test_browse_create_multiple_jsonrpc_versions():
                     'name': 'app.fn2',
                     'type': 'method',
                     'options': {'notification': True, 'validate': True},
-                    'params': [{'name': 's', 'type': 'String', 'required': False, 'nullable': False}],
+                    'params': [
+                        {
+                            'name': 's',
+                            'type': 'String',
+                            'required': False,
+                            'nullable': False,
+                        }
+                    ],
                     'returns': {'type': 'String'},
                     'description': None,
                 },
@@ -243,7 +277,14 @@ def test_browse_create_multiple_jsonrpc_versions():
                     'name': 'app.fn3',
                     'type': 'method',
                     'options': {'notification': True, 'validate': True},
-                    'params': [{'name': 's', 'type': 'String', 'required': False, 'nullable': False}],
+                    'params': [
+                        {
+                            'name': 's',
+                            'type': 'String',
+                            'required': False,
+                            'nullable': False,
+                        }
+                    ],
                     'returns': {'type': 'String'},
                     'description': None,
                 },
@@ -282,7 +323,14 @@ def test_browse_create_multiple_jsonrpc_versions():
                     'name': 'app.fn1',
                     'type': 'method',
                     'options': {'notification': True, 'validate': True},
-                    'params': [{'name': 's', 'type': 'String', 'required': False, 'nullable': False}],
+                    'params': [
+                        {
+                            'name': 's',
+                            'type': 'String',
+                            'required': False,
+                            'nullable': False,
+                        }
+                    ],
                     'returns': {'type': 'String'},
                     'description': None,
                 },
@@ -290,7 +338,14 @@ def test_browse_create_multiple_jsonrpc_versions():
                     'name': 'app.fn2',
                     'type': 'method',
                     'options': {'notification': True, 'validate': True},
-                    'params': [{'name': 's', 'type': 'String', 'required': False, 'nullable': False}],
+                    'params': [
+                        {
+                            'name': 's',
+                            'type': 'String',
+                            'required': False,
+                            'nullable': False,
+                        }
+                    ],
                     'returns': {'type': 'String'},
                     'description': None,
                 },
@@ -370,7 +425,14 @@ def test_browse_create_modular_apps():
                     'name': 'blue1.fn2',
                     'type': 'method',
                     'options': {'notification': True, 'validate': True},
-                    'params': [{'name': 's', 'type': 'String', 'required': False, 'nullable': False}],
+                    'params': [
+                        {
+                            'name': 's',
+                            'type': 'String',
+                            'required': False,
+                            'nullable': False,
+                        }
+                    ],
                     'returns': {'type': 'String'},
                     'description': None,
                 }
@@ -380,7 +442,14 @@ def test_browse_create_modular_apps():
                     'name': 'blue2.fn1',
                     'type': 'method',
                     'options': {'notification': True, 'validate': True},
-                    'params': [{'name': 's', 'type': 'String', 'required': False, 'nullable': False}],
+                    'params': [
+                        {
+                            'name': 's',
+                            'type': 'String',
+                            'required': False,
+                            'nullable': False,
+                        }
+                    ],
                     'returns': {'type': 'String'},
                     'description': None,
                 },
@@ -388,7 +457,14 @@ def test_browse_create_modular_apps():
                     'name': 'blue2.fn2',
                     'type': 'method',
                     'options': {'notification': True, 'validate': True},
-                    'params': [{'name': 's', 'type': 'String', 'required': False, 'nullable': False}],
+                    'params': [
+                        {
+                            'name': 's',
+                            'type': 'String',
+                            'required': False,
+                            'nullable': False,
+                        }
+                    ],
                     'returns': {'type': 'String'},
                     'description': None,
                 },
@@ -396,7 +472,14 @@ def test_browse_create_modular_apps():
                     'name': 'blue2.not_notify',
                     'type': 'method',
                     'options': {'notification': False, 'validate': True},
-                    'params': [{'name': 's', 'type': 'String', 'required': False, 'nullable': False}],
+                    'params': [
+                        {
+                            'name': 's',
+                            'type': 'String',
+                            'required': False,
+                            'nullable': False,
+                        }
+                    ],
                     'returns': {'type': 'String'},
                     'description': None,
                 },

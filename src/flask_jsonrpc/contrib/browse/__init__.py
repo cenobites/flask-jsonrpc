@@ -41,7 +41,10 @@ if t.TYPE_CHECKING:
 
 class JSONRPCBrowse:
     def __init__(
-        self, app: t.Optional['Flask'] = None, url_prefix: str = '/api/browse', base_url: t.Optional[str] = None
+        self,
+        app: t.Optional['Flask'] = None,
+        url_prefix: str = '/api/browse',
+        base_url: t.Optional[str] = None,
     ) -> None:
         self.app = app
         self.url_prefix = url_prefix
@@ -64,7 +67,9 @@ class JSONRPCBrowse:
 
         app.register_blueprint(browse, url_prefix=self.url_prefix)
         app.add_url_rule(
-            f'{self.url_prefix}/static/<path:filename>', 'urn:browse.static', view_func=app.send_static_file
+            f'{self.url_prefix}/static/<path:filename>',
+            'urn:browse.static',
+            view_func=app.send_static_file,
         )
 
     def register_jsonrpc_site(self, jsonrpc_site: 'JSONRPCSite') -> None:

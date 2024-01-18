@@ -71,9 +71,11 @@ class JSONRPCSite:
         https://github.com/pallets/werkzeug/blob/master/src/werkzeug/wrappers/json.py#L54
         """
         mt = request.mimetype
-        return mt in ('application/json', 'application/json-rpc', 'application/jsonrequest') or (
-            mt.startswith('application/') and mt.endswith('+json')
-        )
+        return mt in (
+            'application/json',
+            'application/json-rpc',
+            'application/jsonrequest',
+        ) or (mt.startswith('application/') and mt.endswith('+json'))
 
     def set_path(self, path: str) -> None:
         self.path = path
@@ -86,7 +88,7 @@ class JSONRPCSite:
 
     def dispatch_request(
         self,
-    ) -> t.Tuple[t.Any, int, t.Union[Headers, t.Dict[str, str], t.Tuple[str], t.List[t.Tuple[str]]]]:
+    ) -> t.Tuple[t.Any, int, t.Union[Headers, t.Dict[str, str], t.Tuple[str], t.List[t.Tuple[str]]],]:
         if not self.validate_request():
             raise ParseError(
                 data={
@@ -115,7 +117,7 @@ class JSONRPCSite:
 
     def handle_dispatch_except(
         self, req_json: t.Dict[str, t.Any]
-    ) -> t.Tuple[t.Any, int, t.Union[Headers, t.Dict[str, str], t.Tuple[str], t.List[t.Tuple[str]]]]:
+    ) -> t.Tuple[t.Any, int, t.Union[Headers, t.Dict[str, str], t.Tuple[str], t.List[t.Tuple[str]]],]:
         try:
             if not self.validate(req_json):
                 raise InvalidRequestError(data={'message': f'Invalid JSON: {req_json!r}'})
@@ -140,7 +142,7 @@ class JSONRPCSite:
 
     def batch_dispatch(
         self, reqs_json: t.List[t.Dict[str, t.Any]]
-    ) -> t.Tuple[t.List[t.Any], int, t.Union[Headers, t.Dict[str, str], t.Tuple[str], t.List[t.Tuple[str]]]]:
+    ) -> t.Tuple[t.List[t.Any], int, t.Union[Headers, t.Dict[str, str], t.Tuple[str], t.List[t.Tuple[str]]],]:
         if not reqs_json:
             raise InvalidRequestError(data={'message': 'Empty array'})
 
@@ -158,12 +160,16 @@ class JSONRPCSite:
 
     def dispatch(
         self, req_json: t.Dict[str, t.Any]
-    ) -> t.Tuple[t.Any, int, t.Union[Headers, t.Dict[str, str], t.Tuple[str], t.List[t.Tuple[str]]]]:
+    ) -> t.Tuple[t.Any, int, t.Union[Headers, t.Dict[str, str], t.Tuple[str], t.List[t.Tuple[str]]],]:
         method_name = req_json['method']
         params = req_json.get('params', {})
         view_func = self.view_funcs.get(method_name)
         validate = getattr(view_func, 'jsonrpc_validate', settings.DEFAULT_JSONRPC_METHOD['VALIDATE'])
-        notification = getattr(view_func, 'jsonrpc_notification', settings.DEFAULT_JSONRPC_METHOD['NOTIFICATION'])
+        notification = getattr(
+            view_func,
+            'jsonrpc_notification',
+            settings.DEFAULT_JSONRPC_METHOD['NOTIFICATION'],
+        )
         if not view_func:
             raise MethodNotFoundError(data={'message': f"Method not found: {method_name}"})
 
@@ -208,7 +214,7 @@ class JSONRPCSite:
 
     def unpack_tuple_returns(
         self, resp_view: t.Any
-    ) -> t.Tuple[t.Any, int, t.Union[Headers, t.Dict[str, str], t.Tuple[str], t.List[t.Tuple[str]]]]:
+    ) -> t.Tuple[t.Any, int, t.Union[Headers, t.Dict[str, str], t.Tuple[str], t.List[t.Tuple[str]]],]:
         # https://github.com/pallets/flask/blob/d091bb00c0358e9f30006a064f3dbb671b99aeae/src/flask/app.py#L1981
         if isinstance(resp_view, tuple):
             len_resp_view = len(resp_view)
@@ -235,11 +241,15 @@ class JSONRPCSite:
 
     def make_response(
         self, req_json: t.Dict[str, t.Any], resp_view: t.Any
-    ) -> t.Tuple[t.Any, int, t.Union[Headers, t.Dict[str, str], t.Tuple[str], t.List[t.Tuple[str]]]]:
+    ) -> t.Tuple[t.Any, int, t.Union[Headers, t.Dict[str, str], t.Tuple[str], t.List[t.Tuple[str]]],]:
         rv, status_code, headers = self.unpack_tuple_returns(resp_view)
         if self.is_notification_request(req_json):
             return None, 204, headers
-        resp = {'id': req_json.get('id'), 'jsonrpc': req_json.get('jsonrpc', JSONRPC_VERSION_DEFAULT), 'result': rv}
+        resp = {
+            'id': req_json.get('id'),
+            'jsonrpc': req_json.get('jsonrpc', JSONRPC_VERSION_DEFAULT),
+            'result': rv,
+        }
         return resp, status_code, headers
 
     def is_notification_request(self, req_json: t.Dict[str, t.Any]) -> bool:

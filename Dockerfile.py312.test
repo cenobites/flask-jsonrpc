@@ -1,7 +1,7 @@
-FROM python:3.7-alpine
+FROM python:3.12-alpine
 
 ENV PYTHONUNBUFFERED=1 \
-    PRAGMA_VERSION=py3.7 \
+    PRAGMA_VERSION=py3.12 \
     DEBUG=0
 
 WORKDIR /code
@@ -11,7 +11,6 @@ COPY requirements/ /code/requirements/
 RUN set -ex \
     && apk add --no-cache --virtual .build-deps \
         gcc \
-        g++ \
         musl-dev \
         python3-dev \
         git \
@@ -19,7 +18,8 @@ RUN set -ex \
     && pip install -r requirements/base.txt \
     && pip install -r requirements/test.txt \
         poetry-core>=1.0.0 \
-    && pip install -r requirements/ci.txt \
+    && cat requirements/ci.txt | grep -vw ^pytype > requirements/ci-updated.txt \
+    && pip install -r requirements/ci-updated.txt \
     && apk del .build-deps \
     && addgroup -S kuchulu \
     && adduser \

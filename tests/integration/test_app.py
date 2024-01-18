@@ -1,3 +1,4 @@
+# pylint: disable=C0302
 # Copyright (c) 2022-2022, Cenobit Technologies, Inc. http://cenobit.es/
 # All rights reserved.
 #
@@ -40,13 +41,25 @@ class APITest(APITestCase):
         self.assertEqual(200, rv.status_code)
 
         rv = self.requests.post(
-            API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': ['Python']}
+            API_URL,
+            json={
+                'id': 1,
+                'jsonrpc': '2.0',
+                'method': 'jsonrpc.greeting',
+                'params': ['Python'],
+            },
         )
         self.assertEqual({'id': 1, 'jsonrpc': '2.0', 'result': 'Hello Python'}, rv.json())
         self.assertEqual(200, rv.status_code)
 
         rv = self.requests.post(
-            API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': {'name': 'Flask'}}
+            API_URL,
+            json={
+                'id': 1,
+                'jsonrpc': '2.0',
+                'method': 'jsonrpc.greeting',
+                'params': {'name': 'Flask'},
+            },
         )
         self.assertEqual({'id': 1, 'jsonrpc': '2.0', 'result': 'Hello Flask'}, rv.json())
         self.assertEqual(200, rv.status_code)
@@ -62,7 +75,14 @@ class APITest(APITestCase):
 
         rv = self.requests.post(
             API_URL,
-            data=json.dumps({'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': ['Python']}),
+            data=json.dumps(
+                {
+                    'id': 1,
+                    'jsonrpc': '2.0',
+                    'method': 'jsonrpc.greeting',
+                    'params': ['Python'],
+                }
+            ),
             headers={'Content-Type': 'application/jsonrequest'},
         )
         self.assertEqual({'id': 1, 'jsonrpc': '2.0', 'result': 'Hello Python'}, rv.json())
@@ -70,7 +90,14 @@ class APITest(APITestCase):
 
         rv = self.requests.post(
             API_URL,
-            data=json.dumps({'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': {'name': 'Flask'}}),
+            data=json.dumps(
+                {
+                    'id': 1,
+                    'jsonrpc': '2.0',
+                    'method': 'jsonrpc.greeting',
+                    'params': {'name': 'Flask'},
+                }
+            ),
             headers={'Content-Type': 'application/json'},
         )
         self.assertEqual({'id': 1, 'jsonrpc': '2.0', 'result': 'Hello Flask'}, rv.json())
@@ -164,7 +191,13 @@ class APITest(APITestCase):
 
     def test_greeting_raise_invalid_params_error(self):
         rv = self.requests.post(
-            API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': 'Wrong'}
+            API_URL,
+            json={
+                'id': 1,
+                'jsonrpc': '2.0',
+                'method': 'jsonrpc.greeting',
+                'params': 'Wrong',
+            },
         )
         self.assertEqual(
             {
@@ -183,7 +216,15 @@ class APITest(APITestCase):
         )
         self.assertEqual(400, rv.status_code)
 
-        rv = self.requests.post(API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': [1]})
+        rv = self.requests.post(
+            API_URL,
+            json={
+                'id': 1,
+                'jsonrpc': '2.0',
+                'method': 'jsonrpc.greeting',
+                'params': [1],
+            },
+        )
         self.assertEqual(
             {
                 'id': 1,
@@ -200,7 +241,13 @@ class APITest(APITestCase):
         self.assertEqual(400, rv.status_code)
 
         rv = self.requests.post(
-            API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': {'name': 2}}
+            API_URL,
+            json={
+                'id': 1,
+                'jsonrpc': '2.0',
+                'method': 'jsonrpc.greeting',
+                'params': {'name': 2},
+            },
         )
         self.assertEqual(
             {
@@ -236,19 +283,39 @@ class APITest(APITestCase):
 
     def test_echo(self):
         rv = self.requests.post(
-            API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.echo', 'params': ['Python']}
+            API_URL,
+            json={
+                'id': 1,
+                'jsonrpc': '2.0',
+                'method': 'jsonrpc.echo',
+                'params': ['Python'],
+            },
         )
         self.assertEqual({'id': 1, 'jsonrpc': '2.0', 'result': 'Python'}, rv.json())
         self.assertEqual(200, rv.status_code)
 
         rv = self.requests.post(
-            API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.echo', 'params': {'string': 'Flask'}}
+            API_URL,
+            json={
+                'id': 1,
+                'jsonrpc': '2.0',
+                'method': 'jsonrpc.echo',
+                'params': {'string': 'Flask'},
+            },
         )
         self.assertEqual({'id': 1, 'jsonrpc': '2.0', 'result': 'Flask'}, rv.json())
         self.assertEqual(200, rv.status_code)
 
     def test_echo_raise_invalid_params_error(self):
-        rv = self.requests.post(API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.echo', 'params': 'Wrong'})
+        rv = self.requests.post(
+            API_URL,
+            json={
+                'id': 1,
+                'jsonrpc': '2.0',
+                'method': 'jsonrpc.echo',
+                'params': 'Wrong',
+            },
+        )
         self.assertEqual(
             {
                 'id': 1,
@@ -266,7 +333,10 @@ class APITest(APITestCase):
         )
         self.assertEqual(400, rv.status_code)
 
-        rv = self.requests.post(API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.echo', 'params': [1]})
+        rv = self.requests.post(
+            API_URL,
+            json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.echo', 'params': [1]},
+        )
         self.assertEqual(
             {
                 'id': 1,
@@ -283,7 +353,13 @@ class APITest(APITestCase):
         self.assertEqual(400, rv.status_code)
 
         rv = self.requests.post(
-            API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.echo', 'params': {'name': 2}}
+            API_URL,
+            json={
+                'id': 1,
+                'jsonrpc': '2.0',
+                'method': 'jsonrpc.echo',
+                'params': {'name': 2},
+            },
         )
         self.assertEqual(
             {
@@ -321,24 +397,44 @@ class APITest(APITestCase):
         self.assertEqual('', rv.text)
         self.assertEqual(204, rv.status_code)
 
-        rv = self.requests.post(API_URL, json={'jsonrpc': '2.0', 'method': 'jsonrpc.notify', 'params': ['Some string']})
+        rv = self.requests.post(
+            API_URL,
+            json={
+                'jsonrpc': '2.0',
+                'method': 'jsonrpc.notify',
+                'params': ['Some string'],
+            },
+        )
         self.assertEqual('', rv.text)
         self.assertEqual(204, rv.status_code)
 
     def test_not_allow_notify(self):
-        rv = self.requests.post(API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.not_allow_notify'})
-        self.assertEqual({'id': 1, 'jsonrpc': '2.0', 'result': 'Not allow notify'}, rv.json())
-        self.assertEqual(200, rv.status_code)
-
         rv = self.requests.post(
             API_URL,
-            json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.not_allow_notify', 'params': ['Some string']},
+            json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.not_allow_notify'},
         )
         self.assertEqual({'id': 1, 'jsonrpc': '2.0', 'result': 'Not allow notify'}, rv.json())
         self.assertEqual(200, rv.status_code)
 
         rv = self.requests.post(
-            API_URL, json={'jsonrpc': '2.0', 'method': 'jsonrpc.not_allow_notify', 'params': ['Some string']}
+            API_URL,
+            json={
+                'id': 1,
+                'jsonrpc': '2.0',
+                'method': 'jsonrpc.not_allow_notify',
+                'params': ['Some string'],
+            },
+        )
+        self.assertEqual({'id': 1, 'jsonrpc': '2.0', 'result': 'Not allow notify'}, rv.json())
+        self.assertEqual(200, rv.status_code)
+
+        rv = self.requests.post(
+            API_URL,
+            json={
+                'jsonrpc': '2.0',
+                'method': 'jsonrpc.not_allow_notify',
+                'params': ['Some string'],
+            },
         )
         self.assertEqual(
             {
@@ -359,11 +455,22 @@ class APITest(APITestCase):
         self.assertEqual(400, rv.status_code)
 
     def test_fails(self):
-        rv = self.requests.post(API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.fails', 'params': [2]})
+        rv = self.requests.post(
+            API_URL,
+            json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.fails', 'params': [2]},
+        )
         self.assertEqual({'id': 1, 'jsonrpc': '2.0', 'result': 2}, rv.json())
         self.assertEqual(200, rv.status_code)
 
-        rv = self.requests.post(API_URL, json={'id': '1', 'jsonrpc': '2.0', 'method': 'jsonrpc.fails', 'params': [1]})
+        rv = self.requests.post(
+            API_URL,
+            json={
+                'id': '1',
+                'jsonrpc': '2.0',
+                'method': 'jsonrpc.fails',
+                'params': [1],
+            },
+        )
         self.assertEqual(
             {
                 'id': '1',
@@ -388,7 +495,12 @@ class APITest(APITestCase):
         }
         rv = self.requests.post(API_URL, json=data)
         self.assertEqual(
-            {'id': 1, 'jsonrpc': '2.0', 'result': ['string', {'a': 1}, ['a', 'b', 'c'], 23, 'Flask']}, rv.json()
+            {
+                'id': 1,
+                'jsonrpc': '2.0',
+                'result': ['string', {'a': 1}, ['a', 'b', 'c'], 23, 'Flask'],
+            },
+            rv.json(),
         )
         self.assertEqual(200, rv.status_code)
 
@@ -400,7 +512,12 @@ class APITest(APITestCase):
         }
         rv = self.requests.post(API_URL, json=data)
         self.assertEqual(
-            {'id': 1, 'jsonrpc': '2.0', 'result': ['string', {'a': 1}, ['a', 'b', 'c'], 23, 'Default']}, rv.json()
+            {
+                'id': 1,
+                'jsonrpc': '2.0',
+                'result': ['string', {'a': 1}, ['a', 'b', 'c'], 23, 'Default'],
+            },
+            rv.json(),
         )
         self.assertEqual(200, rv.status_code)
 
@@ -410,27 +527,52 @@ class APITest(APITestCase):
         self.assertEqual({'id': 1, 'jsonrpc': '2.0', 'result': 4}, rv.json())
         self.assertEqual(200, rv.status_code)
 
-        data = {'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.sum', 'params': [0.5, 1.5]}
+        data = {
+            'id': 1,
+            'jsonrpc': '2.0',
+            'method': 'jsonrpc.sum',
+            'params': [0.5, 1.5],
+        }
         rv = self.requests.post(API_URL, json=data)
         self.assertEqual({'id': 1, 'jsonrpc': '2.0', 'result': 2.0}, rv.json())
         self.assertEqual(200, rv.status_code)
 
     def test_decorators(self):
-        data = {'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.decorators', 'params': ['Python']}
+        data = {
+            'id': 1,
+            'jsonrpc': '2.0',
+            'method': 'jsonrpc.decorators',
+            'params': ['Python'],
+        }
         rv = self.requests.post(API_URL, json=data)
-        self.assertEqual({'id': 1, 'jsonrpc': '2.0', 'result': 'Hello Python from decorator, ;)'}, rv.json())
+        self.assertEqual(
+            {'id': 1, 'jsonrpc': '2.0', 'result': 'Hello Python from decorator, ;)'},
+            rv.json(),
+        )
         self.assertEqual(200, rv.status_code)
 
     def test_return_status_code(self):
         rv = self.requests.post(
-            API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.returnStatusCode', 'params': ['OK']}
+            API_URL,
+            json={
+                'id': 1,
+                'jsonrpc': '2.0',
+                'method': 'jsonrpc.returnStatusCode',
+                'params': ['OK'],
+            },
         )
         self.assertEqual({'id': 1, 'jsonrpc': '2.0', 'result': 'Status Code OK'}, rv.json())
         self.assertEqual(201, rv.status_code)
 
     def test_return_headers(self):
         rv = self.requests.post(
-            API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.returnHeaders', 'params': ['OK']}
+            API_URL,
+            json={
+                'id': 1,
+                'jsonrpc': '2.0',
+                'method': 'jsonrpc.returnHeaders',
+                'params': ['OK'],
+            },
         )
         self.assertEqual({'id': 1, 'jsonrpc': '2.0', 'result': 'Headers OK'}, rv.json())
         self.assertEqual(200, rv.status_code)
@@ -439,16 +581,29 @@ class APITest(APITestCase):
     def test_return_status_code_and_headers(self):
         rv = self.requests.post(
             API_URL,
-            json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.returnStatusCodeAndHeaders', 'params': ['OK']},
+            json={
+                'id': 1,
+                'jsonrpc': '2.0',
+                'method': 'jsonrpc.returnStatusCodeAndHeaders',
+                'params': ['OK'],
+            },
         )
-        self.assertEqual({'id': 1, 'jsonrpc': '2.0', 'result': 'Status Code and Headers OK'}, rv.json())
+        self.assertEqual(
+            {'id': 1, 'jsonrpc': '2.0', 'result': 'Status Code and Headers OK'},
+            rv.json(),
+        )
         self.assertEqual(400, rv.status_code)
         self.assertEqual('1', rv.headers['X-JSONRPC'])
 
     def test_not_validate_method(self):
         rv = self.requests.post(
             API_URL,
-            json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.not_validate', 'params': ['OK']},
+            json={
+                'id': 1,
+                'jsonrpc': '2.0',
+                'method': 'jsonrpc.not_validate',
+                'params': ['OK'],
+            },
         )
         self.assertEqual({'id': 1, 'jsonrpc': '2.0', 'result': 'Not validate: OK'}, rv.json())
         self.assertEqual(200, rv.status_code)
@@ -456,7 +611,12 @@ class APITest(APITestCase):
     def test_no_return_method(self):
         rv = self.requests.post(
             API_URL,
-            json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.noReturn', 'params': []},
+            json={
+                'id': 1,
+                'jsonrpc': '2.0',
+                'method': 'jsonrpc.noReturn',
+                'params': [],
+            },
         )
         self.assertEqual(
             {
@@ -481,9 +641,24 @@ class APITest(APITestCase):
         rv = self.requests.post(
             API_URL,
             json=[
-                {'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': ['Python']},
-                {'id': 2, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': ['Flask']},
-                {'id': 3, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': ['JSON-RCP']},
+                {
+                    'id': 1,
+                    'jsonrpc': '2.0',
+                    'method': 'jsonrpc.greeting',
+                    'params': ['Python'],
+                },
+                {
+                    'id': 2,
+                    'jsonrpc': '2.0',
+                    'method': 'jsonrpc.greeting',
+                    'params': ['Flask'],
+                },
+                {
+                    'id': 3,
+                    'jsonrpc': '2.0',
+                    'method': 'jsonrpc.greeting',
+                    'params': ['JSON-RCP'],
+                },
             ],
         )
         self.assertEqual(
@@ -499,10 +674,20 @@ class APITest(APITestCase):
         rv = self.requests.post(
             API_URL,
             json=[
-                {'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': ['Python']},
+                {
+                    'id': 1,
+                    'jsonrpc': '2.0',
+                    'method': 'jsonrpc.greeting',
+                    'params': ['Python'],
+                },
                 {'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': ['Flask']},
                 {'id': 3, 'jsonrpc': '2.0', 'params': ['Flask']},
-                {'id': 4, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': ['JSON-RCP']},
+                {
+                    'id': 4,
+                    'jsonrpc': '2.0',
+                    'method': 'jsonrpc.greeting',
+                    'params': ['JSON-RCP'],
+                },
             ],
         )
         self.assertEqual(
@@ -533,17 +718,34 @@ class APITest(APITestCase):
         self.assertEqual({'id': 1, 'jsonrpc': '2.0', 'result': 'Hello Flask JSON-RPC'}, rv.json())
         self.assertEqual(200, rv.status_code)
 
-        rv = self.requests.post(API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'greeting', 'params': ['Python']})
+        rv = self.requests.post(
+            API_URL,
+            json={
+                'id': 1,
+                'jsonrpc': '2.0',
+                'method': 'greeting',
+                'params': ['Python'],
+            },
+        )
         self.assertEqual({'id': 1, 'jsonrpc': '2.0', 'result': 'Hello Python'}, rv.json())
         self.assertEqual(200, rv.status_code)
 
         rv = self.requests.post(
-            API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'hello', 'params': {'name': 'Flask'}}
+            API_URL,
+            json={
+                'id': 1,
+                'jsonrpc': '2.0',
+                'method': 'hello',
+                'params': {'name': 'Flask'},
+            },
         )
         self.assertEqual({'id': 1, 'jsonrpc': '2.0', 'result': 'Hello Flask'}, rv.json())
         self.assertEqual(200, rv.status_code)
 
-        rv = self.requests.post(API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'echo', 'params': ['Python', 1]})
+        rv = self.requests.post(
+            API_URL,
+            json={'id': 1, 'jsonrpc': '2.0', 'method': 'echo', 'params': ['Python', 1]},
+        )
         self.assertEqual({'id': 1, 'jsonrpc': '2.0', 'result': 'Python'}, rv.json())
         self.assertEqual(200, rv.status_code)
 
@@ -580,7 +782,14 @@ class APITest(APITestCase):
                 'jsonrpc.greeting': {
                     'type': 'method',
                     'options': {'notification': True, 'validate': True},
-                    'params': [{'name': 'name', 'type': 'String', 'required': False, 'nullable': False}],
+                    'params': [
+                        {
+                            'name': 'name',
+                            'type': 'String',
+                            'required': False,
+                            'nullable': False,
+                        }
+                    ],
                     'returns': {'type': 'String'},
                     'description': None,
                 },
@@ -588,8 +797,18 @@ class APITest(APITestCase):
                     'type': 'method',
                     'options': {'notification': True, 'validate': True},
                     'params': [
-                        {'name': 'string', 'type': 'String', 'required': False, 'nullable': False},
-                        {'name': '_some', 'type': 'Object', 'required': False, 'nullable': False},
+                        {
+                            'name': 'string',
+                            'type': 'String',
+                            'required': False,
+                            'nullable': False,
+                        },
+                        {
+                            'name': '_some',
+                            'type': 'Object',
+                            'required': False,
+                            'nullable': False,
+                        },
                     ],
                     'returns': {'type': 'String'},
                     'description': None,
@@ -597,21 +816,42 @@ class APITest(APITestCase):
                 'jsonrpc.notify': {
                     'type': 'method',
                     'options': {'notification': True, 'validate': True},
-                    'params': [{'name': '_string', 'type': 'String', 'required': False, 'nullable': False}],
+                    'params': [
+                        {
+                            'name': '_string',
+                            'type': 'String',
+                            'required': False,
+                            'nullable': False,
+                        }
+                    ],
                     'returns': {'type': 'Null'},
                     'description': None,
                 },
                 'jsonrpc.not_allow_notify': {
                     'type': 'method',
                     'options': {'notification': False, 'validate': True},
-                    'params': [{'name': '_string', 'type': 'String', 'required': False, 'nullable': False}],
+                    'params': [
+                        {
+                            'name': '_string',
+                            'type': 'String',
+                            'required': False,
+                            'nullable': False,
+                        }
+                    ],
                     'returns': {'type': 'String'},
                     'description': None,
                 },
                 'jsonrpc.fails': {
                     'type': 'method',
                     'options': {'notification': True, 'validate': True},
-                    'params': [{'name': 'n', 'type': 'Number', 'required': False, 'nullable': False}],
+                    'params': [
+                        {
+                            'name': 'n',
+                            'type': 'Number',
+                            'required': False,
+                            'nullable': False,
+                        }
+                    ],
                     'returns': {'type': 'Number'},
                     'description': None,
                 },
@@ -619,11 +859,36 @@ class APITest(APITestCase):
                     'type': 'method',
                     'options': {'notification': True, 'validate': True},
                     'params': [
-                        {'name': 'string', 'type': 'String', 'required': False, 'nullable': False},
-                        {'name': 'omg', 'type': 'Object', 'required': False, 'nullable': False},
-                        {'name': 'wtf', 'type': 'Array', 'required': False, 'nullable': False},
-                        {'name': 'nowai', 'type': 'Number', 'required': False, 'nullable': False},
-                        {'name': 'yeswai', 'type': 'String', 'required': False, 'nullable': False},
+                        {
+                            'name': 'string',
+                            'type': 'String',
+                            'required': False,
+                            'nullable': False,
+                        },
+                        {
+                            'name': 'omg',
+                            'type': 'Object',
+                            'required': False,
+                            'nullable': False,
+                        },
+                        {
+                            'name': 'wtf',
+                            'type': 'Array',
+                            'required': False,
+                            'nullable': False,
+                        },
+                        {
+                            'name': 'nowai',
+                            'type': 'Number',
+                            'required': False,
+                            'nullable': False,
+                        },
+                        {
+                            'name': 'yeswai',
+                            'type': 'String',
+                            'required': False,
+                            'nullable': False,
+                        },
                     ],
                     'returns': {'type': 'Array'},
                     'description': None,
@@ -632,8 +897,18 @@ class APITest(APITestCase):
                     'type': 'method',
                     'options': {'notification': True, 'validate': True},
                     'params': [
-                        {'name': 'a', 'type': 'Number', 'required': False, 'nullable': False},
-                        {'name': 'b', 'type': 'Number', 'required': False, 'nullable': False},
+                        {
+                            'name': 'a',
+                            'type': 'Number',
+                            'required': False,
+                            'nullable': False,
+                        },
+                        {
+                            'name': 'b',
+                            'type': 'Number',
+                            'required': False,
+                            'nullable': False,
+                        },
                     ],
                     'returns': {'type': 'Number'},
                     'description': None,
@@ -641,28 +916,56 @@ class APITest(APITestCase):
                 'jsonrpc.decorators': {
                     'type': 'method',
                     'options': {'notification': True, 'validate': True},
-                    'params': [{'name': 'string', 'type': 'String', 'required': False, 'nullable': False}],
+                    'params': [
+                        {
+                            'name': 'string',
+                            'type': 'String',
+                            'required': False,
+                            'nullable': False,
+                        }
+                    ],
                     'returns': {'type': 'String'},
                     'description': None,
                 },
                 'jsonrpc.returnStatusCode': {
                     'type': 'method',
                     'options': {'notification': True, 'validate': True},
-                    'params': [{'name': 's', 'type': 'String', 'required': False, 'nullable': False}],
+                    'params': [
+                        {
+                            'name': 's',
+                            'type': 'String',
+                            'required': False,
+                            'nullable': False,
+                        }
+                    ],
                     'returns': {'type': 'Array'},
                     'description': None,
                 },
                 'jsonrpc.returnHeaders': {
                     'type': 'method',
                     'options': {'notification': True, 'validate': True},
-                    'params': [{'name': 's', 'type': 'String', 'required': False, 'nullable': False}],
+                    'params': [
+                        {
+                            'name': 's',
+                            'type': 'String',
+                            'required': False,
+                            'nullable': False,
+                        }
+                    ],
                     'returns': {'type': 'Array'},
                     'description': None,
                 },
                 'jsonrpc.returnStatusCodeAndHeaders': {
                     'type': 'method',
                     'options': {'notification': True, 'validate': True},
-                    'params': [{'name': 's', 'type': 'String', 'required': False, 'nullable': False}],
+                    'params': [
+                        {
+                            'name': 's',
+                            'type': 'String',
+                            'required': False,
+                            'nullable': False,
+                        }
+                    ],
                     'returns': {'type': 'Array'},
                     'description': None,
                 },
@@ -676,28 +979,56 @@ class APITest(APITestCase):
                 'jsonrpc.noReturn': {
                     'type': 'method',
                     'options': {'notification': True, 'validate': True},
-                    'params': [{'name': '_string', 'type': 'String', 'required': False, 'nullable': False}],
+                    'params': [
+                        {
+                            'name': '_string',
+                            'type': 'String',
+                            'required': False,
+                            'nullable': False,
+                        }
+                    ],
                     'returns': {'type': 'Null'},
                     'description': None,
                 },
                 'classapp.index': {
                     'type': 'method',
                     'options': {'notification': True, 'validate': True},
-                    'params': [{'name': 'name', 'type': 'String', 'required': False, 'nullable': False}],
+                    'params': [
+                        {
+                            'name': 'name',
+                            'type': 'String',
+                            'required': False,
+                            'nullable': False,
+                        }
+                    ],
                     'returns': {'type': 'String'},
                     'description': None,
                 },
                 'greeting': {
                     'type': 'method',
                     'options': {'notification': True, 'validate': True},
-                    'params': [{'name': 'name', 'type': 'String', 'required': False, 'nullable': False}],
+                    'params': [
+                        {
+                            'name': 'name',
+                            'type': 'String',
+                            'required': False,
+                            'nullable': False,
+                        }
+                    ],
                     'returns': {'type': 'String'},
                     'description': None,
                 },
                 'hello': {
                     'type': 'method',
                     'options': {'notification': True, 'validate': True},
-                    'params': [{'name': 'name', 'type': 'String', 'required': False, 'nullable': False}],
+                    'params': [
+                        {
+                            'name': 'name',
+                            'type': 'String',
+                            'required': False,
+                            'nullable': False,
+                        }
+                    ],
                     'returns': {'type': 'String'},
                     'description': None,
                 },
@@ -705,8 +1036,18 @@ class APITest(APITestCase):
                     'type': 'method',
                     'options': {'notification': True, 'validate': True},
                     'params': [
-                        {'name': 'string', 'type': 'String', 'required': False, 'nullable': False},
-                        {'name': '_some', 'type': 'Object', 'required': False, 'nullable': False},
+                        {
+                            'name': 'string',
+                            'type': 'String',
+                            'required': False,
+                            'nullable': False,
+                        },
+                        {
+                            'name': '_some',
+                            'type': 'Object',
+                            'required': False,
+                            'nullable': False,
+                        },
                     ],
                     'returns': {'type': 'String'},
                     'description': None,
@@ -714,21 +1055,42 @@ class APITest(APITestCase):
                 'notify': {
                     'type': 'method',
                     'options': {'notification': True, 'validate': True},
-                    'params': [{'name': '_string', 'type': 'String', 'required': False, 'nullable': False}],
+                    'params': [
+                        {
+                            'name': '_string',
+                            'type': 'String',
+                            'required': False,
+                            'nullable': False,
+                        }
+                    ],
                     'returns': {'type': 'Null'},
                     'description': None,
                 },
                 'not_allow_notify': {
                     'type': 'method',
                     'options': {'notification': False, 'validate': True},
-                    'params': [{'name': '_string', 'type': 'String', 'required': False, 'nullable': False}],
+                    'params': [
+                        {
+                            'name': '_string',
+                            'type': 'String',
+                            'required': False,
+                            'nullable': False,
+                        }
+                    ],
                     'returns': {'type': 'String'},
                     'description': None,
                 },
                 'fails': {
                     'type': 'method',
                     'options': {'notification': True, 'validate': True},
-                    'params': [{'name': 'n', 'type': 'Number', 'required': False, 'nullable': False}],
+                    'params': [
+                        {
+                            'name': 'n',
+                            'type': 'Number',
+                            'required': False,
+                            'nullable': False,
+                        }
+                    ],
                     'returns': {'type': 'Number'},
                     'description': None,
                 },

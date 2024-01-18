@@ -19,7 +19,7 @@ jobs:
       matrix:
         platform:
           - ubuntu-latest
-        python-version: ["3.11"]
+        python-version: ["3.12"]
     steps:
     - name: Checkout source at ${{ matrix.platform }}
       uses: actions/checkout@v3
