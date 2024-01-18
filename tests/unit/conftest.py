@@ -26,8 +26,8 @@
 # POSSIBILITY OF SUCH DAMAGE.
 import pytest
 
-from .test_apps.app import create_app
-from .test_apps.async_app import create_async_app
+from ..test_apps.app import create_app
+from ..test_apps.async_app import create_async_app
 
 
 @pytest.fixture(scope='module')

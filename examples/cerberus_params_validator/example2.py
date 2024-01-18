@@ -59,10 +59,17 @@ class DataclassValidatorMixin:
     default_schema = None
 
     def validate(
-        self, obj: Any, schema: Optional[Dict[str, Any]] = None, update: bool = False, normalize: bool = True
+        self,
+        obj: Any,
+        schema: Optional[Dict[str, Any]] = None,
+        update: bool = False,
+        normalize: bool = True,
     ) -> bool:
         return super().validate(
-            obj.__dict__, schema=self.default_schema if schema is None else schema, update=update, normalize=normalize
+            obj.__dict__,
+            schema=self.default_schema if schema is None else schema,
+            update=update,
+            normalize=normalize,
         )
 
 

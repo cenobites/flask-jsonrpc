@@ -1,4 +1,4 @@
-# Copyright (c) 2020-2022, Cenobit Technologies, Inc. http://cenobit.es/
+# Copyright (c) 2022-2022, Cenobit Technologies, Inc. http://cenobit.es/
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -24,8 +24,3 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-from __future__ import annotations
-
-from .app import JSONRPC
-from .views import JSONRPCView
-from .blueprints import JSONRPCBlueprint

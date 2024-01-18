@@ -27,17 +27,4 @@
 # POSSIBILITY OF SUCH DAMAGE.
 import setuptools
 
-# Metadata goes in setup.cfg. These are here for GitHub's dependency graph.
-setuptools.setup(
-    name='Flask-JSONRPC',
-    install_requires=[
-        'Flask>=1.0.0,<3.0',
-        'typeguard==2.13.3',
-        'typing_extensions>=4.3.0',
-        'typing_inspect==0.8.0',
-    ],
-    extras_require={
-        'async': ['Flask[async]>=1.0.0,<3.0'],
-        'dotenv': ['Flask[dotenv]>=1.0.0,<3.0'],
-    },
-)
+setuptools.setup()

@@ -77,7 +77,10 @@ def index() -> str:
 @check_terminal_id
 @jsonrpc_headers
 def decorators() -> dict:
-    return {'terminal_id': request.get_json(silent=True).get('terminal_id', 0), 'headers': str(request.headers)}
+    return {
+        'terminal_id': request.get_json(silent=True).get('terminal_id', 0),
+        'headers': str(request.headers),
+    }
 
 
 if __name__ == '__main__':

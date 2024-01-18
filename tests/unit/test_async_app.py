@@ -79,8 +79,15 @@ def test_app_create():
     jsonrpc.register(fn3, name='app.fn3')
 
     with app.test_client() as client:
-        rv = client.post('/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.index', 'params': []})
-        assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': 'Welcome to Flask JSON-RPC'}
+        rv = client.post(
+            '/api',
+            json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.index', 'params': []},
+        )
+        assert rv.json == {
+            'id': 1,
+            'jsonrpc': '2.0',
+            'result': 'Welcome to Flask JSON-RPC',
+        }
         assert rv.status_code == 200
 
         rv = client.post('/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.fn0', 'params': []})
@@ -91,15 +98,24 @@ def test_app_create():
         assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': 'Bar'}
         assert rv.status_code == 200
 
-        rv = client.post('/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.fn2', 'params': [':)']})
+        rv = client.post(
+            '/api',
+            json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.fn2', 'params': [':)']},
+        )
         assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': 'Foo :)'}
         assert rv.status_code == 200
 
-        rv = client.post('/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.fn3', 'params': [':)']})
+        rv = client.post(
+            '/api',
+            json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.fn3', 'params': [':)']},
+        )
         assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': 'Foo :)'}
         assert rv.status_code == 200
 
-        rv = client.post('/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.fn4', 'params': [':)']})
+        rv = client.post(
+            '/api',
+            json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.fn4', 'params': [':)']},
+        )
         assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': 'Goo :)'}
         assert rv.status_code == 200
 
@@ -124,7 +140,11 @@ def test_app_create():
             data=json.dumps({'id': 1, 'jsonrpc': '2.0', 'method': 'app.index'}),
             headers={'Content-Type': 'application/json-rpc'},
         )
-        assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': 'Welcome to Flask JSON-RPC'}
+        assert rv.json == {
+            'id': 1,
+            'jsonrpc': '2.0',
+            'result': 'Welcome to Flask JSON-RPC',
+        }
         assert rv.status_code == 200
 
         rv = client.post(
@@ -132,7 +152,11 @@ def test_app_create():
             data=json.dumps({'id': 1, 'jsonrpc': '2.0', 'method': 'app.index', 'params': []}),
             headers={'Content-Type': 'application/jsonrequest'},
         )
-        assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': 'Welcome to Flask JSON-RPC'}
+        assert rv.json == {
+            'id': 1,
+            'jsonrpc': '2.0',
+            'result': 'Welcome to Flask JSON-RPC',
+        }
         assert rv.status_code == 200
 
         rv = client.post(
@@ -140,7 +164,11 @@ def test_app_create():
             data=json.dumps({'id': 1, 'jsonrpc': '2.0', 'method': 'app.index', 'params': []}),
             headers={'Content-Type': 'application/json'},
         )
-        assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': 'Welcome to Flask JSON-RPC'}
+        assert rv.json == {
+            'id': 1,
+            'jsonrpc': '2.0',
+            'result': 'Welcome to Flask JSON-RPC',
+        }
         assert rv.status_code == 200
 
 
@@ -155,8 +183,15 @@ def test_app_create_with_server_name():
         return 'Welcome to Flask JSON-RPC'
 
     with app.test_client() as client:
-        rv = client.post('/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.index', 'params': []})
-        assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': 'Welcome to Flask JSON-RPC'}
+        rv = client.post(
+            '/api',
+            json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.index', 'params': []},
+        )
+        assert rv.json == {
+            'id': 1,
+            'jsonrpc': '2.0',
+            'result': 'Welcome to Flask JSON-RPC',
+        }
         assert rv.status_code == 200
 
 
@@ -173,28 +208,32 @@ def test_app_create_without_register_app():
     jsonrpc.init_app(app)
 
     with app.test_client() as client:
-        rv = client.post('/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.fn2', 'params': [':)']})
+        rv = client.post(
+            '/api',
+            json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.fn2', 'params': [':)']},
+        )
         assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': 'Foo :)'}
         assert rv.status_code == 200
 
 
 def test_app_create_with_method_without_annotation():
-    with pytest.raises(ValueError, match='no type annotations present to: app.fn1'):
-        app = Flask('test_app', instance_relative_config=True)
-        jsonrpc = JSONRPC(app, '/api', enable_web_browsable_api=True)
+    app = Flask('test_app', instance_relative_config=True)
+    jsonrpc = JSONRPC(app, '/api', enable_web_browsable_api=True)
 
+    with pytest.raises(ValueError, match='no type annotations present to: app.fn1'):
         # pylint: disable=W0612
         @jsonrpc.method('app.fn1')
         async def fn1(s):
             await asyncio.sleep(0)
             return f'Foo {s}'
 
-        # pylint: disable=W0612
-        @jsonrpc.method('app.fn2')
-        async def fn2(s: str) -> str:
-            await asyncio.sleep(0)
-            return f'Bar {s}'
+    # pylint: disable=W0612
+    @jsonrpc.method('app.fn2')
+    async def fn2(s: str) -> str:
+        await asyncio.sleep(0)
+        return f'Bar {s}'
 
+    with pytest.raises(ValueError, match='no type annotations present to: app.fn3'):
         # pylint: disable=W0612
         @jsonrpc.method('app.fn3')
         async def fn3(s):  # pylint: disable=W0612
@@ -203,27 +242,28 @@ def test_app_create_with_method_without_annotation():
 
 
 def test_app_create_with_method_without_annotation_on_params():
+    app = Flask('test_app', instance_relative_config=True)
+    jsonrpc = JSONRPC(app, '/api', enable_web_browsable_api=True)
+
+    # pylint: disable=W0612
+    @jsonrpc.method('app.fn4')
+    async def fn4():
+        await asyncio.sleep(0)
+
     with pytest.raises(ValueError, match='no type annotations present to: app.fn2'):
-        app = Flask('test_app', instance_relative_config=True)
-        jsonrpc = JSONRPC(app, '/api', enable_web_browsable_api=True)
-
-        # pylint: disable=W0612
-        @jsonrpc.method('app.fn4')
-        async def fn4():
-            await asyncio.sleep(0)
-
         # pylint: disable=W0612
         @jsonrpc.method('app.fn2')
         async def fn2(s) -> str:
             await asyncio.sleep(0)
             return f'Foo {s}'
 
-        # pylint: disable=W0612
-        @jsonrpc.method('app.fn1')
-        async def fn1(s: str) -> str:
-            await asyncio.sleep(0)
-            return f'Bar {s}'
+    # pylint: disable=W0612
+    @jsonrpc.method('app.fn1')
+    async def fn1(s: str) -> str:
+        await asyncio.sleep(0)
+        return f'Bar {s}'
 
+    with pytest.raises(ValueError, match='no type annotations present to: app.fn3'):
         # pylint: disable=W0612
         @jsonrpc.method('app.fn3')
         async def fn3(s):  # pylint: disable=W0612
@@ -254,7 +294,10 @@ def test_app_create_with_method_without_annotation_on_return():
         raise ValueError(f'no return: {s}')
 
     with app.test_client() as client:
-        rv = client.post('/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.fn1', 'params': [':)']})
+        rv = client.post(
+            '/api',
+            json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.fn1', 'params': [':)']},
+        )
         assert rv.json == {
             'error': {
                 'code': -32602,
@@ -267,11 +310,17 @@ def test_app_create_with_method_without_annotation_on_return():
         }
         assert rv.status_code == 400
 
-        rv = client.post('/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.fn2', 'params': [':)']})
+        rv = client.post(
+            '/api',
+            json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.fn2', 'params': [':)']},
+        )
         assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': 'Bar :)'}
         assert rv.status_code == 200
 
-        rv = client.post('/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.fn3', 'params': ['OK']})
+        rv = client.post(
+            '/api',
+            json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.fn3', 'params': ['OK']},
+        )
         assert rv.json == {
             'error': {
                 'code': -32000,
@@ -295,7 +344,10 @@ def test_app_create_with_wrong_return():
         return f'Bar {s}', 1, 2, 3
 
     with app.test_client() as client:
-        rv = client.post('/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.fn1', 'params': [':)']})
+        rv = client.post(
+            '/api',
+            json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.fn1', 'params': [':)']},
+        )
         assert rv.json == {
             'error': {
                 'code': -32000,
@@ -328,7 +380,10 @@ def test_app_create_with_invalid_view_func():
         jsonrpc.register(fn1.__new__, name='invalid')
 
     with app.test_client() as client:
-        rv = client.post('/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.fn2', 'params': [':)']})
+        rv = client.post(
+            '/api',
+            json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.fn2', 'params': [':)']},
+        )
         assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': 'Foo :)'}
         assert rv.status_code == 200
 
@@ -377,27 +432,45 @@ def test_app_create_multiple_jsonrpc_versions():
     jsonrpc_v2.register(fn4_v2)
 
     with app.test_client() as client:
-        rv = client.post('/api/v1', json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.fn2', 'params': [':)']})
+        rv = client.post(
+            '/api/v1',
+            json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.fn2', 'params': [':)']},
+        )
         assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': 'v1: Foo :)'}
         assert rv.status_code == 200
 
-        rv = client.post('/api/v2', json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.fn2', 'params': [':D']})
+        rv = client.post(
+            '/api/v2',
+            json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.fn2', 'params': [':D']},
+        )
         assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': 'v2: Foo :D'}
         assert rv.status_code == 200
 
-        rv = client.post('/api/v1', json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.fn3', 'params': [';)']})
+        rv = client.post(
+            '/api/v1',
+            json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.fn3', 'params': [';)']},
+        )
         assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': 'Poo ;)'}
         assert rv.status_code == 200
 
-        rv = client.post('/api/v2', json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.fn1', 'params': ['\\oB']})
+        rv = client.post(
+            '/api/v2',
+            json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.fn1', 'params': ['\\oB']},
+        )
         assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': 'Bar \\oB'}
         assert rv.status_code == 200
 
-        rv = client.post('/api/v1', json={'id': 1, 'jsonrpc': '2.0', 'method': 'fn4_v1', 'params': ['\\oB']})
+        rv = client.post(
+            '/api/v1',
+            json={'id': 1, 'jsonrpc': '2.0', 'method': 'fn4_v1', 'params': ['\\oB']},
+        )
         assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': 'Poo \\oB'}
         assert rv.status_code == 200
 
-        rv = client.post('/api/v2', json={'id': 1, 'jsonrpc': '2.0', 'method': 'fn4_v2', 'params': ['\\oB']})
+        rv = client.post(
+            '/api/v2',
+            json={'id': 1, 'jsonrpc': '2.0', 'method': 'fn4_v2', 'params': ['\\oB']},
+        )
         assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': 'Bar \\oB'}
         assert rv.status_code == 200
 
@@ -440,19 +513,31 @@ def test_app_create_modular_apps():
     jsonrpc.register_blueprint(app, jsonrpc_api_3, url_prefix='/b3')
 
     with app.test_client() as client:
-        rv = client.post('/api/b1', json={'id': 1, 'jsonrpc': '2.0', 'method': 'blue1.fn2', 'params': [':)']})
+        rv = client.post(
+            '/api/b1',
+            json={'id': 1, 'jsonrpc': '2.0', 'method': 'blue1.fn2', 'params': [':)']},
+        )
         assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': 'b1: Foo :)'}
         assert rv.status_code == 200
 
-        rv = client.post('/api/b2', json={'id': 1, 'jsonrpc': '2.0', 'method': 'blue2.fn2', 'params': [':)']})
+        rv = client.post(
+            '/api/b2',
+            json={'id': 1, 'jsonrpc': '2.0', 'method': 'blue2.fn2', 'params': [':)']},
+        )
         assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': 'b2: Foo :)'}
         assert rv.status_code == 200
 
-        rv = client.post('/api/b2', json={'id': 1, 'jsonrpc': '2.0', 'method': 'blue2.fn1', 'params': [':)']})
+        rv = client.post(
+            '/api/b2',
+            json={'id': 1, 'jsonrpc': '2.0', 'method': 'blue2.fn1', 'params': [':)']},
+        )
         assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': 'b2: Bar :)'}
         assert rv.status_code == 200
 
-        rv = client.post('/api/b3', json={'id': 1, 'jsonrpc': '2.0', 'method': 'blue3.fn2', 'params': [':)']})
+        rv = client.post(
+            '/api/b3',
+            json={'id': 1, 'jsonrpc': '2.0', 'method': 'blue3.fn2', 'params': [':)']},
+        )
         assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': 'b3: Foo :)'}
         assert rv.status_code == 200
 
@@ -534,7 +619,10 @@ def test_app_create_with_rcp_batch():
 
     with app.test_client() as client:
         idx = uuid.uuid4()
-        rv = client.post('/api', json={'id': idx.hex, 'jsonrpc': '2.0', 'method': 'sum', 'params': [1, 1]})
+        rv = client.post(
+            '/api',
+            json={'id': idx.hex, 'jsonrpc': '2.0', 'method': 'sum', 'params': [1, 1]},
+        )
         assert rv.json == {'id': idx.hex, 'jsonrpc': '2.0', 'result': 2}
         assert rv.status_code == 200
 
@@ -628,7 +716,12 @@ def test_app_create_with_rcp_batch():
             json=[
                 {'id': '1', 'jsonrpc': '2.0', 'method': 'sum', 'params': [1, 1]},
                 {'id': '2', 'jsonrpc': '2.0', 'method': 'subtract', 'params': [2, 2]},
-                {'id': '3', 'jsonrpc': '2.0', 'method': 'get_user', 'params': {'uid': '345'}},
+                {
+                    'id': '3',
+                    'jsonrpc': '2.0',
+                    'method': 'get_user',
+                    'params': {'uid': '345'},
+                },
                 {'jsonrpc': '2.0', 'method': 'notify_sum', 'params': [[1, 2, 3, 4, 5]]},
                 {'id': 'h1', 'jsonrpc': '2.0', 'method': 'headers1'},
                 {'id': 'h2', 'jsonrpc': '2.0', 'method': 'headers2'},

@@ -1,6 +1,17 @@
 version: '3'
 
 services:
+  python3.12:
+    build:
+      context: .
+      dockerfile: Dockerfile.py312.test
+    environment:
+      - PRAGMA_VERSION=py3.12
+    command: >
+      sh -c "flake8 src/ tests/ &&
+        pylint src/ tests/ &&
+        pytest"
+
   python3.11:
     build:
       context: .
@@ -40,17 +51,6 @@ services:
       dockerfile: Dockerfile.py38.test
     environment:
       - PRAGMA_VERSION=py3.8
-    command: >
-      sh -c "flake8 src/ tests/ &&
-        pylint src/ tests/ &&
-        pytest"
-
-  python3.7:
-    build:
-      context: .
-      dockerfile: Dockerfile.py37.test
-    environment:
-      - PRAGMA_VERSION=py3.7
     command: >
       sh -c "flake8 src/ tests/ &&
         pylint src/ tests/ &&

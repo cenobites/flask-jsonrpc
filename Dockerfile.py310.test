@@ -18,8 +18,7 @@ RUN set -ex \
     && pip install -r requirements/base.txt \
     && pip install -r requirements/test.txt \
         poetry-core>=1.0.0 \
-    && cat requirements/ci.txt | grep -wv ^mypy | grep -vw ^pytype > requirements/ci-updated.txt \
-    && pip install -r requirements/ci-updated.txt \
+    && pip install -r requirements/ci.txt \
     && apk del .build-deps \
     && addgroup -S kuchulu \
     && adduser \

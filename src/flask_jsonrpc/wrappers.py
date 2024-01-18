@@ -67,7 +67,7 @@ class JSONRPCDecoratorMixin:
         if isfunction(fn):
             return fn
         if ismethod(fn) and getattr(fn, '__func__', None):
-            return fn.__func__  # pytype: disable=attribute-error
+            return fn.__func__  # pytype: disable=attribute-error,bad-return-type
         raise ValueError('the view function must be either a function or a method')
 
     def get_jsonrpc_site(self) -> 'JSONRPCSite':
@@ -77,7 +77,10 @@ class JSONRPCDecoratorMixin:
         raise NotImplementedError('.get_jsonrpc_site_api must be overridden')
 
     def register_view_function(
-        self, view_func: t.Callable[..., t.Any], name: t.Optional[str] = None, **options: t.Dict[str, t.Any]
+        self,
+        view_func: t.Callable[..., t.Any],
+        name: t.Optional[str] = None,
+        **options: t.Dict[str, t.Any],
     ) -> t.Callable[..., t.Any]:
         fn = self._get_function(view_func)
         fn_options = self._method_options(options)
