@@ -22,11 +22,11 @@ jobs:
         python-version: ["3.12"]
     steps:
     - name: Checkout source at ${{ matrix.platform }}
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         ref: ${{ github.ref_name }}
     - name: Setup Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
     - name: Build source and wheel distributions to version ${{ github.ref_name }}
@@ -35,7 +35,7 @@ jobs:
         python -m build
         twine check --strict dist/*
     - name: Publish distribution to PyPI
-      uses: pypa/gh-action-pypi-publish@v1.5.1
+      uses: pypa/gh-action-pypi-publish@v1.8.11
       with:
         user: __token__
         password: ${{ secrets.PYPI_API_TOKEN }}
