@@ -21,11 +21,11 @@ jobs:
         python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
     steps:
     - name: Checkout source at ${{ matrix.platform }}
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         ref: ${{ github.ref_name }}
     - name: Setup Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
         cache: 'pip'
@@ -53,11 +53,11 @@ jobs:
         python-version: ["3.11"]
     steps:
     - name: Checkout source at ${{ matrix.platform }}
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         ref: ${{ github.ref_name }}
     - name: Setup Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
         cache: 'pip'
@@ -82,11 +82,11 @@ jobs:
         python-version: ["3.12"]
     steps:
     - name: Checkout source at ${{ matrix.platform }}
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         ref: ${{ github.ref_name }}
     - name: Setup Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
         cache: 'pip'
@@ -111,11 +111,11 @@ jobs:
         python-version: ["3.12"]
     steps:
     - name: Checkout source at ${{ matrix.platform }}
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         ref: ${{ github.ref_name }}
     - name: Setup Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
         cache: 'pip'
@@ -146,11 +146,11 @@ jobs:
         python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
     steps:
     - name: Checkout source at ${{ matrix.platform }}
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         ref: ${{ github.ref_name }}
     - name: Setup Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
         cache: 'pip'
@@ -165,7 +165,7 @@ jobs:
         py.test
     - name: Upload coverage JUint report
       if: ${{ matrix.platform == 'ubuntu-latest' && matrix.python-version == '3.12' }}
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: test-n-coverage-report
         path: |
@@ -185,11 +185,11 @@ jobs:
         python-version: ["3.12"]
     steps:
     - name: Checkout source at ${{ matrix.platform }}
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         ref: ${{ github.ref_name }}
     - name: Setup Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
         cache: 'pip'
@@ -199,7 +199,7 @@ jobs:
         pip install --upgrade pip
         pip install -r requirements/test.txt
     - name: Download a coverage artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: test-n-coverage-report
     - name: Send coverage stats to Coveralls
@@ -223,11 +223,11 @@ jobs:
         python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
     steps:
     - name: Checkout source at ${{ matrix.platform }}
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         ref: ${{ github.ref_name }}
     - name: Setup Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
     - name: Build source and wheel distributions
@@ -241,7 +241,7 @@ jobs:
         tar -cvf dist.tar dist
     - name: Upload build and wheel distributions files
       if: ${{  matrix.platform == 'ubuntu-latest' && matrix.python-version == '3.12' }}
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: pre-release-build
         path: dist.tar
@@ -260,15 +260,15 @@ jobs:
         python-version: ["3.12"]
     steps:
     - name: Checkout source at ${{ matrix.platform }}
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         ref: ${{ github.ref_name }}
     - name: Setup Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
     - name: Download build and wheel distributions files
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: pre-release-build
     - name: Build source and wheel distributions to version ${{ github.ref_name }}
@@ -277,7 +277,7 @@ jobs:
         tar -xvf dist.tar
         twine check --strict dist/*
     - name: Publish distribution to TestPyPI
-      uses: pypa/gh-action-pypi-publish@v1.5.1
+      uses: pypa/gh-action-pypi-publish@v1.8.11
       with:
         user: __token__
         password: ${{ secrets.TEST_PYPI_API_TOKEN }}

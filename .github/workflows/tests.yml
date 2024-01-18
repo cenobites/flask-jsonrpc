@@ -22,7 +22,7 @@ jobs:
           - ubuntu-latest
     steps:
     - name: Checkout source at ${{ matrix.platform }}
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
     - name: Run tests
       run: |
         bash ./bin/docker-compose-test.sh
@@ -37,7 +37,7 @@ jobs:
           - ubuntu-latest
     steps:
     - name: Checkout source at ${{ matrix.platform }}
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
     - name: Run tests
       run: |
         bash ./bin/docker-compose-it.sh
