@@ -46,7 +46,7 @@ except ImportError:  # pragma: no cover
 
 # Python 3.8+
 try:
-    from typing_extensions import Final
+    from typing import Final
 except ImportError:  # pragma: no cover
     from typing import Final  # type: ignore  # pylint: disable=C0412
 
