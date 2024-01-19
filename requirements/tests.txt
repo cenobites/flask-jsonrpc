@@ -9,7 +9,7 @@ pytest-selenium==4.0.2  # https://github.com/pytest-dev/pytest-selenium
 
 # Type check
 # ------------------------------------------------------------------------------
-typeguard==2.13.3  # https://github.com/agronholm/typeguard
+typeguard==4.1.5  # https://github.com/agronholm/typeguard
 
 # Code quality
 # ------------------------------------------------------------------------------

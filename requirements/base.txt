@@ -4,6 +4,6 @@ Flask>=3.0.0,<4.0  # https://github.com/pallets/flask
 
 # Tools
 # ------------------------------------------------------------------------------
-typeguard==2.13.3  # https://github.com/agronholm/typeguard
+typeguard==4.1.5  # https://github.com/agronholm/typeguard
 typing_extensions>=4.3.0  # https://github.com/python/typing/blob/master/typing_extensions/README.rst
 typing_inspect==0.9.0  # https://github.com/ilevkivskyi/typing_inspect
