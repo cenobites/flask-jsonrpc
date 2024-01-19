@@ -44,12 +44,6 @@ try:
 except ImportError:  # pragma: no cover
     from typing import Literal  # type: ignore  # pylint: disable=C0412
 
-# Python 3.8+
-try:
-    from typing import Final
-except ImportError:  # pragma: no cover
-    from typing import Final  # type: ignore  # pylint: disable=C0412
-
 # Python 3.7+
 try:
     from typing import get_args  # pylint: disable=C0412
@@ -120,7 +114,7 @@ class JSONRPCNewType:
             if origin_type is Literal:
                 return self.check_args_type(expected_type)
 
-            if origin_type is Final:
+            if origin_type is t.Final:
                 return self.check_args_type(expected_type)
 
             expected_type = origin_type
