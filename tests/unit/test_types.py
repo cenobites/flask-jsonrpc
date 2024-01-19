@@ -86,7 +86,7 @@ def test_types_complex():
     S = t.TypeVar('S', int, float)
     X = t.TypeVar('X', bound=int)
     U = types.Literal[str]
-    V = types.Final[str]
+    V = t.Final[str]
 
     assert types.Object.check_type(T)
     assert types.Number.check_type(S)
