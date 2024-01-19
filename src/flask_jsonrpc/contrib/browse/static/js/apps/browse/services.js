@@ -76,6 +76,10 @@
         .factory('RPC', ['$http', '$location', 'serverUrls', 'UUID', function($http, $location, serverUrls, UUID) {
             return {
                 getValue: function(param) {
+                    if (!param.value) {
+                        return param.value;
+                    }
+
                     if (param.type === 'Object') {
                         return eval('('+ param.value + ')');
                     } else if (param.type === 'Number') {

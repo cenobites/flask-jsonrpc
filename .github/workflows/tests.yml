@@ -1,12 +1,12 @@
-name: Tests
+name: Tests [Docker]
 
 on:
   push:
-    branches: ["master"]
+    branches:
+      - master
+      - release/**
     tags-ignore:
       - v**
-  pull_request:
-    branches: ["master"]
 
 permissions:
   contents: read

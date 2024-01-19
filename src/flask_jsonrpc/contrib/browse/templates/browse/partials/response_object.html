@@ -32,7 +32,7 @@
 
 {% raw %}
 <div class="content-main">
-    <div class="page-header"><h1>{{module.name}}(<span ng-repeat="param in module.params">{{param.name}}: {{param.type}}<span ng-if="!$last">, </span></span>) -> {{module.return.type}}</h1></div>
+    <div class="page-header"><h1>{{module.name}}(<span ng-repeat="param in module.params">{{param.name}}: {{param.type}}<span ng-if="!$last">, </span></span>) -> {{module.returns.type}}</h1></div>
     <blockquote>{{ module.description }}</blockquote>
     <span >
       <p><b>Request:</b></p>
