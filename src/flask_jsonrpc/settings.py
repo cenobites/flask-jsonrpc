@@ -26,21 +26,22 @@
 # POSSIBILITY OF SUCH DAMAGE.
 import typing as t
 
-DEFAULTS = {
-    'DEFAULT_JSONRPC_METHOD': {
-        'VALIDATE': True,
-        'NOTIFICATION': True,
-    },
-}
+# Python 3.10+
+try:
+    from typing import Self
+except ImportError:  # pragma: no cover
+    from typing_extensions import Self
+
+DEFAULTS = {'DEFAULT_JSONRPC_METHOD': {'VALIDATE': True, 'NOTIFICATION': True}}
 
 
 class JSONRPCSettings:
-    def __init__(self, defaults: t.Optional[t.Dict[str, t.Any]] = None):
+    def __init__(self: Self, defaults: t.Optional[t.Dict[str, t.Any]] = None) -> None:
         self.defaults = defaults or DEFAULTS
 
-    def __getattr__(self, attr: str) -> t.Any:
+    def __getattr__(self: Self, attr: str) -> t.Any:  # noqa: ANN401
         if attr not in self.defaults:
-            raise AttributeError(f"Invalid setting: {attr!r}")
+            raise AttributeError(f'Invalid setting: {attr!r}')
 
         val = self.defaults[attr]
 

@@ -34,7 +34,7 @@ import pytest
 from flask_jsonrpc import types
 
 
-def test_types():
+def test_types() -> None:
     assert types.String.check_type(str)
     assert types.String.check_type(t.AnyStr)
     assert str(types.String) == 'String'
@@ -74,14 +74,14 @@ def test_types():
     assert str(types.Null) == 'Null'
 
 
-def test_types_others():
+def test_types_others() -> None:
     assert types.Object.check_type(OrderedDict)
     assert types.Object.check_type(defaultdict)
     assert types.Object.check_type(t.DefaultDict)
     assert types.Object.check_type(t.Mapping)
 
 
-def test_types_complex():
+def test_types_complex() -> None:
     T = t.TypeVar('T')
     S = t.TypeVar('S', int, float)
     X = t.TypeVar('X', bound=int)
@@ -97,8 +97,8 @@ def test_types_complex():
     assert types.String.check_type(t.Optional[str])
 
 
-def test_types_from_fn():
-    def fn(_a: str, _b: int, _c: t.Dict[str, t.Any], _d: t.List[int], _e: t.Any) -> bool:
+def test_types_from_fn() -> None:
+    def fn(_a: str, _b: int, _c: t.Dict[str, t.Any], _d: t.List[int], _e: t.Any) -> bool:  # noqa: ANN401
         return True
 
     fn_annotations = t.get_type_hints(fn)
@@ -112,7 +112,7 @@ def test_types_from_fn():
 
 # pylint: disable=E1136
 @pytest.mark.skipif(sys.version_info < (3, 9), reason='requires python3.9 or higher')
-def test_generic_type_alias():
+def test_generic_type_alias() -> None:
     T = t.TypeVar('T')
 
     assert types.Array.check_type(list[int])
@@ -127,7 +127,7 @@ def test_generic_type_alias():
 
 # pylint: disable=E1131
 @pytest.mark.skipif(sys.version_info < (3, 10), reason='requires python3.10 or higher')
-def test_union_type_expression():
+def test_union_type_expression() -> None:
     assert types.Array.check_type(list[int | str])
     assert types.String.check_type(str | bytearray)
     assert types.String.check_type(bytearray | str)
@@ -136,12 +136,12 @@ def test_union_type_expression():
 
 
 @pytest.mark.skipif(sys.version_info < (3, 10), reason='requires python3.10 or higher')
-def test_none_type():
+def test_none_type() -> None:
     assert types.Null.check_type(type(None))
     assert types.Null.check_type(types.NoneType)
 
 
-def test_new_type():
+def test_new_type() -> None:
     UserId = t.NewType('UserId', int)
     UserUid = t.NewType('UserUid', str)
 

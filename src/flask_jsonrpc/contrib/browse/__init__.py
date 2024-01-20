@@ -31,9 +31,14 @@ from flask import Blueprint, jsonify, request, render_template
 
 from flask_jsonrpc.helpers import urn
 
+# Python 3.11+
+try:
+    from typing import Self
+except ImportError:  # pragma: no cover
+    from typing_extensions import Self
+
 if t.TYPE_CHECKING:
-    from flask import Flask
-    from flask import typing as ft
+    from flask import Flask, typing as ft
 
     from flask_jsonrpc.site import JSONRPCSite
     from flask_jsonrpc.typing import ServiceMethodDescribe
@@ -41,10 +46,7 @@ if t.TYPE_CHECKING:
 
 class JSONRPCBrowse:
     def __init__(
-        self,
-        app: t.Optional['Flask'] = None,
-        url_prefix: str = '/api/browse',
-        base_url: t.Optional[str] = None,
+        self: Self, app: t.Optional['Flask'] = None, url_prefix: str = '/api/browse', base_url: t.Optional[str] = None
     ) -> None:
         self.app = app
         self.url_prefix = url_prefix
@@ -53,10 +55,10 @@ class JSONRPCBrowse:
         if app:
             self.init_app(app)
 
-    def _service_methods_desc(self) -> t.Dict[str, 'ServiceMethodDescribe']:
+    def _service_methods_desc(self: Self) -> t.Dict[str, 'ServiceMethodDescribe']:
         return dict(ChainMap(*[site.describe()['methods'] for site in self.jsonrpc_sites]))
 
-    def init_app(self, app: 'Flask') -> None:
+    def init_app(self: Self, app: 'Flask') -> None:
         name = urn('browse', app.name, self.url_prefix)
         browse = Blueprint(name, __name__, template_folder='templates', static_folder='static')
         browse.add_url_rule('/', view_func=self.vf_index)
@@ -67,25 +69,21 @@ class JSONRPCBrowse:
 
         app.register_blueprint(browse, url_prefix=self.url_prefix)
         app.add_url_rule(
-            f'{self.url_prefix}/static/<path:filename>',
-            'urn:browse.static',
-            view_func=app.send_static_file,
+            f'{self.url_prefix}/static/<path:filename>', 'urn:browse.static', view_func=app.send_static_file
         )
 
-    def register_jsonrpc_site(self, jsonrpc_site: 'JSONRPCSite') -> None:
+    def register_jsonrpc_site(self: Self, jsonrpc_site: 'JSONRPCSite') -> None:
         self.jsonrpc_sites.add(jsonrpc_site)
 
-    def vf_index(self) -> str:
+    def vf_index(self: Self) -> str:
         server_urls: t.Dict[str, str] = {}
         service_describes = [site.describe() for site in self.jsonrpc_sites]
         for service_describe in service_describes:
-            server_urls.update(
-                {name: service_describe['servers'][0]['url'] for name in service_describe['methods'].keys()}
-            )
+            server_urls.update({name: service_describe['servers'][0]['url'] for name in service_describe['methods']})
         url_prefix = f"{request.script_root}{request.path.rstrip('/')}"
         return render_template('browse/index.html', url_prefix=url_prefix, server_urls=server_urls)
 
-    def vf_json_packages(self) -> 'ft.ResponseReturnValue':
+    def vf_json_packages(self: Self) -> 'ft.ResponseReturnValue':
         service_methods = self._service_methods_desc()
         packages = sorted(service_methods.keys())
         packages_tree: t.Dict[str, t.List[t.Dict[str, t.Any]]] = {}
@@ -94,14 +92,14 @@ class JSONRPCBrowse:
             packages_tree.setdefault(package_name, []).append({'name': package, **service_methods[package]})
         return jsonify(packages_tree)
 
-    def vf_json_method(self, method_name: str) -> 'ft.ResponseReturnValue':
+    def vf_json_method(self: Self, method_name: str) -> 'ft.ResponseReturnValue':
         service_procedures = self._service_methods_desc()
         if method_name not in service_procedures:
             return jsonify({'message': 'Not found'}), 404
         return jsonify({'name': method_name, **service_procedures[method_name]})
 
-    def vf_partials_dashboard(self) -> str:
+    def vf_partials_dashboard(self: Self) -> str:
         return render_template('browse/partials/dashboard.html')
 
-    def vf_partials_response_object(self) -> str:
+    def vf_partials_response_object(self: Self) -> str:
         return render_template('browse/partials/response_object.html')

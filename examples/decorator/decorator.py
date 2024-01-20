@@ -46,8 +46,8 @@ app = Flask('decorator')
 jsonrpc = JSONRPC(app, '/api')
 
 
-def check_terminal_id(fn: Callable[..., Any]):
-    def wrapped(*args: Any, **kwargs: Any) -> Any:
+def check_terminal_id(fn: Callable[..., Any]) -> Any:  # noqa: ANN401
+    def wrapped(*args: Any, **kwargs: Any) -> Any:  # noqa: ANN401
         terminal_id = int(request.get_json(silent=True).get('terminal_id', 0))
         if terminal_id <= 0:
             raise ValueError('Invalid terminal ID')
@@ -57,8 +57,8 @@ def check_terminal_id(fn: Callable[..., Any]):
     return wrapped
 
 
-def jsonrpc_headers(fn: Callable[..., Any]):
-    def wrapped(*args: Any, **kwargs: Any) -> Any:
+def jsonrpc_headers(fn: Callable[..., Any]) -> Any:  # noqa: ANN401
+    def wrapped(*args: Any, **kwargs: Any) -> Any:  # noqa: ANN401
         headers = {'X-JSONRPC-Tag': 'JSONRPC 2.0'}
         rv = fn(*args, **kwargs)
         return rv, 200, headers
@@ -77,10 +77,7 @@ def index() -> str:
 @check_terminal_id
 @jsonrpc_headers
 def decorators() -> dict:
-    return {
-        'terminal_id': request.get_json(silent=True).get('terminal_id', 0),
-        'headers': str(request.headers),
-    }
+    return {'terminal_id': request.get_json(silent=True).get('terminal_id', 0), 'headers': str(request.headers)}
 
 
 if __name__ == '__main__':

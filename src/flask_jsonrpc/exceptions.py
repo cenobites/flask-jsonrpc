@@ -30,6 +30,12 @@ import traceback
 
 from flask import current_app
 
+# Python 3.10+
+try:
+    from typing import Self
+except ImportError:  # pragma: no cover
+    from typing_extensions import Self
+
 try:
     from flaskext.babel import gettext as _  # type: ignore
 
@@ -56,10 +62,10 @@ class JSONRPCError(Exception):
     status_code: int = 400
 
     def __init__(
-        self,
+        self: Self,
         message: t.Optional[str] = None,
         code: t.Optional[int] = None,
-        data: t.Optional[t.Any] = None,
+        data: t.Optional[t.Any] = None,  # noqa: ANN401
         status_code: t.Optional[int] = None,
     ) -> None:
         """Setup the Exception and overwrite the default message"""
@@ -74,15 +80,10 @@ class JSONRPCError(Exception):
             self.status_code = status_code
 
     @property
-    def jsonrpc_format(self) -> t.Dict[str, t.Any]:
+    def jsonrpc_format(self: Self) -> t.Dict[str, t.Any]:
         """Return the Exception data in a format for JSON-RPC"""
 
-        error = {
-            'name': self.__class__.__name__,
-            'code': self.code,
-            'message': self.message,
-            'data': self.data,
-        }
+        error = {'name': self.__class__.__name__, 'code': self.code, 'message': self.message, 'data': self.data}
 
         # RuntimeError: Working outside of application context.
         # This typically means that you attempted to use functionality that needed

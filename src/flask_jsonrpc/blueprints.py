@@ -29,6 +29,12 @@ import typing as t
 from .globals import default_jsonrpc_site, default_jsonrpc_site_api
 from .wrappers import JSONRPCDecoratorMixin
 
+# Python 3.10+
+try:
+    from typing import Self
+except ImportError:  # pragma: no cover
+    from typing_extensions import Self
+
 if t.TYPE_CHECKING:
     from .site import JSONRPCSite
     from .views import JSONRPCView
@@ -36,7 +42,7 @@ if t.TYPE_CHECKING:
 
 class JSONRPCBlueprint(JSONRPCDecoratorMixin):
     def __init__(
-        self,
+        self: Self,
         name: str,
         import_name: str,
         jsonrpc_site: t.Type['JSONRPCSite'] = default_jsonrpc_site,
@@ -47,8 +53,8 @@ class JSONRPCBlueprint(JSONRPCDecoratorMixin):
         self.jsonrpc_site = jsonrpc_site()
         self.jsonrpc_site_api = jsonrpc_site_api
 
-    def get_jsonrpc_site(self) -> 'JSONRPCSite':
+    def get_jsonrpc_site(self: Self) -> 'JSONRPCSite':
         return self.jsonrpc_site
 
-    def get_jsonrpc_site_api(self) -> t.Type['JSONRPCView']:
+    def get_jsonrpc_site_api(self: Self) -> t.Type['JSONRPCView']:
         return self.jsonrpc_site_api

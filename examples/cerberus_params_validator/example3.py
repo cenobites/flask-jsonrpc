@@ -28,7 +28,7 @@
 # isort:skip_file
 import os
 import sys
-from typing import Any, Callable, Dict, Optional
+from typing import Any, Callable, Dict, Optional, Self
 
 from flask import Flask
 from cerberus import Validator
@@ -52,23 +52,20 @@ class SchemaValidatorMixin:
     default_schema = None
 
     def validate(
-        self,
-        obj: Any,
+        self: Self,
+        obj: Any,  # noqa: ANN401
         schema: Optional[Dict[str, Any]] = None,
         update: bool = False,
         normalize: bool = True,
     ) -> bool:
         return super().validate(
-            obj,
-            schema=self.default_schema if schema is None else schema,
-            update=update,
-            normalize=normalize,
+            obj, schema=self.default_schema if schema is None else schema, update=update, normalize=normalize
         )
 
 
 def cerberus_validator(validator: Validator) -> Callable[..., Any]:
     def decorator(fn: Callable[..., Any]) -> Callable[..., Any]:
-        def wrapped(*args: Any, **kwargs: Any) -> Any:
+        def wrapped(*args: Any, **kwargs: Any) -> Any:  # noqa: ANN401
             if not validator.validate(kwargs):
                 raise InvalidParamsError(data={'message': validator.errors})
             return fn(*args, **kwargs)
@@ -82,10 +79,7 @@ class UserValidator(SchemaValidatorMixin, Validator):
     default_schema = {
         'user': {
             'type': 'dict',
-            'schema': {
-                'name': {'type': 'string', 'maxlength': 10},
-                'age': {'type': 'integer', 'min': 10},
-            },
+            'schema': {'name': {'type': 'string', 'maxlength': 10}, 'age': {'type': 'integer', 'min': 10}},
         }
     }
 
@@ -94,11 +88,7 @@ v = Validator()
 v.schema = {
     'vehicle': {
         'type': 'dict',
-        'schema': {
-            'make': {'type': 'string'},
-            'model': {'type': 'string'},
-            'year': {'type': 'integer', 'min': 1900},
-        },
+        'schema': {'make': {'type': 'string'}, 'model': {'type': 'string'}, 'year': {'type': 'integer', 'min': 1900}},
     }
 }
 

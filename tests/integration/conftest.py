@@ -26,31 +26,33 @@
 # POSSIBILITY OF SUCH DAMAGE.
 import os
 import time
-import unittest
 from pathlib import Path
+import unittest
 
 import urllib3
 import requests
 from selenium import webdriver
 
+# Python 3.11+
+try:
+    from typing import Self
+except ImportError:  # pragma: no cover
+    from typing_extensions import Self
+
 WEB_DRIVER_SCREENSHOT_DIR = Path(os.environ['PYTEST_CACHE_DIR']) / 'screenshots'
 
 
 class APITestCase(unittest.TestCase):
-    def setUp(self) -> None:
+    def setUp(self: Self) -> None:
         urllib3.disable_warnings()
         session = requests.Session()
-        session.headers.update(
-            {
-                'Content-Type': 'application/json',
-            }
-        )
+        session.headers.update({'Content-Type': 'application/json'})
         session.verify = False
         self.requests = session
 
 
 class WebDriverTestCase(unittest.TestCase):
-    def setUp(self) -> None:
+    def setUp(self: Self) -> None:
         chrome_prefs = {}
         chrome_options = webdriver.ChromeOptions()
         chrome_options.add_argument('--no-sandbox')
@@ -68,5 +70,5 @@ class WebDriverTestCase(unittest.TestCase):
         if not WEB_DRIVER_SCREENSHOT_DIR.exists():
             WEB_DRIVER_SCREENSHOT_DIR.mkdir(parents=True)
 
-    def take_screenshot(self):
+    def take_screenshot(self: Self) -> None:
         self.driver.get_screenshot_as_file(str(WEB_DRIVER_SCREENSHOT_DIR / f'{self.id()}-{time.time()}.png'))

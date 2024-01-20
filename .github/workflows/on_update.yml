@@ -12,7 +12,7 @@ permissions:
 
 jobs:
   lint:
-    name: Lint
+    name: Lint and Format
     runs-on: ${{ matrix.platform }}
     strategy:
       fail-fast: false
@@ -32,12 +32,9 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install -r requirements/base.txt -r requirements/style.txt
-    - name: Run flake8
+    - name: Run ruff
       run: |
-        flake8 src/ tests/
-    - name: Run pylint
-      run: |
-        pylint src/ tests/
+        ruff check .
 
   test:
     name: Test

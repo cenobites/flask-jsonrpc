@@ -31,11 +31,17 @@ from selenium.webdriver.common.by import By
 
 from .conftest import WebDriverTestCase
 
+# Python 3.11+
+try:
+    from typing import Self
+except ImportError:  # pragma: no cover
+    from typing_extensions import Self
+
 BROWSABLE_API_URL = os.environ['BROWSABLE_API_URL']
 
 
 class WebBrowsableAPITest(WebDriverTestCase):
-    def test_index(self):
+    def test_index(self: Self) -> None:
         self.driver.get(BROWSABLE_API_URL)
         logo_link = self.driver.find_element(By.XPATH, '//*[@id="logo-link"]')
         self.assertEqual('Web browsable API', logo_link.text)

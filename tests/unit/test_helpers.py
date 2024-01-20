@@ -31,7 +31,7 @@ import pytest
 from flask_jsonrpc.helpers import urn, from_python_type
 
 
-def test_urn():
+def test_urn() -> None:
     with pytest.raises(ValueError, match='name is required'):
         urn(None)
     with pytest.raises(ValueError, match='name is required'):
@@ -39,7 +39,7 @@ def test_urn():
     assert urn('a', 'b', 'c', 'd') == 'urn:a:b:c:d'
 
 
-def test_from_python_type():
+def test_from_python_type() -> None:
     assert str(from_python_type(str)) == 'String'
     assert str(from_python_type(t.AnyStr)) == 'String'
     assert str(from_python_type(int)) == 'Number'

@@ -30,6 +30,7 @@ import os
 import sys
 from typing import Any, Dict, List, Union, NoReturn, Optional
 from numbers import Real
+import typing as t
 
 from flask import Flask
 
@@ -45,26 +46,26 @@ except ModuleNotFoundError:
 
 
 class MyApp:
-    def index(self) -> str:
+    def index(self: t.Self) -> str:
         return 'Welcome to Flask JSON-RPC'
 
-    def greeting(self, name: str) -> str:
+    def greeting(self: t.Self, name: str) -> str:
         return f'Hello {name}'
 
-    def args_validate(self, a1: int, a2: str, a3: bool, a4: List[Any], a5: Dict[Any, Any]) -> str:
+    def args_validate(self: t.Self, a1: int, a2: str, a3: bool, a4: List[Any], a5: Dict[Any, Any]) -> str:
         return f'Number: {a1}, String: {a2}, Boolean: {a3}, Array: {a4}, Object: {a5}'
 
-    def notify(self, _string: Optional[str] = None) -> None:
+    def notify(self: t.Self, _string: Optional[str] = None) -> None:
         pass
 
-    def fails(self, _string: Optional[str] = None) -> NoReturn:
+    def fails(self: t.Self, _string: Optional[str] = None) -> NoReturn:
         raise ValueError('example of fail')
 
-    def sum_(self, a: Real, b: Real) -> Real:
+    def sum_(self: t.Self, a: Real, b: Real) -> Real:
         return a + b
 
     @classmethod
-    def multiply(cls, a: float, b: float) -> float:
+    def multiply(cls: t.Type[t.Self], a: float, b: float) -> float:
         return a * b
 
     @staticmethod

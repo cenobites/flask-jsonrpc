@@ -25,8 +25,8 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 import typing as t
-import itertools
 from operator import getitem
+import itertools
 
 from .types import Types, Object
 
@@ -34,7 +34,7 @@ if t.TYPE_CHECKING:
     from .types import JSONRPCNewType
 
 
-def urn(name: str, *args: t.Any) -> str:
+def urn(name: str, *args: t.Any) -> str:  # noqa: ANN401
     """Return the URN name.
 
     >>> urn('python')
@@ -61,7 +61,7 @@ def urn(name: str, *args: t.Any) -> str:
     return f"urn:{name}{sep}{st.replace('::', ':')}".lower()
 
 
-def from_python_type(tp: t.Any) -> 'JSONRPCNewType':
+def from_python_type(tp: t.Any) -> 'JSONRPCNewType':  # noqa: ANN401
     """Convert Python type to JSONRPCNewType.
 
     >>> str(from_python_type(str))
@@ -85,7 +85,7 @@ def from_python_type(tp: t.Any) -> 'JSONRPCNewType':
     return Object
 
 
-def get(obj: t.Dict[str, t.Any], path: str, default: t.Any = None) -> t.Any:
+def get(obj: t.Dict[str, t.Any], path: str, default: t.Any = None) -> t.Any:  # noqa: ANN401
     """Get the value at any depth of a nested object based on the path
     described by `path`. If path doesn't exist, `default` is returned.
     Args:
