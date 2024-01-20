@@ -7,13 +7,39 @@ on:
       - release/**
     tags-ignore:
       - v**
+  issue_comment:
+    types: [created]
 
 permissions:
+  actions: write
   contents: read
 
 jobs:
+  does-it-run:
+    name: Does it run?
+    runs-on: ${{ matrix.platform }}
+    strategy:
+      fail-fast: false
+      matrix:
+        platform:
+          - ubuntu-latest
+    steps:
+      - name: Check comment review
+        if: >- 
+          github.event_name == 'issue_comment' && 
+          github.event.issue.pull_request &&
+          !contains(github.event.issue.body, 'github-actions-workflow: tests')
+        uses: action-pack/cancel@v1
+      - name: Comment about start of workflow
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_ID: ${{ github.event.pull_request.html_url }}
+        run: |
+          gh pr comment $PR_ID --body 'The "Tests [Docker]" workflow will be started.'
+
   unit-tests:
     name: Unit tests
+    needs: does-it-run
     runs-on: ${{ matrix.platform }}
     strategy:
       fail-fast: false
@@ -29,6 +55,7 @@ jobs:
 
   integration-tests:
     name: Integration tests
+    needs: does-it-run
     runs-on: ${{ matrix.platform }}
     strategy:
       fail-fast: false
