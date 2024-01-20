@@ -31,6 +31,10 @@ jobs:
           !contains(github.event.issue.body, 'github-actions-workflow: tests')
         uses: action-pack/cancel@v1
       - name: Comment about start of workflow
+        if: >- 
+          github.event_name == 'issue_comment' && 
+          github.event.issue.pull_request &&
+          contains(github.event.issue.body, 'github-actions-workflow: tests')
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PR_ID: ${{ github.event.pull_request.html_url }}
