@@ -37,9 +37,9 @@ jobs:
           contains(github.event.comment.body, 'github-actions-workflow-tests')
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PR_ID: ${{ github.event.pull_request.html_url }}
+          PR: ${{ github.event.issue.pull_request.html_url }}
         run: |
-          gh pr comment $PR_ID --body 'The "Tests [Docker]" workflow will be started.'
+          gh pr comment $PR --body 'The "Tests [Docker]" workflow will be started.'
 
   unit-tests:
     name: Unit tests
