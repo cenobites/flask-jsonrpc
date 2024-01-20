@@ -11,8 +11,10 @@ on:
     types: [created]
 
 permissions:
-  actions: write
   contents: read
+  actions: write
+  issues: write
+  pull-requests: write
 
 jobs:
   does-it-run:
