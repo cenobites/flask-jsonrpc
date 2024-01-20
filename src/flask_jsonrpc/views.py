@@ -26,22 +26,27 @@
 # POSSIBILITY OF SUCH DAMAGE.
 import typing as t
 
-from flask import typing as ft
-from flask import jsonify, current_app, make_response
+from flask import typing as ft, jsonify, current_app, make_response
 from flask.views import MethodView
 
 from .site import JSONRPC_VERSION_DEFAULT, JSONRPC_DEFAULT_HTTP_HEADERS
 from .exceptions import JSONRPCError
+
+# Python 3.10+
+try:
+    from typing import Self
+except ImportError:  # pragma: no cover
+    from typing_extensions import Self
 
 if t.TYPE_CHECKING:
     from .site import JSONRPCSite
 
 
 class JSONRPCView(MethodView):
-    def __init__(self, jsonrpc_site: 'JSONRPCSite') -> None:
+    def __init__(self: Self, jsonrpc_site: 'JSONRPCSite') -> None:
         self.jsonrpc_site = jsonrpc_site
 
-    def post(self) -> ft.ResponseReturnValue:
+    def post(self: Self) -> ft.ResponseReturnValue:
         try:
             response, status_code, headers = self.jsonrpc_site.dispatch_request()
             if status_code == 204:
@@ -49,9 +54,5 @@ class JSONRPCView(MethodView):
             return make_response(jsonify(response), status_code, headers)
         except JSONRPCError as e:
             current_app.logger.exception('jsonrpc error')
-            response = {
-                'id': None,
-                'jsonrpc': JSONRPC_VERSION_DEFAULT,
-                'error': e.jsonrpc_format,
-            }
+            response = {'id': None, 'jsonrpc': JSONRPC_VERSION_DEFAULT, 'error': e.jsonrpc_format}
             return make_response(jsonify(response), e.status_code, JSONRPC_DEFAULT_HTTP_HEADERS)

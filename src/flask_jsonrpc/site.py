@@ -25,8 +25,8 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 # pylint: disable=R0904
-import typing as t
 from uuid import UUID, uuid4
+import typing as t
 from urllib.parse import urlsplit
 
 from flask import json, request, current_app
@@ -46,6 +46,12 @@ from .exceptions import (
     MethodNotFoundError,
 )
 
+# Python 3.10+
+try:
+    from typing import Self
+except ImportError:  # pragma: no cover
+    from typing_extensions import Self
+
 JSONRPC_VERSION_DEFAULT: str = '2.0'
 JSONRPC_DESCRIBE_METHOD_NAME: str = 'rpc.describe'
 JSONRPC_DESCRIBE_SERVICE_METHOD_TYPE: str = 'method'
@@ -54,7 +60,7 @@ JSONRPC_DEFAULT_HTTP_STATUS_CODE: int = 200
 
 
 class JSONRPCSite:
-    def __init__(self, path: t.Optional[str] = None, base_url: t.Optional[str] = None) -> None:
+    def __init__(self: Self, path: t.Optional[str] = None, base_url: t.Optional[str] = None) -> None:
         self.path = path
         self.base_url = base_url
         self.view_funcs: t.Dict[str, t.Callable[..., t.Any]] = {}
@@ -64,31 +70,29 @@ class JSONRPCSite:
         self.register(JSONRPC_DESCRIBE_METHOD_NAME, self.describe)
 
     @property
-    def is_json(self) -> bool:
+    def is_json(self: Self) -> bool:
         """Check if the mimetype indicates JSON data, either
         :mimetype:`application/json` or :mimetype:`application/*+json`.
 
         https://github.com/pallets/werkzeug/blob/master/src/werkzeug/wrappers/json.py#L54
         """
         mt = request.mimetype
-        return mt in (
-            'application/json',
-            'application/json-rpc',
-            'application/jsonrequest',
-        ) or (mt.startswith('application/') and mt.endswith('+json'))
+        return mt in ('application/json', 'application/json-rpc', 'application/jsonrequest') or (
+            mt.startswith('application/') and mt.endswith('+json')
+        )
 
-    def set_path(self, path: str) -> None:
+    def set_path(self: Self, path: str) -> None:
         self.path = path
 
-    def set_base_url(self, base_url: t.Optional[str]) -> None:
+    def set_base_url(self: Self, base_url: t.Optional[str]) -> None:
         self.base_url = base_url
 
-    def register(self, name: str, view_func: t.Callable[..., t.Any]) -> None:
+    def register(self: Self, name: str, view_func: t.Callable[..., t.Any]) -> None:
         self.view_funcs[name] = view_func
 
     def dispatch_request(
-        self,
-    ) -> t.Tuple[t.Any, int, t.Union[Headers, t.Dict[str, str], t.Tuple[str], t.List[t.Tuple[str]]],]:
+        self: Self,
+    ) -> t.Tuple[t.Any, int, t.Union[Headers, t.Dict[str, str], t.Tuple[str], t.List[t.Tuple[str]]]]:
         if not self.validate_request():
             raise ParseError(
                 data={
@@ -102,13 +106,13 @@ class JSONRPCSite:
             return self.batch_dispatch(json_data)
         return self.handle_dispatch_except(json_data)
 
-    def validate_request(self) -> bool:
+    def validate_request(self: Self) -> bool:
         if not self.is_json:
             current_app.logger.error('invalid mimetype')
             return False
         return True
 
-    def to_json(self, request_data: bytes) -> t.Any:
+    def to_json(self: Self, request_data: bytes) -> t.Any:  # noqa: ANN401
         try:
             return json.loads(request_data)
         except ValueError as e:
@@ -116,8 +120,8 @@ class JSONRPCSite:
             raise ParseError(data={'message': f'Invalid JSON: {request_data!r}'}) from e
 
     def handle_dispatch_except(
-        self, req_json: t.Dict[str, t.Any]
-    ) -> t.Tuple[t.Any, int, t.Union[Headers, t.Dict[str, str], t.Tuple[str], t.List[t.Tuple[str]]],]:
+        self: Self, req_json: t.Dict[str, t.Any]
+    ) -> t.Tuple[t.Any, int, t.Union[Headers, t.Dict[str, str], t.Tuple[str], t.List[t.Tuple[str]]]]:
         try:
             if not self.validate(req_json):
                 raise InvalidRequestError(data={'message': f'Invalid JSON: {req_json!r}'})
@@ -141,8 +145,8 @@ class JSONRPCSite:
             return response, jsonrpc_error.status_code, JSONRPC_DEFAULT_HTTP_HEADERS
 
     def batch_dispatch(
-        self, reqs_json: t.List[t.Dict[str, t.Any]]
-    ) -> t.Tuple[t.List[t.Any], int, t.Union[Headers, t.Dict[str, str], t.Tuple[str], t.List[t.Tuple[str]]],]:
+        self: Self, reqs_json: t.List[t.Dict[str, t.Any]]
+    ) -> t.Tuple[t.List[t.Any], int, t.Union[Headers, t.Dict[str, str], t.Tuple[str], t.List[t.Tuple[str]]]]:
         if not reqs_json:
             raise InvalidRequestError(data={'message': 'Empty array'})
 
@@ -159,19 +163,15 @@ class JSONRPCSite:
         return resp_views, status_code, headers
 
     def dispatch(
-        self, req_json: t.Dict[str, t.Any]
-    ) -> t.Tuple[t.Any, int, t.Union[Headers, t.Dict[str, str], t.Tuple[str], t.List[t.Tuple[str]]],]:
+        self: Self, req_json: t.Dict[str, t.Any]
+    ) -> t.Tuple[t.Any, int, t.Union[Headers, t.Dict[str, str], t.Tuple[str], t.List[t.Tuple[str]]]]:
         method_name = req_json['method']
         params = req_json.get('params', {})
         view_func = self.view_funcs.get(method_name)
         validate = getattr(view_func, 'jsonrpc_validate', settings.DEFAULT_JSONRPC_METHOD['VALIDATE'])
-        notification = getattr(
-            view_func,
-            'jsonrpc_notification',
-            settings.DEFAULT_JSONRPC_METHOD['NOTIFICATION'],
-        )
+        notification = getattr(view_func, 'jsonrpc_notification', settings.DEFAULT_JSONRPC_METHOD['NOTIFICATION'])
         if not view_func:
-            raise MethodNotFoundError(data={'message': f"Method not found: {method_name}"})
+            raise MethodNotFoundError(data={'message': f'Method not found: {method_name}'})
 
         if self.is_notification_request(req_json) and not notification:
             raise InvalidRequestError(
@@ -207,14 +207,15 @@ class JSONRPCSite:
 
         return self.make_response(req_json, resp_view)
 
-    def validate(self, req_json: t.Dict[str, t.Any]) -> bool:
+    def validate(self: Self, req_json: t.Dict[str, t.Any]) -> bool:
         if not isinstance(req_json, dict) or 'method' not in req_json:
             return False
         return True
 
     def unpack_tuple_returns(
-        self, resp_view: t.Any
-    ) -> t.Tuple[t.Any, int, t.Union[Headers, t.Dict[str, str], t.Tuple[str], t.List[t.Tuple[str]]],]:
+        self: Self,
+        resp_view: t.Any,  # noqa: ANN401
+    ) -> t.Tuple[t.Any, int, t.Union[Headers, t.Dict[str, str], t.Tuple[str], t.List[t.Tuple[str]]]]:
         # https://github.com/pallets/flask/blob/d091bb00c0358e9f30006a064f3dbb671b99aeae/src/flask/app.py#L1981
         if isinstance(resp_view, tuple):
             len_resp_view = len(resp_view)
@@ -240,39 +241,37 @@ class JSONRPCSite:
         return resp_view, JSONRPC_DEFAULT_HTTP_STATUS_CODE, JSONRPC_DEFAULT_HTTP_HEADERS
 
     def make_response(
-        self, req_json: t.Dict[str, t.Any], resp_view: t.Any
-    ) -> t.Tuple[t.Any, int, t.Union[Headers, t.Dict[str, str], t.Tuple[str], t.List[t.Tuple[str]]],]:
+        self: Self,
+        req_json: t.Dict[str, t.Any],
+        resp_view: t.Any,  # noqa: ANN401
+    ) -> t.Tuple[t.Any, int, t.Union[Headers, t.Dict[str, str], t.Tuple[str], t.List[t.Tuple[str]]]]:
         rv, status_code, headers = self.unpack_tuple_returns(resp_view)
         if self.is_notification_request(req_json):
             return None, 204, headers
-        resp = {
-            'id': req_json.get('id'),
-            'jsonrpc': req_json.get('jsonrpc', JSONRPC_VERSION_DEFAULT),
-            'result': rv,
-        }
+        resp = {'id': req_json.get('id'), 'jsonrpc': req_json.get('jsonrpc', JSONRPC_VERSION_DEFAULT), 'result': rv}
         return resp, status_code, headers
 
-    def is_notification_request(self, req_json: t.Dict[str, t.Any]) -> bool:
+    def is_notification_request(self: Self, req_json: t.Dict[str, t.Any]) -> bool:
         return 'id' not in req_json
 
-    def is_batch_request(self, req_json: t.Any) -> bool:
+    def is_batch_request(self: Self, req_json: t.Any) -> bool:  # noqa: ANN401
         return isinstance(req_json, list)
 
-    def python_type_name(self, pytype: t.Any) -> str:
+    def python_type_name(self: Self, pytype: t.Any) -> str:  # noqa: ANN401
         return str(from_python_type(pytype))
 
-    def service_method_params_desc(self, view_func: t.Callable[..., t.Any]) -> t.List[fjt.ServiceMethodParamsDescribe]:
+    def service_method_params_desc(
+        self: Self, view_func: t.Callable[..., t.Any]
+    ) -> t.List[fjt.ServiceMethodParamsDescribe]:
         return [
             fjt.ServiceMethodParamsDescribe(  # pytype: disable=missing-parameter
-                name=name,
-                type=self.python_type_name(tp),
-                required=False,
-                nullable=False,
+                name=name, type=self.python_type_name(tp), required=False, nullable=False
             )
             for name, tp in getattr(view_func, 'jsonrpc_method_params', {}).items()
+            if name not in ['self', 'cls']  # XXX: It assumes the standard param names
         ]
 
-    def service_methods_desc(self) -> t.Dict[str, fjt.ServiceMethodDescribe]:
+    def service_methods_desc(self: Self) -> t.Dict[str, fjt.ServiceMethodDescribe]:
         methods: t.Dict[str, fjt.ServiceMethodDescribe] = {}
         for key, view_func in self.view_funcs.items():
             if key == JSONRPC_DESCRIBE_METHOD_NAME:
@@ -284,16 +283,16 @@ class JSONRPCSite:
                 options=getattr(view_func, 'jsonrpc_options', {}),
                 params=self.service_method_params_desc(view_func),
                 returns=fjt.ServiceMethodReturnsDescribe(
-                    type=self.python_type_name(getattr(view_func, 'jsonrpc_method_return', type(None))),
+                    type=self.python_type_name(getattr(view_func, 'jsonrpc_method_return', type(None)))
                 ),
             )
         return methods
 
-    def service_server_url(self) -> str:
+    def service_server_url(self: Self) -> str:
         url = urlsplit(self.base_url or self.path)
         return f"{url.scheme!r}://{url.netloc!r}/{(self.path or '').lstrip('/')}" if self.base_url else str(url.path)
 
-    def service_desc(self) -> fjt.ServiceDescribe:
+    def service_desc(self: Self) -> fjt.ServiceDescribe:
         return fjt.ServiceDescribe(
             id=f'urn:uuid:{self.uuid}',
             version=self.version,
@@ -303,5 +302,5 @@ class JSONRPCSite:
             methods=self.service_methods_desc(),
         )
 
-    def describe(self) -> fjt.ServiceDescribe:
+    def describe(self: Self) -> fjt.ServiceDescribe:
         return self.service_desc()

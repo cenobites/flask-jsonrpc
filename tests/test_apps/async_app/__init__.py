@@ -33,6 +33,12 @@ import functools
 
 from flask import Flask
 
+# Python 3.11+
+try:
+    from typing import Self
+except ImportError:  # pragma: no cover
+    from typing_extensions import Self
+
 try:
     from flask_jsonrpc import JSONRPC
 except ModuleNotFoundError:
@@ -45,7 +51,7 @@ except ModuleNotFoundError:
 
 
 class App:
-    async def index(self, name: str = 'Flask JSON-RPC') -> str:
+    async def index(self: Self, name: str = 'Flask JSON-RPC') -> str:
         await asyncio.sleep(0)
         return f'Hello {name}'
 
@@ -55,38 +61,38 @@ class App:
         return f'Hello {name}'
 
     @classmethod
-    async def hello(cls, name: str = 'Flask JSON-RPC') -> str:
+    async def hello(cls: t.Type[Self], name: str = 'Flask JSON-RPC') -> str:
         await asyncio.sleep(0)
         return f'Hello {name}'
 
-    async def echo(self, string: str, _some: t.Any = None) -> str:
+    async def echo(self: Self, string: str, _some: t.Any = None) -> str:  # noqa: ANN401
         await asyncio.sleep(0)
         return string
 
-    async def notify(self, _string: str = None) -> None:
+    async def notify(self: Self, _string: str = None) -> None:
         await asyncio.sleep(0)
 
-    async def not_allow_notify(self, _string: str = None) -> str:
+    async def not_allow_notify(self: Self, _string: str = None) -> str:
         await asyncio.sleep(0)
         return 'Now allow notify'
 
-    async def fails(self, n: int) -> int:
+    async def fails(self: Self, n: int) -> int:
         await asyncio.sleep(0)
         if n % 2 == 0:
             return n
         raise ValueError('number is odd')
 
 
-def async_jsonrpc_decorator(fn):
+def async_jsonrpc_decorator(fn: t.Callable[..., str]) -> t.Callable[..., str]:
     @functools.wraps(fn)
-    async def wrapped(*args, **kwargs):
+    async def wrapped(*args, **kwargs) -> str:  # noqa: ANN002,ANN003
         rv = await fn(*args, **kwargs)
         return f'{rv} from decorator, ;)'
 
     return wrapped
 
 
-def create_async_app(test_config: t.Dict[str, t.Any] = None):  # noqa: C901  pylint: disable=W0612
+def create_async_app(test_config: t.Dict[str, t.Any] = None) -> Flask:  # noqa: C901  pylint: disable=W0612
     """Create and configure an instance of the Flask application."""
     flask_app = Flask('apptest', instance_relative_config=True)
     if test_config:
@@ -102,7 +108,7 @@ def create_async_app(test_config: t.Dict[str, t.Any] = None):  # noqa: C901  pyl
 
     # pylint: disable=W0612
     @jsonrpc.method('jsonrpc.echo')
-    async def echo(string: str, _some: t.Any = None) -> str:
+    async def echo(string: str, _some: t.Any = None) -> str:  # noqa: ANN401
         await asyncio.sleep(0)
         return string
 
@@ -128,11 +134,7 @@ def create_async_app(test_config: t.Dict[str, t.Any] = None):  # noqa: C901  pyl
     # pylint: disable=W0612
     @jsonrpc.method('jsonrpc.strangeEcho')
     async def strange_echo(
-        string: str,
-        omg: t.Dict[str, t.Any],
-        wtf: t.List[str],
-        nowai: int,
-        yeswai: str = 'Default',
+        string: str, omg: t.Dict[str, t.Any], wtf: t.List[str], nowai: int, yeswai: str = 'Default'
     ) -> t.List[t.Any]:
         await asyncio.sleep(0)
         return [string, omg, wtf, nowai, yeswai]
@@ -164,15 +166,13 @@ def create_async_app(test_config: t.Dict[str, t.Any] = None):  # noqa: C901  pyl
 
     # pylint: disable=W0612
     @jsonrpc.method('jsonrpc.returnStatusCodeAndHeaders')
-    async def return_status_code_and_headers(
-        s: str,
-    ) -> t.Tuple[str, int, t.Dict[str, t.Any]]:
+    async def return_status_code_and_headers(s: str) -> t.Tuple[str, int, t.Dict[str, t.Any]]:
         await asyncio.sleep(0)
         return f'Status Code and Headers {s}', 400, {'X-JSONRPC': '1'}
 
     # pylint: disable=W0612
     @jsonrpc.method('jsonrpc.not_validate', validate=False)
-    async def not_validate(s='Oops!'):
+    async def not_validate(s='Oops!'):  # noqa: ANN001,ANN202
         await asyncio.sleep(0)
         return f'Not validate: {s}'
 

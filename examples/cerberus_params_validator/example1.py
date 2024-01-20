@@ -51,18 +51,11 @@ v = Validator()
 v.schema = {
     'user': {
         'type': 'dict',
-        'schema': {
-            'name': {'type': 'string', 'maxlength': 10},
-            'age': {'type': 'integer', 'min': 10},
-        },
+        'schema': {'name': {'type': 'string', 'maxlength': 10}, 'age': {'type': 'integer', 'min': 10}},
     },
     'vehicle': {
         'type': 'dict',
-        'schema': {
-            'make': {'type': 'string'},
-            'model': {'type': 'string'},
-            'year': {'type': 'integer', 'min': 1900},
-        },
+        'schema': {'make': {'type': 'string'}, 'model': {'type': 'string'}, 'year': {'type': 'integer', 'min': 1900}},
     },
 }
 

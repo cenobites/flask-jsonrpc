@@ -50,7 +50,7 @@ jsonrpc.register_blueprint(app, hello, url_prefix='/hello')
 
 
 @app.route('/')
-def index():
+def index() -> str:
     return render_template('index.html')
 
 

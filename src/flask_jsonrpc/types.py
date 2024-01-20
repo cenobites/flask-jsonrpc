@@ -31,6 +31,12 @@ from collections.abc import Mapping
 
 from typing_inspect import is_new_type  # type: ignore
 
+# Python 3.11+
+try:
+    from typing import Self
+except ImportError:  # pragma: no cover
+    from typing_extensions import Self
+
 # Python 3.10+
 try:
     from types import NoneType, UnionType
@@ -44,31 +50,19 @@ try:
 except ImportError:  # pragma: no cover
     from typing import Literal  # type: ignore  # pylint: disable=C0412
 
-# Python 3.7+
-try:
-    from typing import get_args  # pylint: disable=C0412
-except ImportError:  # pragma: no cover
-    from typing_inspect import get_args  # type: ignore  # pylint: disable=C0412
-
-# Python 3.7+
-try:
-    from typing import get_origin  # pylint: disable=C0412
-except ImportError:  # pragma: no cover
-    from typing_inspect import get_origin  # type: ignore  # pylint: disable=C0412
-
 
 class JSONRPCNewType:
-    def __init__(self, name: str, *types: t.Union[type, t.Tuple[t.Union[type, t.Tuple[type, ...]], ...]]) -> None:
+    def __init__(self: Self, name: str, *types: t.Union[type, t.Tuple[t.Union[type, t.Tuple[type, ...]], ...]]) -> None:
         self.name = name
         self.types = types
 
-    def check_expected_type(self, expected_type: t.Any) -> bool:
+    def check_expected_type(self: Self, expected_type: t.Any) -> bool:  # noqa: ANN401
         return any(expected_type is tp for tp in self.types)
 
-    def check_expected_types(self, expected_types: t.Any) -> bool:
+    def check_expected_types(self: Self, expected_types: t.Any) -> bool:  # noqa: ANN401
         return all(any(expt_tp is tp for tp in self.types) for expt_tp in expected_types)
 
-    def check_type_var(self, expected_type: t.Any) -> bool:
+    def check_type_var(self: Self, expected_type: t.Any) -> bool:  # noqa: ANN401
         bound_type = getattr(expected_type, '__bound__', None)
         if bound_type is None:
             expected_types = getattr(expected_type, '__constraints__', None)
@@ -77,19 +71,19 @@ class JSONRPCNewType:
             return self.check_expected_types(expected_types)
         return self.check_expected_type(bound_type)
 
-    def check_new_type(self, expected_type: t.Any) -> bool:
+    def check_new_type(self: Self, expected_type: t.Any) -> bool:  # noqa: ANN401
         super_type = getattr(expected_type, '__supertype__', None)
         return self.check_expected_type(super_type)
 
-    def check_union(self, expected_type: t.Any) -> bool:
-        expected_types = [expt_tp for expt_tp in get_args(expected_type) if expt_tp is not type(None)]  # noqa: E721
+    def check_union(self: Self, expected_type: t.Any) -> bool:  # noqa: ANN401
+        expected_types = [expt_tp for expt_tp in t.get_args(expected_type) if expt_tp is not type(None)]  # noqa: E721
         return self.check_expected_types(expected_types)
 
-    def check_args_type(self, expected_type: t.Any) -> bool:
-        expected_types = get_args(expected_type)
+    def check_args_type(self: Self, expected_type: t.Any) -> bool:  # noqa: ANN401
+        expected_types = t.get_args(expected_type)
         return self.check_expected_types(expected_types)
 
-    def check_type(self, o: t.Any) -> bool:  # pylint: disable=R0911
+    def check_type(self: Self, o: t.Any) -> bool:  # pylint: disable=R0911 # noqa: ANN401
         expected_type = o
         if expected_type is t.Any:
             return self is Object
@@ -103,7 +97,7 @@ class JSONRPCNewType:
         if is_new_type(expected_type):
             return self.check_new_type(expected_type)
 
-        origin_type = get_origin(expected_type)
+        origin_type = t.get_origin(expected_type)
         if origin_type is not None:
             if origin_type is t.Union or origin_type is UnionType:
                 return self.check_union(expected_type)
@@ -121,7 +115,7 @@ class JSONRPCNewType:
 
         return self.check_expected_type(expected_type)
 
-    def __str__(self) -> str:
+    def __str__(self: Self) -> str:
         return self.name
 
 

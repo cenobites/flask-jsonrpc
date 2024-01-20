@@ -25,39 +25,29 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 import json
+import typing as t
+
+if t.TYPE_CHECKING:
+    from flask.testing import FlaskClient
 
 
-def test_app_greeting(client):
+def test_app_greeting(client: 'FlaskClient') -> None:
     rv = client.post('/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting'})
     assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': 'Hello Flask JSON-RPC'}
     assert rv.status_code == 200
 
-    rv = client.post(
-        '/api',
-        json={
-            'id': 1,
-            'jsonrpc': '2.0',
-            'method': 'jsonrpc.greeting',
-            'params': ['Python'],
-        },
-    )
+    rv = client.post('/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': ['Python']})
     assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': 'Hello Python'}
     assert rv.status_code == 200
 
     rv = client.post(
-        '/api',
-        json={
-            'id': 1,
-            'jsonrpc': '2.0',
-            'method': 'jsonrpc.greeting',
-            'params': {'name': 'Flask'},
-        },
+        '/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': {'name': 'Flask'}}
     )
     assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': 'Hello Flask'}
     assert rv.status_code == 200
 
 
-def test_app_greeting_with_different_content_types(client):
+def test_app_greeting_with_different_content_types(client: 'FlaskClient') -> None:
     rv = client.post(
         '/api',
         data=json.dumps({'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting'}),
@@ -68,14 +58,7 @@ def test_app_greeting_with_different_content_types(client):
 
     rv = client.post(
         '/api',
-        data=json.dumps(
-            {
-                'id': 1,
-                'jsonrpc': '2.0',
-                'method': 'jsonrpc.greeting',
-                'params': ['Python'],
-            }
-        ),
+        data=json.dumps({'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': ['Python']}),
         headers={'Content-Type': 'application/jsonrequest'},
     )
     assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': 'Hello Python'}
@@ -83,21 +66,14 @@ def test_app_greeting_with_different_content_types(client):
 
     rv = client.post(
         '/api',
-        data=json.dumps(
-            {
-                'id': 1,
-                'jsonrpc': '2.0',
-                'method': 'jsonrpc.greeting',
-                'params': {'name': 'Flask'},
-            }
-        ),
+        data=json.dumps({'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': {'name': 'Flask'}}),
         headers={'Content-Type': 'application/json'},
     )
     assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': 'Hello Flask'}
     assert rv.status_code == 200
 
 
-def test_app_greeting_raise_parse_error(client):
+def test_app_greeting_raise_parse_error(client: 'FlaskClient') -> None:
     rv = client.post('/api', data={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting'})
     assert rv.json == {
         'id': None,
@@ -124,7 +100,7 @@ def test_app_greeting_raise_parse_error(client):
         'jsonrpc': '2.0',
         'error': {
             'code': -32700,
-            'data': {'message': 'Invalid JSON: b"{\'id\': 1, \'jsonrpc\': \'2.0\', \'method\': \'jsonrpc.greeting\'}"'},
+            'data': {'message': "Invalid JSON: b\"{'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting'}\""},
             'message': 'Parse error',
             'name': 'ParseError',
         },
@@ -145,7 +121,7 @@ def test_app_greeting_raise_parse_error(client):
         'error': {
             'code': -32700,
             'data': {
-                'message': 'Invalid JSON: b"[\\n            {\'jsonrpc\': '
+                'message': "Invalid JSON: b\"[\\n            {'jsonrpc': "
                 "'2.0', 'method': 'jsonrpc.greeting', 'params': "
                 "['Flask'], 'id': '1'},\\n            "
                 "{'jsonrpc': '2.0', 'method'\\n        "
@@ -158,7 +134,7 @@ def test_app_greeting_raise_parse_error(client):
     assert rv.status_code == 400
 
 
-def test_app_greeting_raise_invalid_request_error(client):
+def test_app_greeting_raise_invalid_request_error(client: 'FlaskClient') -> None:
     rv = client.post('/api', json={'id': 1, 'jsonrpc': '2.0'})
     assert rv.json == {
         'id': 1,
@@ -173,16 +149,8 @@ def test_app_greeting_raise_invalid_request_error(client):
     assert rv.status_code == 400
 
 
-def test_app_greeting_raise_invalid_params_error(client):
-    rv = client.post(
-        '/api',
-        json={
-            'id': 1,
-            'jsonrpc': '2.0',
-            'method': 'jsonrpc.greeting',
-            'params': 'Wrong',
-        },
-    )
+def test_app_greeting_raise_invalid_params_error(client: 'FlaskClient') -> None:
+    rv = client.post('/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': 'Wrong'})
     assert rv.json == {
         'id': 1,
         'jsonrpc': '2.0',
@@ -195,10 +163,7 @@ def test_app_greeting_raise_invalid_params_error(client):
     }
     assert rv.status_code == 400
 
-    rv = client.post(
-        '/api',
-        json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': [1]},
-    )
+    rv = client.post('/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': [1]})
     assert rv.json == {
         'id': 1,
         'jsonrpc': '2.0',
@@ -211,15 +176,7 @@ def test_app_greeting_raise_invalid_params_error(client):
     }
     assert rv.status_code == 400
 
-    rv = client.post(
-        '/api',
-        json={
-            'id': 1,
-            'jsonrpc': '2.0',
-            'method': 'jsonrpc.greeting',
-            'params': {'name': 2},
-        },
-    )
+    rv = client.post('/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': {'name': 2}})
     assert rv.json == {
         'id': 1,
         'jsonrpc': '2.0',
@@ -233,7 +190,7 @@ def test_app_greeting_raise_invalid_params_error(client):
     assert rv.status_code == 400
 
 
-def test_app_greeting_raise_method_not_found_error(client):
+def test_app_greeting_raise_method_not_found_error(client: 'FlaskClient') -> None:
     rv = client.post('/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'method-not-found'})
     assert rv.json == {
         'id': 1,
@@ -248,37 +205,18 @@ def test_app_greeting_raise_method_not_found_error(client):
     assert rv.status_code == 400
 
 
-def test_app_echo(client):
-    rv = client.post(
-        '/api',
-        json={
-            'id': 1,
-            'jsonrpc': '2.0',
-            'method': 'jsonrpc.echo',
-            'params': ['Python'],
-        },
-    )
+def test_app_echo(client: 'FlaskClient') -> None:
+    rv = client.post('/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.echo', 'params': ['Python']})
     assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': 'Python'}
     assert rv.status_code == 200
 
-    rv = client.post(
-        '/api',
-        json={
-            'id': 1,
-            'jsonrpc': '2.0',
-            'method': 'jsonrpc.echo',
-            'params': {'string': 'Flask'},
-        },
-    )
+    rv = client.post('/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.echo', 'params': {'string': 'Flask'}})
     assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': 'Flask'}
     assert rv.status_code == 200
 
 
-def test_app_echo_raise_invalid_params_error(client):
-    rv = client.post(
-        '/api',
-        json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.echo', 'params': 'Wrong'},
-    )
+def test_app_echo_raise_invalid_params_error(client: 'FlaskClient') -> None:
+    rv = client.post('/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.echo', 'params': 'Wrong'})
     assert rv.json == {
         'id': 1,
         'jsonrpc': '2.0',
@@ -291,10 +229,7 @@ def test_app_echo_raise_invalid_params_error(client):
     }
     assert rv.status_code == 400
 
-    rv = client.post(
-        '/api',
-        json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.echo', 'params': [1]},
-    )
+    rv = client.post('/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.echo', 'params': [1]})
     assert rv.json == {
         'id': 1,
         'jsonrpc': '2.0',
@@ -307,15 +242,7 @@ def test_app_echo_raise_invalid_params_error(client):
     }
     assert rv.status_code == 400
 
-    rv = client.post(
-        '/api',
-        json={
-            'id': 1,
-            'jsonrpc': '2.0',
-            'method': 'jsonrpc.echo',
-            'params': {'name': 2},
-        },
-    )
+    rv = client.post('/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.echo', 'params': {'name': 2}})
     assert rv.json == {
         'id': 1,
         'jsonrpc': '2.0',
@@ -342,20 +269,17 @@ def test_app_echo_raise_invalid_params_error(client):
     assert rv.status_code == 400
 
 
-def test_app_notify(client):
+def test_app_notify(client: 'FlaskClient') -> None:
     rv = client.post('/api', json={'jsonrpc': '2.0', 'method': 'jsonrpc.notify'})
     assert rv.json is None
     assert rv.status_code == 204
 
-    rv = client.post(
-        '/api',
-        json={'jsonrpc': '2.0', 'method': 'jsonrpc.notify', 'params': ['Some string']},
-    )
+    rv = client.post('/api', json={'jsonrpc': '2.0', 'method': 'jsonrpc.notify', 'params': ['Some string']})
     assert rv.json is None
     assert rv.status_code == 204
 
 
-def test_app_not_allow_notify(client):
+def test_app_not_allow_notify(client: 'FlaskClient') -> None:
     rv = client.post('/api', json={'jsonrpc': '2.0', 'method': 'jsonrpc.not_allow_notify'})
     assert rv.json == {
         'error': {
@@ -373,45 +297,28 @@ def test_app_not_allow_notify(client):
     assert rv.status_code == 400
 
     rv = client.post(
-        '/api',
-        json={
-            'id': 1,
-            'jsonrpc': '2.0',
-            'method': 'jsonrpc.not_allow_notify',
-            'params': ['Some string'],
-        },
+        '/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.not_allow_notify', 'params': ['Some string']}
     )
     assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': 'Not allow notify'}
     assert rv.status_code == 200
 
 
-def test_app_no_return(client):
+def test_app_no_return(client: 'FlaskClient') -> None:
     rv = client.post('/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.noReturn'})
     assert rv.json == {
-        'error': {
-            'code': -32000,
-            'data': {'message': 'no return'},
-            'message': 'Server error',
-            'name': 'ServerError',
-        },
+        'error': {'code': -32000, 'data': {'message': 'no return'}, 'message': 'Server error', 'name': 'ServerError'},
         'id': 1,
         'jsonrpc': '2.0',
     }
     assert rv.status_code == 500
 
 
-def test_app_fails(client):
-    rv = client.post(
-        '/api',
-        json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.fails', 'params': [2]},
-    )
+def test_app_fails(client: 'FlaskClient') -> None:
+    rv = client.post('/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.fails', 'params': [2]})
     assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': 2}
     assert rv.status_code == 200
 
-    rv = client.post(
-        '/api',
-        json={'id': '1', 'jsonrpc': '2.0', 'method': 'jsonrpc.fails', 'params': [1]},
-    )
+    rv = client.post('/api', json={'id': '1', 'jsonrpc': '2.0', 'method': 'jsonrpc.fails', 'params': [1]})
     assert rv.json == {
         'id': '1',
         'jsonrpc': '2.0',
@@ -425,7 +332,7 @@ def test_app_fails(client):
     assert rv.status_code == 500
 
 
-def test_app_strange_echo(client):
+def test_app_strange_echo(client: 'FlaskClient') -> None:
     data = {
         'id': 1,
         'jsonrpc': '2.0',
@@ -433,11 +340,7 @@ def test_app_strange_echo(client):
         'params': ['string', {'a': 1}, ['a', 'b', 'c'], 23, 'Flask'],
     }
     rv = client.post('/api', json=data)
-    assert rv.json == {
-        'id': 1,
-        'jsonrpc': '2.0',
-        'result': ['string', {'a': 1}, ['a', 'b', 'c'], 23, 'Flask'],
-    }
+    assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': ['string', {'a': 1}, ['a', 'b', 'c'], 23, 'Flask']}
     assert rv.status_code == 200
 
     data = {
@@ -447,15 +350,11 @@ def test_app_strange_echo(client):
         'params': ['string', {'a': 1}, ['a', 'b', 'c'], 23],
     }
     rv = client.post('/api', json=data)
-    assert rv.json == {
-        'id': 1,
-        'jsonrpc': '2.0',
-        'result': ['string', {'a': 1}, ['a', 'b', 'c'], 23, 'Default'],
-    }
+    assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': ['string', {'a': 1}, ['a', 'b', 'c'], 23, 'Default']}
     assert rv.status_code == 200
 
 
-def test_app_sum(client):
+def test_app_sum(client: 'FlaskClient') -> None:
     data = {'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.sum', 'params': [1, 3]}
     rv = client.post('/api', json=data)
     assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': 4}
@@ -467,71 +366,36 @@ def test_app_sum(client):
     assert rv.status_code == 200
 
 
-def test_app_decorators(client):
-    data = {
-        'id': 1,
-        'jsonrpc': '2.0',
-        'method': 'jsonrpc.decorators',
-        'params': ['Python'],
-    }
+def test_app_decorators(client: 'FlaskClient') -> None:
+    data = {'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.decorators', 'params': ['Python']}
     rv = client.post('/api', json=data)
-    assert rv.json == {
-        'id': 1,
-        'jsonrpc': '2.0',
-        'result': 'Hello Python from decorator, ;)',
-    }
+    assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': 'Hello Python from decorator, ;)'}
     assert rv.status_code == 200
 
 
-def test_app_return_status_code(client):
-    rv = client.post(
-        '/api',
-        json={
-            'id': 1,
-            'jsonrpc': '2.0',
-            'method': 'jsonrpc.returnStatusCode',
-            'params': ['OK'],
-        },
-    )
+def test_app_return_status_code(client: 'FlaskClient') -> None:
+    rv = client.post('/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.returnStatusCode', 'params': ['OK']})
     assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': 'Status Code OK'}
     assert rv.status_code == 201
 
 
-def test_app_return_headers(client):
-    rv = client.post(
-        '/api',
-        json={
-            'id': 1,
-            'jsonrpc': '2.0',
-            'method': 'jsonrpc.returnHeaders',
-            'params': ['OK'],
-        },
-    )
+def test_app_return_headers(client: 'FlaskClient') -> None:
+    rv = client.post('/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.returnHeaders', 'params': ['OK']})
     assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': 'Headers OK'}
     assert rv.status_code == 200
     assert ('X-JSONRPC', '1') in list(rv.headers)
 
 
-def test_app_return_status_code_and_headers(client):
+def test_app_return_status_code_and_headers(client: 'FlaskClient') -> None:
     rv = client.post(
-        '/api',
-        json={
-            'id': 1,
-            'jsonrpc': '2.0',
-            'method': 'jsonrpc.returnStatusCodeAndHeaders',
-            'params': ['OK'],
-        },
+        '/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.returnStatusCodeAndHeaders', 'params': ['OK']}
     )
-    assert rv.json == {
-        'id': 1,
-        'jsonrpc': '2.0',
-        'result': 'Status Code and Headers OK',
-    }
+    assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': 'Status Code and Headers OK'}
     assert rv.status_code == 400
     assert ('X-JSONRPC', '1') in list(rv.headers)
 
 
-def test_app_with_rcp_batch(client):
+def test_app_with_rcp_batch(client: 'FlaskClient') -> None:
     rv = client.post('/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting'})
     assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': 'Hello Flask JSON-RPC'}
     assert rv.status_code == 200
@@ -539,24 +403,9 @@ def test_app_with_rcp_batch(client):
     rv = client.post(
         '/api',
         json=[
-            {
-                'id': 1,
-                'jsonrpc': '2.0',
-                'method': 'jsonrpc.greeting',
-                'params': ['Python'],
-            },
-            {
-                'id': 2,
-                'jsonrpc': '2.0',
-                'method': 'jsonrpc.greeting',
-                'params': ['Flask'],
-            },
-            {
-                'id': 3,
-                'jsonrpc': '2.0',
-                'method': 'jsonrpc.greeting',
-                'params': ['JSON-RCP'],
-            },
+            {'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': ['Python']},
+            {'id': 2, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': ['Flask']},
+            {'id': 3, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': ['JSON-RCP']},
         ],
     )
     assert rv.json == [
@@ -569,20 +418,10 @@ def test_app_with_rcp_batch(client):
     rv = client.post(
         '/api',
         json=[
-            {
-                'id': 1,
-                'jsonrpc': '2.0',
-                'method': 'jsonrpc.greeting',
-                'params': ['Python'],
-            },
+            {'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': ['Python']},
             {'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': ['Flask']},
             {'id': 3, 'jsonrpc': '2.0', 'params': ['Flask']},
-            {
-                'id': 4,
-                'jsonrpc': '2.0',
-                'method': 'jsonrpc.greeting',
-                'params': ['JSON-RCP'],
-            },
+            {'id': 4, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': ['JSON-RCP']},
         ],
     )
     assert rv.json == [
@@ -606,34 +445,20 @@ def test_app_with_rcp_batch(client):
     assert rv.status_code == 200
 
 
-def test_app_class(client):
+def test_app_class(client: 'FlaskClient') -> None:
     rv = client.post('/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'classapp.index'})
     assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': 'Hello Flask JSON-RPC'}
     assert rv.status_code == 200
 
-    rv = client.post(
-        '/api',
-        json={'id': 1, 'jsonrpc': '2.0', 'method': 'greeting', 'params': ['Python']},
-    )
+    rv = client.post('/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'greeting', 'params': ['Python']})
     assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': 'Hello Python'}
     assert rv.status_code == 200
 
-    rv = client.post(
-        '/api',
-        json={
-            'id': 1,
-            'jsonrpc': '2.0',
-            'method': 'hello',
-            'params': {'name': 'Flask'},
-        },
-    )
+    rv = client.post('/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'hello', 'params': {'name': 'Flask'}})
     assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': 'Hello Flask'}
     assert rv.status_code == 200
 
-    rv = client.post(
-        '/api',
-        json={'id': 1, 'jsonrpc': '2.0', 'method': 'echo', 'params': ['Python', 1]},
-    )
+    rv = client.post('/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'echo', 'params': ['Python', 1]})
     assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': 'Python'}
     assert rv.status_code == 200
 
@@ -654,7 +479,7 @@ def test_app_class(client):
     assert rv.status_code == 500
 
 
-def test_app_system_describe(client):
+def test_app_system_describe(client: 'FlaskClient') -> None:
     rv = client.post('/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'rpc.describe'})
     assert rv.json['id'] == 1
     assert rv.json['jsonrpc'] == '2.0'
@@ -675,18 +500,8 @@ def test_app_system_describe(client):
             'type': 'method',
             'options': {'notification': True, 'validate': True},
             'params': [
-                {
-                    'name': 'string',
-                    'type': 'String',
-                    'required': False,
-                    'nullable': False,
-                },
-                {
-                    'name': '_some',
-                    'type': 'Object',
-                    'required': False,
-                    'nullable': False,
-                },
+                {'name': 'string', 'type': 'String', 'required': False, 'nullable': False},
+                {'name': '_some', 'type': 'Object', 'required': False, 'nullable': False},
             ],
             'returns': {'type': 'String'},
             'description': None,
@@ -694,28 +509,14 @@ def test_app_system_describe(client):
         'jsonrpc.notify': {
             'type': 'method',
             'options': {'notification': True, 'validate': True},
-            'params': [
-                {
-                    'name': '_string',
-                    'type': 'String',
-                    'required': False,
-                    'nullable': False,
-                }
-            ],
+            'params': [{'name': '_string', 'type': 'String', 'required': False, 'nullable': False}],
             'returns': {'type': 'Null'},
             'description': None,
         },
         'jsonrpc.not_allow_notify': {
             'type': 'method',
             'options': {'notification': False, 'validate': True},
-            'params': [
-                {
-                    'name': '_string',
-                    'type': 'String',
-                    'required': False,
-                    'nullable': False,
-                }
-            ],
+            'params': [{'name': '_string', 'type': 'String', 'required': False, 'nullable': False}],
             'returns': {'type': 'String'},
             'description': None,
         },
@@ -730,26 +531,11 @@ def test_app_system_describe(client):
             'type': 'method',
             'options': {'notification': True, 'validate': True},
             'params': [
-                {
-                    'name': 'string',
-                    'type': 'String',
-                    'required': False,
-                    'nullable': False,
-                },
+                {'name': 'string', 'type': 'String', 'required': False, 'nullable': False},
                 {'name': 'omg', 'type': 'Object', 'required': False, 'nullable': False},
                 {'name': 'wtf', 'type': 'Array', 'required': False, 'nullable': False},
-                {
-                    'name': 'nowai',
-                    'type': 'Number',
-                    'required': False,
-                    'nullable': False,
-                },
-                {
-                    'name': 'yeswai',
-                    'type': 'String',
-                    'required': False,
-                    'nullable': False,
-                },
+                {'name': 'nowai', 'type': 'Number', 'required': False, 'nullable': False},
+                {'name': 'yeswai', 'type': 'String', 'required': False, 'nullable': False},
             ],
             'returns': {'type': 'Array'},
             'description': None,
@@ -767,14 +553,7 @@ def test_app_system_describe(client):
         'jsonrpc.decorators': {
             'type': 'method',
             'options': {'notification': True, 'validate': True},
-            'params': [
-                {
-                    'name': 'string',
-                    'type': 'String',
-                    'required': False,
-                    'nullable': False,
-                }
-            ],
+            'params': [{'name': 'string', 'type': 'String', 'required': False, 'nullable': False}],
             'returns': {'type': 'String'},
             'description': None,
         },
@@ -809,14 +588,7 @@ def test_app_system_describe(client):
         'jsonrpc.noReturn': {
             'type': 'method',
             'options': {'notification': True, 'validate': True},
-            'params': [
-                {
-                    'name': '_string',
-                    'type': 'String',
-                    'required': False,
-                    'nullable': False,
-                }
-            ],
+            'params': [{'name': '_string', 'type': 'String', 'required': False, 'nullable': False}],
             'returns': {'type': 'Null'},
             'description': None,
         },
@@ -845,18 +617,8 @@ def test_app_system_describe(client):
             'type': 'method',
             'options': {'notification': True, 'validate': True},
             'params': [
-                {
-                    'name': 'string',
-                    'type': 'String',
-                    'required': False,
-                    'nullable': False,
-                },
-                {
-                    'name': '_some',
-                    'type': 'Object',
-                    'required': False,
-                    'nullable': False,
-                },
+                {'name': 'string', 'type': 'String', 'required': False, 'nullable': False},
+                {'name': '_some', 'type': 'Object', 'required': False, 'nullable': False},
             ],
             'returns': {'type': 'String'},
             'description': None,
@@ -864,28 +626,14 @@ def test_app_system_describe(client):
         'notify': {
             'type': 'method',
             'options': {'notification': True, 'validate': True},
-            'params': [
-                {
-                    'name': '_string',
-                    'type': 'String',
-                    'required': False,
-                    'nullable': False,
-                }
-            ],
+            'params': [{'name': '_string', 'type': 'String', 'required': False, 'nullable': False}],
             'returns': {'type': 'Null'},
             'description': None,
         },
         'not_allow_notify': {
             'type': 'method',
             'options': {'notification': False, 'validate': True},
-            'params': [
-                {
-                    'name': '_string',
-                    'type': 'String',
-                    'required': False,
-                    'nullable': False,
-                }
-            ],
+            'params': [{'name': '_string', 'type': 'String', 'required': False, 'nullable': False}],
             'returns': {'type': 'String'},
             'description': None,
         },

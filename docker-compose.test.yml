@@ -8,8 +8,7 @@ services:
     environment:
       - PRAGMA_VERSION=py3.12
     command: >
-      sh -c "flake8 src/ tests/ &&
-        pylint src/ tests/ &&
+      sh -c "ruff check . &&
         pytest"
 
   python3.11:
@@ -19,8 +18,7 @@ services:
     environment:
       - PRAGMA_VERSION=py3.11
     command: >
-      sh -c "flake8 src/ tests/ &&
-        pylint src/ tests/ &&
+      sh -c "ruff check . &&
         pytest"
 
   python3.10:
@@ -30,8 +28,7 @@ services:
     environment:
       - PRAGMA_VERSION=py3.10
     command: >
-      sh -c "flake8 src/ tests/ &&
-        pylint src/ tests/ &&
+      sh -c "ruff check . &&
         pytest"
 
   python3.9:
@@ -41,8 +38,7 @@ services:
     environment:
       - PRAGMA_VERSION=py3.9
     command: >
-      sh -c "flake8 src/ tests/ &&
-        pylint src/ tests/ &&
+      sh -c "ruff check . &&
         pytest"
 
   python3.8:
@@ -52,6 +48,5 @@ services:
     environment:
       - PRAGMA_VERSION=py3.8
     command: >
-      sh -c "flake8 src/ tests/ &&
-        pylint src/ tests/ &&
+      sh -c "ruff check . &&
         pytest"

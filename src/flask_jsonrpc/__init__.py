@@ -26,6 +26,6 @@
 # POSSIBILITY OF SUCH DAMAGE.
 from __future__ import annotations
 
-from .app import JSONRPC
-from .views import JSONRPCView
-from .blueprints import JSONRPCBlueprint
+from .app import JSONRPC  # noqa: F401
+from .views import JSONRPCView  # noqa: F401
+from .blueprints import JSONRPCBlueprint  # noqa: F401

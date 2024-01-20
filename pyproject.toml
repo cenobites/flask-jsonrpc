@@ -30,10 +30,10 @@ classifiers = [
 ]
 requires-python = ">=3.8"
 dependencies = [
-  "Flask>=3.0.0,<4.0",
-  "typeguard==2.13.3",
-  "typing_extensions>=4.3.0",
-  "typing_inspect==0.9.0",
+    "Flask>=3.0.0,<4.0",
+    "typeguard==2.13.3",
+    "typing_extensions>=4.3.0",
+    "typing_inspect==0.9.0",
 ]
 
 [project.optional-dependencies]
@@ -47,55 +47,66 @@ Documentation = "https://flask-jsonrpc.readthedocs.io/"
 "Issue Tracker" = "https://github.com/cenobites/flask-jsonrpc/issues/"
 Website = "https://flask-jsonrpc.readthedocs.io/"
 
-[tool.black]
+[tool.ruff]
+src = ["src"]
+fix = true
+show-fixes = true
+show-source = true
 line-length = 120
-skip-string-normalization = true
-target-version = ["py312"]
-include = ".pyi?$"
-exclude = """
-(
-  /(
-      .eggs
-    | .git
-    | .hg
-    | .mypy_cache
-    | .pytype
-    | .pytest_cache
-    | .tox
-    | .venv
-    | _build
-    | buck-out
-    | build
-    | dist
-    | htmlcov
-    | junit
-    | htmldoc
-  )/
-  | settings.py
-)
-"""
+target-version = "py38"
 
-[tool.isort]
-profile = "black"
-multi_line_output = 3
-include_trailing_comma = true
-force_grid_wrap = 0
-use_parentheses = true
-length_sort = true
-line_length = 120
-known_flask = "flask"
-sections = "FUTURE,STDLIB,FLASK,THIRDPARTY,FIRSTPARTY,LOCALFOLDER"
+[tool.ruff.lint]
+select = [
+    "E",    # pycodestyle error
+    "W",    # pycodestyle warning
+    "F",    # pyflakes
+    "UP",   # pyupgrade
+    "ANN",  # flake8-annotations
+    "B",    # flake8-bugbear
+    "Q",    # flake8-quotes
+    "SIM",  # flake8-simplify
+    "T",    # flake8-type-checking
+    "B",    # flake8-bandit
+    "C",    # flake8-copyright
+    "I",    # isort
+]
 
-[tool.flake8]
-select = "B,E,F,W,B9,Y0,ISC,I0"
-ignore = "D203,E302,F401,F403,F405,W503"
-exclude = ".git,.tox,.docker,.github,.venv,__pycache__,docs,old,build,dist,htmlcov,junit,.pytest_cache,htmldoc"
+[tool.ruff.lint.mccabe]
 max-complexity = 10
-max-line-length = 120
 
-[tool.pycodestyle]
-max-line-length = 120
-exclude = ".git,.tox,.docker,.github,.venv,__pycache__,docs,old,build,dist,htmlcov,junit,.pytest_cache,htmldoc"
+[tool.ruff.lint.flake8-quotes]
+inline-quotes = "single"
+docstring-quotes = "double"
+
+[tool.ruff.lint.flake8-type-checking]
+exempt-modules = ["typing", "typing_extensions"]
+
+[tool.ruff.lint.flake8-bandit]
+check-typed-exception = true
+
+[tool.ruff.lint.flake8-copyright]
+author = "Cenobit Technologies, Inc. http://cenobit.es/"
+
+[tool.ruff.lint.isort]
+length-sort = true
+combine-as-imports = true
+order-by-type = true
+force-sort-within-sections = true
+split-on-trailing-comma = false
+section-order = ["future", "standard-library", "flask", "third-party", "first-party", "local-folder"]
+
+[tool.ruff.lint.isort.sections]
+"flask" = ["flask"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.format]
+quote-style = "single"
+indent-style = "space"
+skip-magic-trailing-comma = true
+docstring-code-format = true
+docstring-code-line-length = 79
 
 [tool.pytest.ini_options]
 addopts = "--pyargs --doctest-modules --junitxml=junit/test-results.xml --cov-report=html --cov-report=term --cov-report=lcov --cov=flask_jsonrpc --cov-fail-under=100"
@@ -165,13 +176,7 @@ ignore_errors = false
 ignore_missing_imports = false
 strict = true
 
-[[tool.mypy.overrides]]
-module = [
-    "dotenv.*",
-    "importlib_metadata",
-]
-ignore_missing_imports = true
-
 [tool.pytype]
 inputs = ["src/flask_jsonrpc"]
 python_version = "3.11"
+disable = ["invalid-annotation"]

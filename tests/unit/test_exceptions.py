@@ -24,6 +24,7 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
+
 from flask_jsonrpc.exceptions import (
     ParseError,
     ServerError,
@@ -35,7 +36,7 @@ from flask_jsonrpc.exceptions import (
 )
 
 
-def test_jsonrpc_error():
+def test_jsonrpc_error() -> None:
     error = JSONRPCError(message="I'm a teapot", code=-32768, data={'data': [1, 2, 3]}, status_code=418)
     assert error.code == -32768
     assert error.message == "I'm a teapot"
@@ -49,35 +50,25 @@ def test_jsonrpc_error():
     }
 
 
-def test_jsonrpc_error_with_default_params():
+def test_jsonrpc_error_with_default_params() -> None:
     error = JSONRPCError()
     assert error.code == 0
     assert error.message is None
     assert error.data is None
     assert error.status_code == 400
-    assert error.jsonrpc_format == {
-        'code': 0,
-        'data': None,
-        'message': None,
-        'name': 'JSONRPCError',
-    }
+    assert error.jsonrpc_format == {'code': 0, 'data': None, 'message': None, 'name': 'JSONRPCError'}
 
 
-def test_parser_error():
+def test_parser_error() -> None:
     error = ParseError()
     assert error.code == -32700
     assert error.message == 'Parse error'
     assert error.data is None
     assert error.status_code == 400
-    assert error.jsonrpc_format == {
-        'code': -32700,
-        'data': None,
-        'message': 'Parse error',
-        'name': 'ParseError',
-    }
+    assert error.jsonrpc_format == {'code': -32700, 'data': None, 'message': 'Parse error', 'name': 'ParseError'}
 
 
-def test_invalid_request_error():
+def test_invalid_request_error() -> None:
     error = InvalidRequestError()
     assert error.code == -32600
     assert error.message == 'Invalid Request'
@@ -91,7 +82,7 @@ def test_invalid_request_error():
     }
 
 
-def test_method_not_found_error():
+def test_method_not_found_error() -> None:
     error = MethodNotFoundError()
     assert error.code == -32601
     assert error.message == 'Method not found'
@@ -105,7 +96,7 @@ def test_method_not_found_error():
     }
 
 
-def test_invalid_params_error():
+def test_invalid_params_error() -> None:
     error = InvalidParamsError()
     assert error.code == -32602
     assert error.message == 'Invalid params'
@@ -119,29 +110,19 @@ def test_invalid_params_error():
     }
 
 
-def test_internal_error():
+def test_internal_error() -> None:
     error = InternalError()
     assert error.code == -32603
     assert error.message == 'Internal error'
     assert error.data is None
     assert error.status_code == 400
-    assert error.jsonrpc_format == {
-        'code': -32603,
-        'data': None,
-        'message': 'Internal error',
-        'name': 'InternalError',
-    }
+    assert error.jsonrpc_format == {'code': -32603, 'data': None, 'message': 'Internal error', 'name': 'InternalError'}
 
 
-def test_server_error():
+def test_server_error() -> None:
     error = ServerError()
     assert error.code == -32000
     assert error.message == 'Server error'
     assert error.data is None
     assert error.status_code == 500
-    assert error.jsonrpc_format == {
-        'code': -32000,
-        'data': None,
-        'message': 'Server error',
-        'name': 'ServerError',
-    }
+    assert error.jsonrpc_format == {'code': -32000, 'data': None, 'message': 'Server error', 'name': 'ServerError'}

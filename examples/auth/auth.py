@@ -28,8 +28,12 @@
 # isort:skip_file
 import os
 import sys
+import typing as t
 
 from flask import Flask, request
+
+if t.TYPE_CHECKING:
+    from flask.typing import ResponseReturnValue
 
 try:
     from flask_jsonrpc import JSONRPC, JSONRPCView
@@ -47,12 +51,12 @@ class UnauthorizedError(Exception):
 
 
 class AuthorizationView(JSONRPCView):
-    def check_auth(self) -> bool:
+    def check_auth(self: t.Self) -> bool:
         username = request.headers.get('X-Username')
         password = request.headers.get('X-Password')
         return username == 'username' and password == 'secret'
 
-    def dispatch_request(self):
+    def dispatch_request(self: t.Self) -> 'ResponseReturnValue':
         if not self.check_auth():
             raise UnauthorizedError()
         return super().dispatch_request()

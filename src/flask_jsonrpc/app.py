@@ -34,6 +34,12 @@ from .helpers import urn
 from .wrappers import JSONRPCDecoratorMixin
 from .contrib.browse import JSONRPCBrowse
 
+# Python 3.10+
+try:
+    from typing import Self
+except ImportError:  # pragma: no cover
+    from typing_extensions import Self
+
 if t.TYPE_CHECKING:
     from .site import JSONRPCSite
     from .views import JSONRPCView
@@ -42,7 +48,7 @@ if t.TYPE_CHECKING:
 
 class JSONRPC(JSONRPCDecoratorMixin):
     def __init__(
-        self,
+        self: Self,
         app: t.Optional[Flask] = None,
         service_url: str = '/api',
         jsonrpc_site: t.Type['JSONRPCSite'] = default_jsonrpc_site,
@@ -59,16 +65,16 @@ class JSONRPC(JSONRPCDecoratorMixin):
         if app:
             self.init_app(app)
 
-    def get_jsonrpc_site(self) -> 'JSONRPCSite':
+    def get_jsonrpc_site(self: Self) -> 'JSONRPCSite':
         return self.jsonrpc_site
 
-    def get_jsonrpc_site_api(self) -> t.Type['JSONRPCView']:
+    def get_jsonrpc_site_api(self: Self) -> t.Type['JSONRPCView']:
         return self.jsonrpc_site_api
 
-    def _make_jsonrpc_browse_url(self, path: str) -> str:
+    def _make_jsonrpc_browse_url(self: Self, path: str) -> str:
         return ''.join([path.rstrip('/'), '/browse'])
 
-    def init_app(self, app: Flask) -> None:
+    def init_app(self: Self, app: Flask) -> None:
         http_host = app.config.get('SERVER_NAME')
         app_root = app.config['APPLICATION_ROOT']
         url_scheme = app.config['PREFERRED_URL_SCHEME']
@@ -93,15 +99,15 @@ class JSONRPC(JSONRPCDecoratorMixin):
             self.init_browse_app(app)
 
     def register(
-        self,
+        self: Self,
         view_func: t.Callable[..., t.Any],
         name: t.Optional[str] = None,
-        **options: t.Any,
+        **options: t.Any,  # noqa: ANN401
     ) -> None:
         self.register_view_function(view_func, name, **options)
 
     def register_blueprint(
-        self,
+        self: Self,
         app: Flask,
         jsonrpc_app: 'JSONRPCBlueprint',
         url_prefix: t.Optional[str] = None,
@@ -119,20 +125,19 @@ class JSONRPC(JSONRPCDecoratorMixin):
         app.add_url_rule(
             path,
             view_func=jsonrpc_app.get_jsonrpc_site_api().as_view(
-                urn('blueprint', app.name, jsonrpc_app.name, path),
-                jsonrpc_site=jsonrpc_app.get_jsonrpc_site(),
+                urn('blueprint', app.name, jsonrpc_app.name, path), jsonrpc_site=jsonrpc_app.get_jsonrpc_site()
             ),
         )
 
         if app.config['DEBUG'] or enable_web_browsable_api:
             self.register_browse(jsonrpc_app)
 
-    def init_browse_app(self, app: Flask, path: t.Optional[str] = None, base_url: t.Optional[str] = None) -> None:
+    def init_browse_app(self: Self, app: Flask, path: t.Optional[str] = None, base_url: t.Optional[str] = None) -> None:
         browse_url = self._make_jsonrpc_browse_url(path or self.path)
         self.jsonrpc_browse = JSONRPCBrowse(app, url_prefix=browse_url, base_url=base_url or self.base_url)
         self.jsonrpc_browse.register_jsonrpc_site(self.get_jsonrpc_site())
 
-    def register_browse(self, jsonrpc_app: t.Union['JSONRPC', 'JSONRPCBlueprint']) -> None:
+    def register_browse(self: Self, jsonrpc_app: t.Union['JSONRPC', 'JSONRPCBlueprint']) -> None:
         if not self.jsonrpc_browse:
             raise RuntimeError(
                 'You need to init the Browse app before register the Site, see JSONRPC.init_browse_app(...)'

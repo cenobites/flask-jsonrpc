@@ -32,6 +32,12 @@ import functools
 
 from flask import Flask
 
+# Python 3.11+
+try:
+    from typing import Self
+except ImportError:  # pragma: no cover
+    from typing_extensions import Self
+
 try:
     from flask_jsonrpc import JSONRPC
 except ModuleNotFoundError:
@@ -44,7 +50,7 @@ except ModuleNotFoundError:
 
 
 class App:
-    def index(self, name: str = 'Flask JSON-RPC') -> str:
+    def index(self: Self, name: str = 'Flask JSON-RPC') -> str:
         return f'Hello {name}'
 
     @staticmethod
@@ -52,34 +58,34 @@ class App:
         return f'Hello {name}'
 
     @classmethod
-    def hello(cls, name: str = 'Flask JSON-RPC') -> str:
+    def hello(cls: t.Type[Self], name: str = 'Flask JSON-RPC') -> str:
         return f'Hello {name}'
 
-    def echo(self, string: str, _some: t.Any = None) -> str:
+    def echo(self: Self, string: str, _some: t.Any = None) -> str:  # noqa: ANN401
         return string
 
-    def notify(self, _string: str = None) -> None:
+    def notify(self: Self, _string: str = None) -> None:
         pass
 
-    def not_allow_notify(self, _string: str = None) -> str:
+    def not_allow_notify(self: Self, _string: str = None) -> str:
         return 'Now allow notify'
 
-    def fails(self, n: int) -> int:
+    def fails(self: Self, n: int) -> int:
         if n % 2 == 0:
             return n
         raise ValueError('number is odd')
 
 
-def jsonrpc_decorator(fn):
+def jsonrpc_decorator(fn: t.Callable[..., str]) -> t.Callable[..., str]:
     @functools.wraps(fn)
-    def wrapped(*args, **kwargs):
+    def wrapped(*args, **kwargs) -> str:  # noqa: ANN002,ANN003
         rv = fn(*args, **kwargs)
         return f'{rv} from decorator, ;)'
 
     return wrapped
 
 
-def create_app(test_config: t.Dict[str, t.Any] = None):  # noqa: C901  pylint: disable=W0612
+def create_app(test_config: t.Dict[str, t.Any] = None) -> Flask:  # noqa: C901  pylint: disable=W0612
     """Create and configure an instance of the Flask application."""
     flask_app = Flask('apptest', instance_relative_config=True)
     if test_config:
@@ -94,7 +100,7 @@ def create_app(test_config: t.Dict[str, t.Any] = None):  # noqa: C901  pylint: d
 
     # pylint: disable=W0612
     @jsonrpc.method('jsonrpc.echo')
-    def echo(string: str, _some: t.Any = None) -> str:
+    def echo(string: str, _some: t.Any = None) -> str:  # noqa: ANN401
         return string
 
     # pylint: disable=W0612
@@ -117,11 +123,7 @@ def create_app(test_config: t.Dict[str, t.Any] = None):  # noqa: C901  pylint: d
     # pylint: disable=W0612
     @jsonrpc.method('jsonrpc.strangeEcho')
     def strange_echo(
-        string: str,
-        omg: t.Dict[str, t.Any],
-        wtf: t.List[str],
-        nowai: int,
-        yeswai: str = 'Default',
+        string: str, omg: t.Dict[str, t.Any], wtf: t.List[str], nowai: int, yeswai: str = 'Default'
     ) -> t.List[t.Any]:
         return [string, omg, wtf, nowai, yeswai]
 
@@ -153,7 +155,7 @@ def create_app(test_config: t.Dict[str, t.Any] = None):  # noqa: C901  pylint: d
 
     # pylint: disable=W0612
     @jsonrpc.method('jsonrpc.not_validate', validate=False)
-    def not_validate(s='Oops!'):
+    def not_validate(s='Oops!'):  # noqa: ANN001,ANN202
         return f'Not validate: {s}'
 
     @jsonrpc.method('jsonrpc.noReturn')
