@@ -4,11 +4,12 @@ include AUTHORS
 include README.md
 include requirements/*.txt
 include src/flask_jsonrpc/py.typed
+include src/buildtools/py.typed
 recursive-include src/flask_jsonrpc/contrib/browse/templates *
 recursive-include src/flask_jsonrpc/contrib/browse/static *
+graft src/buildtools
 graft docs
 prune docs/_build
 graft examples
 graft tests
-global-exclude *.pyc
-exclude src/flask_jsonrpc/contrib/browse/templates/.editorconfig
+global-exclude *~ *.py[cod] *.so *.swp *.editorconfig __pycache__

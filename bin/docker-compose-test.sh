@@ -7,20 +7,40 @@ DOCKER_COMPOSE_FILE_PATH=../${DOCKER_COMPOSE_FILE_NAME}
 docker-compose -f ${DOCKER_COMPOSE_FILE_PATH} -p ci build --build-arg VERSION=$(date +%s)
 docker-compose -f ${DOCKER_COMPOSE_FILE_PATH} -p ci --compatibility up -d
 
-DOCKER_WAIT_FOR_PY38=$(docker wait ci_python3.8_1)
-docker logs ci_python3.8_1
+(
+    set -e
+    docker wait ci_python3.8_1
+    docker logs ci_python3.8_1
+)
+DOCKER_WAIT_FOR_PY38=$?
 
-DOCKER_WAIT_FOR_PY39=$(docker wait ci_python3.9_1)
-docker logs ci_python3.9_1
+(
+    set -e
+    docker wait ci_python3.9_1
+    docker logs ci_python3.9_1
+)
+DOCKER_WAIT_FOR_PY39=$?
 
-DOCKER_WAIT_FOR_PY310=$(docker wait ci_python3.10_1)
-docker logs ci_python3.10_1
+(
+    set -e
+    docker wait ci_python3.10_1
+    docker logs ci_python3.10_1
+)
+DOCKER_WAIT_FOR_PY310=$?
 
-DOCKER_WAIT_FOR_PY311=$(docker wait ci_python3.11_1)
-docker logs ci_python3.11_1
+(
+    set -e
+    docker wait ci_python3.11_1
+    docker logs ci_python3.11_1
+)
+DOCKER_WAIT_FOR_PY311=$?
 
-DOCKER_WAIT_FOR_PY312=$(docker wait ci_python3.12_1)
-docker logs ci_python3.12_1
+(
+    set -e
+    docker wait ci_python3.12_1
+    docker logs ci_python3.12_1
+)
+DOCKER_WAIT_FOR_PY312=$?
 
 docker-compose -f ${DOCKER_COMPOSE_FILE_PATH} -p ci down --remove-orphans
 

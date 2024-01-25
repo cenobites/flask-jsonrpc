@@ -1,6 +1,40 @@
 version: '3'
 
 services:
+  sut:
+    build:
+      context: .
+      dockerfile: Dockerfile.it
+    environment:
+      - PYTEST_CACHE_DIR=.pytest_cache
+      - SITE_DOMAIN=app.flask-jsonrpc.cenobit.es
+      - SITE_PORT=80
+      - WEB_URL=https://app.flask-jsonrpc.cenobit.es
+      - API_URL=https://app.flask-jsonrpc.cenobit.es/api
+      - BROWSABLE_API_URL=https://app.flask-jsonrpc.cenobit.es/api/browse
+    user: ${UID:-0}:${GID:-0}
+    volumes:
+      - .pytest_cache/test-results/app:/app/test-results
+      - .pytest_cache/screnshots/app:/app/.pytest_cache/screnshots
+    depends_on:
+      - nginx
+    networks:
+      - default
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.local
+    environment:
+      - FLASK_SERVER_NAME=app:5000
+    user: ${UID:-0}:${GID:-0}
+    command: >
+      python app.py
+    ports:
+      - '5000:5000'
+    networks:
+      - default
+
   async_sut:
     build:
       context: .
@@ -37,17 +71,17 @@ services:
     networks:
       - default
 
-  sut:
+  mypyc_sut:
     build:
       context: .
       dockerfile: Dockerfile.it
     environment:
       - PYTEST_CACHE_DIR=.pytest_cache
-      - SITE_DOMAIN=app.flask-jsonrpc.cenobit.es
+      - SITE_DOMAIN=mypyc-app.flask-jsonrpc.cenobit.es
       - SITE_PORT=80
-      - WEB_URL=https://app.flask-jsonrpc.cenobit.es
-      - API_URL=https://app.flask-jsonrpc.cenobit.es/api
-      - BROWSABLE_API_URL=https://app.flask-jsonrpc.cenobit.es/api/browse
+      - WEB_URL=https://mypyc-app.flask-jsonrpc.cenobit.es
+      - API_URL=https://mypyc-app.flask-jsonrpc.cenobit.es/api
+      - BROWSABLE_API_URL=https://mypyc-app.flask-jsonrpc.cenobit.es/api/browse
     user: ${UID:-0}:${GID:-0}
     volumes:
       - .pytest_cache/test-results/app:/app/test-results
@@ -57,17 +91,19 @@ services:
     networks:
       - default
 
-  app:
+  mypyc_app:
     build:
       context: .
       dockerfile: Dockerfile.local
+      args:
+        - MYPYC_ENABLE=1
     environment:
-      - FLASK_SERVER_NAME=app:5000
+      - FLASK_SERVER_NAME=mypyc_app:5000
     user: ${UID:-0}:${GID:-0}
     command: >
       python app.py
     ports:
-      - '5000:5000'
+      - '5002:5000'
     networks:
       - default
 
@@ -83,11 +119,13 @@ services:
     depends_on:
       - app
       - async_app
+      - mypyc_app
     networks:
       default:
         aliases:
           - app.flask-jsonrpc.cenobit.es
           - async-app.flask-jsonrpc.cenobit.es
+          - mypyc-app.flask-jsonrpc.cenobit.es
 
 networks:
   default:

@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-# Copyright (c) 2012-2022, Cenobit Technologies, Inc. http://cenobit.es/
+# Copyright (c) 2024 Cenobit Technologies, Inc. http://cenobit.es/
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -26,32 +25,18 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 import os
-import sys
-import pathlib
+import typing as t
 
-import setuptools
+from setuptools import build_meta as _backend
 
-setup_attrs = {}
+get_requires_for_build_sdist = _backend.get_requires_for_build_sdist
+prepare_metadata_for_build_wheel = _backend.prepare_metadata_for_build_wheel
+build_sdist = _backend.build_sdist
+build_wheel = _backend.build_wheel
 
-if 'bdist_wheel' in sys.argv and os.environ.get('MYPYC_ENABLE', 'False').lower() in ('true', 't', '1'):
-    from mypyc.build import mypycify  # pylint: disable=E0611
 
-    project_dir = pathlib.Path(__file__).resolve().parent
-    ext_modules = [
-        '--config-file',
-        str(project_dir / 'pyproject.toml'),
-        '--strict',
-        '--check-untyped-defs',
-        '--ignore-missing-imports',
-        '--disable-error-code',
-        'unused-ignore',
-        '--disable-error-code',
-        'no-any-return',
-        '--disable-error-code',
-        'misc',
-    ]
-    ext_modules.extend([str(file) for file in (project_dir / 'src' / 'flask_jsonrpc').rglob('*.py')])
-    setup_attrs['ext_modules'] = mypycify(ext_modules)
-    setup_attrs['package_data'] = {'flask_jsonrpc.contrib.browse': ['static*', 'templates*']}
-
-setuptools.setup(**setup_attrs)
+def get_requires_for_build_wheel(config_settings: t.Optional[t.Mapping[str, t.Any]] = None) -> t.List[str]:
+    requires = _backend.get_requires_for_build_wheel(config_settings)
+    if os.environ.get('MYPYC_ENABLE', 'False').lower() in ('true', 't', '1'):
+        requires.append('mypy')
+    return requires
