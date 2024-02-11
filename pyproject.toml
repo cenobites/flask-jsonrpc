@@ -5,7 +5,7 @@ backend-path = ["src/buildtools"]
 
 [project]
 name = "Flask-JSONRPC"
-version = "3.0.1a0"
+version = "3.0.1a1"
 description = "Adds JSONRPC support to Flask."
 readme = {file = "README.md", content-type = "text/markdown"}
 license = {file = "LICENSE"}
@@ -58,6 +58,20 @@ namespaces = false
 
 [tool.distutils.bdist_wheel]
 universal = true
+
+[tool.cibuildwheel]
+before-all = "uname -a"
+build-verbosity = 1
+skip = [
+    "cp3{8,9,10}-*",
+    "*-manylinux_i686",
+    "*-musllinux_i686",
+    "*-win32",
+    "pp*",
+]
+
+[tool.cibuildwheel.environment]
+MYPYC_ENABLE = "1"
 
 [tool.ruff]
 src = ["src"]
