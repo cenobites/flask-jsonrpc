@@ -41,7 +41,6 @@ jobs:
 
   build-wheels:
     name: Build wheels on ${{ matrix.platform }}
-    needs: [run-tox, coverage]
     runs-on: ${{ matrix.platform }}
     strategy:
       fail-fast: false
