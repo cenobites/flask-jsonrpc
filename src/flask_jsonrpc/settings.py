@@ -38,6 +38,7 @@ DEFAULTS = {'DEFAULT_JSONRPC_METHOD': {'VALIDATE': True, 'NOTIFICATION': True}}
 class JSONRPCSettings:
     def __init__(self: Self, defaults: t.Optional[t.Dict[str, t.Any]] = None) -> None:
         self.defaults = defaults or DEFAULTS
+        self.setup(self.defaults)
 
     def __getattr__(self: Self, attr: str) -> t.Any:  # noqa: ANN401
         if attr not in self.defaults:
@@ -47,6 +48,11 @@ class JSONRPCSettings:
 
         setattr(self, attr, val)
         return val
+
+    # XXX: https://mypyc.readthedocs.io/en/latest/differences_from_python.html#monkey-patching
+    def setup(self: Self, defaults: t.Dict[str, t.Any]) -> None:
+        for attr, val in defaults.items():
+            setattr(JSONRPCSettings, attr, val)
 
 
 settings = JSONRPCSettings(DEFAULTS)

@@ -23,15 +23,13 @@ jobs:
     steps:
     - name: Checkout source at ${{ matrix.platform }}
       uses: actions/checkout@v4
-      with:
-        ref: ${{ github.ref_name }}
     - name: Setup Python ${{ matrix.python-version }}
       uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
     - name: Build source and wheel distributions to version ${{ github.ref_name }}
       run: |
-        python -m pip install build twine
+        python -m pip install -r requirements/build.txt
         python -m build
         twine check --strict dist/*
     - name: Publish distribution to PyPI
@@ -39,7 +37,7 @@ jobs:
       with:
         user: __token__
         password: ${{ secrets.PYPI_API_TOKEN }}
-    - name: Create GitHub Pre Release
+    - name: Create GitHub Release
       id: create_release
       uses: softprops/action-gh-release@v1
       with:

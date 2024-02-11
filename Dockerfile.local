@@ -17,11 +17,19 @@ RUN echo "Version: ${VERSION}"
 
 COPY . ./
 
-ARG FLASK_ASYNC=0
-RUN pip install pip setuptools wheel --upgrade \
+ARG FLASK_ASYNC=0 \
+    MYPYC_ENABLE=0
+RUN pip install pip wheel --upgrade \
     && echo "Flask Async? ${FLASK_ASYNC}" \
-    && [[ ${FLASK_ASYNC} = 1 ]] && PROJECT_PATH=".[async]" || PROJECT_PATH="." \
-    && pip wheel --wheel-dir=/svc/wheels -e ${PROJECT_PATH}
+    && echo "Mypyc compile? ${MYPYC_ENABLE}" \
+    && [[ ${FLASK_ASYNC} = 1 ]] \
+        && PROJECT_PATH=".[async]" \
+        || PROJECT_PATH="." \
+    && [[ ${MYPYC_ENABLE} = 1 ]] \
+        && python -m pip install -r requirements/base.txt -r requirements/cbuild.txt \
+        && pip wheel --wheel-dir=/svc/wheels -e ${PROJECT_PATH} \
+        && python setup.py bdist_wheel --dist-dir /svc/dist \
+        || pip wheel --wheel-dir=/svc/wheels -e ${PROJECT_PATH}
 
 FROM python:3.12-alpine
 
@@ -43,11 +51,17 @@ COPY --from=builder /svc /svc
 
 WORKDIR /app
 
-ARG FLASK_ASYNC=0
+ARG FLASK_ASYNC=0 \
+    MYPYC_ENABLE=0
 RUN pip install pip setuptools wheel --upgrade \
     && echo "Flask Async? ${FLASK_ASYNC}" \
-    && [[ ${FLASK_ASYNC} = 1 ]] && PIP_INSTALL_PACKAGES="Flask-JSONRPC[async]" || PIP_INSTALL_PACKAGES="Flask-JSONRPC" \
+    && [[ ${FLASK_ASYNC} = 1 ]] \
+        && PIP_INSTALL_PACKAGES="Flask-JSONRPC[async]" \
+        || PIP_INSTALL_PACKAGES="Flask-JSONRPC" \
     && pip install --no-index --find-links=/svc/wheels ${PIP_INSTALL_PACKAGES} \
+    && [[ ${MYPYC_ENABLE} = 1 ]] \
+        && pip install /svc/dist/* --force-reinstall \
+        || echo "Do nothing..." \
     && addgroup -S flask_user \
     && adduser \
         --disabled-password \

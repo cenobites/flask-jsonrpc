@@ -1,0 +1,6 @@
+-r build.txt
+
+# Mypyc
+# ------------------------------------------------------------------------------
+mypy[mypyc]==1.8.0  # https://github.com/python/mypy
+mypy-extensions==1.0.0  # https://github.com/python/mypy_extensions

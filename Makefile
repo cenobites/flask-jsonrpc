@@ -11,7 +11,7 @@ clean:
 	@find . -name "*.pyc" | xargs rm -rf
 	@find . -name "__pycache__" | xargs rm -rf
 	@find . -name ".coverage" | xargs rm -rf
-	@rm -rf .coverage .eggs/ .mypy_cache/ .pytype/ .pytest_cache/ .tox/ src/Flask_JSONRPC.egg-info/ htmlcov/ junit/ htmldoc/ build/ dist/
+	@rm -rf .coverage coverage.* .eggs/ .mypy_cache/ .pytype/ .ruff_cache/ .pytest_cache/ .tox/ src/Flask_JSONRPC.egg-info/ htmlcov/ junit/ htmldoc/ build/ dist/
 
 test: clean
 	@python -m tox
@@ -23,6 +23,7 @@ test-release: clean test
 release: clean test
 	@python -m pip install --upgrade build
 	@python -m build
+	@MYPYC_ENABLE=1 python setup.py bdist_wheel
 
 publish-test: clean release
 	@python -m pip install --upgrade twine
