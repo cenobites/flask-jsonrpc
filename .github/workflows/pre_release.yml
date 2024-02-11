@@ -101,7 +101,7 @@ jobs:
         allow-empty: true
 
   build:
-    name: Build source
+    name: Build source on ${{ matrix.platform }}
     needs: [run-tox, coverage]
     runs-on: ${{ matrix.platform }}
     strategy:
@@ -109,9 +109,7 @@ jobs:
       matrix:
         platform:
           - ubuntu-latest
-          - macos-latest
-          - windows-latest
-        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
+        python-version: ["3.12"]
     steps:
     - name: Checkout source at ${{ matrix.platform }}
       uses: actions/checkout@v4
@@ -124,7 +122,6 @@ jobs:
         python -m pip install -r requirements/build.txt
         python -m build --outdir dist-${{ matrix.platform }}-${{ matrix.python-version }}
     - name: Compiles Python modules to C extensions with Mypyc
-      if: ${{ matrix.platform == 'ubuntu-latest' && matrix.python-version == '3.12' }}
       env:
         MYPYC_ENABLE: 1
       run: |
@@ -135,15 +132,46 @@ jobs:
     - name: Tar build and wheel distributions files
       run: |
         tar -cvf dist-${{ matrix.platform }}-${{ matrix.python-version }}.tar dist-${{ matrix.platform }}-${{ matrix.python-version }}
+        tar -cvf mypyc-dist-${{ matrix.platform }}-${{ matrix.python-version }}.tar mypyc-dist-${{ matrix.platform }}-${{ matrix.python-version }}
     - name: Upload build and wheel distributions files
       uses: actions/upload-artifact@v4
       with:
         name: pre-release-build-${{ matrix.platform }}-${{ matrix.python-version }}
-        path: dist-${{ matrix.platform }}-${{ matrix.python-version }}.tar
+        path: |
+          dist-${{ matrix.platform }}-${{ matrix.python-version }}.tar
+          mypyc-dist-${{ matrix.platform }}-${{ matrix.python-version }}.tar
+
+  build-wheels:
+    name: Build wheels on ${{ matrix.platform }}
+    needs: [run-tox, coverage]
+    runs-on: ${{ matrix.platform }}
+    strategy:
+      fail-fast: false
+      matrix:
+        platform:
+          - ubuntu-latest
+          - macos-latest
+          - windows-latest
+        python-version: ["3.12"]
+    steps:
+      - name: Checkout source at ${{ matrix.platform }}
+        uses: actions/checkout@v4
+      - name: Setup Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install cbuild dependencies
+        run: python -m pip install -r requirements/cbuild.txt
+      - name: Build wheels
+        run: python -m cibuildwheel --output-dir wheelhouse
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pre-release-cibw-wheels-${{ matrix.platform }}-${{ matrix.python-version }}
+          path: ./wheelhouse/*.whl
 
   publish-testpypi:
     name: Publish to TestPyPI
-    needs: build
+    needs: [build, build-wheels]
     runs-on: ${{ matrix.platform }}
     permissions:
       contents: write
@@ -164,10 +192,17 @@ jobs:
       uses: actions/download-artifact@v4
       with:
         name: pre-release-build-${{ matrix.platform }}-${{ matrix.python-version }}
+    - name: Download cibw wheels distributions files
+      uses: actions/download-artifact@v4
+      with:
+        path: pre-release-cibw-wheels
+        pattern: pre-release-cibw-wheels-*
+        merge-multiple: true
     - name: Build source and wheel distributions to version ${{ github.ref_name }}
       run: |
         python -m pip install -r requirements/build.txt
         tar -xvf dist-${{ matrix.platform }}-${{ matrix.python-version }}.tar
+        mv pre-release-cibw-wheels/* dist-${{ matrix.platform }}-${{ matrix.python-version }}/
         twine check --strict dist-${{ matrix.platform }}-${{ matrix.python-version }}/*
     - name: Publish distribution to TestPyPI
       uses: pypa/gh-action-pypi-publish@v1.8.11
