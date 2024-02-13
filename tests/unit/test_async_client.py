@@ -593,8 +593,22 @@ def test_app_system_describe(async_client: 'FlaskClient') -> None:
         'jsonrpc.not_validate': {
             'type': 'method',
             'options': {'notification': True, 'validate': False},
-            'params': [],
-            'returns': {'type': 'Null'},
+            'params': [{'name': 's', 'nullable': False, 'required': False, 'type': 'Object'}],
+            'returns': {'type': 'Object'},
+            'description': None,
+        },
+        'jsonrpc.mixin_not_validate': {
+            'type': 'method',
+            'options': {'notification': True, 'validate': False},
+            'params': [
+                {'name': 's', 'type': 'Object', 'required': False, 'nullable': False},
+                {'name': 't', 'type': 'Number', 'required': False, 'nullable': False},
+                {'name': 'u', 'type': 'Object', 'required': False, 'nullable': False},
+                {'name': 'v', 'type': 'String', 'required': False, 'nullable': False},
+                {'name': 'x', 'type': 'Object', 'required': False, 'nullable': False},
+                {'name': 'z', 'type': 'Object', 'required': False, 'nullable': False},
+            ],
+            'returns': {'type': 'Object'},
             'description': None,
         },
         'jsonrpc.noReturn': {

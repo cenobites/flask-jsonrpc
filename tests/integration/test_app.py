@@ -455,6 +455,31 @@ class APITest(APITestCase):
         self.assertEqual({'id': 1, 'jsonrpc': '2.0', 'result': 'Not validate: OK'}, rv.json())
         self.assertEqual(200, rv.status_code)
 
+    def test_mixin_not_validate_method(self: Self) -> None:
+        rv = self.requests.post(
+            API_URL,
+            json={
+                'id': 1,
+                'jsonrpc': '2.0',
+                'method': 'jsonrpc.mixin_not_validate',
+                'params': [':)', 1, 3.2, ':D', [1, 2, 3], {1: 1}],
+            },
+        )
+        self.assertEqual({'id': 1, 'jsonrpc': '2.0', 'result': 'Not validate: :) 1 3.2 :D [1, 2, 3] {1: 1}'}, rv.json())
+        self.assertEqual(200, rv.status_code)
+
+        rv = self.requests.post(
+            API_URL,
+            json={
+                'id': 1,
+                'jsonrpc': '2.0',
+                'method': 'jsonrpc.mixin_not_validate',
+                'params': {'s': ':)', 't': 1, 'u': 3.2, 'v': ':D', 'x': [1, 2, 3], 'z': {1: 1}},
+            },
+        )
+        self.assertEqual({'id': 1, 'jsonrpc': '2.0', 'result': 'Not validate: :) 1 3.2 :D [1, 2, 3] {1: 1}'}, rv.json())
+        self.assertEqual(200, rv.status_code)
+
     def test_no_return_method(self: Self) -> None:
         rv = self.requests.post(API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.noReturn', 'params': []})
         self.assertEqual(
@@ -668,8 +693,22 @@ class APITest(APITestCase):
                 'jsonrpc.not_validate': {
                     'type': 'method',
                     'options': {'notification': True, 'validate': False},
-                    'params': [],
-                    'returns': {'type': 'Null'},
+                    'params': [{'name': 's', 'nullable': False, 'required': False, 'type': 'Object'}],
+                    'returns': {'type': 'Object'},
+                    'description': None,
+                },
+                'jsonrpc.mixin_not_validate': {
+                    'type': 'method',
+                    'options': {'notification': True, 'validate': False},
+                    'params': [
+                        {'name': 's', 'type': 'Object', 'required': False, 'nullable': False},
+                        {'name': 't', 'type': 'Number', 'required': False, 'nullable': False},
+                        {'name': 'u', 'type': 'Object', 'required': False, 'nullable': False},
+                        {'name': 'v', 'type': 'String', 'required': False, 'nullable': False},
+                        {'name': 'x', 'type': 'Object', 'required': False, 'nullable': False},
+                        {'name': 'z', 'type': 'Object', 'required': False, 'nullable': False},
+                    ],
+                    'returns': {'type': 'Object'},
                     'description': None,
                 },
                 'jsonrpc.noReturn': {

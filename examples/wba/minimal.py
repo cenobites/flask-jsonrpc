@@ -81,5 +81,20 @@ def fails(_string: Optional[str]) -> NoReturn:
     raise ValueError('example of fail')
 
 
+@jsonrpc.method('App.notValidate', validate=False)
+def not_validate(s='Oops!'):  # noqa: ANN001,ANN202,ANN201
+    return f'Not validate: {s}'
+
+
+@jsonrpc.method('App.mixinNotValidate', validate=False)
+def mixin_not_validate(s, t: int, u, v: str, x, z):  # noqa: ANN001,ANN202,ANN201
+    return f'Not validate: {s} {t} {u} {v} {x} {z}'
+
+
+@jsonrpc.method('App.mixinNotValidateReturn', validate=False)
+def mixin_not_validate_with_no_return(_s, _t: int, _u, _v: str, _x, _z):  # noqa: ANN001,ANN202,ANN201
+    pass
+
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True)

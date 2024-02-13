@@ -81,7 +81,12 @@
                     }
 
                     if (param.type === 'Object') {
-                        return eval('('+ param.value + ')');
+                        try {
+                            return eval('('+ param.value + ')');
+                        } catch (e) {
+                            console.error('Failed to evaluate the object:', param.value);
+                            return param.value;
+                        }
                     } else if (param.type === 'Number') {
                         if (param.value.indexOf('.') !== -1) {
                             return parseFloat(param.value);
