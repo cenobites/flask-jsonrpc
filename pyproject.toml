@@ -77,7 +77,7 @@ MYPYC_ENABLE = "1"
 src = ["src"]
 fix = true
 show-fixes = true
-show-source = true
+output-format = "concise"
 line-length = 120
 target-version = "py38"
 

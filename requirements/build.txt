@@ -1,8 +1,8 @@
 # Tools
 # ------------------------------------------------------------------------------
 wheel==0.42.0  # https://github.com/pypa/wheel
-setuptools==69.1.0  # https://github.com/pypa/setuptools
-build==1.0.3  # https://github.com/pypa/build
+setuptools==69.1.1  # https://github.com/pypa/setuptools
+build==1.1.1  # https://github.com/pypa/build
 packaging==23.2  # https://github.com/pypa/packaging
 pyproject-hooks==1.0.0  # https://github.com/pypa/pyproject-hooks
 twine==5.0.0  # https://github.com/pypa/twine
