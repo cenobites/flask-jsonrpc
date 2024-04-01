@@ -102,14 +102,14 @@ jobs:
         mv release-cibw-wheels/* dist-${{ matrix.platform }}-${{ matrix.python-version }}/
         twine check --strict dist-${{ matrix.platform }}-${{ matrix.python-version }}/*
     - name: Publish distribution to PyPI
-      uses: pypa/gh-action-pypi-publish@v1.8.12
+      uses: pypa/gh-action-pypi-publish@v1.8.14
       with:
         user: __token__
         password: ${{ secrets.PYPI_API_TOKEN }}
         packages-dir: dist-${{ matrix.platform }}-${{ matrix.python-version }}/
     - name: Create GitHub Release
       id: create_release
-      uses: softprops/action-gh-release@v1
+      uses: softprops/action-gh-release@v2
       with:
         draft: false
         prerelease: false
