@@ -1,8 +1,8 @@
 # Testing
 # ------------------------------------------------------------------------------
-pytest==8.1.1  # https://github.com/pytest-dev/pytest
+pytest==8.2.0  # https://github.com/pytest-dev/pytest
 pytest-cov==5.0.0  # https://github.com/pytest-dev/pytest-cov
-pytest-xdist==3.5.0  # https://github.com/pytest-dev/pytest-xdist
+pytest-xdist==3.6.1  # https://github.com/pytest-dev/pytest-xdist
 pytest-sugar==1.0.0  # https://github.com/Frozenball/pytest-sugar
 pytest-env==1.1.3  # https://github.com/MobileDynasty/pytest-env
 pytest-selenium==4.1.0  # https://github.com/pytest-dev/pytest-selenium
@@ -13,7 +13,7 @@ typeguard==2.13.3  # https://github.com/agronholm/typeguard
 
 # Code quality
 # ------------------------------------------------------------------------------
-coverage==7.4.4  # https://github.com/nedbat/coveragepy
+coverage==7.5.1  # https://github.com/nedbat/coveragepy
 
 # Tools
 # ------------------------------------------------------------------------------
