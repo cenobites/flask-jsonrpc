@@ -1,6 +1,6 @@
 # Testing
 # ------------------------------------------------------------------------------
-pytest==8.2.0  # https://github.com/pytest-dev/pytest
+pytest==8.2.1  # https://github.com/pytest-dev/pytest
 pytest-cov==5.0.0  # https://github.com/pytest-dev/pytest-cov
 pytest-xdist==3.6.1  # https://github.com/pytest-dev/pytest-xdist
 pytest-sugar==1.0.0  # https://github.com/Frozenball/pytest-sugar
