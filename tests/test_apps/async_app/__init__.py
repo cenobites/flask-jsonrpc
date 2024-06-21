@@ -176,6 +176,12 @@ def create_async_app(test_config: t.Dict[str, t.Any] = None) -> Flask:  # noqa: 
         await asyncio.sleep(0)
         return f'Not validate: {s}'
 
+    # pylint: disable=W0612
+    @jsonrpc.method('jsonrpc.mixin_not_validate', validate=False)
+    async def mixin_not_validate(s, t: int, u, v: str, x, z):  # noqa: ANN001,ANN202
+        await asyncio.sleep(0)
+        return f'Not validate: {s} {t} {u} {v} {x} {z}'
+
     @jsonrpc.method('jsonrpc.noReturn')
     async def no_return(_string: t.Optional[str] = None) -> t.NoReturn:
         await asyncio.sleep(0)

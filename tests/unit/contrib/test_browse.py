@@ -51,6 +51,11 @@ def test_browse_create() -> None:
     def fn3(s: str) -> str:
         return f'Foo {s}'
 
+    # pylint: disable=W0612
+    @jsonrpc.method('app.fn4', validate=False)
+    def fn4(s, t: int, u, v: str, x, z):  # noqa: ANN001,ANN202
+        return f'Not validate: {s} {t} {u} {v} {x} {z}'
+
     with app.test_client() as client:
         rv = client.post('/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.fn1', 'params': [1]})
         assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': 'Foo 1'}
@@ -79,6 +84,25 @@ def test_browse_create() -> None:
         }
         assert rv.status_code == 400
 
+        rv = client.post(
+            '/api',
+            json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.fn4', 'params': [':)', 1, 3.2, ':D', [1, 2, 3], {1: 1}]},
+        )
+        assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': "Not validate: :) 1 3.2 :D [1, 2, 3] {'1': 1}"}
+        assert rv.status_code == 200
+
+        rv = client.post(
+            '/api',
+            json={
+                'id': 1,
+                'jsonrpc': '2.0',
+                'method': 'app.fn4',
+                'params': {'s': ':)', 't': 1, 'u': 3.2, 'v': ':D', 'x': [1, 2, 3], 'z': {1: 1}},
+            },
+        )
+        assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': "Not validate: :) 1 3.2 :D [1, 2, 3] {'1': 1}"}
+        assert rv.status_code == 200
+
         rv = client.get('/api/browse')
         assert rv.status_code == 308
 
@@ -94,8 +118,8 @@ def test_browse_create() -> None:
                     'name': 'app.fn1',
                     'type': 'method',
                     'options': {'notification': True, 'validate': False},
-                    'params': [],
-                    'returns': {'type': 'Null'},
+                    'params': [{'name': 's', 'type': 'Object', 'required': False, 'nullable': False}],
+                    'returns': {'type': 'Object'},
                     'description': 'Function app.fn1',
                 },
                 {
@@ -112,6 +136,21 @@ def test_browse_create() -> None:
                     'options': {'notification': False, 'validate': True},
                     'params': [{'name': 's', 'type': 'String', 'required': False, 'nullable': False}],
                     'returns': {'type': 'String'},
+                    'description': None,
+                },
+                {
+                    'name': 'app.fn4',
+                    'type': 'method',
+                    'options': {'notification': True, 'validate': False},
+                    'params': [
+                        {'name': 's', 'type': 'Object', 'required': False, 'nullable': False},
+                        {'name': 't', 'type': 'Number', 'required': False, 'nullable': False},
+                        {'name': 'u', 'type': 'Object', 'required': False, 'nullable': False},
+                        {'name': 'v', 'type': 'String', 'required': False, 'nullable': False},
+                        {'name': 'x', 'type': 'Object', 'required': False, 'nullable': False},
+                        {'name': 'z', 'type': 'Object', 'required': False, 'nullable': False},
+                    ],
+                    'returns': {'type': 'Object'},
                     'description': None,
                 },
             ]

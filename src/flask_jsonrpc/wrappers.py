@@ -25,7 +25,8 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 import typing as t
-from inspect import ismethod, signature, isfunction
+from inspect import _empty, ismethod, signature, isfunction
+from collections import OrderedDict
 
 from typeguard import typechecked
 
@@ -76,6 +77,18 @@ class JSONRPCDecoratorMixin:
             return fn.__func__  # pytype: disable=attribute-error,bad-return-type
         raise ValueError('the view function must be either a function or a method')
 
+    def _get_type_hints_by_signature(
+        self: Self, fn: t.Callable[..., t.Any], fn_annotations: t.Dict[str, t.Any]
+    ) -> t.Dict[str, t.Any]:
+        sig = signature(fn)
+        parameters = OrderedDict()
+        for name in sig.parameters:
+            parameters[name] = fn_annotations.get(name, t.Any)
+        parameters['return'] = fn_annotations.get(
+            'return', t.Any if sig.return_annotation is _empty else sig.return_annotation
+        )
+        return parameters
+
     def get_jsonrpc_site(self: Self) -> 'JSONRPCSite':
         raise NotImplementedError('.get_jsonrpc_site must be overridden')
 
@@ -88,6 +101,8 @@ class JSONRPCDecoratorMixin:
         fn = self._get_function(view_func)
         fn_options = self._method_options(options)
         fn_annotations = t.get_type_hints(fn)
+        if not fn_options['validate']:
+            fn_annotations = self._get_type_hints_by_signature(fn, fn_annotations)
         method_name = name if name else getattr(fn, '__name__', '<noname>')
         view_func_wrapped = typechecked(view_func) if fn_options['validate'] else view_func
         setattr(view_func_wrapped, 'jsonrpc_method_name', method_name)  # noqa: B010
