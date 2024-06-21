@@ -16,7 +16,7 @@ Some reasons you might want to use:
 * Run-time type checking functions defined with [PEP 484](https://www.python.org/dev/peps/pep-0484/ "PEP 484") argument (and return) type annotations.
 * Extensive documentation, and great community support.
 
-There is a live example API for testing purposes, [available here](http://flask-jsonrpc.herokuapp.com/api/browse "Web browsable API").
+There is a live example API for testing purposes, [available here](https://flask-jsonrpc.cenobit.es/api/browse/#/ "Web browsable API").
 
 **Below:** *Screenshot from the browsable API*
 
