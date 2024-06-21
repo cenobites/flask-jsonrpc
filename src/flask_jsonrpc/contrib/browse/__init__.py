@@ -51,7 +51,7 @@ class JSONRPCBrowse:
         self.app = app
         self.url_prefix = url_prefix
         self.base_url = base_url
-        self.jsonrpc_sites: t.Set['JSONRPCSite'] = set()
+        self.jsonrpc_sites: t.Set[JSONRPCSite] = set()
         if app:
             self.init_app(app)
 
