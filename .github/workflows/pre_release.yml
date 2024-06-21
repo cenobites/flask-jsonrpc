@@ -34,11 +34,11 @@ jobs:
     - name: Run tox
       if: ${{ matrix.platform == 'ubuntu-latest' && matrix.python-version == '3.12' }}
       run: |
-        tox -e py,py-async,style,typing,security,docs
+        tox -e py,py-async,style,typing-mypy,security-safety,security-bandit,docs -p all
     - name: Run tox (Pytype)
       if: ${{ matrix.platform == 'ubuntu-latest' && matrix.python-version == '3.11' }}
       run: |
-        tox -e pytype
+        tox -e typing-pytype
 
   test:
     name: Test
