@@ -88,6 +88,9 @@ class JSONRPCBrowse:
         packages = sorted(service_methods.keys())
         packages_tree: t.Dict[str, t.List[t.Dict[str, t.Any]]] = {}
         for package in packages:
+            # The rpc. prefix is a reserved method prefix for JSON-RPC 2.0 specification system extensions.
+            if package.startswith('rpc.'):
+                continue
             package_name = package.split('.')[0]
             packages_tree.setdefault(package_name, []).append({'name': package, **service_methods[package]})
         return jsonify(packages_tree)

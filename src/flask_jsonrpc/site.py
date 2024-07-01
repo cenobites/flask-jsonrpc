@@ -27,6 +27,7 @@
 # pylint: disable=R0904
 from uuid import UUID, uuid4
 import typing as t
+from functools import cache
 from urllib.parse import urlsplit
 
 from flask import json, request, current_app
@@ -268,14 +269,11 @@ class JSONRPCSite:
                 name=name, type=self.python_type_name(tp), required=False, nullable=False
             )
             for name, tp in getattr(view_func, 'jsonrpc_method_params', {}).items()
-            if name not in ['self', 'cls']  # XXX: It assumes the standard param names
         ]
 
     def service_methods_desc(self: Self) -> t.Dict[str, fjt.ServiceMethodDescribe]:
         methods: t.Dict[str, fjt.ServiceMethodDescribe] = {}
         for key, view_func in self.view_funcs.items():
-            if key == JSONRPC_DESCRIBE_METHOD_NAME:
-                continue
             name = getattr(view_func, 'jsonrpc_method_name', key)
             methods[name] = fjt.ServiceMethodDescribe(  # pytype: disable=missing-parameter
                 type=JSONRPC_DESCRIBE_SERVICE_METHOD_TYPE,
@@ -302,5 +300,6 @@ class JSONRPCSite:
             methods=self.service_methods_desc(),
         )
 
+    @cache  # noqa: B019
     def describe(self: Self) -> fjt.ServiceDescribe:
         return self.service_desc()

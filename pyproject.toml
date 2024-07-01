@@ -40,6 +40,7 @@ dependencies = [
 [project.optional-dependencies]
 async = ["Flask[async]>=3.0.0,<4.0"]
 dotenv = ["Flask[dotenv]>=3.0.0,<4.0"]
+openrpc = ["dacite==1.8.1"]
 
 [project.urls]
 Donate = "https://github.com/sponsors/nycholas"

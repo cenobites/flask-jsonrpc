@@ -60,6 +60,7 @@ class JSONRPC(JSONRPCDecoratorMixin):
         self.base_url: t.Optional[str] = None
         self.jsonrpc_site = jsonrpc_site()
         self.jsonrpc_site_api = jsonrpc_site_api
+        self.jsonrpc_apps: t.Set[t.Union[JSONRPC, JSONRPCBlueprint]] = set()
         self.jsonrpc_browse: t.Optional[JSONRPCBrowse] = None
         self.enable_web_browsable_api = enable_web_browsable_api
         if app:
@@ -128,6 +129,8 @@ class JSONRPC(JSONRPCDecoratorMixin):
                 urn('blueprint', app.name, jsonrpc_app.name, path), jsonrpc_site=jsonrpc_app.get_jsonrpc_site()
             ),
         )
+
+        self.jsonrpc_apps.add(jsonrpc_app)
 
         if app.config['DEBUG'] or enable_web_browsable_api:
             self.register_browse(jsonrpc_app)
