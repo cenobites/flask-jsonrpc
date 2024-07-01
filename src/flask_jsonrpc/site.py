@@ -27,6 +27,7 @@
 # pylint: disable=R0904
 from uuid import UUID, uuid4
 import typing as t
+from collections import OrderedDict
 from urllib.parse import urlsplit
 
 from flask import json, request, current_app
@@ -52,6 +53,12 @@ try:
 except ImportError:  # pragma: no cover
     from typing_extensions import Self
 
+# Python 3.9+
+try:
+    from functools import cache
+except ImportError:  # pragma: no cover
+    from functools import lru_cache as cache
+
 JSONRPC_VERSION_DEFAULT: str = '2.0'
 JSONRPC_DESCRIBE_METHOD_NAME: str = 'rpc.describe'
 JSONRPC_DESCRIBE_SERVICE_METHOD_TYPE: str = 'method'
@@ -63,7 +70,7 @@ class JSONRPCSite:
     def __init__(self: Self, path: t.Optional[str] = None, base_url: t.Optional[str] = None) -> None:
         self.path = path
         self.base_url = base_url
-        self.view_funcs: t.Dict[str, t.Callable[..., t.Any]] = {}
+        self.view_funcs: t.OrderedDict[str, t.Callable[..., t.Any]] = OrderedDict()
         self.uuid: UUID = uuid4()
         self.name: str = 'Flask-JSONRPC'
         self.version: str = JSONRPC_VERSION_DEFAULT
@@ -268,14 +275,11 @@ class JSONRPCSite:
                 name=name, type=self.python_type_name(tp), required=False, nullable=False
             )
             for name, tp in getattr(view_func, 'jsonrpc_method_params', {}).items()
-            if name not in ['self', 'cls']  # XXX: It assumes the standard param names
         ]
 
-    def service_methods_desc(self: Self) -> t.Dict[str, fjt.ServiceMethodDescribe]:
-        methods: t.Dict[str, fjt.ServiceMethodDescribe] = {}
+    def service_methods_desc(self: Self) -> t.OrderedDict[str, fjt.ServiceMethodDescribe]:
+        methods: t.OrderedDict[str, fjt.ServiceMethodDescribe] = OrderedDict()
         for key, view_func in self.view_funcs.items():
-            if key == JSONRPC_DESCRIBE_METHOD_NAME:
-                continue
             name = getattr(view_func, 'jsonrpc_method_name', key)
             methods[name] = fjt.ServiceMethodDescribe(  # pytype: disable=missing-parameter
                 type=JSONRPC_DESCRIBE_SERVICE_METHOD_TYPE,
@@ -302,5 +306,6 @@ class JSONRPCSite:
             methods=self.service_methods_desc(),
         )
 
+    @cache  # noqa: B019
     def describe(self: Self) -> fjt.ServiceDescribe:
         return self.service_desc()

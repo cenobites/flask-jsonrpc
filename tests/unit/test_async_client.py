@@ -670,6 +670,13 @@ def test_app_system_describe(async_client: 'FlaskClient') -> None:
             'returns': {'type': 'Number'},
             'description': None,
         },
+        'rpc.describe': {
+            'description': None,
+            'options': {},
+            'params': [],
+            'returns': {'type': 'Null'},
+            'type': 'method',
+        },
     }
 
     assert rv.status_code == 200

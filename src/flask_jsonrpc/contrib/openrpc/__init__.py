@@ -1,4 +1,4 @@
-# Copyright (c) 2023-2024, Cenobit Technologies, Inc. http://cenobit.es/
+# Copyright (c) 2024-2024, Cenobit Technologies, Inc. http://cenobit.es/
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -26,46 +26,45 @@
 # POSSIBILITY OF SUCH DAMAGE.
 import typing as t
 
-# Python 3.8+
+# Python 3.11+
 try:
-    from typing_extensions import TypedDict
+    from typing import Self
 except ImportError:  # pragma: no cover
-    from typing import TypedDict  # pylint: disable=C0412
+    from typing_extensions import Self
+
+from .methods import OPENRPC_DISCOVER_METHOD_NAME, openrpc_discover_method
+from .wrappers import OpenRPCExtendSchemaDecoratorMixin
+
+if t.TYPE_CHECKING:
+    from flask import Flask
+
+    from flask_jsonrpc.app import JSONRPC
+
+    from .typing import OpenRPCSchema
 
 
-class ServiceMethodParamsDescribe(TypedDict, total=False):
-    type: str
-    name: str
-    required: bool
-    nullable: bool
-    minimum: t.Optional[int]
-    maximum: t.Optional[int]
-    pattern: t.Optional[str]
-    length: t.Optional[int]
-    description: t.Optional[str]
+class OpenRPC(OpenRPCExtendSchemaDecoratorMixin):
+    def __init__(
+        self: Self,
+        app: t.Optional['Flask'] = None,
+        jsonrpc_app: t.Optional['JSONRPC'] = None,
+        *,
+        openrpc_schema: t.Optional['OpenRPCSchema'] = None,
+    ) -> None:
+        self.app = app
+        self.jsonrpc_app = jsonrpc_app
+        self.openrpc_schema = openrpc_schema
+        if app and jsonrpc_app:
+            self.init_app(app, jsonrpc_app)
 
-
-class ServiceMethodReturnsDescribe(TypedDict):
-    type: str
-
-
-class ServiceMethodDescribe(TypedDict):
-    type: str
-    description: t.Optional[str]
-    options: t.Dict[str, t.Any]
-    params: t.List[ServiceMethodParamsDescribe]
-    returns: ServiceMethodReturnsDescribe
-
-
-class ServiceServersDescribe(TypedDict, total=False):
-    url: str
-    description: t.Optional[str]
-
-
-class ServiceDescribe(TypedDict):
-    id: str
-    version: str
-    name: str
-    description: t.Optional[str]
-    servers: t.List[ServiceServersDescribe]
-    methods: t.OrderedDict[str, ServiceMethodDescribe]
+    def init_app(self: Self, app: 'Flask', jsonrpc_app: 'JSONRPC') -> None:
+        jsonrpc_site = jsonrpc_app.get_jsonrpc_site()
+        jsonrpc_sites = [japp.get_jsonrpc_site() for japp in jsonrpc_app.jsonrpc_apps]
+        jsonrpc_app.get_jsonrpc_site().register(
+            OPENRPC_DISCOVER_METHOD_NAME,
+            openrpc_discover_method([jsonrpc_site] + jsonrpc_sites, openrpc_schema=self.openrpc_schema),
+        )
+        for site in jsonrpc_sites:
+            site.register(
+                OPENRPC_DISCOVER_METHOD_NAME, openrpc_discover_method([site], openrpc_schema=self.openrpc_schema)
+            )

@@ -770,6 +770,13 @@ class APITest(APITestCase):
                     'returns': {'type': 'Number'},
                     'description': None,
                 },
+                'rpc.describe': {
+                    'description': None,
+                    'options': {},
+                    'params': [],
+                    'returns': {'type': 'Null'},
+                    'type': 'method',
+                },
             },
             json_data['result']['methods'],
         )

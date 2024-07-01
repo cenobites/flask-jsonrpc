@@ -89,6 +89,16 @@ class JSONRPCDecoratorMixin:
         )
         return parameters
 
+    def _get_annotations(self: Self, fn: t.Callable[..., t.Any], fn_options: t.Dict[str, t.Any]) -> t.Dict[str, t.Any]:
+        fn_annotations = t.get_type_hints(fn)
+        if not fn_options['validate']:
+            fn_annotations = self._get_type_hints_by_signature(fn, fn_annotations)
+        if fn_annotations.get('self', None) == Self or ('self' in fn_annotations and not fn_options['validate']):
+            del fn_annotations['self']
+        if fn_annotations.get('cls', None) == t.Type[Self] or ('cls' in fn_annotations and not fn_options['validate']):
+            del fn_annotations['cls']
+        return fn_annotations
+
     def get_jsonrpc_site(self: Self) -> 'JSONRPCSite':
         raise NotImplementedError('.get_jsonrpc_site must be overridden')
 
@@ -100,9 +110,7 @@ class JSONRPCDecoratorMixin:
     ) -> t.Callable[..., t.Any]:
         fn = self._get_function(view_func)
         fn_options = self._method_options(options)
-        fn_annotations = t.get_type_hints(fn)
-        if not fn_options['validate']:
-            fn_annotations = self._get_type_hints_by_signature(fn, fn_annotations)
+        fn_annotations = self._get_annotations(fn, fn_options)
         method_name = name if name else getattr(fn, '__name__', '<noname>')
         view_func_wrapped = typechecked(view_func) if fn_options['validate'] else view_func
         setattr(view_func_wrapped, 'jsonrpc_method_name', method_name)  # noqa: B010
