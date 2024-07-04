@@ -177,7 +177,7 @@ def test_openrpc_create() -> None:
                 'version': '0.0.1',
             },
             'methods': [
-                {'name': 'rpc.describe', 'params': [], 'result': {'name': 'default', 'schema': {'type': 'null'}}},
+                {'name': 'rpc.describe', 'params': [], 'result': {'name': 'default', 'schema': {'type': 'object'}}},
                 {
                     'description': 'Returns an OpenRPC schema as a description of this service',
                     'name': 'rpc.discover',
@@ -336,7 +336,7 @@ def test_openrpc_create_by_autogenerate() -> None:
         assert rv.json['result'] == {
             'info': {'title': 'Flask-JSONRPC', 'version': '0.0.1'},
             'methods': [
-                {'name': 'rpc.describe', 'params': [], 'result': {'name': 'default', 'schema': {'type': 'null'}}},
+                {'name': 'rpc.describe', 'params': [], 'result': {'name': 'default', 'schema': {'type': 'object'}}},
                 {
                     'description': 'Returns an OpenRPC schema as a description of this service',
                     'name': 'rpc.discover',
@@ -423,7 +423,7 @@ def test_openrpc_create_with_blueprint() -> None:
         assert rv.json['result'] == {
             'info': {'title': 'Flask-JSONRPC', 'version': '0.0.1'},
             'methods': [
-                {'name': 'rpc.describe', 'params': [], 'result': {'name': 'default', 'schema': {'type': 'null'}}},
+                {'name': 'rpc.describe', 'params': [], 'result': {'name': 'default', 'schema': {'type': 'object'}}},
                 {'name': 'Article.index', 'params': [], 'result': {'name': 'default', 'schema': {'type': 'string'}}},
                 {
                     'description': 'Returns an OpenRPC schema as a description of this service',
@@ -449,7 +449,7 @@ def test_openrpc_create_with_blueprint() -> None:
         assert rv.json['result'] == {
             'info': {'title': 'Flask-JSONRPC', 'version': '0.0.1'},
             'methods': [
-                {'name': 'rpc.describe', 'params': [], 'result': {'name': 'default', 'schema': {'type': 'null'}}},
+                {'name': 'rpc.describe', 'params': [], 'result': {'name': 'default', 'schema': {'type': 'object'}}},
                 {'name': 'User.index', 'params': [], 'result': {'name': 'default', 'schema': {'type': 'string'}}},
                 {
                     'description': 'Returns an OpenRPC schema as a description of this service',
@@ -478,7 +478,7 @@ def test_openrpc_create_with_blueprint() -> None:
         assert len(rv.json['result']['methods']) == 5
         assert sorted(rv.json['result']['methods'], key=lambda d: d['name']) == sorted(
             [
-                {'name': 'rpc.describe', 'params': [], 'result': {'name': 'default', 'schema': {'type': 'null'}}},
+                {'name': 'rpc.describe', 'params': [], 'result': {'name': 'default', 'schema': {'type': 'object'}}},
                 {
                     'description': 'Returns an OpenRPC schema as a description of this service',
                     'name': 'rpc.discover',

@@ -28,16 +28,15 @@
 from uuid import UUID, uuid4
 import typing as t
 from collections import OrderedDict
-from urllib.parse import urlsplit
 
 from flask import json, request, current_app
 
 from typeguard import qualified_name
 from werkzeug.datastructures import Headers
 
-from . import typing as fjt  # pylint: disable=W0404
-from .helpers import get, from_python_type
+from .helpers import get
 from .settings import settings
+from .descriptor import JSONRPCServiceDescriptor
 from .exceptions import (
     ParseError,
     ServerError,
@@ -53,15 +52,7 @@ try:
 except ImportError:  # pragma: no cover
     from typing_extensions import Self
 
-# Python 3.9+
-try:
-    from functools import cache
-except ImportError:  # pragma: no cover
-    from functools import lru_cache as cache
-
 JSONRPC_VERSION_DEFAULT: str = '2.0'
-JSONRPC_DESCRIBE_METHOD_NAME: str = 'rpc.describe'
-JSONRPC_DESCRIBE_SERVICE_METHOD_TYPE: str = 'method'
 JSONRPC_DEFAULT_HTTP_HEADERS: t.Dict[str, str] = {}
 JSONRPC_DEFAULT_HTTP_STATUS_CODE: int = 200
 
@@ -74,7 +65,7 @@ class JSONRPCSite:
         self.uuid: UUID = uuid4()
         self.name: str = 'Flask-JSONRPC'
         self.version: str = JSONRPC_VERSION_DEFAULT
-        self.register(JSONRPC_DESCRIBE_METHOD_NAME, self.describe)
+        self.describe = JSONRPCServiceDescriptor(self).describe
 
     @property
     def is_json(self: Self) -> bool:
@@ -261,49 +252,3 @@ class JSONRPCSite:
 
     def is_batch_request(self: Self, req_json: t.Any) -> bool:  # noqa: ANN401
         return isinstance(req_json, list)
-
-    def python_type_name(self: Self, pytype: t.Any) -> str:  # noqa: ANN401
-        return str(from_python_type(pytype))
-
-    def service_method_params_desc(
-        self: Self, view_func: t.Callable[..., t.Any]
-    ) -> t.List[fjt.ServiceMethodParamsDescribe]:
-        return [
-            fjt.ServiceMethodParamsDescribe(  # pytype: disable=missing-parameter
-                name=name, type=self.python_type_name(tp), required=False, nullable=False
-            )
-            for name, tp in getattr(view_func, 'jsonrpc_method_params', {}).items()
-        ]
-
-    def service_methods_desc(self: Self) -> t.OrderedDict[str, fjt.ServiceMethodDescribe]:
-        methods: t.OrderedDict[str, fjt.ServiceMethodDescribe] = OrderedDict()
-        for key, view_func in self.view_funcs.items():
-            name = getattr(view_func, 'jsonrpc_method_name', key)
-            methods[name] = fjt.ServiceMethodDescribe(  # pytype: disable=missing-parameter
-                type=JSONRPC_DESCRIBE_SERVICE_METHOD_TYPE,
-                description=getattr(view_func, '__doc__', None),
-                options=getattr(view_func, 'jsonrpc_options', {}),
-                params=self.service_method_params_desc(view_func),
-                returns=fjt.ServiceMethodReturnsDescribe(
-                    type=self.python_type_name(getattr(view_func, 'jsonrpc_method_return', type(None)))
-                ),
-            )
-        return methods
-
-    def service_server_url(self: Self) -> str:
-        url = urlsplit(self.base_url or self.path)
-        return f"{url.scheme!r}://{url.netloc!r}/{(self.path or '').lstrip('/')}" if self.base_url else str(url.path)
-
-    def service_desc(self: Self) -> fjt.ServiceDescribe:
-        return fjt.ServiceDescribe(
-            id=f'urn:uuid:{self.uuid}',
-            version=self.version,
-            name=self.name,
-            description=self.__doc__,
-            servers=[fjt.ServiceServersDescribe(url=self.service_server_url())],  # pytype: disable=missing-parameter
-            methods=self.service_methods_desc(),
-        )
-
-    @cache  # noqa: B019
-    def describe(self: Self) -> fjt.ServiceDescribe:
-        return self.service_desc()

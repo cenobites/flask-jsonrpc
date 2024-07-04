@@ -61,13 +61,13 @@ def _openrpc_discover_method(
         jsonrpc_site = jsonrpc_sites[0]
         service_describe_methods = OrderedDict(
             (name, (method_describe, jsonrpc_site.view_funcs[name]))
-            for name, method_describe in jsonrpc_site.service_methods_desc().items()
+            for name, method_describe in jsonrpc_site.describe()['methods'].items()
         )
         for jsonrpc_site in jsonrpc_sites[1:]:
             service_describe_methods.update(
                 OrderedDict(
                     (name, (method_describe, jsonrpc_site.view_funcs[name]))
-                    for name, method_describe in jsonrpc_site.service_methods_desc().items()
+                    for name, method_describe in jsonrpc_site.describe()['methods'].items()
                     # To ensure that has only one rpc.* method, the others will be disregarded.
                     if not name.startswith('rpc.')
                 )
