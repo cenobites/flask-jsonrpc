@@ -35,6 +35,7 @@ dependencies = [
     "typeguard==2.13.3",
     "typing_extensions>=4.3.0",
     "typing_inspect==0.9.0",
+    "dacite==1.8.1",
 ]
 
 [project.optional-dependencies]

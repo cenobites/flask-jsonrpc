@@ -1,4 +1,4 @@
-# Copyright (c) 2023-2024, Cenobit Technologies, Inc. http://cenobit.es/
+# Copyright (c) 2020-2024, Cenobit Technologies, Inc. http://cenobit.es/
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -24,48 +24,3 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-import typing as t
-
-# Python 3.8+
-try:
-    from typing_extensions import TypedDict
-except ImportError:  # pragma: no cover
-    from typing import TypedDict  # pylint: disable=C0412
-
-
-class ServiceMethodParamsDescribe(TypedDict, total=False):
-    type: str
-    name: str
-    required: bool
-    nullable: bool
-    minimum: t.Optional[int]
-    maximum: t.Optional[int]
-    pattern: t.Optional[str]
-    length: t.Optional[int]
-    description: t.Optional[str]
-
-
-class ServiceMethodReturnsDescribe(TypedDict):
-    type: str
-
-
-class ServiceMethodDescribe(TypedDict):
-    type: str
-    description: t.Optional[str]
-    options: t.Dict[str, t.Any]
-    params: t.List[ServiceMethodParamsDescribe]
-    returns: ServiceMethodReturnsDescribe
-
-
-class ServiceServersDescribe(TypedDict, total=False):
-    url: str
-    description: t.Optional[str]
-
-
-class ServiceDescribe(TypedDict):
-    id: str
-    version: str
-    name: str
-    description: t.Optional[str]
-    servers: t.List[ServiceServersDescribe]
-    methods: t.OrderedDict[str, ServiceMethodDescribe]
