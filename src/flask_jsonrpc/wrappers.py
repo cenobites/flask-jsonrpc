@@ -66,9 +66,7 @@ class JSONRPCDecoratorMixin:
             return False
         fn_annotations = t.get_type_hints(fn)
         fn_annotations.pop('return', None)
-        if self._method_has_parameters(fn) and not fn_annotations:
-            return False
-        return True
+        return not (self._method_has_parameters(fn) and not fn_annotations)
 
     def _get_function(self: Self, fn: t.Callable[..., t.Any]) -> t.Callable[..., t.Any]:
         if isfunction(fn):
