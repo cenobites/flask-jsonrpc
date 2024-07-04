@@ -44,21 +44,9 @@ OPENRPC_DISCOVER_METHOD_NAME: str = 'rpc.discover'
 OPENRPC_DISCOVER_SERVICE_METHOD_TYPE: str = 'method'
 
 
-def openrpc_discover_method(
-    jsonrpc_sites: t.List['JSONRPCSite'], *, openrpc_schema: t.Optional[st.OpenRPCSchema] = None
+def _openrpc_discover_method(
+    jsonrpc_sites: t.List['JSONRPCSite'], *, openrpc_schema: st.OpenRPCSchema
 ) -> t.Callable[..., t.Dict[str, t.Any]]:
-    if openrpc_schema is None:
-        jsonrpc_site = jsonrpc_sites[0]
-        jsonrpc_service_describe = jsonrpc_site.describe()
-        openrpc_schema = st.OpenRPCSchema(
-            info=st.Info(
-                title=jsonrpc_service_describe['name'],
-                version='0.0.1',
-                description=jsonrpc_service_describe['description'],
-            ),
-            servers=st.Server(name='default', url=jsonrpc_service_describe['servers'][0]['url']),
-        )
-
     @cache
     @extend_schema(
         name=OPENRPC_DISCOVER_METHOD_NAME,
@@ -113,3 +101,20 @@ def openrpc_discover_method(
         return openrpc_schema_to_dict(openrpc_schema)
 
     return openrpc_discover
+
+
+def openrpc_discover_method(
+    jsonrpc_sites: t.List['JSONRPCSite'], *, openrpc_schema: t.Optional[st.OpenRPCSchema] = None
+) -> t.Callable[..., t.Dict[str, t.Any]]:
+    if openrpc_schema is None:
+        jsonrpc_site = jsonrpc_sites[0]
+        jsonrpc_service_describe = jsonrpc_site.describe()
+        openrpc_schema = st.OpenRPCSchema(
+            info=st.Info(
+                title=jsonrpc_service_describe['name'],
+                version='0.0.1',
+                description=jsonrpc_service_describe['description'],
+            ),
+            servers=st.Server(name='default', url=jsonrpc_service_describe['servers'][0]['url']),
+        )
+    return _openrpc_discover_method(jsonrpc_sites, openrpc_schema=openrpc_schema)
