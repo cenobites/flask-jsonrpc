@@ -215,9 +215,7 @@ class JSONRPCSite:
         return self.make_response(req_json, resp_view)
 
     def validate(self: Self, req_json: t.Dict[str, t.Any]) -> bool:
-        if not isinstance(req_json, dict) or 'method' not in req_json:
-            return False
-        return True
+        return isinstance(req_json, dict) and 'method' in req_json
 
     def unpack_tuple_returns(
         self: Self,
