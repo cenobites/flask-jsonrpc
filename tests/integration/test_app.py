@@ -774,7 +774,7 @@ class APITest(APITestCase):
                     'description': None,
                     'options': {},
                     'params': [],
-                    'returns': {'type': 'Null'},
+                    'returns': {'type': 'Object'},
                     'type': 'method',
                 },
             },

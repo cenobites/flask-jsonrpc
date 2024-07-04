@@ -92,9 +92,9 @@ class JSONRPCDecoratorMixin:
         if not fn_options['validate']:
             fn_annotations = self._get_type_hints_by_signature(fn, fn_annotations)
         if fn_annotations.get('self', None) == Self or ('self' in fn_annotations and not fn_options['validate']):
-            del fn_annotations['self']
+            fn_annotations.pop('self', None)
         if fn_annotations.get('cls', None) == t.Type[Self] or ('cls' in fn_annotations and not fn_options['validate']):
-            del fn_annotations['cls']
+            fn_annotations.pop('cls', None)
         return fn_annotations
 
     def get_jsonrpc_site(self: Self) -> 'JSONRPCSite':

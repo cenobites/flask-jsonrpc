@@ -674,7 +674,7 @@ def test_app_system_describe(async_client: 'FlaskClient') -> None:
             'description': None,
             'options': {},
             'params': [],
-            'returns': {'type': 'Null'},
+            'returns': {'type': 'Object'},
             'type': 'method',
         },
     }
