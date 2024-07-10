@@ -158,7 +158,7 @@ def get_pets(tags: t.Optional[t.List[str]] = None, limit: t.Optional[int] = None
 )
 @jsonrpc.method('Petstore.create_pet')
 def create_pet(name: str, tag: str) -> Pet:
-    pet = Pet(id=random.randint(1, 100), name=name, tag=tag)
+    pet = Pet(id=random.randint(4, 100), name=name, tag=tag)
     PETS.append(pet)
     return pet
 
