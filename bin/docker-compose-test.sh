@@ -9,36 +9,36 @@ docker compose -f ${DOCKER_COMPOSE_FILE_PATH} -p ci up -d
 
 (
     set -e
-    docker wait ci_python3.8_1
-    docker logs ci_python3.8_1
+    docker wait ci-python3.8-1
+    docker logs ci-python3.8-1
 )
 DOCKER_WAIT_FOR_PY38=$?
 
 (
     set -e
-    docker wait ci_python3.9_1
-    docker logs ci_python3.9_1
+    docker wait ci-python3.9-1
+    docker logs ci-python3.9-1
 )
 DOCKER_WAIT_FOR_PY39=$?
 
 (
     set -e
-    docker wait ci_python3.10_1
-    docker logs ci_python3.10_1
+    docker wait ci-python3.10-1
+    docker logs ci-python3.10-1
 )
 DOCKER_WAIT_FOR_PY310=$?
 
 (
     set -e
-    docker wait ci_python3.11_1
-    docker logs ci_python3.11_1
+    docker wait ci-python3.11-1
+    docker logs ci-python3.11-1
 )
 DOCKER_WAIT_FOR_PY311=$?
 
 (
     set -e
-    docker wait ci_python3.12_1
-    docker logs ci_python3.12_1
+    docker wait ci-python3.12-1
+    docker logs ci-python3.12-1
 )
 DOCKER_WAIT_FOR_PY312=$?
 
