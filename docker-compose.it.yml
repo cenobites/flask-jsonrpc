@@ -33,7 +33,7 @@ services:
     networks:
       - default
 
-  async_sut:
+  async-sut:
     build:
       context: .
       dockerfile: Dockerfile.it
@@ -46,30 +46,30 @@ services:
       - BROWSABLE_API_URL=https://async-app.flask-jsonrpc.cenobit.es/api/browse
     user: ${UID:-0}:${GID:-0}
     volumes:
-      - .pytest_cache/test-results/async_app:/app/test-results
-      - .pytest_cache/screnshots/async_app:/app/.pytest_cache/screnshots
+      - .pytest_cache/test-results/async-app:/app/test-results
+      - .pytest_cache/screnshots/async-app:/app/.pytest_cache/screnshots
     depends_on:
       - nginx
     networks:
       - default
 
-  async_app:
+  async-app:
     build:
       context: .
       dockerfile: Dockerfile.local
       args:
         - FLASK_ASYNC=1
     environment:
-      - FLASK_SERVER_NAME=async_app:5000
+      - FLASK_SERVER_NAME=async-app:5000
     user: ${UID:-0}:${GID:-0}
     command: >
-      python async_app.py
+      python async-app.py
     ports:
       - '5001:5000'
     networks:
       - default
 
-  mypyc_sut:
+  mypyc-sut:
     build:
       context: .
       dockerfile: Dockerfile.it
@@ -89,14 +89,14 @@ services:
     networks:
       - default
 
-  mypyc_app:
+  mypyc-app:
     build:
       context: .
       dockerfile: Dockerfile.local
       args:
         - MYPYC_ENABLE=1
     environment:
-      - FLASK_SERVER_NAME=mypyc_app:5000
+      - FLASK_SERVER_NAME=mypyc-app:5000
     user: ${UID:-0}:${GID:-0}
     command: >
       python app.py
@@ -116,8 +116,8 @@ services:
       - .docker/nginx/nginx.conf:/etc/nginx/nginx.conf
     depends_on:
       - app
-      - async_app
-      - mypyc_app
+      - async-app
+      - mypyc-app
     networks:
       default:
         aliases:
