@@ -7,7 +7,7 @@
         <h4 class="modal-title"><span class="glyphicon glyphicon-star"></span> {{module.name}}(<span ng-repeat="param in module.params">{{param.name}}: {{param.type}}<span ng-if="!$last">, </span></span>) -> {{module.returns.type}}</h4>
       </div>
       <div class="modal-body">
-        <h5><b>Description:</b> <span ng-if="!module.description">None</span><span style="white-space: pre-wrap;">{{module.description}}</span></h5>
+        <h5><b>Description:</b> <span ng-if="!module.description">None</span><span class="method-description">{{module.description}}</span></h5>
         <ng-form name="nameDialog" novalidate role="form">
           <div class="form-group input-group-lg">
             <span ng-repeat="param in module.params">
@@ -33,7 +33,7 @@
 {% raw %}
 <div class="content-main">
     <div class="page-header"><h1>{{module.name}}(<span ng-repeat="param in module.params">{{param.name}}: {{param.type}}<span ng-if="!$last">, </span></span>) -> {{module.returns.type}}</h1></div>
-    <blockquote>{{ module.description }}</blockquote>
+    <blockquote class="method-description">{{ module.description }}</blockquote>
     <span >
       <p><b>Request:</b></p>
       <div class="request-info" style="clear: both">
