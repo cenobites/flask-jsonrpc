@@ -6,5 +6,5 @@ cibuildwheel==2.20.0
 
 # Mypyc
 # ------------------------------------------------------------------------------
-mypy[mypyc]==1.11.1  # https://github.com/python/mypy
+mypy[mypyc]==1.11.2  # https://github.com/python/mypy
 mypy-extensions==1.0.0  # https://github.com/python/mypy_extensions
