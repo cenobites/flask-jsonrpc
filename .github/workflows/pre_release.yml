@@ -204,7 +204,7 @@ jobs:
         twine check --strict dist-${{ matrix.platform }}-${{ matrix.python-version }}/*
     - name: Publish distribution to TestPyPI
       continue-on-error: true
-      uses: pypa/gh-action-pypi-publish@v1.9.0
+      uses: pypa/gh-action-pypi-publish@v1.10.0
       with:
         user: __token__
         password: ${{ secrets.TEST_PYPI_API_TOKEN }}
