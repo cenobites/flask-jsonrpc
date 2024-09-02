@@ -1,7 +1,7 @@
 # Tools
 # ------------------------------------------------------------------------------
 wheel==0.44.0  # https://github.com/pypa/wheel
-setuptools==73.0.1  # https://github.com/pypa/setuptools
+setuptools==74.0.0  # https://github.com/pypa/setuptools
 build==1.2.1  # https://github.com/pypa/build
 packaging==24.1  # https://github.com/pypa/packaging
 pyproject-hooks==1.1.0  # https://github.com/pypa/pyproject-hooks
