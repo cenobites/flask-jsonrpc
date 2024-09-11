@@ -198,7 +198,7 @@ jobs:
         merge-multiple: true
     - name: Build source and wheel distributions to version ${{ github.ref_name }}
       run: |
-        python -m pip install -r requirements/build.txt
+        python -m pip install -r requirements/build.txt twine
         tar -xvf dist-${{ matrix.platform }}-${{ matrix.python-version }}.tar
         mv pre-release-cibw-wheels/* dist-${{ matrix.platform }}-${{ matrix.python-version }}/
         twine check --strict dist-${{ matrix.platform }}-${{ matrix.python-version }}/*

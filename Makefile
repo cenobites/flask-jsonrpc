@@ -11,9 +11,10 @@ clean:
 	@find . -name "*.pyc" | xargs rm -rf
 	@find . -name "__pycache__" | xargs rm -rf
 	@find . -name ".coverage" | xargs rm -rf
-	@rm -rf .coverage coverage.* .eggs/ .mypy_cache/ .pytype/ .ruff_cache/ .pytest_cache/ .tox/ src/Flask_JSONRPC.egg-info/ htmlcov/ junit/ htmldoc/ build/ dist/
+	@rm -rf .coverage coverage.* .eggs/ .mypy_cache/ .pytype/ .ruff_cache/ .pytest_cache/ .tox/ src/Flask_JSONRPC.egg-info/ htmlcov/ junit/ htmldoc/ build/ dist/ wheelhouse/
 
 test: clean
+	@python -m pip install --upgrade tox
 	@python -m tox
 
 test-release: clean test
@@ -21,7 +22,7 @@ test-release: clean test
 	@docker-compose -f docker-compose.test.yml up
 
 release: clean test
-	@python -m pip install --upgrade build
+	@python -m pip install --upgrade -r requirements/cbuild.txt
 	@python -m build
 	@MYPYC_ENABLE=1 python setup.py bdist_wheel
 
@@ -35,7 +36,6 @@ publish: clean release
 
 env:
 ifeq ($(VIRTUALENV_EXISTS), 0)
-	@python -m venv .venv
-	@.venv/bin/pip install --upgrade pip setuptools
+	@python -m venv --upgrade-deps .venv
 	@.venv/bin/pip install -r requirements/local.txt
 endif
