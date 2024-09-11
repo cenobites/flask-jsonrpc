@@ -47,7 +47,6 @@ Website = "https://flask-jsonrpc.readthedocs.io/"
 [build-system]
 requires = ["flit_core>=3.2,<4"]
 build-backend = "flit_core.buildapi"
-#backend-path = ["src/buildtools"]
 
 [tool.flit.module]
 name = "flask_jsonrpc"
