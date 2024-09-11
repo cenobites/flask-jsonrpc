@@ -102,7 +102,7 @@ jobs:
         mv release-cibw-wheels/* dist-${{ matrix.platform }}-${{ matrix.python-version }}/
         twine check --strict dist-${{ matrix.platform }}-${{ matrix.python-version }}/*
     - name: Publish distribution to PyPI
-      uses: pypa/gh-action-pypi-publish@v1.9.0
+      uses: pypa/gh-action-pypi-publish@v1.10.0
       with:
         user: __token__
         password: ${{ secrets.PYPI_API_TOKEN }}
