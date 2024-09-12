@@ -1,6 +1,5 @@
 include tox.ini
-include COPYING
-include AUTHORS
+include LICENSE.txt
 include README.md
 include requirements/*.txt
 include src/flask_jsonrpc/py.typed

@@ -1,14 +1,9 @@
-[build-system]
-requires = ["setuptools>=61.0", "wheel>=0.42"]
-build-backend = "backend"
-backend-path = ["src/buildtools"]
-
 [project]
 name = "Flask-JSONRPC"
 version = "4.0.0a0"
 description = "Adds JSONRPC support to Flask."
 readme = {file = "README.md", content-type = "text/markdown"}
-license = {file = "LICENSE"}
+license = {file = "LICENSE.txt"}
 authors = [{name = "Nycholas Oliveira", email = "nycholas@cenobit.es"}]
 maintainers = [{name = "Cenobit Technologies Inc.", email = "hi@cenobit.es"}]
 keywords = ["flask", "flask-extensions", "jsonrpc"]
@@ -48,6 +43,25 @@ Documentation = "https://flask-jsonrpc.readthedocs.io/"
 "Source Code" = "https://github.com/cenobites/flask-jsonrpc"
 "Issue Tracker" = "https://github.com/cenobites/flask-jsonrpc/issues/"
 Website = "https://flask-jsonrpc.readthedocs.io/"
+
+[build-system]
+requires = ["flit_core>=3.2,<4"]
+build-backend = "flit_core.buildapi"
+
+[tool.flit.module]
+name = "flask_jsonrpc"
+
+[tool.flit.sdist]
+include = [
+    "docs/",
+    "examples/",
+    "requirements/",
+    "tests/",
+    "tox.ini",
+]
+exclude = [
+    "docs/_build/",
+]
 
 [tool.setuptools]
 zip-safe = false
@@ -144,6 +158,10 @@ testpaths = [
     "src/flask_jsonrpc",
     "tests",
 ]
+filterwarnings = [
+    "error",
+    "ignore::pytest.PytestUnraisableExceptionWarning"
+]
 norecursedirs = [
     "tests/test_apps",
     "tests/integration",
@@ -201,6 +219,8 @@ python_version = "3.12"
 check_untyped_defs = true
 ignore_errors = false
 ignore_missing_imports = false
+show_error_codes = true
+pretty = true
 strict = true
 
 [[tool.mypy.overrides]]
@@ -211,7 +231,6 @@ module = [
     "dotenv.*",
 ]
 ignore_missing_imports = true
-
 
 [tool.pytype]
 inputs = ["src/flask_jsonrpc"]

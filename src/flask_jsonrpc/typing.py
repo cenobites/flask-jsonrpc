@@ -24,7 +24,14 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
+import sys
 import typing as t
+
+# Python 3.8
+if sys.version_info[:2] == (3, 8):  # pragma: no cover
+    from typing import OrderedDict
+else:  # pragma: no cover
+    from collections import OrderedDict
 
 # Python 3.8+
 try:
@@ -68,4 +75,4 @@ class ServiceDescribe(TypedDict):
     name: str
     description: t.Optional[str]
     servers: t.List[ServiceServersDescribe]
-    methods: t.OrderedDict[str, ServiceMethodDescribe]
+    methods: OrderedDict[str, ServiceMethodDescribe]

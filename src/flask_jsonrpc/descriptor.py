@@ -53,7 +53,7 @@ class JSONRPCServiceDescriptor:
         def describe() -> fjt.ServiceDescribe:
             return self.service_describe()
 
-        fn_annotations = t.get_type_hints(describe)
+        fn_annotations = {'return': fjt.ServiceDescribe}
         setattr(describe, 'jsonrpc_method_name', JSONRPC_DESCRIBE_METHOD_NAME)  # noqa: B010
         setattr(describe, 'jsonrpc_method_sig', fn_annotations)  # noqa: B010
         setattr(describe, 'jsonrpc_method_return', fn_annotations.pop('return', None))  # noqa: B010
