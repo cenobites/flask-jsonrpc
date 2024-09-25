@@ -71,9 +71,7 @@ class JSONRPCServiceDescriptor:
         self: Self, view_func: t.Callable[..., t.Any]
     ) -> t.List[fjt.ServiceMethodParamsDescribe]:
         return [
-            fjt.ServiceMethodParamsDescribe(  # pytype: disable=missing-parameter
-                name=name, type=self.python_type_name(tp), required=False, nullable=False
-            )
+            fjt.ServiceMethodParamsDescribe(name=name, type=self.python_type_name(tp))
             for name, tp in getattr(view_func, 'jsonrpc_method_params', {}).items()
         ]
 
@@ -81,15 +79,17 @@ class JSONRPCServiceDescriptor:
         methods: t.OrderedDict[str, fjt.ServiceMethodDescribe] = OrderedDict()
         for key, view_func in self.jsonrpc_site.view_funcs.items():
             name = getattr(view_func, 'jsonrpc_method_name', key)
-            methods[name] = fjt.ServiceMethodDescribe(  # pytype: disable=missing-parameter
+            method = fjt.ServiceMethodDescribe(
                 type=JSONRPC_DESCRIBE_SERVICE_METHOD_TYPE,
-                description=getattr(view_func, '__doc__', None),
                 options=getattr(view_func, 'jsonrpc_options', {}),
                 params=self.service_method_params_desc(view_func),
                 returns=fjt.ServiceMethodReturnsDescribe(
                     type=self.python_type_name(getattr(view_func, 'jsonrpc_method_return', type(None)))
                 ),
             )
+            # mypyc: pydantic optional value
+            method.description = getattr(view_func, '__doc__', None)
+            methods[name] = method
         return methods
 
     def service_server_url(self: Self) -> str:
@@ -101,11 +101,13 @@ class JSONRPCServiceDescriptor:
         )
 
     def service_describe(self: Self) -> fjt.ServiceDescribe:
-        return fjt.ServiceDescribe(
+        serv_desc = fjt.ServiceDescribe(
             id=f'urn:uuid:{self.jsonrpc_site.uuid}',
             version=self.jsonrpc_site.version,
             name=self.jsonrpc_site.name,
-            description=self.jsonrpc_site.__doc__,
             servers=[fjt.ServiceServersDescribe(url=self.service_server_url())],  # pytype: disable=missing-parameter
             methods=self.service_methods_desc(),
         )
+        # mypyc: pydantic optional value
+        serv_desc.description = self.jsonrpc_site.__doc__
+        return serv_desc

@@ -27,9 +27,10 @@
 import typing as t
 from collections import ChainMap
 
-from flask import Blueprint, jsonify, request, render_template
+from flask import Blueprint, request, render_template
 
 from flask_jsonrpc.helpers import urn
+from flask_jsonrpc.encoders import jsonify, serializable
 
 # Python 3.11+
 try:
@@ -56,7 +57,7 @@ class JSONRPCBrowse:
             self.init_app(app)
 
     def _service_methods_desc(self: Self) -> t.Dict[str, 'ServiceMethodDescribe']:
-        return dict(ChainMap(*[site.describe()['methods'] for site in self.jsonrpc_sites]))
+        return dict(ChainMap(*[site.describe().methods for site in self.jsonrpc_sites]))
 
     def init_app(self: Self, app: 'Flask') -> None:
         name = urn('browse', app.name, self.url_prefix)
@@ -79,7 +80,7 @@ class JSONRPCBrowse:
         server_urls: t.Dict[str, str] = {}
         service_describes = [site.describe() for site in self.jsonrpc_sites]
         for service_describe in service_describes:
-            server_urls.update({name: service_describe['servers'][0]['url'] for name in service_describe['methods']})
+            server_urls.update({name: service_describe.servers[0].url for name in service_describe.methods})
         url_prefix = f"{request.script_root}{request.path.rstrip('/')}"
         return render_template('browse/index.html', url_prefix=url_prefix, server_urls=server_urls)
 
@@ -92,14 +93,16 @@ class JSONRPCBrowse:
             if package.startswith('rpc.'):
                 continue
             package_name = package.split('.')[0]
-            packages_tree.setdefault(package_name, []).append({'name': package, **service_methods[package]})
+            packages_tree.setdefault(package_name, []).append(
+                {'name': package, **serializable(service_methods[package])}
+            )
         return jsonify(packages_tree)
 
     def vf_json_method(self: Self, method_name: str) -> 'ft.ResponseReturnValue':
         service_procedures = self._service_methods_desc()
         if method_name not in service_procedures:
             return jsonify({'message': 'Not found'}), 404
-        return jsonify({'name': method_name, **service_procedures[method_name]})
+        return jsonify({'name': method_name, **serializable(service_procedures[method_name])})
 
     def vf_partials_dashboard(self: Self) -> str:
         return render_template('browse/partials/dashboard.html')

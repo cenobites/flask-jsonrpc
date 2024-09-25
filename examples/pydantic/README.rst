@@ -22,14 +22,16 @@ Testing your service
             "jsonrpc": "2.0",
             "method": "Petstore.create_pet",
             "params": {
-                "name": "Jhon",
-                "tag": "cat"
+                "pet": {
+                    "name": "Jhon",
+                    "tag": "cat"
+                }
             },
             "id": "1c7fb3b2-7a87-4cf7-8e28-aafc33dae71d"
         }'
     {
         "id": "1c7fb3b2-7a87-4cf7-8e28-aafc33dae71d",
-        "jsonrpc": "2.0",
+        "jsonrpc": "2.0",P
         "result": {
             "id": 32,
             "name": "Jhon",

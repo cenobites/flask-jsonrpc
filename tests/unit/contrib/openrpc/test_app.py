@@ -46,8 +46,7 @@ def test_openrpc_create() -> None:
                 license=st.License(
                     name='BSD License', url='https://github.com/cenobites/flask-jsonrpc?tab=BSD-3-Clause-2-ov-file'
                 ),
-            ),
-            servers=[],
+            )
         ),
     )
 
@@ -122,7 +121,7 @@ def test_openrpc_create() -> None:
         return f'Foo {s}'
 
     # pylint: disable=W0612
-    @openrpc.extend_schema(name='FN3')
+    @openrpc.extend_schema(name='FN4')
     @jsonrpc.method('app.fn4', notification=False)
     def fn4(s: str) -> str:
         return f'Foo {s}'
@@ -246,7 +245,7 @@ def test_openrpc_create() -> None:
                     'summary': 'Function app.fn3',
                 },
                 {
-                    'name': 'FN3',
+                    'name': 'FN4',
                     'params': [{'name': 's', 'schema': {'type': 'string'}}],
                     'result': {'name': 'default', 'schema': {'type': 'string'}},
                 },

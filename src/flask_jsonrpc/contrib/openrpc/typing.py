@@ -1,12 +1,7 @@
 from enum import Enum
 import typing as t
-from dataclasses import field, dataclass
 
-# Python 3.10+
-try:
-    from typing import Self
-except ImportError:  # pragma: no cover
-    from typing_extensions import Self
+from pydantic import Field, BaseModel, AliasChoices
 
 OPENRPC_VERSION_DEFAULT: str = '1.3.2'
 
@@ -17,38 +12,42 @@ class OAuth2FlowType(Enum):
     PASSWORD = 'password'  # nosec B105
 
 
-@dataclass
-class OAuth2Flow:
+class OAuth2Flow(BaseModel):
     type: OAuth2FlowType
-    authorization_url: t.Optional[str] = field(default=None, metadata={'field_name': 'authorizationUrl'})
-    refresh_url: t.Optional[str] = field(default=None, metadata={'field_name': 'refreshUrl'})
-    token_url: t.Optional[str] = field(default=None, metadata={'field_name': 'tokenUrl'})
-    scopes: t.Dict[str, str] = field(default_factory=dict)
+    authorization_url: t.Optional[str] = Field(
+        default=None,
+        serialization_alias='authorizationUrl',
+        validation_alias=AliasChoices('authorizationUrl', 'authorizationUrl'),
+    )
+    refresh_url: t.Optional[str] = Field(
+        default=None, serialization_alias='refreshUrl', validation_alias=AliasChoices('refresh_url', 'refreshUrl')
+    )
+    token_url: t.Optional[str] = Field(
+        default=None, serialization_alias='tokenUrl', validation_alias=AliasChoices('token_url', 'tokenUrl')
+    )
+    scopes: t.Dict[str, str] = Field(default_factory=dict)
 
 
-@dataclass
-class OAuth2:
+class OAuth2(BaseModel):
     flows: t.List[OAuth2Flow]
-    type: t.Literal['oauth2'] = field(default='oauth2')
-    description: t.Optional[str] = field(default=None)
+    type: t.Literal['oauth2'] = Field(default='oauth2')
+    description: t.Optional[str] = None
 
 
-@dataclass
-class BearerAuth:
-    in_: str = field(metadata={'field_name': 'in'})
-    type: t.Literal['bearer'] = field(default='bearer')
-    name: str = field(default='Authorization')
-    description: t.Optional[str] = field(default=None)
-    scopes: t.Dict[str, str] = field(default_factory=dict)
+class BearerAuth(BaseModel):
+    in_: str = Field(alias='in')
+    type: t.Literal['bearer'] = Field(default='bearer')
+    name: str = Field(default='Authorization')
+    description: t.Optional[str] = None
+    scopes: t.Dict[str, str] = Field(default_factory=dict)
 
 
-@dataclass
-class APIKeyAuth:
-    in_: str = field(metadata={'field_name': 'in'})
-    type: t.Literal['apikey'] = field(default='apikey')
-    name: str = field(default='api_key')
-    description: t.Optional[str] = field(default=None)
-    scopes: t.Dict[str, str] = field(default_factory=dict)
+class APIKeyAuth(BaseModel):
+    in_: str = Field(alias='in')
+    type: t.Literal['apikey'] = Field(default='apikey')
+    name: str = Field(default='api_key')
+    description: t.Optional[str] = None
+    scopes: t.Dict[str, str] = Field(default_factory=dict)
 
 
 class ParamStructure(Enum):
@@ -66,219 +65,292 @@ class SchemaDataType(Enum):
     STRING = 'string'
 
     @staticmethod
-    def of(st: str) -> 'SchemaDataType':
+    def from_rpc_describe_type(st: str) -> 'SchemaDataType':
         type_name = st.lower()
         if type_name == 'number':
             return SchemaDataType.INTEGER
         return SchemaDataType(type_name)
 
 
-@dataclass
-class Schema:
-    id: t.Optional[str] = field(default=None, metadata={'field_name': '$id'})
-    title: t.Optional[str] = field(default=None)
-    format: t.Optional[str] = field(default=None)
-    enum: t.Optional[t.List[t.Any]] = field(default=None)
-    type: t.Optional[t.Union[SchemaDataType, t.List[SchemaDataType]]] = field(
+class Schema(BaseModel):
+    id: t.Optional[str] = Field(default=None, serialization_alias='$id', validation_alias=AliasChoices('id', '$id'))
+    title: t.Optional[str] = None
+    format: t.Optional[str] = None
+    enum: t.Optional[t.List[t.Any]] = None
+    type: t.Optional[t.Union[SchemaDataType, t.List[SchemaDataType]]] = None
+    all_of: t.Optional[t.List['Schema']] = Field(
+        default=None, serialization_alias='allOf', validation_alias=AliasChoices('all_of', 'allOf')
+    )
+    any_of: t.Optional[t.List['Schema']] = Field(
+        default=None, serialization_alias='anyOf', validation_alias=AliasChoices('any_of', 'anyOf')
+    )
+    one_of: t.Optional[t.List['Schema']] = Field(
+        default=None, serialization_alias='oneOf', validation_alias=AliasChoices('one_of', 'oneOf')
+    )
+    not_: t.Optional['Schema'] = Field(
+        default=None, serialization_alias='not', validation_alias=AliasChoices('not_', 'not')
+    )
+    pattern: t.Optional[str] = None
+    minimum: t.Optional[float] = None
+    maximum: t.Optional[float] = None
+    exclusive_minimum: t.Optional[float] = Field(
         default=None,
-        metadata={'encode': lambda x: getattr(x, 'value', x) if x else x, 'decode': lambda x: x.value if x else x},
+        serialization_alias='exclusiveMinimum',
+        validation_alias=AliasChoices('exclusive_minimum', 'exclusiveMinimum'),
     )
-    all_of: t.Optional[t.List['Schema']] = field(default=None, metadata={'field_name': 'allOf'})
-    any_of: t.Optional[t.List['Schema']] = field(default=None, metadata={'field_name': 'anyOf'})
-    one_of: t.Optional[t.List['Schema']] = field(default=None, metadata={'field_name': 'oneOf'})
-    not_: t.Optional['Schema'] = field(default=None, metadata={'field_name': 'not'})
-    pattern: t.Optional[str] = field(default=None)
-    minimum: t.Optional[float] = field(default=None)
-    maximum: t.Optional[float] = field(default=None)
-    exclusive_minimum: t.Optional[float] = field(default=None, metadata={'field_name': 'exclusiveMinimum'})
-    exclusive_maximum: t.Optional[float] = field(default=None, metadata={'field_name': 'exclusiveMaximum'})
-    multiple_of: t.Optional[float] = field(default=None, metadata={'field_name': 'multipleOf'})
-    min_length: t.Optional[int] = field(default=None, metadata={'field_name': 'minLength'})
-    max_length: t.Optional[int] = field(default=None, metadata={'field_name': 'maxLength'})
-    properties: t.Optional[t.Dict[str, 'Schema']] = field(default=None)
-    pattern_properties: t.Optional[t.Dict[str, 'Schema']] = field(
-        default=None, metadata={'field_name': 'patternProperties'}
+    exclusive_maximum: t.Optional[float] = Field(
+        default=None,
+        serialization_alias='exclusiveMaximum',
+        validation_alias=AliasChoices('exclusive_maximum', 'exclusiveMaximum'),
     )
-    additional_properties: t.Optional['Schema'] = field(default=None, metadata={'field_name': 'additionalProperties'})
-    property_names: t.Optional['Schema'] = field(default=None, metadata={'field_name': 'propertyNames'})
-    min_properties: t.Optional[int] = field(default=None, metadata={'field_name': 'minProperties'})
-    max_properties: t.Optional[int] = field(default=None, metadata={'field_name': 'maxProperties'})
-    required: t.Optional[t.List[str]] = field(default=None)
-    defs: t.Optional[t.Dict[str, 'Schema']] = field(default=None, metadata={'field_name': '$defs'})
-    items: t.Optional['Schema'] = field(default=None)
-    prefix_items: t.Optional[t.List['Schema']] = field(default=None, metadata={'field_name': 'prefixItems'})
-    contains: t.Optional['Schema'] = field(default=None)
-    min_contains: t.Optional[int] = field(default=None, metadata={'field_name': 'minContains'})
-    max_contains: t.Optional[int] = field(default=None, metadata={'field_name': 'maxContains'})
-    min_items: t.Optional[int] = field(default=None, metadata={'field_name': 'minItems'})
-    max_items: t.Optional[int] = field(default=None, metadata={'field_name': 'maxItems'})
-    unique_items: t.Optional[bool] = field(default=None, metadata={'field_name': 'uniqueItems'})
-    ref: t.Optional[str] = field(default=None, metadata={'field_name': '$ref'})
-    description: t.Optional[str] = field(default=None)
-    deprecated: t.Optional[bool] = field(default=None)
-    default: t.Optional[t.Any] = field(default=None)
-    examples: t.Optional[t.List[t.Any]] = field(default=None)
-    read_only: t.Optional[bool] = field(default=None, metadata={'field_name': 'readOnly'})
-    write_only: t.Optional[bool] = field(default=None, metadata={'field_name': 'writeOnly'})
-    const: t.Optional[t.Any] = field(default=None)
-    dependent_required: t.Optional[t.Dict[str, t.List[str]]] = field(
-        default=None, metadata={'field_name': 'dependentRequired'}
+    multiple_of: t.Optional[float] = Field(
+        default=None, serialization_alias='multipleOf', validation_alias=AliasChoices('multiple_of', 'multipleOf')
     )
-    dependent_schemas: t.Optional[t.Dict[str, 'Schema']] = field(
-        default=None, metadata={'field_name': 'dependentSchemas'}
+    min_length: t.Optional[int] = Field(
+        default=None, serialization_alias='minLength', validation_alias=AliasChoices('min_length', 'minLength')
     )
-    if_: t.Optional['Schema'] = field(default=None, metadata={'field_name': 'if'})
-    then: t.Optional['Schema'] = field(default=None)
-    else_: t.Optional['Schema'] = field(default=None, metadata={'field_name': 'else'})
-    schema_: t.Optional[str] = field(default=None, metadata={'field_name': '$schema'})
+    max_length: t.Optional[int] = Field(
+        default=None, serialization_alias='maxLength', validation_alias=AliasChoices('max_length', 'maxLength')
+    )
+    properties: t.Optional[t.Dict[str, 'Schema']] = None
+    pattern_properties: t.Optional[t.Dict[str, 'Schema']] = Field(
+        default=None,
+        serialization_alias='patternProperties',
+        validation_alias=AliasChoices('pattern_properties', 'patternProperties'),
+    )
+    additional_properties: t.Optional['Schema'] = Field(
+        default=None,
+        serialization_alias='additionalProperties',
+        validation_alias=AliasChoices('additional_properties', 'additionalProperties'),
+    )
+    property_names: t.Optional['Schema'] = Field(
+        default=None,
+        serialization_alias='propertyNames',
+        validation_alias=AliasChoices('property_names', 'propertyNames'),
+    )
+    min_properties: t.Optional[int] = Field(
+        default=None,
+        serialization_alias='minProperties',
+        validation_alias=AliasChoices('min_properties', 'minProperties'),
+    )
+    max_properties: t.Optional[int] = Field(
+        default=None,
+        serialization_alias='maxProperties',
+        validation_alias=AliasChoices('max_properties', 'maxProperties'),
+    )
+    required: t.Optional[t.List[str]] = None
+    defs: t.Optional[t.Dict[str, 'Schema']] = Field(
+        default=None, serialization_alias='$defs', validation_alias=AliasChoices('defs', '$defs')
+    )
+    items: t.Optional['Schema'] = None
+    prefix_items: t.Optional[t.List['Schema']] = Field(
+        default=None, serialization_alias='prefixItems', validation_alias=AliasChoices('prefix_items', 'prefixItems')
+    )
+    contains: t.Optional['Schema'] = None
+    min_contains: t.Optional[int] = Field(
+        default=None, serialization_alias='minContains', validation_alias=AliasChoices('min_contains', 'minContains')
+    )
+    max_contains: t.Optional[int] = Field(
+        default=None, serialization_alias='maxContains', validation_alias=AliasChoices('max_contains', 'maxContains')
+    )
+    min_items: t.Optional[int] = Field(
+        default=None, serialization_alias='minItems', validation_alias=AliasChoices('min_items', 'minItems')
+    )
+    max_items: t.Optional[int] = Field(
+        default=None, serialization_alias='maxItems', validation_alias=AliasChoices('max_items', 'maxItems')
+    )
+    unique_items: t.Optional[bool] = Field(
+        default=None, serialization_alias='uniqueItems', validation_alias=AliasChoices('unique_items', 'uniqueItems')
+    )
+    ref: t.Optional[str] = Field(default=None, serialization_alias='$ref', validation_alias=AliasChoices('ref', '$ref'))
+    description: t.Optional[str] = None
+    deprecated: t.Optional[bool] = None
+    default: t.Optional[t.Any] = None
+    examples: t.Optional[t.List[t.Any]] = None
+    read_only: t.Optional[bool] = Field(
+        default=None, serialization_alias='readOnly', validation_alias=AliasChoices('read_only', 'readOnly')
+    )
+    write_only: t.Optional[bool] = Field(
+        default=None, serialization_alias='writeOnly', validation_alias=AliasChoices('write_only', 'writeOnly')
+    )
+    const: t.Optional[t.Any] = None
+    dependent_required: t.Optional[t.Dict[str, t.List[str]]] = Field(
+        default=None,
+        serialization_alias='dependentRequired',
+        validation_alias=AliasChoices('dependent_required', 'dependentRequired'),
+    )
+    dependent_schemas: t.Optional[t.Dict[str, 'Schema']] = Field(
+        default=None,
+        serialization_alias='dependentSchemas',
+        validation_alias=AliasChoices('dependent_schemas', 'dependentSchemas'),
+    )
+    if_: t.Optional['Schema'] = Field(
+        default=None, serialization_alias='if', validation_alias=AliasChoices('if_', 'if')
+    )
+    then: t.Optional['Schema'] = None
+    else_: t.Optional['Schema'] = Field(
+        default=None, serialization_alias='else', validation_alias=AliasChoices('else_', 'else')
+    )
+    schema_: t.Optional[str] = Field(
+        default=None,
+        alias='schema',
+        serialization_alias='$schema',
+        validation_alias=AliasChoices('schema_', 'schema', '$schema'),
+    )
 
 
-@dataclass
-class Reference:
-    ref: str = field(metadata={'field_name': '$ref'})
+class Reference(BaseModel):
+    ref: str = Field(serialization_alias='$ref', validation_alias=AliasChoices('ref', '$ref'))
 
 
-@dataclass
-class ContentDescriptor:
+class ContentDescriptor(BaseModel):
     name: str
-    schema: Schema
-    summary: t.Optional[str] = field(default=None)
-    description: t.Optional[str] = field(default=None)
-    required: t.Optional[bool] = field(default=None)
-    deprecated: t.Optional[bool] = field(default=None)
+    schema_: Schema = Field(alias='schema', validation_alias=AliasChoices('schema_', 'schema'))
+    summary: t.Optional[str] = None
+    description: t.Optional[str] = None
+    required: t.Optional[bool] = None
+    deprecated: t.Optional[bool] = None
 
 
-@dataclass
-class Contact:
-    name: t.Optional[str] = field(default=None)
-    url: t.Optional[str] = field(default=None)
-    email: t.Optional[str] = field(default=None)
+class Contact(BaseModel):
+    name: t.Optional[str] = None
+    url: t.Optional[str] = None
+    email: t.Optional[str] = None
 
 
-@dataclass
-class License:
+class License(BaseModel):
     name: str
-    url: t.Optional[str] = field(default=None)
+    url: t.Optional[str] = None
 
 
-@dataclass
-class Info:
+class Info(BaseModel):
     title: str
     version: str
-    description: t.Optional[str] = field(default=None)
-    terms_of_service: t.Optional[str] = field(default=None, metadata={'field_name': 'termsOfService'})
-    contact: t.Optional[Contact] = field(default=None)
-    license: t.Optional[License] = field(default=None)
+    description: t.Optional[str] = None
+    terms_of_service: t.Optional[str] = Field(
+        default=None,
+        serialization_alias='termsOfService',
+        validation_alias=AliasChoices('terms_of_service', 'termsOfService'),
+    )
+    contact: t.Optional[Contact] = None
+    license_: t.Optional[License] = Field(
+        default=None, alias='license', validation_alias=AliasChoices('license_', 'license')
+    )
 
 
-@dataclass
-class ServerVariable:
+class ServerVariable(BaseModel):
     default: str
-    enum: t.Optional[t.List[str]] = field(default=None)
-    description: t.Optional[str] = field(default=None)
+    enum: t.Optional[t.List[str]] = None
+    description: t.Optional[str] = None
 
 
-@dataclass
-class Server:
+class Server(BaseModel):
     url: str
-    name: str = field(default='default')
-    summary: t.Optional[str] = field(default=None)
-    description: t.Optional[str] = field(default=None)
-    variables: t.Optional[t.Dict[str, ServerVariable]] = field(default=None)
+    name: str = Field(default='default')
+    summary: t.Optional[str] = None
+    description: t.Optional[str] = None
+    variables: t.Optional[t.Dict[str, ServerVariable]] = None
 
 
-@dataclass
-class Example:
+class Example(BaseModel):
     name: str
     value: t.Any
-    summary: t.Optional[str] = field(default=None)
-    description: t.Optional[str] = field(default=None)
-    external_value: t.Optional[str] = field(default=None, metadata={'field_name': 'externalValue'})
+    summary: t.Optional[str] = None
+    description: t.Optional[str] = None
+    external_value: t.Optional[str] = Field(
+        default=None,
+        serialization_alias='externalValue',
+        validation_alias=AliasChoices('external_value', 'externalValue'),
+    )
 
 
-@dataclass
-class ExamplePairing:
-    name: t.Optional[str] = field(default=None)
-    params: t.Optional[t.List[Example]] = field(default=None)
-    summary: t.Optional[str] = field(default=None)
-    description: t.Optional[str] = field(default=None)
-    result: t.Optional[Example] = field(default=None)
+class ExamplePairing(BaseModel):
+    name: t.Optional[str] = None
+    params: t.Optional[t.List[Example]] = None
+    summary: t.Optional[str] = None
+    description: t.Optional[str] = None
+    result: t.Optional[Example] = None
 
 
-@dataclass
-class Link:
+class Link(BaseModel):
     name: str
-    summary: t.Optional[str] = field(default=None)
-    description: t.Optional[str] = field(default=None)
-    method: t.Optional[str] = field(default=None)
-    params: t.Optional[t.Any] = field(default=None)
-    server: t.Optional[Server] = field(default=None)
+    summary: t.Optional[str] = None
+    description: t.Optional[str] = None
+    method: t.Optional[str] = None
+    params: t.Optional[t.Any] = None
+    server: t.Optional[Server] = None
 
 
-@dataclass
-class Error:
+class Error(BaseModel):
     code: int
     message: str
-    data: t.Optional[t.Any] = field(default=None)
+    data: t.Optional[t.Any] = None
 
 
-@dataclass
-class ExternalDocumentation:
+class ExternalDocumentation(BaseModel):
     url: str
-    description: t.Optional[str] = field(default=None)
+    description: t.Optional[str] = None
 
 
-@dataclass
-class Tag:
+class Tag(BaseModel):
     name: str
-    summary: t.Optional[str] = field(default=None)
-    description: t.Optional[str] = field(default=None)
-    external_docs: t.Optional[ExternalDocumentation] = field(default=None, metadata={'field_name': 'externalDocs'})
-
-
-@dataclass
-class Components:
-    content_descriptors: t.Optional[t.Dict[str, ContentDescriptor]] = field(
-        default=None, metadata={'field_name': 'contentDescriptors'}
-    )
-    schemas: t.Optional[t.Dict[str, Schema]] = field(default=None)
-    examples: t.Optional[t.Dict[str, Example]] = field(default=None)
-    links: t.Optional[t.Dict[str, Link]] = field(default=None)
-    errors: t.Optional[t.Dict[str, Error]] = field(default=None)
-    example_pairing_objects: t.Optional[t.Dict[str, ExamplePairing]] = field(default=None)
-    tags: t.Optional[t.Dict[str, Tag]] = field(default=None)
-    x_security_schemes: t.Optional[t.Dict[str, t.Union[OAuth2, BearerAuth, APIKeyAuth]]] = field(
-        default=None, metadata={'field_name': 'x-security-schemes'}
+    summary: t.Optional[str] = None
+    description: t.Optional[str] = None
+    external_docs: t.Optional[ExternalDocumentation] = Field(
+        default=None, serialization_alias='externalDocs', validation_alias=AliasChoices('external_docs', 'externalDocs')
     )
 
 
-@dataclass
-class Method:
+class Components(BaseModel):
+    content_descriptors: t.Optional[t.Dict[str, ContentDescriptor]] = Field(
+        default=None,
+        serialization_alias='contentDescriptors',
+        validation_alias=AliasChoices('content_descriptors', 'contentDescriptors'),
+    )
+    schemas: t.Optional[t.Dict[str, Schema]] = None
+    examples: t.Optional[t.Dict[str, Example]] = None
+    links: t.Optional[t.Dict[str, Link]] = None
+    errors: t.Optional[t.Dict[str, Error]] = None
+    example_pairing_objects: t.Optional[t.Dict[str, ExamplePairing]] = None
+    tags: t.Optional[t.Dict[str, Tag]] = None
+    x_security_schemes: t.Optional[t.Dict[str, t.Union[OAuth2, BearerAuth, APIKeyAuth]]] = Field(
+        default=None,
+        serialization_alias='x-security-schemes',
+        validation_alias=AliasChoices('x_security_schemes', 'x-security-schemes'),
+    )
+
+
+class Method(BaseModel):
     name: str
     params: t.List[ContentDescriptor]
     result: ContentDescriptor
-    tags: t.Optional[t.List[Tag]] = field(default=None)
-    summary: t.Optional[str] = field(default=None)
-    description: t.Optional[str] = field(default=None)
-    external_docs: t.Optional[ExternalDocumentation] = field(default=None, metadata={'field_name': 'externalDocs'})
-    deprecated: t.Optional[bool] = field(default=None)
-    servers: t.Optional[t.List[Server]] = field(default=None)
-    errors: t.Optional[t.List[Error]] = field(default=None)
-    links: t.Optional[t.List[Link]] = field(default=None)
-    param_structure: t.Optional[ParamStructure] = field(default=None, metadata={'field_name': 'paramStructure'})
-    examples: t.Optional[t.List[ExamplePairing]] = field(default=None)
-    x_security: t.Optional[t.Dict[str, t.List[str]]] = field(default=None, metadata={'field_name': 'x-security'})
+    tags: t.Optional[t.List[Tag]] = None
+    summary: t.Optional[str] = None
+    description: t.Optional[str] = None
+    external_docs: t.Optional[ExternalDocumentation] = Field(
+        default=None, serialization_alias='externalDocs', validation_alias=AliasChoices('external_docs', 'externalDocs')
+    )
+    deprecated: t.Optional[bool] = None
+    servers: t.Optional[t.List[Server]] = None
+    errors: t.Optional[t.List[Error]] = None
+    links: t.Optional[t.List[Link]] = None
+    param_structure: t.Optional[ParamStructure] = Field(
+        default=None,
+        serialization_alias='paramStructure',
+        validation_alias=AliasChoices('param_structure', 'paramStructure'),
+    )
+    examples: t.Optional[t.List[ExamplePairing]] = None
+    x_security: t.Optional[t.Dict[str, t.List[str]]] = Field(
+        default=None, serialization_alias='x-security', validation_alias=AliasChoices('x_security', 'x-security')
+    )
 
 
-@dataclass
-class OpenRPCSchema:
+class OpenRPCSchema(BaseModel):
     info: Info
-    openrpc: str = field(default=OPENRPC_VERSION_DEFAULT)
-    methods: t.List[Method] = field(default_factory=list)
-    servers: t.Union[t.List[Server], Server] = field(default_factory=list)
-    components: t.Optional[Components] = field(default=None)
-    external_docs: t.Optional[ExternalDocumentation] = field(default=None, metadata={'field_name': 'externalDocs'})
-
-    def __post_init__(self: Self) -> None:
-        if self.servers is None or (isinstance(self.servers, list) and len(self.servers) == 0):
-            self.servers = Server(name='default', url='localhost')
+    openrpc: str = Field(default=OPENRPC_VERSION_DEFAULT)
+    methods: t.List[Method] = []
+    servers: t.Union[t.List[Server], Server] = Server(name='default', url='localhost')
+    components: t.Optional[Components] = None
+    external_docs: t.Optional[ExternalDocumentation] = Field(
+        default=None, serialization_alias='externalDocs', validation_alias=AliasChoices('external_docs', 'externalDocs')
+    )

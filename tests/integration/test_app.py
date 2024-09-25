@@ -43,19 +43,19 @@ except ImportError:  # pragma: no cover
 class APITest(APITestCase):
     def test_greeting(self: Self) -> None:
         rv = self.requests.post(API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting'})
-        self.assertEqual({'id': 1, 'jsonrpc': '2.0', 'result': 'Hello Flask JSON-RPC'}, rv.json())
+        self.assertDictEqual({'id': 1, 'jsonrpc': '2.0', 'result': 'Hello Flask JSON-RPC'}, rv.json())
         self.assertEqual(200, rv.status_code)
 
         rv = self.requests.post(
             API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': ['Python']}
         )
-        self.assertEqual({'id': 1, 'jsonrpc': '2.0', 'result': 'Hello Python'}, rv.json())
+        self.assertDictEqual({'id': 1, 'jsonrpc': '2.0', 'result': 'Hello Python'}, rv.json())
         self.assertEqual(200, rv.status_code)
 
         rv = self.requests.post(
             API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': {'name': 'Flask'}}
         )
-        self.assertEqual({'id': 1, 'jsonrpc': '2.0', 'result': 'Hello Flask'}, rv.json())
+        self.assertDictEqual({'id': 1, 'jsonrpc': '2.0', 'result': 'Hello Flask'}, rv.json())
         self.assertEqual(200, rv.status_code)
 
     def test_app_greeting_with_different_content_types(self: Self) -> None:
@@ -64,15 +64,13 @@ class APITest(APITestCase):
             data=json.dumps({'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting'}),
             headers={'Content-Type': 'application/json-rpc'},
         )
-        self.assertEqual({'id': 1, 'jsonrpc': '2.0', 'result': 'Hello Flask JSON-RPC'}, rv.json())
+        self.assertDictEqual({'id': 1, 'jsonrpc': '2.0', 'result': 'Hello Flask JSON-RPC'}, rv.json())
         self.assertEqual(200, rv.status_code)
 
         rv = self.requests.post(
-            API_URL,
-            data=json.dumps({'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': ['Python']}),
-            headers={'Content-Type': 'application/jsonrequest'},
+            API_URL, data=json.dumps({'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': ['Python']})
         )
-        self.assertEqual({'id': 1, 'jsonrpc': '2.0', 'result': 'Hello Python'}, rv.json())
+        self.assertDictEqual({'id': 1, 'jsonrpc': '2.0', 'result': 'Hello Python'}, rv.json())
         self.assertEqual(200, rv.status_code)
 
         rv = self.requests.post(
@@ -80,12 +78,12 @@ class APITest(APITestCase):
             data=json.dumps({'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': {'name': 'Flask'}}),
             headers={'Content-Type': 'application/json'},
         )
-        self.assertEqual({'id': 1, 'jsonrpc': '2.0', 'result': 'Hello Flask'}, rv.json())
+        self.assertDictEqual({'id': 1, 'jsonrpc': '2.0', 'result': 'Hello Flask'}, rv.json())
         self.assertEqual(200, rv.status_code)
 
     def test_greeting_raise_parse_error(self: Self) -> None:
         rv = self.requests.post(API_URL, data={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting'})
-        self.assertEqual(
+        self.assertDictEqual(
             {
                 'id': None,
                 'jsonrpc': '2.0',
@@ -105,7 +103,7 @@ class APITest(APITestCase):
             data="{'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting'}",
             headers={'Content-Type': 'application/json'},
         )
-        self.assertEqual(
+        self.assertDictEqual(
             {
                 'id': None,
                 'jsonrpc': '2.0',
@@ -130,7 +128,7 @@ class APITest(APITestCase):
             ]""",
             headers={'Content-Type': 'application/json'},
         )
-        self.assertEqual(
+        self.assertDictEqual(
             {
                 'id': None,
                 'jsonrpc': '2.0',
@@ -152,7 +150,7 @@ class APITest(APITestCase):
 
     def test_greeting_raise_invalid_request_error(self: Self) -> None:
         rv = self.requests.post(API_URL, json={'id': 1, 'jsonrpc': '2.0'})
-        self.assertEqual(
+        self.assertDictEqual(
             {
                 'id': 1,
                 'jsonrpc': '2.0',
@@ -171,15 +169,13 @@ class APITest(APITestCase):
         rv = self.requests.post(
             API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': 'Wrong'}
         )
-        self.assertEqual(
+        self.assertDictEqual(
             {
                 'id': 1,
                 'jsonrpc': '2.0',
                 'error': {
                     'code': -32602,
-                    'data': {
-                        'message': 'Parameter structures are by-position (tuple, set, list) or by-name (dict): Wrong'
-                    },
+                    'data': {'message': 'Parameter structures are by-position (list) or by-name (dict): Wrong'},
                     'message': 'Invalid params',
                     'name': 'InvalidParamsError',
                 },
@@ -189,7 +185,7 @@ class APITest(APITestCase):
         self.assertEqual(400, rv.status_code)
 
         rv = self.requests.post(API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': [1]})
-        self.assertEqual(
+        self.assertDictEqual(
             {
                 'id': 1,
                 'jsonrpc': '2.0',
@@ -207,7 +203,7 @@ class APITest(APITestCase):
         rv = self.requests.post(
             API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': {'name': 2}}
         )
-        self.assertEqual(
+        self.assertDictEqual(
             {
                 'id': 1,
                 'jsonrpc': '2.0',
@@ -224,7 +220,7 @@ class APITest(APITestCase):
 
     def test_greeting_raise_method_not_found_error(self: Self) -> None:
         rv = self.requests.post(API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'method-not-found'})
-        self.assertEqual(
+        self.assertDictEqual(
             {
                 'id': 1,
                 'jsonrpc': '2.0',
@@ -243,26 +239,24 @@ class APITest(APITestCase):
         rv = self.requests.post(
             API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.echo', 'params': ['Python']}
         )
-        self.assertEqual({'id': 1, 'jsonrpc': '2.0', 'result': 'Python'}, rv.json())
+        self.assertDictEqual({'id': 1, 'jsonrpc': '2.0', 'result': 'Python'}, rv.json())
         self.assertEqual(200, rv.status_code)
 
         rv = self.requests.post(
             API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.echo', 'params': {'string': 'Flask'}}
         )
-        self.assertEqual({'id': 1, 'jsonrpc': '2.0', 'result': 'Flask'}, rv.json())
+        self.assertDictEqual({'id': 1, 'jsonrpc': '2.0', 'result': 'Flask'}, rv.json())
         self.assertEqual(200, rv.status_code)
 
     def test_echo_raise_invalid_params_error(self: Self) -> None:
         rv = self.requests.post(API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.echo', 'params': 'Wrong'})
-        self.assertEqual(
+        self.assertDictEqual(
             {
                 'id': 1,
                 'jsonrpc': '2.0',
                 'error': {
                     'code': -32602,
-                    'data': {
-                        'message': 'Parameter structures are by-position (tuple, set, list) or by-name (dict): Wrong'
-                    },
+                    'data': {'message': 'Parameter structures are by-position (list) or by-name (dict): Wrong'},
                     'message': 'Invalid params',
                     'name': 'InvalidParamsError',
                 },
@@ -272,7 +266,7 @@ class APITest(APITestCase):
         self.assertEqual(400, rv.status_code)
 
         rv = self.requests.post(API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.echo', 'params': [1]})
-        self.assertEqual(
+        self.assertDictEqual(
             {
                 'id': 1,
                 'jsonrpc': '2.0',
@@ -290,7 +284,7 @@ class APITest(APITestCase):
         rv = self.requests.post(
             API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.echo', 'params': {'name': 2}}
         )
-        self.assertEqual(
+        self.assertDictEqual(
             {
                 'id': 1,
                 'jsonrpc': '2.0',
@@ -306,7 +300,7 @@ class APITest(APITestCase):
         self.assertEqual(400, rv.status_code)
 
         rv = self.requests.post(API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.echo'})
-        self.assertEqual(
+        self.assertDictEqual(
             {
                 'id': 1,
                 'jsonrpc': '2.0',
@@ -332,19 +326,19 @@ class APITest(APITestCase):
 
     def test_not_allow_notify(self: Self) -> None:
         rv = self.requests.post(API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.not_allow_notify'})
-        self.assertEqual({'id': 1, 'jsonrpc': '2.0', 'result': 'Not allow notify'}, rv.json())
+        self.assertDictEqual({'id': 1, 'jsonrpc': '2.0', 'result': 'Not allow notify'}, rv.json())
         self.assertEqual(200, rv.status_code)
 
         rv = self.requests.post(
             API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.not_allow_notify', 'params': ['Some string']}
         )
-        self.assertEqual({'id': 1, 'jsonrpc': '2.0', 'result': 'Not allow notify'}, rv.json())
+        self.assertDictEqual({'id': 1, 'jsonrpc': '2.0', 'result': 'Not allow notify'}, rv.json())
         self.assertEqual(200, rv.status_code)
 
         rv = self.requests.post(
             API_URL, json={'jsonrpc': '2.0', 'method': 'jsonrpc.not_allow_notify', 'params': ['Some string']}
         )
-        self.assertEqual(
+        self.assertDictEqual(
             {
                 'error': {
                     'code': -32600,
@@ -364,11 +358,11 @@ class APITest(APITestCase):
 
     def test_fails(self: Self) -> None:
         rv = self.requests.post(API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.fails', 'params': [2]})
-        self.assertEqual({'id': 1, 'jsonrpc': '2.0', 'result': 2}, rv.json())
+        self.assertDictEqual({'id': 1, 'jsonrpc': '2.0', 'result': 2}, rv.json())
         self.assertEqual(200, rv.status_code)
 
         rv = self.requests.post(API_URL, json={'id': '1', 'jsonrpc': '2.0', 'method': 'jsonrpc.fails', 'params': [1]})
-        self.assertEqual(
+        self.assertDictEqual(
             {
                 'id': '1',
                 'jsonrpc': '2.0',
@@ -391,7 +385,7 @@ class APITest(APITestCase):
             'params': ['string', {'a': 1}, ['a', 'b', 'c'], 23, 'Flask'],
         }
         rv = self.requests.post(API_URL, json=data)
-        self.assertEqual(
+        self.assertDictEqual(
             {'id': 1, 'jsonrpc': '2.0', 'result': ['string', {'a': 1}, ['a', 'b', 'c'], 23, 'Flask']}, rv.json()
         )
         self.assertEqual(200, rv.status_code)
@@ -403,7 +397,7 @@ class APITest(APITestCase):
             'params': ['string', {'a': 1}, ['a', 'b', 'c'], 23],
         }
         rv = self.requests.post(API_URL, json=data)
-        self.assertEqual(
+        self.assertDictEqual(
             {'id': 1, 'jsonrpc': '2.0', 'result': ['string', {'a': 1}, ['a', 'b', 'c'], 23, 'Default']}, rv.json()
         )
         self.assertEqual(200, rv.status_code)
@@ -411,32 +405,32 @@ class APITest(APITestCase):
     def test_sum(self: Self) -> None:
         data = {'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.sum', 'params': [1, 3]}
         rv = self.requests.post(API_URL, json=data)
-        self.assertEqual({'id': 1, 'jsonrpc': '2.0', 'result': 4}, rv.json())
+        self.assertDictEqual({'id': 1, 'jsonrpc': '2.0', 'result': 4}, rv.json())
         self.assertEqual(200, rv.status_code)
 
         data = {'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.sum', 'params': [0.5, 1.5]}
         rv = self.requests.post(API_URL, json=data)
-        self.assertEqual({'id': 1, 'jsonrpc': '2.0', 'result': 2.0}, rv.json())
+        self.assertDictEqual({'id': 1, 'jsonrpc': '2.0', 'result': 2.0}, rv.json())
         self.assertEqual(200, rv.status_code)
 
     def test_decorators(self: Self) -> None:
         data = {'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.decorators', 'params': ['Python']}
         rv = self.requests.post(API_URL, json=data)
-        self.assertEqual({'id': 1, 'jsonrpc': '2.0', 'result': 'Hello Python from decorator, ;)'}, rv.json())
+        self.assertDictEqual({'id': 1, 'jsonrpc': '2.0', 'result': 'Hello Python from decorator, ;)'}, rv.json())
         self.assertEqual(200, rv.status_code)
 
     def test_return_status_code(self: Self) -> None:
         rv = self.requests.post(
             API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.returnStatusCode', 'params': ['OK']}
         )
-        self.assertEqual({'id': 1, 'jsonrpc': '2.0', 'result': 'Status Code OK'}, rv.json())
+        self.assertDictEqual({'id': 1, 'jsonrpc': '2.0', 'result': 'Status Code OK'}, rv.json())
         self.assertEqual(201, rv.status_code)
 
     def test_return_headers(self: Self) -> None:
         rv = self.requests.post(
             API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.returnHeaders', 'params': ['OK']}
         )
-        self.assertEqual({'id': 1, 'jsonrpc': '2.0', 'result': 'Headers OK'}, rv.json())
+        self.assertDictEqual({'id': 1, 'jsonrpc': '2.0', 'result': 'Headers OK'}, rv.json())
         self.assertEqual(200, rv.status_code)
         self.assertEqual('1', rv.headers['X-JSONRPC'])
 
@@ -444,7 +438,7 @@ class APITest(APITestCase):
         rv = self.requests.post(
             API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.returnStatusCodeAndHeaders', 'params': ['OK']}
         )
-        self.assertEqual({'id': 1, 'jsonrpc': '2.0', 'result': 'Status Code and Headers OK'}, rv.json())
+        self.assertDictEqual({'id': 1, 'jsonrpc': '2.0', 'result': 'Status Code and Headers OK'}, rv.json())
         self.assertEqual(400, rv.status_code)
         self.assertEqual('1', rv.headers['X-JSONRPC'])
 
@@ -452,7 +446,7 @@ class APITest(APITestCase):
         rv = self.requests.post(
             API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.not_validate', 'params': ['OK']}
         )
-        self.assertEqual({'id': 1, 'jsonrpc': '2.0', 'result': 'Not validate: OK'}, rv.json())
+        self.assertDictEqual({'id': 1, 'jsonrpc': '2.0', 'result': 'Not validate: OK'}, rv.json())
         self.assertEqual(200, rv.status_code)
 
     def test_mixin_not_validate_method(self: Self) -> None:
@@ -465,7 +459,9 @@ class APITest(APITestCase):
                 'params': [':)', 1, 3.2, ':D', [1, 2, 3], {1: 1}],
             },
         )
-        self.assertEqual({'id': 1, 'jsonrpc': '2.0', 'result': 'Not validate: :) 1 3.2 :D [1, 2, 3] {1: 1}'}, rv.json())
+        self.assertDictEqual(
+            {'id': 1, 'jsonrpc': '2.0', 'result': "Not validate: :) 1 3.2 :D [1, 2, 3] {'1': 1}"}, rv.json()
+        )
         self.assertEqual(200, rv.status_code)
 
         rv = self.requests.post(
@@ -477,12 +473,14 @@ class APITest(APITestCase):
                 'params': {'s': ':)', 't': 1, 'u': 3.2, 'v': ':D', 'x': [1, 2, 3], 'z': {1: 1}},
             },
         )
-        self.assertEqual({'id': 1, 'jsonrpc': '2.0', 'result': 'Not validate: :) 1 3.2 :D [1, 2, 3] {1: 1}'}, rv.json())
+        self.assertDictEqual(
+            {'id': 1, 'jsonrpc': '2.0', 'result': "Not validate: :) 1 3.2 :D [1, 2, 3] {'1': 1}"}, rv.json()
+        )
         self.assertEqual(200, rv.status_code)
 
     def test_no_return_method(self: Self) -> None:
         rv = self.requests.post(API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.noReturn', 'params': []})
-        self.assertEqual(
+        self.assertDictEqual(
             {
                 'error': {
                     'code': -32000,
@@ -499,7 +497,7 @@ class APITest(APITestCase):
 
     def test_with_rcp_batch(self: Self) -> None:
         rv = self.requests.post(API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting'})
-        self.assertEqual({'id': 1, 'jsonrpc': '2.0', 'result': 'Hello Flask JSON-RPC'}, rv.json())
+        self.assertDictEqual({'id': 1, 'jsonrpc': '2.0', 'result': 'Hello Flask JSON-RPC'}, rv.json())
         self.assertEqual(200, rv.status_code)
 
         rv = self.requests.post(
@@ -549,33 +547,33 @@ class APITest(APITestCase):
         self.assertEqual(200, rv.status_code)
 
         rv = self.requests.post(API_URL, json={'id': 2, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting'})
-        self.assertEqual({'id': 2, 'jsonrpc': '2.0', 'result': 'Hello Flask JSON-RPC'}, rv.json())
+        self.assertDictEqual({'id': 2, 'jsonrpc': '2.0', 'result': 'Hello Flask JSON-RPC'}, rv.json())
         self.assertEqual(200, rv.status_code)
 
     def test_class(self: Self) -> None:
         rv = self.requests.post(API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'classapp.index'})
-        self.assertEqual({'id': 1, 'jsonrpc': '2.0', 'result': 'Hello Flask JSON-RPC'}, rv.json())
+        self.assertDictEqual({'id': 1, 'jsonrpc': '2.0', 'result': 'Hello Flask JSON-RPC'}, rv.json())
         self.assertEqual(200, rv.status_code)
 
         rv = self.requests.post(API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'greeting', 'params': ['Python']})
-        self.assertEqual({'id': 1, 'jsonrpc': '2.0', 'result': 'Hello Python'}, rv.json())
+        self.assertDictEqual({'id': 1, 'jsonrpc': '2.0', 'result': 'Hello Python'}, rv.json())
         self.assertEqual(200, rv.status_code)
 
         rv = self.requests.post(
             API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'hello', 'params': {'name': 'Flask'}}
         )
-        self.assertEqual({'id': 1, 'jsonrpc': '2.0', 'result': 'Hello Flask'}, rv.json())
+        self.assertDictEqual({'id': 1, 'jsonrpc': '2.0', 'result': 'Hello Flask'}, rv.json())
         self.assertEqual(200, rv.status_code)
 
         rv = self.requests.post(API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'echo', 'params': ['Python', 1]})
-        self.assertEqual({'id': 1, 'jsonrpc': '2.0', 'result': 'Python'}, rv.json())
+        self.assertDictEqual({'id': 1, 'jsonrpc': '2.0', 'result': 'Python'}, rv.json())
         self.assertEqual(200, rv.status_code)
 
         rv = self.requests.post(API_URL, json={'jsonrpc': '2.0', 'method': 'notify', 'params': ['Python']})
         self.assertEqual(204, rv.status_code)
 
         rv = self.requests.post(API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'fails', 'params': [13]})
-        self.assertEqual(
+        self.assertDictEqual(
             {
                 'id': 1,
                 'jsonrpc': '2.0',
@@ -590,193 +588,678 @@ class APITest(APITestCase):
         )
         self.assertEqual(500, rv.status_code)
 
+    def test_app_with_pythonclass(self: Self) -> None:
+        rv = self.requests.post(
+            API_URL,
+            json={
+                'id': 1,
+                'jsonrpc': '2.0',
+                'method': 'jsonrpc.createColor',
+                'params': {'color': {'name': 'Blue', 'tag': 'good'}},
+            },
+            headers={'Content-Type': 'application/json'},
+        )
+        self.assertEqual(200, rv.status_code)
+        self.assertDictEqual({'id': 1, 'jsonrpc': '2.0', 'result': {'id': 1, 'name': 'Blue', 'tag': 'good'}}, rv.json())
+
+        rv = self.requests.post(
+            API_URL,
+            json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.createColor', 'params': {'color': {'name': 'Red'}}},
+            headers={'Content-Type': 'application/json'},
+        )
+        self.assertEqual(400, rv.status_code)
+        data = rv.json()
+        self.assertEqual(1, data['id'])
+        self.assertEqual('2.0', data['jsonrpc'])
+        self.assertEqual(-32602, data['error']['code'])
+        self.assertTrue("missing 1 required positional argument: 'tag'" in data['error']['data']['message'])
+        self.assertEqual('Invalid params', data['error']['message'])
+        self.assertEqual('InvalidParamsError', data['error']['name'])
+
+        rv = self.requests.post(
+            API_URL,
+            json={
+                'id': 1,
+                'jsonrpc': '2.0',
+                'method': 'jsonrpc.createManyColor',
+                'params': {'colors': [{'name': 'Blue', 'tag': 'good'}, {'name': 'Red', 'tag': 'bad'}]},
+            },
+            headers={'Content-Type': 'application/json'},
+        )
+        self.assertEqual(200, rv.status_code)
+        self.assertDictEqual(
+            {
+                'id': 1,
+                'jsonrpc': '2.0',
+                'result': [{'id': 0, 'name': 'Blue', 'tag': 'good'}, {'id': 1, 'name': 'Red', 'tag': 'bad'}],
+            },
+            rv.json(),
+        )
+
+        rv = self.requests.post(
+            API_URL,
+            json={
+                'id': 1,
+                'jsonrpc': '2.0',
+                'method': 'jsonrpc.createManyColor',
+                'params': {'colors': [{'name': 'Blue', 'tag': 'good'}], 'color': {'name': 'Red', 'tag': 'bad'}},
+            },
+            headers={'Content-Type': 'application/json'},
+        )
+        self.assertEqual(200, rv.status_code)
+        self.assertDictEqual(
+            {
+                'id': 1,
+                'jsonrpc': '2.0',
+                'result': [{'id': 0, 'name': 'Blue', 'tag': 'good'}, {'id': 1, 'name': 'Red', 'tag': 'bad'}],
+            },
+            rv.json(),
+        )
+
+        rv = self.requests.post(
+            API_URL,
+            json={
+                'id': 1,
+                'jsonrpc': '2.0',
+                'method': 'jsonrpc.createManyColor',
+                'params': [
+                    [{'name': 'Blue', 'tag': 'good'}, {'name': 'Red', 'tag': 'bad'}],
+                    {'name': 'Green', 'tag': 'yay'},
+                ],
+            },
+            headers={'Content-Type': 'application/json'},
+        )
+        self.assertEqual(200, rv.status_code)
+        self.assertDictEqual(
+            {
+                'id': 1,
+                'jsonrpc': '2.0',
+                'result': [
+                    {'id': 0, 'name': 'Blue', 'tag': 'good'},
+                    {'id': 1, 'name': 'Red', 'tag': 'bad'},
+                    {'id': 2, 'name': 'Green', 'tag': 'yay'},
+                ],
+            },
+            rv.json(),
+        )
+
+        rv = self.requests.post(
+            API_URL,
+            json={
+                'id': 1,
+                'jsonrpc': '2.0',
+                'method': 'jsonrpc.createManyFixColor',
+                'params': {'colors': {'1': {'name': 'Blue', 'tag': 'good'}}},
+            },
+            headers={'Content-Type': 'application/json'},
+        )
+        self.assertEqual(200, rv.status_code)
+        self.assertDictEqual(
+            {'id': 1, 'jsonrpc': '2.0', 'result': [{'id': 1, 'name': 'Blue', 'tag': 'good'}]}, rv.json()
+        )
+
+        rv = self.requests.post(
+            API_URL,
+            json={
+                'id': 1,
+                'jsonrpc': '2.0',
+                'method': 'jsonrpc.removeColor',
+                'params': {'color': {'id': 1, 'name': 'Blue', 'tag': 'good'}},
+            },
+            headers={'Content-Type': 'application/json'},
+        )
+        self.assertEqual(200, rv.status_code)
+        self.assertDictEqual({'id': 1, 'jsonrpc': '2.0', 'result': {'id': 1, 'name': 'Blue', 'tag': 'good'}}, rv.json())
+
+        rv = self.requests.post(
+            API_URL,
+            json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.removeColor', 'params': {'color': None}},
+            headers={'Content-Type': 'application/json'},
+        )
+        self.assertEqual(200, rv.status_code)
+        self.assertDictEqual({'id': 1, 'jsonrpc': '2.0', 'result': None}, rv.json())
+
+        rv = self.requests.post(
+            API_URL,
+            json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.removeColor', 'params': []},
+            headers={'Content-Type': 'application/json'},
+        )
+        self.assertEqual(200, rv.status_code)
+        self.assertDictEqual({'id': 1, 'jsonrpc': '2.0', 'result': None}, rv.json())
+
+    def test_app_with_dataclass(self: Self) -> None:
+        rv = self.requests.post(
+            API_URL,
+            json={
+                'id': 1,
+                'jsonrpc': '2.0',
+                'method': 'jsonrpc.createCar',
+                'params': {'car': {'name': 'Fusca', 'tag': 'blue'}},
+            },
+            headers={'Content-Type': 'application/json'},
+        )
+        self.assertEqual(200, rv.status_code)
+        self.assertDictEqual(
+            {'id': 1, 'jsonrpc': '2.0', 'result': {'id': 1, 'name': 'Fusca', 'tag': 'blue'}}, rv.json()
+        )
+
+        rv = self.requests.post(
+            API_URL,
+            json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.createCar', 'params': {'car': {'name': 'Fusca'}}},
+            headers={'Content-Type': 'application/json'},
+        )
+        self.assertEqual(400, rv.status_code)
+        data = rv.json()
+        self.assertEqual(1, data['id'])
+        self.assertEqual('2.0', data['jsonrpc'])
+        self.assertEqual(-32602, data['error']['code'])
+        self.assertTrue("missing 1 required positional argument: 'tag'" in data['error']['data']['message'])
+        self.assertEqual('Invalid params', data['error']['message'])
+        self.assertEqual('InvalidParamsError', data['error']['name'])
+
+        rv = self.requests.post(
+            API_URL,
+            json={
+                'id': 1,
+                'jsonrpc': '2.0',
+                'method': 'jsonrpc.createManyCar',
+                'params': {'cars': [{'name': 'Fusca', 'tag': 'blue'}, {'name': 'Kombi', 'tag': 'yellow'}]},
+            },
+            headers={'Content-Type': 'application/json'},
+        )
+        self.assertEqual(200, rv.status_code)
+        self.assertDictEqual(
+            {
+                'id': 1,
+                'jsonrpc': '2.0',
+                'result': [{'id': 0, 'name': 'Fusca', 'tag': 'blue'}, {'id': 1, 'name': 'Kombi', 'tag': 'yellow'}],
+            },
+            rv.json(),
+        )
+
+        rv = self.requests.post(
+            API_URL,
+            json={
+                'id': 1,
+                'jsonrpc': '2.0',
+                'method': 'jsonrpc.createManyCar',
+                'params': {'cars': [{'name': 'Fusca', 'tag': 'blue'}], 'car': {'name': 'Kombi', 'tag': 'yellow'}},
+            },
+            headers={'Content-Type': 'application/json'},
+        )
+        self.assertEqual(200, rv.status_code)
+        self.assertDictEqual(
+            {
+                'id': 1,
+                'jsonrpc': '2.0',
+                'result': [{'id': 0, 'name': 'Fusca', 'tag': 'blue'}, {'id': 1, 'name': 'Kombi', 'tag': 'yellow'}],
+            },
+            rv.json(),
+        )
+
+        rv = self.requests.post(
+            API_URL,
+            json={
+                'id': 1,
+                'jsonrpc': '2.0',
+                'method': 'jsonrpc.createManyCar',
+                'params': [
+                    [{'name': 'Fusca', 'tag': 'blue'}, {'name': 'Kombi', 'tag': 'yellow'}],
+                    {'name': 'Gol', 'tag': 'white'},
+                ],
+            },
+            headers={'Content-Type': 'application/json'},
+        )
+        self.assertEqual(200, rv.status_code)
+        self.assertDictEqual(
+            {
+                'id': 1,
+                'jsonrpc': '2.0',
+                'result': [
+                    {'id': 0, 'name': 'Fusca', 'tag': 'blue'},
+                    {'id': 1, 'name': 'Kombi', 'tag': 'yellow'},
+                    {'id': 2, 'name': 'Gol', 'tag': 'white'},
+                ],
+            },
+            rv.json(),
+        )
+
+        rv = self.requests.post(
+            API_URL,
+            json={
+                'id': 1,
+                'jsonrpc': '2.0',
+                'method': 'jsonrpc.createManyFixCar',
+                'params': {'cars': {'1': {'name': 'Fusca', 'tag': 'blue'}}},
+            },
+            headers={'Content-Type': 'application/json'},
+        )
+        self.assertEqual(200, rv.status_code)
+        self.assertDictEqual(
+            {'id': 1, 'jsonrpc': '2.0', 'result': [{'id': 1, 'name': 'Fusca', 'tag': 'blue'}]}, rv.json()
+        )
+
+        rv = self.requests.post(
+            API_URL,
+            json={
+                'id': 1,
+                'jsonrpc': '2.0',
+                'method': 'jsonrpc.removeCar',
+                'params': {'car': {'id': 1, 'name': 'Fusca', 'tag': 'blue'}},
+            },
+            headers={'Content-Type': 'application/json'},
+        )
+        self.assertEqual(200, rv.status_code)
+        self.assertDictEqual(
+            {'id': 1, 'jsonrpc': '2.0', 'result': {'id': 1, 'name': 'Fusca', 'tag': 'blue'}}, rv.json()
+        )
+
+        rv = self.requests.post(
+            API_URL,
+            json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.removeCar', 'params': {'car': None}},
+            headers={'Content-Type': 'application/json'},
+        )
+        self.assertEqual(200, rv.status_code)
+        self.assertDictEqual({'id': 1, 'jsonrpc': '2.0', 'result': None}, rv.json())
+
+        rv = self.requests.post(
+            API_URL,
+            json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.removeCar', 'params': []},
+            headers={'Content-Type': 'application/json'},
+        )
+        self.assertEqual(200, rv.status_code)
+        self.assertDictEqual({'id': 1, 'jsonrpc': '2.0', 'result': None}, rv.json())
+
+    def test_app_with_pydantic(self: Self) -> None:
+        rv = self.requests.post(
+            API_URL,
+            json={
+                'id': 1,
+                'jsonrpc': '2.0',
+                'method': 'jsonrpc.createPet',
+                'params': {'pet': {'name': 'Eve', 'tag': 'dog'}},
+            },
+            headers={'Content-Type': 'application/json'},
+        )
+        self.assertEqual(200, rv.status_code)
+        self.assertDictEqual({'id': 1, 'jsonrpc': '2.0', 'result': {'id': 1, 'name': 'Eve', 'tag': 'dog'}}, rv.json())
+
+        rv = self.requests.post(
+            API_URL,
+            json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.createPet', 'params': {'pet': {'name': 'Eve'}}},
+            headers={'Content-Type': 'application/json'},
+        )
+        self.assertEqual(400, rv.status_code)
+        self.assertDictEqual(
+            {
+                'id': 1,
+                'jsonrpc': '2.0',
+                'error': {
+                    'code': -32602,
+                    'data': {
+                        'message': '1 validation error for NewPet\n'
+                        'tag\n'
+                        "  Field required [type=missing, input_value={'name': 'Eve'}, "
+                        'input_type=dict]\n'
+                        '    For further information visit '
+                        'https://errors.pydantic.dev/2.9/v/missing'
+                    },
+                    'message': 'Invalid params',
+                    'name': 'InvalidParamsError',
+                },
+            },
+            rv.json(),
+        )
+
+        rv = self.requests.post(
+            API_URL,
+            json={
+                'id': 1,
+                'jsonrpc': '2.0',
+                'method': 'jsonrpc.createManyPet',
+                'params': {'pets': [{'name': 'Eve', 'tag': 'dog'}, {'name': 'Lou', 'tag': 'dog'}]},
+            },
+            headers={'Content-Type': 'application/json'},
+        )
+        self.assertEqual(200, rv.status_code)
+        self.assertDictEqual(
+            {
+                'id': 1,
+                'jsonrpc': '2.0',
+                'result': [{'id': 0, 'name': 'Eve', 'tag': 'dog'}, {'id': 1, 'name': 'Lou', 'tag': 'dog'}],
+            },
+            rv.json(),
+        )
+
+        rv = self.requests.post(
+            API_URL,
+            json={
+                'id': 1,
+                'jsonrpc': '2.0',
+                'method': 'jsonrpc.createManyPet',
+                'params': {'pets': [{'name': 'Eve', 'tag': 'dog'}], 'pet': {'name': 'Lou', 'tag': 'dog'}},
+            },
+            headers={'Content-Type': 'application/json'},
+        )
+        self.assertEqual(200, rv.status_code)
+        self.assertDictEqual(
+            {
+                'id': 1,
+                'jsonrpc': '2.0',
+                'result': [{'id': 0, 'name': 'Eve', 'tag': 'dog'}, {'id': 1, 'name': 'Lou', 'tag': 'dog'}],
+            },
+            rv.json(),
+        )
+
+        rv = self.requests.post(
+            API_URL,
+            json={
+                'id': 1,
+                'jsonrpc': '2.0',
+                'method': 'jsonrpc.createManyPet',
+                'params': [
+                    [{'name': 'Eve', 'tag': 'dog'}, {'name': 'Lou', 'tag': 'dog'}],
+                    {'name': 'Tequila', 'tag': 'cat'},
+                ],
+            },
+            headers={'Content-Type': 'application/json'},
+        )
+        self.assertEqual(200, rv.status_code)
+        self.assertDictEqual(
+            {
+                'id': 1,
+                'jsonrpc': '2.0',
+                'result': [
+                    {'id': 0, 'name': 'Eve', 'tag': 'dog'},
+                    {'id': 1, 'name': 'Lou', 'tag': 'dog'},
+                    {'id': 2, 'name': 'Tequila', 'tag': 'cat'},
+                ],
+            },
+            rv.json(),
+        )
+
+        rv = self.requests.post(
+            API_URL,
+            json={
+                'id': 1,
+                'jsonrpc': '2.0',
+                'method': 'jsonrpc.createManyFixPet',
+                'params': {'pets': {'1': {'name': 'Eve', 'tag': 'dog'}}},
+            },
+            headers={'Content-Type': 'application/json'},
+        )
+        self.assertEqual(200, rv.status_code)
+        self.assertDictEqual({'id': 1, 'jsonrpc': '2.0', 'result': [{'id': 1, 'name': 'Eve', 'tag': 'dog'}]}, rv.json())
+
+        rv = self.requests.post(
+            API_URL,
+            json={
+                'id': 1,
+                'jsonrpc': '2.0',
+                'method': 'jsonrpc.removePet',
+                'params': {'pet': {'id': 1, 'name': 'Eve', 'tag': 'dog'}},
+            },
+        )
+        self.assertEqual(200, rv.status_code)
+        self.assertDictEqual({'id': 1, 'jsonrpc': '2.0', 'result': {'id': 1, 'name': 'Eve', 'tag': 'dog'}}, rv.json())
+
+        rv = self.requests.post(
+            API_URL,
+            json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.removePet', 'params': {'pet': None}},
+            headers={'Content-Type': 'application/json'},
+        )
+        self.assertEqual(200, rv.status_code)
+        self.assertDictEqual({'id': 1, 'jsonrpc': '2.0', 'result': None}, rv.json())
+
+        rv = self.requests.post(
+            API_URL,
+            json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.removePet', 'params': []},
+            headers={'Content-Type': 'application/json'},
+        )
+        self.assertEqual(200, rv.status_code)
+        self.assertDictEqual({'id': 1, 'jsonrpc': '2.0', 'result': None}, rv.json())
+
     def test_system_describe(self: Self) -> None:
         rv = self.requests.post(API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'rpc.describe'})
         json_data = rv.json()
         self.assertEqual(1, json_data['id'])
         self.assertEqual('2.0', json_data['jsonrpc'])
         self.assertEqual('Flask-JSONRPC', json_data['result']['name'])
-        self.assertIsNone(json_data['result']['description'])
+        self.assertTrue('description' not in json_data['result'])
         self.assertEqual('2.0', json_data['result']['version'])
         self.assertIsNotNone(json_data['result']['servers'])
-        self.assertEqual(
+        self.assertDictEqual(
             {
-                'jsonrpc.greeting': {
-                    'type': 'method',
-                    'options': {'notification': True, 'validate': True},
-                    'params': [{'name': 'name', 'type': 'String', 'required': False, 'nullable': False}],
-                    'returns': {'type': 'String'},
-                    'description': None,
-                },
-                'jsonrpc.echo': {
-                    'type': 'method',
-                    'options': {'notification': True, 'validate': True},
-                    'params': [
-                        {'name': 'string', 'type': 'String', 'required': False, 'nullable': False},
-                        {'name': '_some', 'type': 'Object', 'required': False, 'nullable': False},
-                    ],
-                    'returns': {'type': 'String'},
-                    'description': None,
-                },
-                'jsonrpc.notify': {
-                    'type': 'method',
-                    'options': {'notification': True, 'validate': True},
-                    'params': [{'name': '_string', 'type': 'String', 'required': False, 'nullable': False}],
-                    'returns': {'type': 'Null'},
-                    'description': None,
-                },
-                'jsonrpc.not_allow_notify': {
-                    'type': 'method',
-                    'options': {'notification': False, 'validate': True},
-                    'params': [{'name': '_string', 'type': 'String', 'required': False, 'nullable': False}],
-                    'returns': {'type': 'String'},
-                    'description': None,
-                },
-                'jsonrpc.fails': {
-                    'type': 'method',
-                    'options': {'notification': True, 'validate': True},
-                    'params': [{'name': 'n', 'type': 'Number', 'required': False, 'nullable': False}],
-                    'returns': {'type': 'Number'},
-                    'description': None,
-                },
-                'jsonrpc.strangeEcho': {
-                    'type': 'method',
-                    'options': {'notification': True, 'validate': True},
-                    'params': [
-                        {'name': 'string', 'type': 'String', 'required': False, 'nullable': False},
-                        {'name': 'omg', 'type': 'Object', 'required': False, 'nullable': False},
-                        {'name': 'wtf', 'type': 'Array', 'required': False, 'nullable': False},
-                        {'name': 'nowai', 'type': 'Number', 'required': False, 'nullable': False},
-                        {'name': 'yeswai', 'type': 'String', 'required': False, 'nullable': False},
-                    ],
-                    'returns': {'type': 'Array'},
-                    'description': None,
-                },
-                'jsonrpc.sum': {
-                    'type': 'method',
-                    'options': {'notification': True, 'validate': True},
-                    'params': [
-                        {'name': 'a', 'type': 'Number', 'required': False, 'nullable': False},
-                        {'name': 'b', 'type': 'Number', 'required': False, 'nullable': False},
-                    ],
-                    'returns': {'type': 'Number'},
-                    'description': None,
-                },
-                'jsonrpc.decorators': {
-                    'type': 'method',
-                    'options': {'notification': True, 'validate': True},
-                    'params': [{'name': 'string', 'type': 'String', 'required': False, 'nullable': False}],
-                    'returns': {'type': 'String'},
-                    'description': None,
-                },
-                'jsonrpc.returnStatusCode': {
-                    'type': 'method',
-                    'options': {'notification': True, 'validate': True},
-                    'params': [{'name': 's', 'type': 'String', 'required': False, 'nullable': False}],
-                    'returns': {'type': 'Array'},
-                    'description': None,
-                },
-                'jsonrpc.returnHeaders': {
-                    'type': 'method',
-                    'options': {'notification': True, 'validate': True},
-                    'params': [{'name': 's', 'type': 'String', 'required': False, 'nullable': False}],
-                    'returns': {'type': 'Array'},
-                    'description': None,
-                },
-                'jsonrpc.returnStatusCodeAndHeaders': {
-                    'type': 'method',
-                    'options': {'notification': True, 'validate': True},
-                    'params': [{'name': 's', 'type': 'String', 'required': False, 'nullable': False}],
-                    'returns': {'type': 'Array'},
-                    'description': None,
-                },
-                'jsonrpc.not_validate': {
-                    'type': 'method',
-                    'options': {'notification': True, 'validate': False},
-                    'params': [{'name': 's', 'nullable': False, 'required': False, 'type': 'Object'}],
-                    'returns': {'type': 'Object'},
-                    'description': None,
-                },
-                'jsonrpc.mixin_not_validate': {
-                    'type': 'method',
-                    'options': {'notification': True, 'validate': False},
-                    'params': [
-                        {'name': 's', 'type': 'Object', 'required': False, 'nullable': False},
-                        {'name': 't', 'type': 'Number', 'required': False, 'nullable': False},
-                        {'name': 'u', 'type': 'Object', 'required': False, 'nullable': False},
-                        {'name': 'v', 'type': 'String', 'required': False, 'nullable': False},
-                        {'name': 'x', 'type': 'Object', 'required': False, 'nullable': False},
-                        {'name': 'z', 'type': 'Object', 'required': False, 'nullable': False},
-                    ],
-                    'returns': {'type': 'Object'},
-                    'description': None,
-                },
-                'jsonrpc.noReturn': {
-                    'type': 'method',
-                    'options': {'notification': True, 'validate': True},
-                    'params': [{'name': '_string', 'type': 'String', 'required': False, 'nullable': False}],
-                    'returns': {'type': 'Null'},
-                    'description': None,
-                },
                 'classapp.index': {
-                    'type': 'method',
                     'options': {'notification': True, 'validate': True},
-                    'params': [{'name': 'name', 'type': 'String', 'required': False, 'nullable': False}],
+                    'params': [{'name': 'name', 'type': 'String'}],
                     'returns': {'type': 'String'},
-                    'description': None,
-                },
-                'greeting': {
                     'type': 'method',
-                    'options': {'notification': True, 'validate': True},
-                    'params': [{'name': 'name', 'type': 'String', 'required': False, 'nullable': False}],
-                    'returns': {'type': 'String'},
-                    'description': None,
-                },
-                'hello': {
-                    'type': 'method',
-                    'options': {'notification': True, 'validate': True},
-                    'params': [{'name': 'name', 'type': 'String', 'required': False, 'nullable': False}],
-                    'returns': {'type': 'String'},
-                    'description': None,
                 },
                 'echo': {
-                    'type': 'method',
                     'options': {'notification': True, 'validate': True},
-                    'params': [
-                        {'name': 'string', 'type': 'String', 'required': False, 'nullable': False},
-                        {'name': '_some', 'type': 'Object', 'required': False, 'nullable': False},
-                    ],
+                    'params': [{'name': 'string', 'type': 'String'}, {'name': '_some', 'type': 'Object'}],
                     'returns': {'type': 'String'},
-                    'description': None,
-                },
-                'notify': {
                     'type': 'method',
-                    'options': {'notification': True, 'validate': True},
-                    'params': [{'name': '_string', 'type': 'String', 'required': False, 'nullable': False}],
-                    'returns': {'type': 'Null'},
-                    'description': None,
-                },
-                'not_allow_notify': {
-                    'type': 'method',
-                    'options': {'notification': False, 'validate': True},
-                    'params': [{'name': '_string', 'type': 'String', 'required': False, 'nullable': False}],
-                    'returns': {'type': 'String'},
-                    'description': None,
                 },
                 'fails': {
-                    'type': 'method',
                     'options': {'notification': True, 'validate': True},
-                    'params': [{'name': 'n', 'type': 'Number', 'required': False, 'nullable': False}],
+                    'params': [{'name': 'n', 'type': 'Number'}],
                     'returns': {'type': 'Number'},
-                    'description': None,
+                    'type': 'method',
                 },
-                'rpc.describe': {
-                    'description': None,
-                    'options': {},
-                    'params': [],
+                'greeting': {
+                    'options': {'notification': True, 'validate': True},
+                    'params': [{'name': 'name', 'type': 'String'}],
+                    'returns': {'type': 'String'},
+                    'type': 'method',
+                },
+                'hello': {
+                    'options': {'notification': True, 'validate': True},
+                    'params': [{'name': 'name', 'type': 'String'}],
+                    'returns': {'type': 'String'},
+                    'type': 'method',
+                },
+                'jsonrpc.createCar': {
+                    'options': {'notification': True, 'validate': True},
+                    'params': [{'name': 'car', 'type': 'Object'}],
                     'returns': {'type': 'Object'},
                     'type': 'method',
                 },
+                'jsonrpc.createColor': {
+                    'options': {'notification': True, 'validate': True},
+                    'params': [{'name': 'color', 'type': 'Object'}],
+                    'returns': {'type': 'Object'},
+                    'type': 'method',
+                },
+                'jsonrpc.createManyCar': {
+                    'options': {'notification': True, 'validate': True},
+                    'params': [{'name': 'cars', 'type': 'Array'}, {'name': 'car', 'type': 'Object'}],
+                    'returns': {'type': 'Array'},
+                    'type': 'method',
+                },
+                'jsonrpc.createManyColor': {
+                    'options': {'notification': True, 'validate': True},
+                    'params': [{'name': 'colors', 'type': 'Array'}, {'name': 'color', 'type': 'Object'}],
+                    'returns': {'type': 'Array'},
+                    'type': 'method',
+                },
+                'jsonrpc.createManyFixCar': {
+                    'options': {'notification': True, 'validate': True},
+                    'params': [{'name': 'cars', 'type': 'Object'}],
+                    'returns': {'type': 'Array'},
+                    'type': 'method',
+                },
+                'jsonrpc.createManyFixColor': {
+                    'options': {'notification': True, 'validate': True},
+                    'params': [{'name': 'colors', 'type': 'Object'}],
+                    'returns': {'type': 'Array'},
+                    'type': 'method',
+                },
+                'jsonrpc.createManyFixPet': {
+                    'options': {'notification': True, 'validate': True},
+                    'params': [{'name': 'pets', 'type': 'Object'}],
+                    'returns': {'type': 'Array'},
+                    'type': 'method',
+                },
+                'jsonrpc.createManyPet': {
+                    'options': {'notification': True, 'validate': True},
+                    'params': [{'name': 'pets', 'type': 'Array'}, {'name': 'pet', 'type': 'Object'}],
+                    'returns': {'type': 'Array'},
+                    'type': 'method',
+                },
+                'jsonrpc.createPet': {
+                    'options': {'notification': True, 'validate': True},
+                    'params': [{'name': 'pet', 'type': 'Object'}],
+                    'returns': {'type': 'Object'},
+                    'type': 'method',
+                },
+                'jsonrpc.decorators': {
+                    'options': {'notification': True, 'validate': True},
+                    'params': [{'name': 'string', 'type': 'String'}],
+                    'returns': {'type': 'String'},
+                    'type': 'method',
+                },
+                'jsonrpc.echo': {
+                    'options': {'notification': True, 'validate': True},
+                    'params': [{'name': 'string', 'type': 'String'}, {'name': '_some', 'type': 'Object'}],
+                    'returns': {'type': 'String'},
+                    'type': 'method',
+                },
+                'jsonrpc.fails': {
+                    'options': {'notification': True, 'validate': True},
+                    'params': [{'name': 'n', 'type': 'Number'}],
+                    'returns': {'type': 'Number'},
+                    'type': 'method',
+                },
+                'jsonrpc.greeting': {
+                    'options': {'notification': True, 'validate': True},
+                    'params': [{'name': 'name', 'type': 'String'}],
+                    'returns': {'type': 'String'},
+                    'type': 'method',
+                },
+                'jsonrpc.invalidUnion1': {
+                    'options': {'notification': True, 'validate': True},
+                    'params': [{'name': 'color', 'type': 'Object'}],
+                    'returns': {'type': 'Object'},
+                    'type': 'method',
+                },
+                'jsonrpc.invalidUnion2': {
+                    'options': {'notification': True, 'validate': True},
+                    'params': [{'name': 'color', 'type': 'Object'}],
+                    'returns': {'type': 'Object'},
+                    'type': 'method',
+                },
+                'jsonrpc.literalType': {
+                    'options': {'notification': True, 'validate': True},
+                    'params': [{'name': 'x', 'type': 'Object'}],
+                    'returns': {'type': 'Object'},
+                    'type': 'method',
+                },
+                'jsonrpc.mixin_not_validate': {
+                    'options': {'notification': True, 'validate': False},
+                    'params': [
+                        {'name': 's', 'type': 'Object'},
+                        {'name': 't', 'type': 'Number'},
+                        {'name': 'u', 'type': 'Object'},
+                        {'name': 'v', 'type': 'String'},
+                        {'name': 'x', 'type': 'Object'},
+                        {'name': 'z', 'type': 'Object'},
+                    ],
+                    'returns': {'type': 'Object'},
+                    'type': 'method',
+                },
+                'jsonrpc.noReturn': {
+                    'options': {'notification': True, 'validate': True},
+                    'params': [{'name': '_string', 'type': 'String'}],
+                    'returns': {'type': 'Null'},
+                    'type': 'method',
+                },
+                'jsonrpc.not_allow_notify': {
+                    'options': {'notification': False, 'validate': True},
+                    'params': [{'name': '_string', 'type': 'String'}],
+                    'returns': {'type': 'String'},
+                    'type': 'method',
+                },
+                'jsonrpc.not_validate': {
+                    'options': {'notification': True, 'validate': False},
+                    'params': [{'name': 's', 'type': 'Object'}],
+                    'returns': {'type': 'Object'},
+                    'type': 'method',
+                },
+                'jsonrpc.notify': {
+                    'options': {'notification': True, 'validate': True},
+                    'params': [{'name': '_string', 'type': 'String'}],
+                    'returns': {'type': 'Null'},
+                    'type': 'method',
+                },
+                'jsonrpc.removeCar': {
+                    'options': {'notification': True, 'validate': True},
+                    'params': [{'name': 'car', 'type': 'Object'}],
+                    'returns': {'type': 'Object'},
+                    'type': 'method',
+                },
+                'jsonrpc.removeColor': {
+                    'options': {'notification': True, 'validate': True},
+                    'params': [{'name': 'color', 'type': 'Object'}],
+                    'returns': {'type': 'Object'},
+                    'type': 'method',
+                },
+                'jsonrpc.removePet': {
+                    'options': {'notification': True, 'validate': True},
+                    'params': [{'name': 'pet', 'type': 'Object'}],
+                    'returns': {'type': 'Object'},
+                    'type': 'method',
+                },
+                'jsonrpc.returnHeaders': {
+                    'options': {'notification': True, 'validate': True},
+                    'params': [{'name': 's', 'type': 'String'}],
+                    'returns': {'type': 'Array'},
+                    'type': 'method',
+                },
+                'jsonrpc.returnStatusCode': {
+                    'options': {'notification': True, 'validate': True},
+                    'params': [{'name': 's', 'type': 'String'}],
+                    'returns': {'type': 'Array'},
+                    'type': 'method',
+                },
+                'jsonrpc.returnStatusCodeAndHeaders': {
+                    'options': {'notification': True, 'validate': True},
+                    'params': [{'name': 's', 'type': 'String'}],
+                    'returns': {'type': 'Array'},
+                    'type': 'method',
+                },
+                'jsonrpc.strangeEcho': {
+                    'options': {'notification': True, 'validate': True},
+                    'params': [
+                        {'name': 'string', 'type': 'String'},
+                        {'name': 'omg', 'type': 'Object'},
+                        {'name': 'wtf', 'type': 'Array'},
+                        {'name': 'nowai', 'type': 'Number'},
+                        {'name': 'yeswai', 'type': 'String'},
+                    ],
+                    'returns': {'type': 'Array'},
+                    'type': 'method',
+                },
+                'jsonrpc.sum': {
+                    'options': {'notification': True, 'validate': True},
+                    'params': [{'name': 'a', 'type': 'Number'}, {'name': 'b', 'type': 'Number'}],
+                    'returns': {'type': 'Number'},
+                    'type': 'method',
+                },
+                'not_allow_notify': {
+                    'options': {'notification': False, 'validate': True},
+                    'params': [{'name': '_string', 'type': 'String'}],
+                    'returns': {'type': 'String'},
+                    'type': 'method',
+                },
+                'notify': {
+                    'options': {'notification': True, 'validate': True},
+                    'params': [{'name': '_string', 'type': 'String'}],
+                    'returns': {'type': 'Null'},
+                    'type': 'method',
+                },
+                'rpc.describe': {'options': {}, 'params': [], 'returns': {'type': 'Object'}, 'type': 'method'},
             },
             json_data['result']['methods'],
         )

@@ -73,7 +73,7 @@ class JSONRPCDecoratorMixin:
             return fn
         if ismethod(fn) and getattr(fn, '__func__', None):
             return fn.__func__  # pytype: disable=attribute-error,bad-return-type
-        raise ValueError('the view function must be either a function or a method')
+        raise ValueError('the view function must be either a function or a method') from None
 
     def _get_type_hints_by_signature(
         self: Self, fn: t.Callable[..., t.Any], fn_annotations: t.Dict[str, t.Any]
@@ -98,10 +98,10 @@ class JSONRPCDecoratorMixin:
         return fn_annotations
 
     def get_jsonrpc_site(self: Self) -> 'JSONRPCSite':
-        raise NotImplementedError('.get_jsonrpc_site must be overridden')
+        raise NotImplementedError('.get_jsonrpc_site must be overridden') from None
 
     def get_jsonrpc_site_api(self: Self) -> t.Type['JSONRPCView']:
-        raise NotImplementedError('.get_jsonrpc_site_api must be overridden')
+        raise NotImplementedError('.get_jsonrpc_site_api must be overridden') from None
 
     def register_view_function(
         self: Self, view_func: t.Callable[..., t.Any], name: t.Optional[str] = None, **options: t.Dict[str, t.Any]
@@ -127,7 +127,7 @@ class JSONRPCDecoratorMixin:
         def decorator(fn: t.Callable[..., t.Any]) -> t.Callable[..., t.Any]:
             method_name = name if name else getattr(fn, '__name__', '<noname>')
             if validate and not self._validate(fn):
-                raise ValueError(f'no type annotations present to: {method_name}')
+                raise ValueError(f'no type annotations present to: {method_name}') from None
             return self.register_view_function(fn, name, **options)
 
         return decorator

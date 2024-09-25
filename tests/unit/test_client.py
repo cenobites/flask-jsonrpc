@@ -156,7 +156,7 @@ def test_app_greeting_raise_invalid_params_error(client: 'FlaskClient') -> None:
         'jsonrpc': '2.0',
         'error': {
             'code': -32602,
-            'data': {'message': 'Parameter structures are by-position (tuple, set, list) or by-name (dict): Wrong'},
+            'data': {'message': 'Parameter structures are by-position (list) or by-name (dict): Wrong'},
             'message': 'Invalid params',
             'name': 'InvalidParamsError',
         },
@@ -214,6 +214,19 @@ def test_app_echo(client: 'FlaskClient') -> None:
     assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': 'Flask'}
     assert rv.status_code == 200
 
+    rv = client.post('/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.echo', 'params': {'string': None}})
+    assert rv.json == {
+        'id': 1,
+        'jsonrpc': '2.0',
+        'error': {
+            'code': -32602,
+            'data': {'message': "missing a required argument: 'string'"},
+            'message': 'Invalid params',
+            'name': 'InvalidParamsError',
+        },
+    }
+    assert rv.status_code == 400
+
 
 def test_app_echo_raise_invalid_params_error(client: 'FlaskClient') -> None:
     rv = client.post('/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.echo', 'params': 'Wrong'})
@@ -222,7 +235,7 @@ def test_app_echo_raise_invalid_params_error(client: 'FlaskClient') -> None:
         'jsonrpc': '2.0',
         'error': {
             'code': -32602,
-            'data': {'message': 'Parameter structures are by-position (tuple, set, list) or by-name (dict): Wrong'},
+            'data': {'message': 'Parameter structures are by-position (list) or by-name (dict): Wrong'},
             'message': 'Invalid params',
             'name': 'InvalidParamsError',
         },
@@ -365,6 +378,20 @@ def test_app_sum(client: 'FlaskClient') -> None:
     assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': 2.0}
     assert rv.status_code == 200
 
+    data = {'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.sum', 'params': {'a': None, 'b': None}}
+    rv = client.post('/api', json=data)
+    assert rv.json == {
+        'id': 1,
+        'jsonrpc': '2.0',
+        'error': {
+            'code': -32602,
+            'data': {'message': "missing a required argument: 'a'"},
+            'message': 'Invalid params',
+            'name': 'InvalidParamsError',
+        },
+    }
+    assert rv.status_code == 400
+
 
 def test_app_decorators(client: 'FlaskClient') -> None:
     data = {'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.decorators', 'params': ['Python']}
@@ -479,192 +506,651 @@ def test_app_class(client: 'FlaskClient') -> None:
     assert rv.status_code == 500
 
 
+def test_app_with_pythonclass(client: 'FlaskClient') -> None:
+    rv = client.post(
+        '/api',
+        json={
+            'id': 1,
+            'jsonrpc': '2.0',
+            'method': 'jsonrpc.createColor',
+            'params': {'color': {'name': 'Blue', 'tag': 'good'}},
+        },
+    )
+    assert rv.status_code == 200
+    assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': {'id': 1, 'name': 'Blue', 'tag': 'good'}}
+
+    rv = client.post(
+        '/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.createColor', 'params': {'color': {'name': 'Red'}}}
+    )
+    assert rv.status_code == 400
+    data = rv.get_json()
+    assert data['id'] == 1
+    assert data['jsonrpc'] == '2.0'
+    assert data['error']['code'] == -32602
+    assert "missing 1 required positional argument: 'tag'" in data['error']['data']['message']
+    assert data['error']['message'] == 'Invalid params'
+    assert data['error']['name'] == 'InvalidParamsError'
+
+    rv = client.post(
+        '/api',
+        json={
+            'id': 1,
+            'jsonrpc': '2.0',
+            'method': 'jsonrpc.createManyColor',
+            'params': {'colors': [{'name': 'Blue', 'tag': 'good'}, {'name': 'Red', 'tag': 'bad'}]},
+        },
+    )
+    assert rv.status_code == 200
+    assert rv.json == {
+        'id': 1,
+        'jsonrpc': '2.0',
+        'result': [{'id': 0, 'name': 'Blue', 'tag': 'good'}, {'id': 1, 'name': 'Red', 'tag': 'bad'}],
+    }
+
+    rv = client.post(
+        '/api',
+        json={
+            'id': 1,
+            'jsonrpc': '2.0',
+            'method': 'jsonrpc.createManyColor',
+            'params': {'colors': [{'name': 'Blue', 'tag': 'good'}], 'color': {'name': 'Red', 'tag': 'bad'}},
+        },
+    )
+    assert rv.status_code == 200
+    assert rv.json == {
+        'id': 1,
+        'jsonrpc': '2.0',
+        'result': [{'id': 0, 'name': 'Blue', 'tag': 'good'}, {'id': 1, 'name': 'Red', 'tag': 'bad'}],
+    }
+
+    rv = client.post(
+        '/api',
+        json={
+            'id': 1,
+            'jsonrpc': '2.0',
+            'method': 'jsonrpc.createManyColor',
+            'params': [
+                [{'name': 'Blue', 'tag': 'good'}, {'name': 'Red', 'tag': 'bad'}],
+                {'name': 'Green', 'tag': 'yay'},
+            ],
+        },
+    )
+    assert rv.status_code == 200
+    assert rv.json == {
+        'id': 1,
+        'jsonrpc': '2.0',
+        'result': [
+            {'id': 0, 'name': 'Blue', 'tag': 'good'},
+            {'id': 1, 'name': 'Red', 'tag': 'bad'},
+            {'id': 2, 'name': 'Green', 'tag': 'yay'},
+        ],
+    }
+
+    rv = client.post(
+        '/api',
+        json={
+            'id': 1,
+            'jsonrpc': '2.0',
+            'method': 'jsonrpc.createManyFixColor',
+            'params': {'colors': {'1': {'name': 'Blue', 'tag': 'good'}}},
+        },
+    )
+    assert rv.status_code == 200
+    assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': [{'id': 1, 'name': 'Blue', 'tag': 'good'}]}
+
+    rv = client.post(
+        '/api',
+        json={
+            'id': 1,
+            'jsonrpc': '2.0',
+            'method': 'jsonrpc.removeColor',
+            'params': {'color': {'id': 1, 'name': 'Blue', 'tag': 'good'}},
+        },
+    )
+    assert rv.status_code == 200
+    assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': {'id': 1, 'name': 'Blue', 'tag': 'good'}}
+
+    rv = client.post(
+        '/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.removeColor', 'params': {'color': None}}
+    )
+    assert rv.status_code == 200
+    assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': None}
+
+    rv = client.post('/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.removeColor', 'params': []})
+    assert rv.status_code == 200
+    assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': None}
+
+
+def test_app_with_invalid_union(client: 'FlaskClient') -> None:
+    rv = client.post(
+        '/api',
+        json={
+            'id': 1,
+            'jsonrpc': '2.0',
+            'method': 'jsonrpc.invalidUnion1',
+            'params': {'color': {'name': 'Blue', 'tag': 'good'}},
+        },
+    )
+    assert rv.status_code == 400
+    assert rv.json == {
+        'id': 1,
+        'jsonrpc': '2.0',
+        'error': {
+            'code': -32602,
+            'data': {
+                'message': 'the only type of union that is supported is: typing.Union[T, ' 'None] or typing.Optional[T]'
+            },
+            'message': 'Invalid params',
+            'name': 'InvalidParamsError',
+        },
+    }
+
+    rv = client.post(
+        '/api',
+        json={
+            'id': 1,
+            'jsonrpc': '2.0',
+            'method': 'jsonrpc.invalidUnion2',
+            'params': {'color': {'name': 'Blue', 'tag': 'good'}},
+        },
+    )
+    assert rv.status_code == 400
+    assert rv.json == {
+        'id': 1,
+        'jsonrpc': '2.0',
+        'error': {
+            'code': -32602,
+            'data': {
+                'message': 'the only type of union that is supported is: typing.Union[T, ' 'None] or typing.Optional[T]'
+            },
+            'message': 'Invalid params',
+            'name': 'InvalidParamsError',
+        },
+    }
+
+
+def test_app_with_pythontypes(client: 'FlaskClient') -> None:
+    rv = client.post('/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.literalType', 'params': {'x': 'X'}})
+    assert rv.status_code == 200
+    assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': 'X'}
+
+
+def test_app_with_dataclass(client: 'FlaskClient') -> None:
+    rv = client.post(
+        '/api',
+        json={
+            'id': 1,
+            'jsonrpc': '2.0',
+            'method': 'jsonrpc.createCar',
+            'params': {'car': {'name': 'Fusca', 'tag': 'blue'}},
+        },
+    )
+    assert rv.status_code == 200
+    assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': {'id': 1, 'name': 'Fusca', 'tag': 'blue'}}
+
+    rv = client.post(
+        '/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.createCar', 'params': {'car': {'name': 'Fusca'}}}
+    )
+    assert rv.status_code == 400
+    data = rv.get_json()
+    assert data['id'] == 1
+    assert data['jsonrpc'] == '2.0'
+    assert data['error']['code'] == -32602
+    assert "missing 1 required positional argument: 'tag'" in data['error']['data']['message']
+    assert data['error']['message'] == 'Invalid params'
+    assert data['error']['name'] == 'InvalidParamsError'
+
+    rv = client.post(
+        '/api',
+        json={
+            'id': 1,
+            'jsonrpc': '2.0',
+            'method': 'jsonrpc.createManyCar',
+            'params': {'cars': [{'name': 'Fusca', 'tag': 'blue'}, {'name': 'Kombi', 'tag': 'yellow'}]},
+        },
+    )
+    assert rv.status_code == 200
+    assert rv.json == {
+        'id': 1,
+        'jsonrpc': '2.0',
+        'result': [{'id': 0, 'name': 'Fusca', 'tag': 'blue'}, {'id': 1, 'name': 'Kombi', 'tag': 'yellow'}],
+    }
+
+    rv = client.post(
+        '/api',
+        json={
+            'id': 1,
+            'jsonrpc': '2.0',
+            'method': 'jsonrpc.createManyCar',
+            'params': {'cars': [{'name': 'Fusca', 'tag': 'blue'}], 'car': {'name': 'Kombi', 'tag': 'yellow'}},
+        },
+    )
+    assert rv.status_code == 200
+    assert rv.json == {
+        'id': 1,
+        'jsonrpc': '2.0',
+        'result': [{'id': 0, 'name': 'Fusca', 'tag': 'blue'}, {'id': 1, 'name': 'Kombi', 'tag': 'yellow'}],
+    }
+
+    rv = client.post(
+        '/api',
+        json={
+            'id': 1,
+            'jsonrpc': '2.0',
+            'method': 'jsonrpc.createManyCar',
+            'params': [
+                [{'name': 'Fusca', 'tag': 'blue'}, {'name': 'Kombi', 'tag': 'yellow'}],
+                {'name': 'Gol', 'tag': 'white'},
+            ],
+        },
+    )
+    assert rv.status_code == 200
+    assert rv.json == {
+        'id': 1,
+        'jsonrpc': '2.0',
+        'result': [
+            {'id': 0, 'name': 'Fusca', 'tag': 'blue'},
+            {'id': 1, 'name': 'Kombi', 'tag': 'yellow'},
+            {'id': 2, 'name': 'Gol', 'tag': 'white'},
+        ],
+    }
+
+    rv = client.post(
+        '/api',
+        json={
+            'id': 1,
+            'jsonrpc': '2.0',
+            'method': 'jsonrpc.createManyFixCar',
+            'params': {'cars': {'1': {'name': 'Fusca', 'tag': 'blue'}}},
+        },
+    )
+    assert rv.status_code == 200
+    assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': [{'id': 1, 'name': 'Fusca', 'tag': 'blue'}]}
+
+    rv = client.post(
+        '/api',
+        json={
+            'id': 1,
+            'jsonrpc': '2.0',
+            'method': 'jsonrpc.removeCar',
+            'params': {'car': {'id': 1, 'name': 'Fusca', 'tag': 'blue'}},
+        },
+    )
+    assert rv.status_code == 200
+    assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': {'id': 1, 'name': 'Fusca', 'tag': 'blue'}}
+
+    rv = client.post('/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.removeCar', 'params': {'car': None}})
+    assert rv.status_code == 200
+    assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': None}
+
+    rv = client.post('/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.removeCar', 'params': []})
+    assert rv.status_code == 200
+    assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': None}
+
+
+def test_app_with_pydantic(client: 'FlaskClient') -> None:
+    rv = client.post(
+        '/api',
+        json={
+            'id': 1,
+            'jsonrpc': '2.0',
+            'method': 'jsonrpc.createPet',
+            'params': {'pet': {'name': 'Eve', 'tag': 'dog'}},
+        },
+    )
+    assert rv.status_code == 200
+    assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': {'id': 1, 'name': 'Eve', 'tag': 'dog'}}
+
+    rv = client.post(
+        '/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.createPet', 'params': {'pet': {'name': 'Eve'}}}
+    )
+    assert rv.status_code == 400
+    assert rv.json == {
+        'id': 1,
+        'jsonrpc': '2.0',
+        'error': {
+            'code': -32602,
+            'data': {
+                'message': '1 validation error for NewPet\n'
+                'tag\n'
+                "  Field required [type=missing, input_value={'name': 'Eve'}, "
+                'input_type=dict]\n'
+                '    For further information visit '
+                'https://errors.pydantic.dev/2.9/v/missing'
+            },
+            'message': 'Invalid params',
+            'name': 'InvalidParamsError',
+        },
+    }
+
+    rv = client.post(
+        '/api',
+        json={
+            'id': 1,
+            'jsonrpc': '2.0',
+            'method': 'jsonrpc.createManyPet',
+            'params': {'pets': [{'name': 'Eve', 'tag': 'dog'}, {'name': 'Lou', 'tag': 'dog'}]},
+        },
+    )
+    assert rv.status_code == 200
+    assert rv.json == {
+        'id': 1,
+        'jsonrpc': '2.0',
+        'result': [{'id': 0, 'name': 'Eve', 'tag': 'dog'}, {'id': 1, 'name': 'Lou', 'tag': 'dog'}],
+    }
+
+    rv = client.post(
+        '/api',
+        json={
+            'id': 1,
+            'jsonrpc': '2.0',
+            'method': 'jsonrpc.createManyPet',
+            'params': {'pets': [{'name': 'Eve', 'tag': 'dog'}], 'pet': {'name': 'Lou', 'tag': 'dog'}},
+        },
+    )
+    assert rv.status_code == 200
+    assert rv.json == {
+        'id': 1,
+        'jsonrpc': '2.0',
+        'result': [{'id': 0, 'name': 'Eve', 'tag': 'dog'}, {'id': 1, 'name': 'Lou', 'tag': 'dog'}],
+    }
+
+    rv = client.post(
+        '/api',
+        json={
+            'id': 1,
+            'jsonrpc': '2.0',
+            'method': 'jsonrpc.createManyPet',
+            'params': [
+                [{'name': 'Eve', 'tag': 'dog'}, {'name': 'Lou', 'tag': 'dog'}],
+                {'name': 'Tequila', 'tag': 'cat'},
+            ],
+        },
+    )
+    assert rv.status_code == 200
+    assert rv.json == {
+        'id': 1,
+        'jsonrpc': '2.0',
+        'result': [
+            {'id': 0, 'name': 'Eve', 'tag': 'dog'},
+            {'id': 1, 'name': 'Lou', 'tag': 'dog'},
+            {'id': 2, 'name': 'Tequila', 'tag': 'cat'},
+        ],
+    }
+
+    rv = client.post(
+        '/api',
+        json={
+            'id': 1,
+            'jsonrpc': '2.0',
+            'method': 'jsonrpc.createManyFixPet',
+            'params': {'pets': {'1': {'name': 'Eve', 'tag': 'dog'}}},
+        },
+    )
+    assert rv.status_code == 200
+    assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': [{'id': 1, 'name': 'Eve', 'tag': 'dog'}]}
+
+    rv = client.post(
+        '/api',
+        json={
+            'id': 1,
+            'jsonrpc': '2.0',
+            'method': 'jsonrpc.removePet',
+            'params': {'pet': {'id': 1, 'name': 'Eve', 'tag': 'dog'}},
+        },
+    )
+    assert rv.status_code == 200
+    assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': {'id': 1, 'name': 'Eve', 'tag': 'dog'}}
+
+    rv = client.post('/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.removePet', 'params': {'pet': None}})
+    assert rv.status_code == 200
+    assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': None}
+
+    rv = client.post('/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.removePet', 'params': []})
+    assert rv.status_code == 200
+    assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': None}
+
+
 def test_app_system_describe(client: 'FlaskClient') -> None:
     rv = client.post('/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'rpc.describe'})
-    assert rv.json['id'] == 1
-    assert rv.json['jsonrpc'] == '2.0'
-    assert rv.json['result']['name'] == 'Flask-JSONRPC'
-    assert rv.json['result']['description'] is None
-    assert rv.json['result']['version'] == '2.0'
-    assert rv.json['result']['servers'] is not None
-    assert 'url' in rv.json['result']['servers'][0]
-    assert rv.json['result']['methods'] == {
+    data = rv.get_json()
+    assert data['id'] == 1
+    assert data['jsonrpc'] == '2.0'
+    assert data['result']['name'] == 'Flask-JSONRPC'
+    assert data['result']['version'] == '2.0'
+    assert data['result']['servers'] is not None
+    assert 'url' in data['result']['servers'][0]
+    assert data['result']['methods'] == {
         'jsonrpc.greeting': {
             'type': 'method',
             'options': {'notification': True, 'validate': True},
-            'params': [{'name': 'name', 'type': 'String', 'required': False, 'nullable': False}],
+            'params': [{'name': 'name', 'type': 'String'}],
             'returns': {'type': 'String'},
-            'description': None,
         },
         'jsonrpc.echo': {
             'type': 'method',
             'options': {'notification': True, 'validate': True},
-            'params': [
-                {'name': 'string', 'type': 'String', 'required': False, 'nullable': False},
-                {'name': '_some', 'type': 'Object', 'required': False, 'nullable': False},
-            ],
+            'params': [{'name': 'string', 'type': 'String'}, {'name': '_some', 'type': 'Object'}],
             'returns': {'type': 'String'},
-            'description': None,
         },
         'jsonrpc.notify': {
             'type': 'method',
             'options': {'notification': True, 'validate': True},
-            'params': [{'name': '_string', 'type': 'String', 'required': False, 'nullable': False}],
+            'params': [{'name': '_string', 'type': 'String'}],
             'returns': {'type': 'Null'},
-            'description': None,
         },
         'jsonrpc.not_allow_notify': {
             'type': 'method',
             'options': {'notification': False, 'validate': True},
-            'params': [{'name': '_string', 'type': 'String', 'required': False, 'nullable': False}],
+            'params': [{'name': '_string', 'type': 'String'}],
             'returns': {'type': 'String'},
-            'description': None,
         },
         'jsonrpc.fails': {
             'type': 'method',
             'options': {'notification': True, 'validate': True},
-            'params': [{'name': 'n', 'type': 'Number', 'required': False, 'nullable': False}],
+            'params': [{'name': 'n', 'type': 'Number'}],
             'returns': {'type': 'Number'},
-            'description': None,
         },
         'jsonrpc.strangeEcho': {
             'type': 'method',
             'options': {'notification': True, 'validate': True},
             'params': [
-                {'name': 'string', 'type': 'String', 'required': False, 'nullable': False},
-                {'name': 'omg', 'type': 'Object', 'required': False, 'nullable': False},
-                {'name': 'wtf', 'type': 'Array', 'required': False, 'nullable': False},
-                {'name': 'nowai', 'type': 'Number', 'required': False, 'nullable': False},
-                {'name': 'yeswai', 'type': 'String', 'required': False, 'nullable': False},
+                {'name': 'string', 'type': 'String'},
+                {'name': 'omg', 'type': 'Object'},
+                {'name': 'wtf', 'type': 'Array'},
+                {'name': 'nowai', 'type': 'Number'},
+                {'name': 'yeswai', 'type': 'String'},
             ],
             'returns': {'type': 'Array'},
-            'description': None,
         },
         'jsonrpc.sum': {
             'type': 'method',
             'options': {'notification': True, 'validate': True},
-            'params': [
-                {'name': 'a', 'type': 'Number', 'required': False, 'nullable': False},
-                {'name': 'b', 'type': 'Number', 'required': False, 'nullable': False},
-            ],
+            'params': [{'name': 'a', 'type': 'Number'}, {'name': 'b', 'type': 'Number'}],
             'returns': {'type': 'Number'},
-            'description': None,
+        },
+        'jsonrpc.createCar': {
+            'options': {'notification': True, 'validate': True},
+            'params': [{'name': 'car', 'type': 'Object'}],
+            'returns': {'type': 'Object'},
+            'type': 'method',
+        },
+        'jsonrpc.createColor': {
+            'options': {'notification': True, 'validate': True},
+            'params': [{'name': 'color', 'type': 'Object'}],
+            'returns': {'type': 'Object'},
+            'type': 'method',
+        },
+        'jsonrpc.createManyCar': {
+            'options': {'notification': True, 'validate': True},
+            'params': [{'name': 'cars', 'type': 'Array'}, {'name': 'car', 'type': 'Object'}],
+            'returns': {'type': 'Array'},
+            'type': 'method',
+        },
+        'jsonrpc.createManyColor': {
+            'options': {'notification': True, 'validate': True},
+            'params': [{'name': 'colors', 'type': 'Array'}, {'name': 'color', 'type': 'Object'}],
+            'returns': {'type': 'Array'},
+            'type': 'method',
+        },
+        'jsonrpc.createManyFixCar': {
+            'options': {'notification': True, 'validate': True},
+            'params': [{'name': 'cars', 'type': 'Object'}],
+            'returns': {'type': 'Array'},
+            'type': 'method',
+        },
+        'jsonrpc.createManyFixColor': {
+            'options': {'notification': True, 'validate': True},
+            'params': [{'name': 'colors', 'type': 'Object'}],
+            'returns': {'type': 'Array'},
+            'type': 'method',
+        },
+        'jsonrpc.createManyFixPet': {
+            'options': {'notification': True, 'validate': True},
+            'params': [{'name': 'pets', 'type': 'Object'}],
+            'returns': {'type': 'Array'},
+            'type': 'method',
+        },
+        'jsonrpc.createManyPet': {
+            'options': {'notification': True, 'validate': True},
+            'params': [{'name': 'pets', 'type': 'Array'}, {'name': 'pet', 'type': 'Object'}],
+            'returns': {'type': 'Array'},
+            'type': 'method',
+        },
+        'jsonrpc.createPet': {
+            'options': {'notification': True, 'validate': True},
+            'params': [{'name': 'pet', 'type': 'Object'}],
+            'returns': {'type': 'Object'},
+            'type': 'method',
         },
         'jsonrpc.decorators': {
             'type': 'method',
             'options': {'notification': True, 'validate': True},
-            'params': [{'name': 'string', 'type': 'String', 'required': False, 'nullable': False}],
+            'params': [{'name': 'string', 'type': 'String'}],
             'returns': {'type': 'String'},
-            'description': None,
         },
         'jsonrpc.returnStatusCode': {
             'type': 'method',
             'options': {'notification': True, 'validate': True},
-            'params': [{'name': 's', 'type': 'String', 'required': False, 'nullable': False}],
+            'params': [{'name': 's', 'type': 'String'}],
             'returns': {'type': 'Array'},
-            'description': None,
+        },
+        'jsonrpc.removeCar': {
+            'options': {'notification': True, 'validate': True},
+            'params': [{'name': 'car', 'type': 'Object'}],
+            'returns': {'type': 'Object'},
+            'type': 'method',
+        },
+        'jsonrpc.removeColor': {
+            'options': {'notification': True, 'validate': True},
+            'params': [{'name': 'color', 'type': 'Object'}],
+            'returns': {'type': 'Object'},
+            'type': 'method',
+        },
+        'jsonrpc.removePet': {
+            'options': {'notification': True, 'validate': True},
+            'params': [{'name': 'pet', 'type': 'Object'}],
+            'returns': {'type': 'Object'},
+            'type': 'method',
         },
         'jsonrpc.returnHeaders': {
             'type': 'method',
             'options': {'notification': True, 'validate': True},
-            'params': [{'name': 's', 'type': 'String', 'required': False, 'nullable': False}],
+            'params': [{'name': 's', 'type': 'String'}],
             'returns': {'type': 'Array'},
-            'description': None,
         },
         'jsonrpc.returnStatusCodeAndHeaders': {
             'type': 'method',
             'options': {'notification': True, 'validate': True},
-            'params': [{'name': 's', 'type': 'String', 'required': False, 'nullable': False}],
+            'params': [{'name': 's', 'type': 'String'}],
             'returns': {'type': 'Array'},
-            'description': None,
         },
         'jsonrpc.not_validate': {
             'type': 'method',
             'options': {'notification': True, 'validate': False},
-            'params': [{'name': 's', 'nullable': False, 'required': False, 'type': 'Object'}],
+            'params': [{'name': 's', 'type': 'Object'}],
             'returns': {'type': 'Object'},
-            'description': None,
+        },
+        'jsonrpc.invalidUnion1': {
+            'options': {'notification': True, 'validate': True},
+            'params': [{'name': 'color', 'type': 'Object'}],
+            'returns': {'type': 'Object'},
+            'type': 'method',
+        },
+        'jsonrpc.invalidUnion2': {
+            'options': {'notification': True, 'validate': True},
+            'params': [{'name': 'color', 'type': 'Object'}],
+            'returns': {'type': 'Object'},
+            'type': 'method',
+        },
+        'jsonrpc.literalType': {
+            'options': {'notification': True, 'validate': True},
+            'params': [{'name': 'x', 'type': 'Object'}],
+            'returns': {'type': 'Object'},
+            'type': 'method',
         },
         'jsonrpc.mixin_not_validate': {
             'type': 'method',
             'options': {'notification': True, 'validate': False},
             'params': [
-                {'name': 's', 'type': 'Object', 'required': False, 'nullable': False},
-                {'name': 't', 'type': 'Number', 'required': False, 'nullable': False},
-                {'name': 'u', 'type': 'Object', 'required': False, 'nullable': False},
-                {'name': 'v', 'type': 'String', 'required': False, 'nullable': False},
-                {'name': 'x', 'type': 'Object', 'required': False, 'nullable': False},
-                {'name': 'z', 'type': 'Object', 'required': False, 'nullable': False},
+                {'name': 's', 'type': 'Object'},
+                {'name': 't', 'type': 'Number'},
+                {'name': 'u', 'type': 'Object'},
+                {'name': 'v', 'type': 'String'},
+                {'name': 'x', 'type': 'Object'},
+                {'name': 'z', 'type': 'Object'},
             ],
             'returns': {'type': 'Object'},
-            'description': None,
         },
         'jsonrpc.noReturn': {
             'type': 'method',
             'options': {'notification': True, 'validate': True},
-            'params': [{'name': '_string', 'type': 'String', 'required': False, 'nullable': False}],
+            'params': [{'name': '_string', 'type': 'String'}],
             'returns': {'type': 'Null'},
-            'description': None,
         },
         'classapp.index': {
             'type': 'method',
             'options': {'notification': True, 'validate': True},
-            'params': [{'name': 'name', 'type': 'String', 'required': False, 'nullable': False}],
+            'params': [{'name': 'name', 'type': 'String'}],
             'returns': {'type': 'String'},
-            'description': None,
         },
         'greeting': {
             'type': 'method',
             'options': {'notification': True, 'validate': True},
-            'params': [{'name': 'name', 'type': 'String', 'required': False, 'nullable': False}],
+            'params': [{'name': 'name', 'type': 'String'}],
             'returns': {'type': 'String'},
-            'description': None,
         },
         'hello': {
             'type': 'method',
             'options': {'notification': True, 'validate': True},
-            'params': [{'name': 'name', 'type': 'String', 'required': False, 'nullable': False}],
+            'params': [{'name': 'name', 'type': 'String'}],
             'returns': {'type': 'String'},
-            'description': None,
         },
         'echo': {
             'type': 'method',
             'options': {'notification': True, 'validate': True},
-            'params': [
-                {'name': 'string', 'type': 'String', 'required': False, 'nullable': False},
-                {'name': '_some', 'type': 'Object', 'required': False, 'nullable': False},
-            ],
+            'params': [{'name': 'string', 'type': 'String'}, {'name': '_some', 'type': 'Object'}],
             'returns': {'type': 'String'},
-            'description': None,
         },
         'notify': {
             'type': 'method',
             'options': {'notification': True, 'validate': True},
-            'params': [{'name': '_string', 'type': 'String', 'required': False, 'nullable': False}],
+            'params': [{'name': '_string', 'type': 'String'}],
             'returns': {'type': 'Null'},
-            'description': None,
         },
         'not_allow_notify': {
             'type': 'method',
             'options': {'notification': False, 'validate': True},
-            'params': [{'name': '_string', 'type': 'String', 'required': False, 'nullable': False}],
+            'params': [{'name': '_string', 'type': 'String'}],
             'returns': {'type': 'String'},
-            'description': None,
         },
         'fails': {
             'type': 'method',
             'options': {'notification': True, 'validate': True},
-            'params': [{'name': 'n', 'type': 'Number', 'required': False, 'nullable': False}],
+            'params': [{'name': 'n', 'type': 'Number'}],
             'returns': {'type': 'Number'},
-            'description': None,
         },
-        'rpc.describe': {
-            'description': None,
-            'options': {},
-            'params': [],
-            'returns': {'type': 'Object'},
-            'type': 'method',
-        },
+        'rpc.describe': {'options': {}, 'params': [], 'returns': {'type': 'Object'}, 'type': 'method'},
     }
 
     assert rv.status_code == 200

@@ -42,7 +42,7 @@ class JSONRPCSettings:
 
     def __getattr__(self: Self, attr: str) -> t.Any:  # noqa: ANN401
         if attr not in self.defaults:
-            raise AttributeError(f'Invalid setting: {attr!r}')
+            raise AttributeError(f'invalid setting: {attr!r}') from None
 
         val = self.defaults[attr]
 

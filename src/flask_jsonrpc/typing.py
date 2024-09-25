@@ -27,52 +27,48 @@
 import sys
 import typing as t
 
+from pydantic.main import BaseModel
+
 # Python 3.8
 if sys.version_info[:2] == (3, 8):  # pragma: no cover
     from typing import OrderedDict
 else:  # pragma: no cover
     from collections import OrderedDict
 
-# Python 3.8+
-try:
-    from typing_extensions import TypedDict
-except ImportError:  # pragma: no cover
-    from typing import TypedDict  # pylint: disable=C0412
 
-
-class ServiceMethodParamsDescribe(TypedDict, total=False):
+class ServiceMethodParamsDescribe(BaseModel):
     type: str
     name: str
-    required: bool
-    nullable: bool
-    minimum: t.Optional[int]
-    maximum: t.Optional[int]
-    pattern: t.Optional[str]
-    length: t.Optional[int]
-    description: t.Optional[str]
+    required: t.Optional[bool] = None
+    nullable: t.Optional[bool] = None
+    minimum: t.Optional[int] = None
+    maximum: t.Optional[int] = None
+    pattern: t.Optional[str] = None
+    length: t.Optional[int] = None
+    description: t.Optional[str] = None
 
 
-class ServiceMethodReturnsDescribe(TypedDict):
+class ServiceMethodReturnsDescribe(BaseModel):
     type: str
 
 
-class ServiceMethodDescribe(TypedDict):
+class ServiceMethodDescribe(BaseModel):
     type: str
-    description: t.Optional[str]
-    options: t.Dict[str, t.Any]
-    params: t.List[ServiceMethodParamsDescribe]
+    description: t.Optional[str] = None
+    options: t.Dict[str, t.Any] = {}
+    params: t.List[ServiceMethodParamsDescribe] = []
     returns: ServiceMethodReturnsDescribe
 
 
-class ServiceServersDescribe(TypedDict, total=False):
+class ServiceServersDescribe(BaseModel):
     url: str
-    description: t.Optional[str]
+    description: t.Optional[str] = None
 
 
-class ServiceDescribe(TypedDict):
+class ServiceDescribe(BaseModel):
     id: str
     version: str
     name: str
-    description: t.Optional[str]
+    description: t.Optional[str] = None
     servers: t.List[ServiceServersDescribe]
     methods: OrderedDict[str, ServiceMethodDescribe]

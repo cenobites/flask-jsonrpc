@@ -27,9 +27,10 @@
 import typing as t
 from collections import OrderedDict
 
+from flask_jsonrpc.encoders import serializable
+
 from . import typing as st
 from .utils import MethodExtendSchema, extend_schema
-from .helpers import openrpc_schema_to_dict, openrpc_method_schema_from_dict
 
 # Python 3.9+
 try:
@@ -46,7 +47,7 @@ OPENRPC_DISCOVER_SERVICE_METHOD_TYPE: str = 'method'
 
 def _openrpc_discover_method(
     jsonrpc_sites: t.List['JSONRPCSite'], *, openrpc_schema: st.OpenRPCSchema
-) -> t.Callable[..., t.Dict[str, t.Any]]:
+) -> t.Callable[..., st.OpenRPCSchema]:
     @cache
     @extend_schema(
         name=OPENRPC_DISCOVER_METHOD_NAME,
@@ -57,17 +58,17 @@ def _openrpc_discover_method(
             schema=st.Schema(ref='https://raw.githubusercontent.com/open-rpc/meta-schema/master/schema.json'),
         ),
     )
-    def openrpc_discover() -> t.Dict[str, t.Any]:
+    def cached_openrpc_discover_method() -> st.OpenRPCSchema:
         jsonrpc_site = jsonrpc_sites[0]
         service_describe_methods = OrderedDict(
             (name, (method_describe, jsonrpc_site.view_funcs[name]))
-            for name, method_describe in jsonrpc_site.describe()['methods'].items()
+            for name, method_describe in jsonrpc_site.describe().methods.items()
         )
         for jsonrpc_site in jsonrpc_sites[1:]:
             service_describe_methods.update(
                 OrderedDict(
                     (name, (method_describe, jsonrpc_site.view_funcs[name]))
-                    for name, method_describe in jsonrpc_site.describe()['methods'].items()
+                    for name, method_describe in jsonrpc_site.describe().methods.items()
                     # To ensure that has only one rpc.* method, the others will be disregarded.
                     if not name.startswith('rpc.')
                 )
@@ -75,46 +76,43 @@ def _openrpc_discover_method(
 
         for name, (method_describe, view_func) in service_describe_methods.items():
             fn_openrpc_method_schema = getattr(view_func, 'openrpc_method_schema', MethodExtendSchema())  # noqa: B010
-            openrpc_method_schema = {k: v for k, v in fn_openrpc_method_schema.items() if v is not None}
-
             method_schema = {
-                'name': openrpc_method_schema.get('name', name),
-                'description': openrpc_method_schema.get('description', method_describe['description']),
+                'name': fn_openrpc_method_schema.name or name,
+                'description': fn_openrpc_method_schema.description or method_describe.description,
                 'result': {
                     'name': 'default',
-                    'schema': {'type': st.SchemaDataType.of(method_describe['returns']['type'])},
+                    'schema': {'type': st.SchemaDataType.from_rpc_describe_type(method_describe.returns.type)},
                 },
             }
             method_params_schema = []
-            for param in method_describe['params']:
+            for param in method_describe.params:
                 method_params_schema.append(
                     {
-                        'name': param['name'],
-                        'schema': {'type': st.SchemaDataType.of(param['type'])},
-                        'required': param['required'] or None,
+                        'name': param.name,
+                        'schema': {'type': st.SchemaDataType.from_rpc_describe_type(param.type)},
+                        'required': param.required or None,
                     }
                 )
             method_schema['params'] = method_params_schema
+            method_schema_merged = st.Method(
+                **{**serializable(method_schema), **serializable(fn_openrpc_method_schema)}
+            )
+            openrpc_schema.methods.append(method_schema_merged)
+        return openrpc_schema
 
-            method_schema_merged = {**method_schema, **openrpc_method_schema}
-            openrpc_schema.methods.append(openrpc_method_schema_from_dict(method_schema_merged))
-        return openrpc_schema_to_dict(openrpc_schema)
-
-    return openrpc_discover
+    return cached_openrpc_discover_method  # pyright: ignore
 
 
 def openrpc_discover_method(
     jsonrpc_sites: t.List['JSONRPCSite'], *, openrpc_schema: t.Optional[st.OpenRPCSchema] = None
-) -> t.Callable[..., t.Dict[str, t.Any]]:
+) -> t.Callable[..., st.OpenRPCSchema]:
     if openrpc_schema is None:
         jsonrpc_site = jsonrpc_sites[0]
         jsonrpc_service_describe = jsonrpc_site.describe()
         openrpc_schema = st.OpenRPCSchema(
             info=st.Info(
-                title=jsonrpc_service_describe['name'],
-                version='0.0.1',
-                description=jsonrpc_service_describe['description'],
+                title=jsonrpc_service_describe.name, version='0.0.1', description=jsonrpc_service_describe.description
             ),
-            servers=st.Server(name='default', url=jsonrpc_service_describe['servers'][0]['url']),
+            servers=st.Server(name='default', url=jsonrpc_service_describe.servers[0].url),
         )
     return _openrpc_discover_method(jsonrpc_sites, openrpc_schema=openrpc_schema)

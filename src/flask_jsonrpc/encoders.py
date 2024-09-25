@@ -1,4 +1,4 @@
-# Copyright (c) 2020-2024, Cenobit Technologies, Inc. http://cenobit.es/
+# Copyright (c) 2024-2024, Cenobit Technologies, Inc. http://cenobit.es/
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -24,36 +24,44 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
+from enum import Enum
+from types import GeneratorType
 import typing as t
+from pathlib import PurePath
+from collections import deque
+import dataclasses
 
-from flask import typing as ft, current_app, make_response
-from flask.views import MethodView
+from flask import typing as ft, jsonify as _jsonify
 
-from .site import JSONRPC_VERSION_DEFAULT, JSONRPC_DEFAULT_HTTP_HEADERS
-from .encoders import jsonify
-from .exceptions import JSONRPCError
-
-# Python 3.10+
-try:
-    from typing import Self
-except ImportError:  # pragma: no cover
-    from typing_extensions import Self
-
-if t.TYPE_CHECKING:
-    from .site import JSONRPCSite
+from pydantic.main import BaseModel
 
 
-class JSONRPCView(MethodView):
-    def __init__(self: Self, jsonrpc_site: 'JSONRPCSite') -> None:
-        self.jsonrpc_site = jsonrpc_site
+def serializable(obj: t.Any) -> t.Any:  # noqa: ANN401
+    if isinstance(obj, Enum):
+        return obj.value
+    if isinstance(obj, PurePath):
+        return str(obj)
+    if isinstance(obj, dict):
+        encoded_dict = {}
+        for key, value in obj.items():
+            encoded_key = serializable(key)
+            encoded_value = serializable(value)
+            encoded_dict[encoded_key] = encoded_value
+        return encoded_dict
+    if isinstance(obj, (list, set, frozenset, GeneratorType, tuple, deque)):
+        encoded_list = []
+        for item in obj:
+            encoded_list.append(serializable(item))
+        return encoded_list
+    if dataclasses.is_dataclass(obj):
+        obj_dict = dataclasses.asdict(obj)  # type: ignore
+        return serializable(obj_dict)
+    if isinstance(obj, BaseModel):
+        return serializable(obj.model_dump(exclude_none=True, by_alias=True))
+    if hasattr(obj, '__dict__'):
+        return obj.__dict__
+    return obj
 
-    def post(self: Self) -> ft.ResponseReturnValue:
-        try:
-            response, status_code, headers = self.jsonrpc_site.dispatch_request()
-            if status_code == 204:
-                return make_response('', status_code, headers)
-            return make_response(jsonify(response), status_code, headers)
-        except JSONRPCError as e:
-            current_app.logger.exception('jsonrpc error')
-            response = {'id': None, 'jsonrpc': JSONRPC_VERSION_DEFAULT, 'error': e.jsonrpc_format}
-            return make_response(jsonify(response), e.status_code, JSONRPC_DEFAULT_HTTP_HEADERS)
+
+def jsonify(obj: t.Any) -> ft.ResponseValue:  # noqa: ANN401
+    return _jsonify(serializable(obj))

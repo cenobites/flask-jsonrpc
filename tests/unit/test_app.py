@@ -174,7 +174,7 @@ def test_app_create_without_register_browse() -> None:
     jsonrpc = JSONRPC(service_url='/api', enable_web_browsable_api=True)
 
     with pytest.raises(
-        RuntimeError, match='You need to init the Browse app before register the Site, see JSONRPC.init_browse_app(...)'
+        RuntimeError, match='you need to init the Browse app before register the Site, see JSONRPC.init_browse_app(...)'
     ):
         jsonrpc.register_browse(jsonrpc)
 
