@@ -33,5 +33,5 @@ from flask_jsonrpc.settings import JSONRPCSettings
 def test_settings() -> None:
     settings = JSONRPCSettings({'setting': True})
     assert settings.setting is True
-    with pytest.raises(AttributeError, match="Invalid setting: 'xxx'"):
+    with pytest.raises(AttributeError, match="invalid setting: 'xxx'"):
         assert settings.xxx is None

@@ -36,6 +36,7 @@ from werkzeug.datastructures import Headers
 
 from .helpers import get
 from .settings import settings
+from .funcutils import bindfy
 from .descriptor import JSONRPCServiceDescriptor
 from .exceptions import (
     ParseError,
@@ -97,7 +98,7 @@ class JSONRPCSite:
                     'message': f'Invalid mime type for JSON: {request.mimetype}, '
                     'use header Content-Type: application/json'
                 }
-            )
+            ) from None
 
         json_data = self.to_json(request.data)
         if self.is_batch_request(json_data):
@@ -117,12 +118,67 @@ class JSONRPCSite:
             current_app.logger.exception('invalid json: %s', request_data)
             raise ParseError(data={'message': f'Invalid JSON: {request_data!r}'}) from e
 
+    def handle_view_func(self: Self, view_func: t.Callable[..., t.Any], params: t.Any) -> t.Any:  # noqa: ANN401
+        view_func_params = getattr(view_func, 'jsonrpc_method_params', {})
+        validate = getattr(view_func, 'jsonrpc_validate', settings.DEFAULT_JSONRPC_METHOD['VALIDATE'])
+        try:
+            if isinstance(params, list):
+                kw_params = {}
+                for i, (param_name, _param_type) in enumerate(view_func_params.items()):
+                    kw_params[param_name] = (params[i : i + 1] or [None])[0]
+                binded_params = bindfy(view_func, kw_params)
+            elif isinstance(params, dict):
+                binded_params = bindfy(view_func, params)
+            else:
+                raise InvalidParamsError(
+                    data={'message': f'Parameter structures are by-position (list) or by-name (dict): {params}'}
+                ) from None
+
+            sanitazed_params = {k: v for k, v in binded_params.items() if v is not None}
+            resp_view = current_app.ensure_sync(view_func)(**sanitazed_params)
+
+            # TODO: Enhance the checker to return the type
+            view_fun_annotations = t.get_type_hints(view_func)
+            view_fun_return: t.Optional[t.Any] = view_fun_annotations.pop('return', None)
+            if validate and resp_view is not None and view_fun_return is None:
+                resp_view_qn = qualified_name(resp_view)
+                view_fun_return_qn = qualified_name(view_fun_return)
+                raise TypeError(
+                    f'return type of {resp_view_qn} must be a type; got {view_fun_return_qn} instead'
+                ) from None
+
+            return resp_view
+        except TypeError as e:
+            current_app.logger.exception('invalid type checked for: %s', view_func.__name__)
+            raise InvalidParamsError(data={'message': str(e)}) from e
+
+    def dispatch(
+        self: Self, req_json: t.Dict[str, t.Any]
+    ) -> t.Tuple[t.Any, int, t.Union[Headers, t.Dict[str, str], t.Tuple[str], t.List[t.Tuple[str]]]]:
+        method_name = req_json['method']
+        params = req_json.get('params', {})
+        view_func = self.view_funcs.get(method_name)
+        notification = getattr(view_func, 'jsonrpc_notification', settings.DEFAULT_JSONRPC_METHOD['NOTIFICATION'])
+        if not view_func:
+            raise MethodNotFoundError(data={'message': f'Method not found: {method_name}'}) from None
+
+        if self.is_notification_request(req_json) and not notification:
+            raise InvalidRequestError(
+                data={
+                    'message': f"The method {method_name!r} doesn't allow Notification "
+                    "Request object (without an 'id' member)"
+                }
+            ) from None
+
+        resp_view = self.handle_view_func(view_func, params)
+        return self.make_response(req_json, resp_view)
+
     def handle_dispatch_except(
         self: Self, req_json: t.Dict[str, t.Any]
     ) -> t.Tuple[t.Any, int, t.Union[Headers, t.Dict[str, str], t.Tuple[str], t.List[t.Tuple[str]]]]:
         try:
             if not self.validate(req_json):
-                raise InvalidRequestError(data={'message': f'Invalid JSON: {req_json!r}'})
+                raise InvalidRequestError(data={'message': f'Invalid JSON: {req_json!r}'}) from None
             return self.dispatch(req_json)
         except JSONRPCError as e:
             current_app.logger.exception('jsonrpc error')
@@ -146,7 +202,7 @@ class JSONRPCSite:
         self: Self, reqs_json: t.List[t.Dict[str, t.Any]]
     ) -> t.Tuple[t.List[t.Any], int, t.Union[Headers, t.Dict[str, str], t.Tuple[str], t.List[t.Tuple[str]]]]:
         if not reqs_json:
-            raise InvalidRequestError(data={'message': 'Empty array'})
+            raise InvalidRequestError(data={'message': 'Empty array'}) from None
 
         resp_views = []
         headers = Headers()
@@ -159,51 +215,6 @@ class JSONRPCSite:
         if not resp_views:
             status_code = 204
         return resp_views, status_code, headers
-
-    def dispatch(
-        self: Self, req_json: t.Dict[str, t.Any]
-    ) -> t.Tuple[t.Any, int, t.Union[Headers, t.Dict[str, str], t.Tuple[str], t.List[t.Tuple[str]]]]:
-        method_name = req_json['method']
-        params = req_json.get('params', {})
-        view_func = self.view_funcs.get(method_name)
-        validate = getattr(view_func, 'jsonrpc_validate', settings.DEFAULT_JSONRPC_METHOD['VALIDATE'])
-        notification = getattr(view_func, 'jsonrpc_notification', settings.DEFAULT_JSONRPC_METHOD['NOTIFICATION'])
-        if not view_func:
-            raise MethodNotFoundError(data={'message': f'Method not found: {method_name}'})
-
-        if self.is_notification_request(req_json) and not notification:
-            raise InvalidRequestError(
-                data={
-                    'message': f"The method {method_name!r} doesn't allow Notification "
-                    "Request object (without an 'id' member)"
-                }
-            )
-
-        try:
-            if isinstance(params, (tuple, set, list)):
-                resp_view = current_app.ensure_sync(view_func)(*params)
-            elif isinstance(params, dict):
-                resp_view = current_app.ensure_sync(view_func)(**params)
-            else:
-                raise InvalidParamsError(
-                    data={
-                        'message': 'Parameter structures are by-position '
-                        f'(tuple, set, list) or by-name (dict): {params}'
-                    }
-                )
-
-            # TODO: Improve the checker to return type
-            view_fun_annotations = t.get_type_hints(view_func)
-            view_fun_return: t.Optional[t.Any] = view_fun_annotations.pop('return', None)
-            if validate and resp_view is not None and view_fun_return is None:
-                resp_view_qn = qualified_name(resp_view)
-                view_fun_return_qn = qualified_name(view_fun_return)
-                raise TypeError(f'return type of {resp_view_qn} must be a type; got {view_fun_return_qn} instead')
-        except TypeError as e:
-            current_app.logger.exception('invalid type checked for: %s', view_func.__name__)
-            raise InvalidParamsError(data={'message': str(e)}) from e
-
-        return self.make_response(req_json, resp_view)
 
     def validate(self: Self, req_json: t.Dict[str, t.Any]) -> bool:
         return isinstance(req_json, dict) and 'method' in req_json
@@ -231,7 +242,7 @@ class JSONRPCSite:
                     'the view function did not return a valid response tuple.'
                     ' The tuple must have the form (body, status, headers),'
                     ' (body, status), or (body, headers).'
-                )
+                ) from None
             return rv, status_code, headers
 
         return resp_view, JSONRPC_DEFAULT_HTTP_STATUS_CODE, JSONRPC_DEFAULT_HTTP_HEADERS

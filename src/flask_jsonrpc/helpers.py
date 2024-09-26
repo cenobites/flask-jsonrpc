@@ -53,7 +53,7 @@ def urn(name: str, *args: t.Any) -> str:  # noqa: ANN401
     ValueError: name is required
     """
     if not name:
-        raise ValueError('name is required')
+        raise ValueError('name is required') from None
     splitted_args = [arg.split('/') for arg in args]
     st = ':'.join(list(itertools.chain(*splitted_args)))
     st = st.rstrip(':').lstrip(':')
@@ -61,7 +61,7 @@ def urn(name: str, *args: t.Any) -> str:  # noqa: ANN401
     return f"urn:{name}{sep}{st.replace('::', ':')}".lower()
 
 
-def from_python_type(tp: t.Any) -> 'JSONRPCNewType':  # noqa: ANN401
+def from_python_type(tp: t.Any, default: 't.Optional[JSONRPCNewType]' = Object) -> 't.Optional[JSONRPCNewType]':  # noqa: ANN401
     """Convert Python type to JSONRPCNewType.
 
     >>> str(from_python_type(str))
@@ -82,10 +82,10 @@ def from_python_type(tp: t.Any) -> 'JSONRPCNewType':  # noqa: ANN401
     for typ in Types:
         if typ.check_type(tp):
             return typ
-    return Object
+    return default
 
 
-def get(obj: t.Dict[str, t.Any], path: str, default: t.Any = None) -> t.Any:  # noqa: ANN401
+def get(obj: t.Any, path: str, default: t.Any = None) -> t.Any:  # noqa: ANN401
     """Get the value at any depth of a nested object based on the path
     described by `path`. If path doesn't exist, `default` is returned.
     Args:
@@ -103,6 +103,8 @@ def get(obj: t.Dict[str, t.Any], path: str, default: t.Any = None) -> t.Any:  # 
     >>> get(None, 'a')
 
     >>> get(None, 'a', 'default')
+    'default'
+    >>> get('a', 'a.b.c', 'default')
     'default'
     >>> get({'a': 1}, 'a')
     1
@@ -126,11 +128,11 @@ def get(obj: t.Dict[str, t.Any], path: str, default: t.Any = None) -> t.Any:  # 
 
     obj_val = obj
     keys = path.split('.')
-    for key in keys:
-        try:
+    try:
+        for key in keys:
             obj_val = getitem(obj_val, key)
-        except KeyError:
-            return default
+    except (TypeError, KeyError):
+        return default
     return obj_val
 
 

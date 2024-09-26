@@ -143,6 +143,6 @@ class JSONRPC(JSONRPCDecoratorMixin):
     def register_browse(self: Self, jsonrpc_app: t.Union['JSONRPC', 'JSONRPCBlueprint']) -> None:
         if not self.jsonrpc_browse:
             raise RuntimeError(
-                'You need to init the Browse app before register the Site, see JSONRPC.init_browse_app(...)'
+                'you need to init the Browse app before register the Site, see JSONRPC.init_browse_app(...)'
             )
         self.jsonrpc_browse.register_jsonrpc_site(jsonrpc_app.get_jsonrpc_site())

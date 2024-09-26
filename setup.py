@@ -59,6 +59,7 @@ if USE_MYPYC:
         '--strict',
         '--check-untyped-defs',
         '--ignore-missing-imports',
+        '--disallow-untyped-defs',
         '--disable-error-code',
         'unused-ignore',
         '--disable-error-code',

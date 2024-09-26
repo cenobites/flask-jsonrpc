@@ -24,9 +24,10 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
+from types import GeneratorType
 import typing as t
 from numbers import Real, Integral, Rational
-from collections import OrderedDict, defaultdict
+from collections import OrderedDict, deque, defaultdict
 from collections.abc import Mapping
 
 from typing_inspect import is_new_type  # type: ignore
@@ -122,7 +123,9 @@ class JSONRPCNewType:
 String = JSONRPCNewType('String', str, bytes, bytearray)
 Number = JSONRPCNewType('Number', int, float, Real, Rational, Integral)
 Object = JSONRPCNewType('Object', dict, t.Dict, defaultdict, OrderedDict, Mapping)
-Array = JSONRPCNewType('Array', list, set, t.Set, tuple, t.List, t.NamedTuple, frozenset, t.FrozenSet)
+Array = JSONRPCNewType(
+    'Array', list, set, t.Set, tuple, t.List, t.NamedTuple, frozenset, t.FrozenSet, GeneratorType, deque
+)
 Boolean = JSONRPCNewType('Boolean', bool)
 Null = JSONRPCNewType('Null', type(None), NoneType)
 Types = [String, Number, Object, Array, Boolean, Null]

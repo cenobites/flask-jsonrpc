@@ -30,6 +30,7 @@ import sys
 import typing as t
 import asyncio
 import functools
+from dataclasses import dataclass
 
 from flask import Flask
 
@@ -38,6 +39,8 @@ try:
     from typing import Self
 except ImportError:  # pragma: no cover
     from typing_extensions import Self
+
+from pydantic import BaseModel
 
 try:
     from flask_jsonrpc import JSONRPC
@@ -48,6 +51,43 @@ except ModuleNotFoundError:
         sys.path.append(flask_jsonrpc_project_dir)
 
     from flask_jsonrpc import JSONRPC
+
+
+class NewColor:
+    name: str
+    tag: str
+
+    def __init__(self: Self, name: str, tag: str) -> None:
+        self.name = name
+        self.tag = tag
+
+
+class Color(NewColor):
+    id: int
+
+    def __init__(self: Self, id: int, name: str, tag: str) -> None:
+        super().__init__(name, tag)
+        self.id = id
+
+
+@dataclass
+class NewCar:
+    name: str
+    tag: str
+
+
+@dataclass
+class Car(NewCar):
+    id: int
+
+
+class NewPet(BaseModel):
+    name: str
+    tag: str
+
+
+class Pet(NewPet):
+    id: int
 
 
 class App:
@@ -69,10 +109,10 @@ class App:
         await asyncio.sleep(0)
         return string
 
-    async def notify(self: Self, _string: str = None) -> None:
+    async def notify(self: Self, _string: t.Optional[str] = None) -> None:
         await asyncio.sleep(0)
 
-    async def not_allow_notify(self: Self, _string: str = None) -> str:
+    async def not_allow_notify(self: Self, _string: t.Optional[str] = None) -> str:
         await asyncio.sleep(0)
         return 'Now allow notify'
 
@@ -92,7 +132,7 @@ def async_jsonrpc_decorator(fn: t.Callable[..., str]) -> t.Callable[..., str]:
     return wrapped
 
 
-def create_async_app(test_config: t.Dict[str, t.Any] = None) -> Flask:  # noqa: C901  pylint: disable=W0612
+def create_async_app(test_config: t.Optional[t.Dict[str, t.Any]] = None) -> Flask:  # noqa: C901  pylint: disable=W0612
     """Create and configure an instance of the Flask application."""
     flask_app = Flask('apptest', instance_relative_config=True)
     if test_config:
@@ -186,6 +226,90 @@ def create_async_app(test_config: t.Dict[str, t.Any] = None) -> Flask:  # noqa: 
     async def no_return(_string: t.Optional[str] = None) -> t.NoReturn:
         await asyncio.sleep(0)
         raise ValueError('no return')
+
+    @jsonrpc.method('jsonrpc.createColor')
+    async def create_color(color: NewColor) -> Color:
+        await asyncio.sleep(0)
+        return Color(id=1, name=color.name, tag=color.tag)
+
+    @jsonrpc.method('jsonrpc.createManyColor')
+    async def create_many_colors(colors: t.List[NewColor], color: t.Optional[NewColor] = None) -> t.List[Color]:
+        new_color = [Color(id=i, name=pet.name, tag=pet.tag) for i, pet in enumerate(colors)]
+        if color is not None:
+            return new_color + [Color(id=len(colors), name=color.name, tag=color.tag)]
+        await asyncio.sleep(0)
+        return new_color
+
+    @jsonrpc.method('jsonrpc.createManyFixColor')
+    async def create_many_fix_colors(colors: t.Dict[str, NewPet]) -> t.List[Color]:
+        await asyncio.sleep(0)
+        return [Color(id=int(color_id), name=color.name, tag=color.tag) for color_id, color in colors.items()]
+
+    @jsonrpc.method('jsonrpc.removeColor')
+    async def remove_color(color: t.Optional[Color] = None) -> t.Optional[Color]:
+        await asyncio.sleep(0)
+        return color
+
+    @jsonrpc.method('jsonrpc.invalidUnion1')
+    async def invalid_union_1(color: t.Union[Color, NewColor]) -> t.Union[Color, NewColor]:
+        await asyncio.sleep(0)
+        return color
+
+    @jsonrpc.method('jsonrpc.invalidUnion2')
+    async def invalid_union_2(color: t.Union[Color, NewColor, None] = None) -> t.Union[Color, NewColor, None]:
+        await asyncio.sleep(0)
+        return color
+
+    @jsonrpc.method('jsonrpc.literalType')
+    async def literal_type(x: t.Literal['X']) -> t.Literal['X']:
+        await asyncio.sleep(0)
+        return x
+
+    @jsonrpc.method('jsonrpc.createPet')
+    async def create_pet(pet: NewPet) -> Pet:
+        await asyncio.sleep(0)
+        return Pet(id=1, name=pet.name, tag=pet.tag)
+
+    @jsonrpc.method('jsonrpc.createManyPet')
+    async def create_many_pets(pets: t.List[NewPet], pet: t.Optional[NewPet] = None) -> t.List[Pet]:
+        new_pets = [Pet(id=i, name=pet.name, tag=pet.tag) for i, pet in enumerate(pets)]
+        if pet is not None:
+            return new_pets + [Pet(id=len(pets), name=pet.name, tag=pet.tag)]
+        await asyncio.sleep(0)
+        return new_pets
+
+    @jsonrpc.method('jsonrpc.createManyFixPet')
+    async def create_many_fix_pets(pets: t.Dict[str, NewPet]) -> t.List[Pet]:
+        await asyncio.sleep(0)
+        return [Pet(id=int(pet_id), name=pet.name, tag=pet.tag) for pet_id, pet in pets.items()]
+
+    @jsonrpc.method('jsonrpc.removePet')
+    async def remove_pet(pet: t.Optional[Pet] = None) -> t.Optional[Pet]:
+        await asyncio.sleep(0)
+        return pet
+
+    @jsonrpc.method('jsonrpc.createCar')
+    async def create_car(car: NewCar) -> Car:
+        await asyncio.sleep(0)
+        return Car(id=1, name=car.name, tag=car.tag)
+
+    @jsonrpc.method('jsonrpc.createManyCar')
+    async def create_many_cars(cars: t.List[NewCar], car: t.Optional[NewCar] = None) -> t.List[Car]:
+        await asyncio.sleep(0)
+        new_cars = [Car(id=i, name=car.name, tag=car.tag) for i, car in enumerate(cars)]
+        if car is not None:
+            return new_cars + [Car(id=len(cars), name=car.name, tag=car.tag)]
+        return new_cars
+
+    @jsonrpc.method('jsonrpc.createManyFixCar')
+    async def create_many_fix_cars(cars: t.Dict[str, NewCar]) -> t.List[Car]:
+        await asyncio.sleep(0)
+        return [Car(id=int(car_id), name=car.name, tag=car.tag) for car_id, car in cars.items()]
+
+    @jsonrpc.method('jsonrpc.removeCar')
+    async def remove_car(car: t.Optional[Car] = None) -> t.Optional[Car]:
+        await asyncio.sleep(0)
+        return car
 
     class_app = App()
     jsonrpc.register(class_app.index, name='classapp.index')

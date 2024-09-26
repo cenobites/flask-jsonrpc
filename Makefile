@@ -13,6 +13,10 @@ clean:
 	@find . -name ".coverage" | xargs rm -rf
 	@rm -rf .coverage coverage.* .eggs/ .mypy_cache/ .pytype/ .ruff_cache/ .pytest_cache/ .tox/ src/Flask_JSONRPC.egg-info/ htmlcov/ junit/ htmldoc/ build/ dist/ wheelhouse/
 
+style:
+	@ruff check .
+	@ruff format .
+
 test: clean
 	@python -m pip install --upgrade tox
 	@python -m tox

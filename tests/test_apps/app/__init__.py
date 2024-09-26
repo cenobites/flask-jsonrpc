@@ -29,6 +29,7 @@ import os
 import sys
 import typing as t
 import functools
+from dataclasses import dataclass
 
 from flask import Flask
 
@@ -37,6 +38,8 @@ try:
     from typing import Self
 except ImportError:  # pragma: no cover
     from typing_extensions import Self
+
+from pydantic import BaseModel
 
 try:
     from flask_jsonrpc import JSONRPC
@@ -47,6 +50,43 @@ except ModuleNotFoundError:
         sys.path.append(flask_jsonrpc_project_dir)
 
     from flask_jsonrpc import JSONRPC
+
+
+class NewColor:
+    name: str
+    tag: str
+
+    def __init__(self: Self, name: str, tag: str) -> None:
+        self.name = name
+        self.tag = tag
+
+
+class Color(NewColor):
+    id: int
+
+    def __init__(self: Self, id: int, name: str, tag: str) -> None:
+        super().__init__(name, tag)
+        self.id = id
+
+
+@dataclass
+class NewCar:
+    name: str
+    tag: str
+
+
+@dataclass
+class Car(NewCar):
+    id: int
+
+
+class NewPet(BaseModel):
+    name: str
+    tag: str
+
+
+class Pet(NewPet):
+    id: int
 
 
 class App:
@@ -64,10 +104,10 @@ class App:
     def echo(self: Self, string: str, _some: t.Any = None) -> str:  # noqa: ANN401
         return string
 
-    def notify(self: Self, _string: str = None) -> None:
+    def notify(self: Self, _string: t.Optional[str] = None) -> None:
         pass
 
-    def not_allow_notify(self: Self, _string: str = None) -> str:
+    def not_allow_notify(self: Self, _string: t.Optional[str] = None) -> str:
         return 'Now allow notify'
 
     def fails(self: Self, n: int) -> int:
@@ -85,7 +125,7 @@ def jsonrpc_decorator(fn: t.Callable[..., str]) -> t.Callable[..., str]:
     return wrapped
 
 
-def create_app(test_config: t.Dict[str, t.Any] = None) -> Flask:  # noqa: C901  pylint: disable=W0612
+def create_app(test_config: t.Optional[t.Dict[str, t.Any]] = None) -> Flask:  # noqa: C901  pylint: disable=W0612
     """Create and configure an instance of the Flask application."""
     flask_app = Flask('apptest', instance_relative_config=True)
     if test_config:
@@ -105,12 +145,12 @@ def create_app(test_config: t.Dict[str, t.Any] = None) -> Flask:  # noqa: C901  
 
     # pylint: disable=W0612
     @jsonrpc.method('jsonrpc.notify')
-    def notify(_string: str = None) -> None:
+    def notify(_string: t.Optional[str] = None) -> None:
         pass
 
     # pylint: disable=W0612
     @jsonrpc.method('jsonrpc.not_allow_notify', notification=False)
-    def not_allow_notify(_string: str = None) -> str:
+    def not_allow_notify(_string: str = 'None') -> str:
         return 'Not allow notify'
 
     # pylint: disable=W0612
@@ -166,6 +206,75 @@ def create_app(test_config: t.Dict[str, t.Any] = None) -> Flask:  # noqa: C901  
     @jsonrpc.method('jsonrpc.noReturn')
     def no_return(_string: t.Optional[str] = None) -> t.NoReturn:
         raise ValueError('no return')
+
+    @jsonrpc.method('jsonrpc.createColor')
+    def create_color(color: NewColor) -> Color:
+        return Color(id=1, name=color.name, tag=color.tag)
+
+    @jsonrpc.method('jsonrpc.createManyColor')
+    def create_many_colors(colors: t.List[NewColor], color: t.Optional[NewColor] = None) -> t.List[Color]:
+        new_color = [Color(id=i, name=pet.name, tag=pet.tag) for i, pet in enumerate(colors)]
+        if color is not None:
+            return new_color + [Color(id=len(colors), name=color.name, tag=color.tag)]
+        return new_color
+
+    @jsonrpc.method('jsonrpc.createManyFixColor')
+    def create_many_fix_colors(colors: t.Dict[str, NewPet]) -> t.List[Color]:
+        return [Color(id=int(color_id), name=color.name, tag=color.tag) for color_id, color in colors.items()]
+
+    @jsonrpc.method('jsonrpc.removeColor')
+    def remove_color(color: t.Optional[Color] = None) -> t.Optional[Color]:
+        return color
+
+    @jsonrpc.method('jsonrpc.invalidUnion1')
+    def invalid_union_1(color: t.Union[Color, NewColor]) -> t.Union[Color, NewColor]:
+        return color
+
+    @jsonrpc.method('jsonrpc.invalidUnion2')
+    def invalid_union_2(color: t.Union[Color, NewColor, None] = None) -> t.Union[Color, NewColor, None]:
+        return color
+
+    @jsonrpc.method('jsonrpc.literalType')
+    def literal_type(x: t.Literal['X']) -> t.Literal['X']:
+        return x
+
+    @jsonrpc.method('jsonrpc.createPet')
+    def create_pet(pet: NewPet) -> Pet:
+        return Pet(id=1, name=pet.name, tag=pet.tag)
+
+    @jsonrpc.method('jsonrpc.createManyPet')
+    def create_many_pets(pets: t.List[NewPet], pet: t.Optional[NewPet] = None) -> t.List[Pet]:
+        new_pets = [Pet(id=i, name=pet.name, tag=pet.tag) for i, pet in enumerate(pets)]
+        if pet is not None:
+            return new_pets + [Pet(id=len(pets), name=pet.name, tag=pet.tag)]
+        return new_pets
+
+    @jsonrpc.method('jsonrpc.createManyFixPet')
+    def create_many_fix_pets(pets: t.Dict[str, NewPet]) -> t.List[Pet]:
+        return [Pet(id=int(pet_id), name=pet.name, tag=pet.tag) for pet_id, pet in pets.items()]
+
+    @jsonrpc.method('jsonrpc.removePet')
+    def remove_pet(pet: t.Optional[Pet] = None) -> t.Optional[Pet]:
+        return pet
+
+    @jsonrpc.method('jsonrpc.createCar')
+    def create_car(car: NewCar) -> Car:
+        return Car(id=1, name=car.name, tag=car.tag)
+
+    @jsonrpc.method('jsonrpc.createManyCar')
+    def create_many_cars(cars: t.List[NewCar], car: t.Optional[NewCar] = None) -> t.List[Car]:
+        new_cars = [Car(id=i, name=car.name, tag=car.tag) for i, car in enumerate(cars)]
+        if car is not None:
+            return new_cars + [Car(id=len(cars), name=car.name, tag=car.tag)]
+        return new_cars
+
+    @jsonrpc.method('jsonrpc.createManyFixCar')
+    def create_many_fix_cars(cars: t.Dict[str, NewCar]) -> t.List[Car]:
+        return [Car(id=int(car_id), name=car.name, tag=car.tag) for car_id, car in cars.items()]
+
+    @jsonrpc.method('jsonrpc.removeCar')
+    def remove_car(car: t.Optional[Car] = None) -> t.Optional[Car]:
+        return car
 
     class_app = App()
     jsonrpc.register(class_app.index, name='classapp.index')
