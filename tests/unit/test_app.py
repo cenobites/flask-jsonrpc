@@ -35,6 +35,19 @@ from werkzeug.datastructures import Headers
 
 from flask_jsonrpc import JSONRPC, JSONRPCBlueprint
 
+# Python 3.10+
+try:
+    from typing import Self
+except ImportError:  # pragma: no cover
+    from typing_extensions import Self
+
+
+class CustomException(Exception):
+    def __init__(self: Self, message: str, data: t.Dict[str, t.Any]) -> None:
+        super().__init__(message)
+        self.message = message
+        self.data = data
+
 
 def test_app_create() -> None:
     app = Flask('test_app', instance_relative_config=True)
@@ -135,6 +148,117 @@ def test_app_create() -> None:
         )
         assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': 'Welcome to Flask JSON-RPC'}
         assert rv.status_code == 200
+
+
+def test_app_create_using_error_handler() -> None:
+    app = Flask('test_app', instance_relative_config=True)
+    jsonrpc = JSONRPC(app, '/api', enable_web_browsable_api=True)
+
+    @jsonrpc.errorhandler(CustomException)
+    def handle_custom_exc(exc: CustomException) -> t.Dict[str, t.Any]:
+        return exc.data
+
+    # pylint: disable=W0612
+    @jsonrpc.method('app.index')
+    def index() -> str:
+        return 'Welcome to Flask JSON-RPC'
+
+    # pylint: disable=W0612
+    @jsonrpc.method('app.errorhandler')
+    def fn0() -> t.NoReturn:
+        raise CustomException('Testing error handler', data={'message': 'Flask JSON-RPC', 'code': '0000'})
+
+    with app.test_client() as client:
+        rv = client.post('/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.index', 'params': []})
+        assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': 'Welcome to Flask JSON-RPC'}
+        assert rv.status_code == 200
+
+        rv = client.post('/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.errorhandler', 'params': []})
+        assert rv.json == {
+            'id': 1,
+            'jsonrpc': '2.0',
+            'error': {
+                'code': -32000,
+                'data': {'code': '0000', 'message': 'Flask JSON-RPC'},
+                'message': 'Server error',
+                'name': 'ServerError',
+            },
+        }
+        assert rv.status_code == 500
+
+
+def test_app_create_modular_using_error_handler() -> None:
+    jsonrpc_api_1 = JSONRPCBlueprint('jsonrpc_api_1', __name__)
+
+    @jsonrpc_api_1.errorhandler(CustomException)
+    def handle_custom_exc_jsonrpc_api_1(exc: CustomException) -> t.Dict[str, t.Any]:
+        return f"jsonrpc_api_1: {exc.data['message']}"
+
+    # pylint: disable=W0612
+    @jsonrpc_api_1.method('blue1.index')
+    def index_b1() -> str:
+        return 'b1 index'
+
+    # pylint: disable=W0612
+    @jsonrpc_api_1.method('blue1.errorhandler')
+    def error_b1() -> t.NoReturn:
+        raise CustomException('Testing error handler', data={'message': 'Flask JSON-RPC', 'code': '0000'})
+
+    jsonrpc_api_2 = JSONRPCBlueprint('jsonrpc_api_2', __name__)
+
+    @jsonrpc_api_2.errorhandler(CustomException)
+    def handle_custom_exc_jsonrpc_api_2(exc: CustomException) -> t.Dict[str, t.Any]:
+        return f"jsonrpc_api_2: {exc.data['message']}"
+
+    # pylint: disable=W0612
+    @jsonrpc_api_2.method('blue2.index')
+    def index_b2() -> str:
+        return 'b2 index'
+
+    # pylint: disable=W0612
+    @jsonrpc_api_2.method('blue2.errorhandler')
+    def error_b2() -> t.NoReturn:
+        raise CustomException('Testing error handler', data={'message': 'Flask JSON-RPC', 'code': '0000'})
+
+    app = Flask('test_app', instance_relative_config=True)
+    jsonrpc = JSONRPC(app, '/api', enable_web_browsable_api=True)
+    jsonrpc.register_blueprint(app, jsonrpc_api_1, url_prefix='/b1')
+    jsonrpc.register_blueprint(app, jsonrpc_api_2, url_prefix='/b2')
+
+    with app.test_client() as client:
+        rv = client.post('/api/b1', json={'id': 1, 'jsonrpc': '2.0', 'method': 'blue1.index', 'params': []})
+        assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': 'b1 index'}
+        assert rv.status_code == 200
+
+        rv = client.post('/api/b1', json={'id': 1, 'jsonrpc': '2.0', 'method': 'blue1.errorhandler', 'params': []})
+        assert rv.json == {
+            'id': 1,
+            'jsonrpc': '2.0',
+            'error': {
+                'code': -32000,
+                'data': 'jsonrpc_api_1: Flask JSON-RPC',
+                'message': 'Server error',
+                'name': 'ServerError',
+            },
+        }
+        assert rv.status_code == 500
+
+        rv = client.post('/api/b2', json={'id': 1, 'jsonrpc': '2.0', 'method': 'blue2.index', 'params': []})
+        assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': 'b2 index'}
+        assert rv.status_code == 200
+
+        rv = client.post('/api/b2', json={'id': 1, 'jsonrpc': '2.0', 'method': 'blue2.errorhandler', 'params': []})
+        assert rv.json == {
+            'id': 1,
+            'jsonrpc': '2.0',
+            'error': {
+                'code': -32000,
+                'data': 'jsonrpc_api_2: Flask JSON-RPC',
+                'message': 'Server error',
+                'name': 'ServerError',
+            },
+        }
+        assert rv.status_code == 500
 
 
 def test_app_create_with_server_name() -> None:

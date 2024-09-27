@@ -82,7 +82,6 @@ class JSONRPCError(Exception):
     @property
     def jsonrpc_format(self: Self) -> t.Dict[str, t.Any]:
         """Return the Exception data in a format for JSON-RPC"""
-
         error = {'name': self.__class__.__name__, 'code': self.code, 'message': self.message, 'data': self.data}
 
         # RuntimeError: Working outside of application context.

@@ -506,6 +506,60 @@ def test_app_class(client: 'FlaskClient') -> None:
     assert rv.status_code == 500
 
 
+def test_app_with_invalid_union(client: 'FlaskClient') -> None:
+    rv = client.post(
+        '/api',
+        json={
+            'id': 1,
+            'jsonrpc': '2.0',
+            'method': 'jsonrpc.invalidUnion1',
+            'params': {'color': {'name': 'Blue', 'tag': 'good'}},
+        },
+    )
+    assert rv.status_code == 400
+    assert rv.json == {
+        'id': 1,
+        'jsonrpc': '2.0',
+        'error': {
+            'code': -32602,
+            'data': {
+                'message': 'the only type of union that is supported is: typing.Union[T, ' 'None] or typing.Optional[T]'
+            },
+            'message': 'Invalid params',
+            'name': 'InvalidParamsError',
+        },
+    }
+
+    rv = client.post(
+        '/api',
+        json={
+            'id': 1,
+            'jsonrpc': '2.0',
+            'method': 'jsonrpc.invalidUnion2',
+            'params': {'color': {'name': 'Blue', 'tag': 'good'}},
+        },
+    )
+    assert rv.status_code == 400
+    assert rv.json == {
+        'id': 1,
+        'jsonrpc': '2.0',
+        'error': {
+            'code': -32602,
+            'data': {
+                'message': 'the only type of union that is supported is: typing.Union[T, ' 'None] or typing.Optional[T]'
+            },
+            'message': 'Invalid params',
+            'name': 'InvalidParamsError',
+        },
+    }
+
+
+def test_app_with_pythontypes(client: 'FlaskClient') -> None:
+    rv = client.post('/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.literalType', 'params': {'x': 'X'}})
+    assert rv.status_code == 200
+    assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': 'X'}
+
+
 def test_app_with_pythonclass(client: 'FlaskClient') -> None:
     rv = client.post(
         '/api',
@@ -620,59 +674,26 @@ def test_app_with_pythonclass(client: 'FlaskClient') -> None:
     assert rv.status_code == 200
     assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': None}
 
-
-def test_app_with_invalid_union(client: 'FlaskClient') -> None:
     rv = client.post(
         '/api',
         json={
             'id': 1,
             'jsonrpc': '2.0',
-            'method': 'jsonrpc.invalidUnion1',
-            'params': {'color': {'name': 'Blue', 'tag': 'good'}},
+            'method': 'jsonrpc.removeColor',
+            'params': {'color': {'id': 100, 'name': 'Blue', 'tag': 'good'}},
         },
     )
-    assert rv.status_code == 400
+    assert rv.status_code == 500
     assert rv.json == {
         'id': 1,
         'jsonrpc': '2.0',
         'error': {
-            'code': -32602,
-            'data': {
-                'message': 'the only type of union that is supported is: typing.Union[T, ' 'None] or typing.Optional[T]'
-            },
-            'message': 'Invalid params',
-            'name': 'InvalidParamsError',
+            'code': -32000,
+            'data': {'color_id': 100, 'reason': 'The color with an ID greater than 10 does not exist.'},
+            'message': 'Server error',
+            'name': 'ServerError',
         },
     }
-
-    rv = client.post(
-        '/api',
-        json={
-            'id': 1,
-            'jsonrpc': '2.0',
-            'method': 'jsonrpc.invalidUnion2',
-            'params': {'color': {'name': 'Blue', 'tag': 'good'}},
-        },
-    )
-    assert rv.status_code == 400
-    assert rv.json == {
-        'id': 1,
-        'jsonrpc': '2.0',
-        'error': {
-            'code': -32602,
-            'data': {
-                'message': 'the only type of union that is supported is: typing.Union[T, ' 'None] or typing.Optional[T]'
-            },
-            'message': 'Invalid params',
-            'name': 'InvalidParamsError',
-        },
-    }
-
-
-def test_app_with_pythontypes(client: 'FlaskClient') -> None:
-    rv = client.post('/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.literalType', 'params': {'x': 'X'}})
-    assert rv.status_code == 200
-    assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': 'X'}
 
 
 def test_app_with_dataclass(client: 'FlaskClient') -> None:
@@ -786,6 +807,27 @@ def test_app_with_dataclass(client: 'FlaskClient') -> None:
     rv = client.post('/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.removeCar', 'params': []})
     assert rv.status_code == 200
     assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': None}
+
+    rv = client.post(
+        '/api',
+        json={
+            'id': 1,
+            'jsonrpc': '2.0',
+            'method': 'jsonrpc.removeCar',
+            'params': {'car': {'id': 100, 'name': 'Fusca', 'tag': 'blue'}},
+        },
+    )
+    assert rv.status_code == 500
+    assert rv.json == {
+        'id': 1,
+        'jsonrpc': '2.0',
+        'error': {
+            'code': -32000,
+            'data': {'car_id': 100, 'reason': 'The car with an ID greater than 10 does not exist.'},
+            'message': 'Server error',
+            'name': 'ServerError',
+        },
+    }
 
 
 def test_app_with_pydantic(client: 'FlaskClient') -> None:
@@ -909,6 +951,27 @@ def test_app_with_pydantic(client: 'FlaskClient') -> None:
     rv = client.post('/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.removePet', 'params': []})
     assert rv.status_code == 200
     assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': None}
+
+    rv = client.post(
+        '/api',
+        json={
+            'id': 1,
+            'jsonrpc': '2.0',
+            'method': 'jsonrpc.removePet',
+            'params': {'pet': {'id': 100, 'name': 'Lou', 'tag': 'dog'}},
+        },
+    )
+    assert rv.status_code == 500
+    assert rv.json == {
+        'id': 1,
+        'jsonrpc': '2.0',
+        'error': {
+            'code': -32000,
+            'data': {'pet_id': 100, 'reason': 'The pet with an ID greater than 10 does not exist.'},
+            'message': 'Server error',
+            'name': 'ServerError',
+        },
+    }
 
 
 def test_app_system_describe(client: 'FlaskClient') -> None:

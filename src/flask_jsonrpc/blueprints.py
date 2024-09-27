@@ -26,7 +26,10 @@
 # POSSIBILITY OF SUCH DAMAGE.
 import typing as t
 
+from flask import typing as ft
+
 from .globals import default_jsonrpc_site, default_jsonrpc_site_api
+from .handlers import JSONRPCErrorHandlerDecoratorMixin
 from .wrappers import JSONRPCDecoratorMixin
 
 # Python 3.10+
@@ -40,7 +43,7 @@ if t.TYPE_CHECKING:
     from .views import JSONRPCView
 
 
-class JSONRPCBlueprint(JSONRPCDecoratorMixin):
+class JSONRPCBlueprint(JSONRPCDecoratorMixin, JSONRPCErrorHandlerDecoratorMixin):
     def __init__(
         self: Self,
         name: str,
@@ -58,3 +61,6 @@ class JSONRPCBlueprint(JSONRPCDecoratorMixin):
 
     def get_jsonrpc_site_api(self: Self) -> t.Type['JSONRPCView']:
         return self.jsonrpc_site_api
+
+    def register_error_handler(self: Self, exception: t.Type[Exception], fn: ft.ErrorHandlerCallable) -> None:
+        super().register_error_handler(exception, fn)

@@ -597,7 +597,6 @@ class APITest(APITestCase):
                 'method': 'jsonrpc.createColor',
                 'params': {'color': {'name': 'Blue', 'tag': 'good'}},
             },
-            headers={'Content-Type': 'application/json'},
         )
         self.assertEqual(200, rv.status_code)
         self.assertDictEqual({'id': 1, 'jsonrpc': '2.0', 'result': {'id': 1, 'name': 'Blue', 'tag': 'good'}}, rv.json())
@@ -605,7 +604,6 @@ class APITest(APITestCase):
         rv = self.requests.post(
             API_URL,
             json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.createColor', 'params': {'color': {'name': 'Red'}}},
-            headers={'Content-Type': 'application/json'},
         )
         self.assertEqual(400, rv.status_code)
         data = rv.json()
@@ -624,7 +622,6 @@ class APITest(APITestCase):
                 'method': 'jsonrpc.createManyColor',
                 'params': {'colors': [{'name': 'Blue', 'tag': 'good'}, {'name': 'Red', 'tag': 'bad'}]},
             },
-            headers={'Content-Type': 'application/json'},
         )
         self.assertEqual(200, rv.status_code)
         self.assertDictEqual(
@@ -644,7 +641,6 @@ class APITest(APITestCase):
                 'method': 'jsonrpc.createManyColor',
                 'params': {'colors': [{'name': 'Blue', 'tag': 'good'}], 'color': {'name': 'Red', 'tag': 'bad'}},
             },
-            headers={'Content-Type': 'application/json'},
         )
         self.assertEqual(200, rv.status_code)
         self.assertDictEqual(
@@ -667,7 +663,6 @@ class APITest(APITestCase):
                     {'name': 'Green', 'tag': 'yay'},
                 ],
             },
-            headers={'Content-Type': 'application/json'},
         )
         self.assertEqual(200, rv.status_code)
         self.assertDictEqual(
@@ -691,7 +686,6 @@ class APITest(APITestCase):
                 'method': 'jsonrpc.createManyFixColor',
                 'params': {'colors': {'1': {'name': 'Blue', 'tag': 'good'}}},
             },
-            headers={'Content-Type': 'application/json'},
         )
         self.assertEqual(200, rv.status_code)
         self.assertDictEqual(
@@ -706,26 +700,45 @@ class APITest(APITestCase):
                 'method': 'jsonrpc.removeColor',
                 'params': {'color': {'id': 1, 'name': 'Blue', 'tag': 'good'}},
             },
-            headers={'Content-Type': 'application/json'},
         )
         self.assertEqual(200, rv.status_code)
         self.assertDictEqual({'id': 1, 'jsonrpc': '2.0', 'result': {'id': 1, 'name': 'Blue', 'tag': 'good'}}, rv.json())
 
         rv = self.requests.post(
-            API_URL,
-            json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.removeColor', 'params': {'color': None}},
-            headers={'Content-Type': 'application/json'},
+            API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.removeColor', 'params': {'color': None}}
+        )
+        self.assertEqual(200, rv.status_code)
+        self.assertDictEqual({'id': 1, 'jsonrpc': '2.0', 'result': None}, rv.json())
+
+        rv = self.requests.post(
+            API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.removeColor', 'params': []}
         )
         self.assertEqual(200, rv.status_code)
         self.assertDictEqual({'id': 1, 'jsonrpc': '2.0', 'result': None}, rv.json())
 
         rv = self.requests.post(
             API_URL,
-            json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.removeColor', 'params': []},
-            headers={'Content-Type': 'application/json'},
+            json={
+                'id': 1,
+                'jsonrpc': '2.0',
+                'method': 'jsonrpc.removeColor',
+                'params': {'color': {'id': 100, 'name': 'Blue', 'tag': 'good'}},
+            },
         )
-        self.assertEqual(200, rv.status_code)
-        self.assertDictEqual({'id': 1, 'jsonrpc': '2.0', 'result': None}, rv.json())
+        self.assertEqual(500, rv.status_code)
+        self.assertDictEqual(
+            {
+                'id': 1,
+                'jsonrpc': '2.0',
+                'error': {
+                    'code': -32000,
+                    'data': {'color_id': 100, 'reason': 'The color with an ID greater than 10 does not exist.'},
+                    'message': 'Server error',
+                    'name': 'ServerError',
+                },
+            },
+            rv.json(),
+        )
 
     def test_app_with_dataclass(self: Self) -> None:
         rv = self.requests.post(
@@ -736,7 +749,6 @@ class APITest(APITestCase):
                 'method': 'jsonrpc.createCar',
                 'params': {'car': {'name': 'Fusca', 'tag': 'blue'}},
             },
-            headers={'Content-Type': 'application/json'},
         )
         self.assertEqual(200, rv.status_code)
         self.assertDictEqual(
@@ -746,7 +758,6 @@ class APITest(APITestCase):
         rv = self.requests.post(
             API_URL,
             json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.createCar', 'params': {'car': {'name': 'Fusca'}}},
-            headers={'Content-Type': 'application/json'},
         )
         self.assertEqual(400, rv.status_code)
         data = rv.json()
@@ -765,7 +776,6 @@ class APITest(APITestCase):
                 'method': 'jsonrpc.createManyCar',
                 'params': {'cars': [{'name': 'Fusca', 'tag': 'blue'}, {'name': 'Kombi', 'tag': 'yellow'}]},
             },
-            headers={'Content-Type': 'application/json'},
         )
         self.assertEqual(200, rv.status_code)
         self.assertDictEqual(
@@ -785,7 +795,6 @@ class APITest(APITestCase):
                 'method': 'jsonrpc.createManyCar',
                 'params': {'cars': [{'name': 'Fusca', 'tag': 'blue'}], 'car': {'name': 'Kombi', 'tag': 'yellow'}},
             },
-            headers={'Content-Type': 'application/json'},
         )
         self.assertEqual(200, rv.status_code)
         self.assertDictEqual(
@@ -808,7 +817,6 @@ class APITest(APITestCase):
                     {'name': 'Gol', 'tag': 'white'},
                 ],
             },
-            headers={'Content-Type': 'application/json'},
         )
         self.assertEqual(200, rv.status_code)
         self.assertDictEqual(
@@ -832,7 +840,6 @@ class APITest(APITestCase):
                 'method': 'jsonrpc.createManyFixCar',
                 'params': {'cars': {'1': {'name': 'Fusca', 'tag': 'blue'}}},
             },
-            headers={'Content-Type': 'application/json'},
         )
         self.assertEqual(200, rv.status_code)
         self.assertDictEqual(
@@ -847,7 +854,6 @@ class APITest(APITestCase):
                 'method': 'jsonrpc.removeCar',
                 'params': {'car': {'id': 1, 'name': 'Fusca', 'tag': 'blue'}},
             },
-            headers={'Content-Type': 'application/json'},
         )
         self.assertEqual(200, rv.status_code)
         self.assertDictEqual(
@@ -855,20 +861,38 @@ class APITest(APITestCase):
         )
 
         rv = self.requests.post(
-            API_URL,
-            json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.removeCar', 'params': {'car': None}},
-            headers={'Content-Type': 'application/json'},
+            API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.removeCar', 'params': {'car': None}}
         )
+        self.assertEqual(200, rv.status_code)
+        self.assertDictEqual({'id': 1, 'jsonrpc': '2.0', 'result': None}, rv.json())
+
+        rv = self.requests.post(API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.removeCar', 'params': []})
         self.assertEqual(200, rv.status_code)
         self.assertDictEqual({'id': 1, 'jsonrpc': '2.0', 'result': None}, rv.json())
 
         rv = self.requests.post(
             API_URL,
-            json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.removeCar', 'params': []},
-            headers={'Content-Type': 'application/json'},
+            json={
+                'id': 1,
+                'jsonrpc': '2.0',
+                'method': 'jsonrpc.removeCar',
+                'params': {'car': {'id': 100, 'name': 'Fusca', 'tag': 'blue'}},
+            },
         )
-        self.assertEqual(200, rv.status_code)
-        self.assertDictEqual({'id': 1, 'jsonrpc': '2.0', 'result': None}, rv.json())
+        self.assertEqual(500, rv.status_code)
+        self.assertDictEqual(
+            {
+                'id': 1,
+                'jsonrpc': '2.0',
+                'error': {
+                    'code': -32000,
+                    'data': {'car_id': 100, 'reason': 'The car with an ID greater than 10 does not exist.'},
+                    'message': 'Server error',
+                    'name': 'ServerError',
+                },
+            },
+            rv.json(),
+        )
 
     def test_app_with_pydantic(self: Self) -> None:
         rv = self.requests.post(
@@ -879,15 +903,12 @@ class APITest(APITestCase):
                 'method': 'jsonrpc.createPet',
                 'params': {'pet': {'name': 'Eve', 'tag': 'dog'}},
             },
-            headers={'Content-Type': 'application/json'},
         )
         self.assertEqual(200, rv.status_code)
         self.assertDictEqual({'id': 1, 'jsonrpc': '2.0', 'result': {'id': 1, 'name': 'Eve', 'tag': 'dog'}}, rv.json())
 
         rv = self.requests.post(
-            API_URL,
-            json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.createPet', 'params': {'pet': {'name': 'Eve'}}},
-            headers={'Content-Type': 'application/json'},
+            API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.createPet', 'params': {'pet': {'name': 'Eve'}}}
         )
         self.assertEqual(400, rv.status_code)
         self.assertDictEqual(
@@ -919,7 +940,6 @@ class APITest(APITestCase):
                 'method': 'jsonrpc.createManyPet',
                 'params': {'pets': [{'name': 'Eve', 'tag': 'dog'}, {'name': 'Lou', 'tag': 'dog'}]},
             },
-            headers={'Content-Type': 'application/json'},
         )
         self.assertEqual(200, rv.status_code)
         self.assertDictEqual(
@@ -939,7 +959,6 @@ class APITest(APITestCase):
                 'method': 'jsonrpc.createManyPet',
                 'params': {'pets': [{'name': 'Eve', 'tag': 'dog'}], 'pet': {'name': 'Lou', 'tag': 'dog'}},
             },
-            headers={'Content-Type': 'application/json'},
         )
         self.assertEqual(200, rv.status_code)
         self.assertDictEqual(
@@ -962,7 +981,6 @@ class APITest(APITestCase):
                     {'name': 'Tequila', 'tag': 'cat'},
                 ],
             },
-            headers={'Content-Type': 'application/json'},
         )
         self.assertEqual(200, rv.status_code)
         self.assertDictEqual(
@@ -986,7 +1004,6 @@ class APITest(APITestCase):
                 'method': 'jsonrpc.createManyFixPet',
                 'params': {'pets': {'1': {'name': 'Eve', 'tag': 'dog'}}},
             },
-            headers={'Content-Type': 'application/json'},
         )
         self.assertEqual(200, rv.status_code)
         self.assertDictEqual({'id': 1, 'jsonrpc': '2.0', 'result': [{'id': 1, 'name': 'Eve', 'tag': 'dog'}]}, rv.json())
@@ -1004,20 +1021,38 @@ class APITest(APITestCase):
         self.assertDictEqual({'id': 1, 'jsonrpc': '2.0', 'result': {'id': 1, 'name': 'Eve', 'tag': 'dog'}}, rv.json())
 
         rv = self.requests.post(
-            API_URL,
-            json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.removePet', 'params': {'pet': None}},
-            headers={'Content-Type': 'application/json'},
+            API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.removePet', 'params': {'pet': None}}
         )
+        self.assertEqual(200, rv.status_code)
+        self.assertDictEqual({'id': 1, 'jsonrpc': '2.0', 'result': None}, rv.json())
+
+        rv = self.requests.post(API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.removePet', 'params': []})
         self.assertEqual(200, rv.status_code)
         self.assertDictEqual({'id': 1, 'jsonrpc': '2.0', 'result': None}, rv.json())
 
         rv = self.requests.post(
             API_URL,
-            json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.removePet', 'params': []},
-            headers={'Content-Type': 'application/json'},
+            json={
+                'id': 1,
+                'jsonrpc': '2.0',
+                'method': 'jsonrpc.removePet',
+                'params': {'pet': {'id': 100, 'name': 'Lou', 'tag': 'dog'}},
+            },
         )
-        self.assertEqual(200, rv.status_code)
-        self.assertDictEqual({'id': 1, 'jsonrpc': '2.0', 'result': None}, rv.json())
+        self.assertEqual(500, rv.status_code)
+        self.assertDictEqual(
+            {
+                'id': 1,
+                'jsonrpc': '2.0',
+                'error': {
+                    'code': -32000,
+                    'data': {'pet_id': 100, 'reason': 'The pet with an ID greater than 10 does not exist.'},
+                    'message': 'Server error',
+                    'name': 'ServerError',
+                },
+            },
+            rv.json(),
+        )
 
     def test_system_describe(self: Self) -> None:
         rv = self.requests.post(API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'rpc.describe'})
