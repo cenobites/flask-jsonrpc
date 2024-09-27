@@ -131,3 +131,15 @@ class JSONRPCDecoratorMixin:
             return self.register_view_function(fn, name, **options)
 
         return decorator
+
+    def register_error_handler(self: Self, exception: t.Type[Exception], fn: t.Callable[[t.Any], t.Any]) -> None:
+        self.get_jsonrpc_site().register_error_handler(exception, fn)
+
+    def errorhandler(
+        self: Self, exception: t.Type[Exception]
+    ) -> t.Callable[[t.Callable[[t.Any], t.Any]], t.Callable[[t.Any], t.Any]]:
+        def decorator(fn: t.Callable[[t.Any], t.Any]) -> t.Callable[[t.Any], t.Any]:
+            self.register_error_handler(exception, fn)
+            return fn
+
+        return decorator

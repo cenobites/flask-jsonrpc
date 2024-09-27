@@ -226,7 +226,7 @@ class JSONRPCSite:
         resp_views = []
         headers = Headers()
         status_code = JSONRPC_DEFAULT_HTTP_STATUS_CODE
-        for rv, _, hdrs in (self.handle_dispatch_except(rq) for rq in reqs_json):
+        for rv, _, hdrs in [self.handle_dispatch_except(rq) for rq in reqs_json]:
             headers.update([hdrs] if isinstance(hdrs, tuple) else hdrs)  # type: ignore
             if rv is None:
                 continue

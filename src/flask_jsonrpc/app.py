@@ -31,7 +31,6 @@ from flask import Flask
 
 from .globals import default_jsonrpc_site, default_jsonrpc_site_api
 from .helpers import urn
-from .handlers import JSONRPCErrorHandlerDecoratorMixin
 from .wrappers import JSONRPCDecoratorMixin
 from .contrib.browse import JSONRPCBrowse
 
@@ -47,7 +46,7 @@ if t.TYPE_CHECKING:
     from .blueprints import JSONRPCBlueprint
 
 
-class JSONRPC(JSONRPCDecoratorMixin, JSONRPCErrorHandlerDecoratorMixin):
+class JSONRPC(JSONRPCDecoratorMixin):
     def __init__(
         self: Self,
         app: t.Optional[Flask] = None,
@@ -135,9 +134,6 @@ class JSONRPC(JSONRPCDecoratorMixin, JSONRPCErrorHandlerDecoratorMixin):
 
         if app.config['DEBUG'] or enable_web_browsable_api:
             self.register_browse(jsonrpc_app)
-
-    def register_error_handler(self: Self, exception: t.Type[Exception], fn: t.Callable[[t.Any], t.Any]) -> None:
-        super().register_error_handler(exception, fn)
 
     def init_browse_app(self: Self, app: Flask, path: t.Optional[str] = None, base_url: t.Optional[str] = None) -> None:
         browse_url = self._make_jsonrpc_browse_url(path or self.path)
