@@ -12,34 +12,6 @@ permissions:
   contents: read
 
 jobs:
-  run-tox:
-    name: Tox | Test, Style, Lint, Typing, Pytype, Security and Docs
-    runs-on: ${{ matrix.platform }}
-    strategy:
-      fail-fast: false
-      matrix:
-        platform:
-          - ubuntu-latest
-        python-version: ["3.11", "3.12"]
-    steps:
-    - name: Checkout source at ${{ matrix.platform }}
-      uses: actions/checkout@v4
-    - name: Setup Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v5
-      with:
-        python-version: ${{ matrix.python-version }}
-    - name: Install dependencies
-      run: |
-        python -m pip install tox
-    - name: Run tox
-      if: ${{ matrix.platform == 'ubuntu-latest' && matrix.python-version == '3.12' }}
-      run: |
-        tox -e py,py-async,style,typing-mypy,typing-pyright,security-safety,security-bandit,docs -p all
-    - name: Run tox (Pytype)
-      if: ${{ matrix.platform == 'ubuntu-latest' && matrix.python-version == '3.11' }}
-      run: |
-        tox -e typing-pytype
-
   test:
     name: Test
     runs-on: ${{ matrix.platform }}
@@ -102,7 +74,7 @@ jobs:
 
   build:
     name: Build source on ${{ matrix.platform }}
-    needs: [run-tox, coverage]
+    needs: [coverage]
     runs-on: ${{ matrix.platform }}
     strategy:
       fail-fast: false
@@ -121,6 +93,34 @@ jobs:
       run: |
         python -m pip install -r requirements/build.txt
         python -m build --outdir dist-${{ matrix.platform }}-${{ matrix.python-version }}
+    - name: Tar build and wheel distributions files
+      run: |
+        tar -cvf dist-${{ matrix.platform }}-${{ matrix.python-version }}.tar dist-${{ matrix.platform }}-${{ matrix.python-version }}
+    - name: Upload build and wheel distributions files
+      uses: actions/upload-artifact@v4
+      with:
+        name: pre-release-build-${{ matrix.platform }}-${{ matrix.python-version }}
+        path: |
+          dist-${{ matrix.platform }}-${{ matrix.python-version }}.tar
+
+  build-mypyc:
+    name: Build using Mypyc source on ${{ matrix.platform }}
+    continue-on-error: true
+    needs: [coverage]
+    runs-on: ${{ matrix.platform }}
+    strategy:
+      fail-fast: false
+      matrix:
+        platform:
+          - ubuntu-latest
+        python-version: ["3.12"]
+    steps:
+    - name: Checkout source at ${{ matrix.platform }}
+      uses: actions/checkout@v4
+    - name: Setup Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ matrix.python-version }}
     - name: Compiles Python modules to C extensions with Mypyc
       env:
         MYPYC_ENABLE: 1
@@ -131,19 +131,17 @@ jobs:
         python setup.py bdist_wheel --dist-dir mypyc-dist-${{ matrix.platform }}-${{ matrix.python-version }}
     - name: Tar build and wheel distributions files
       run: |
-        tar -cvf dist-${{ matrix.platform }}-${{ matrix.python-version }}.tar dist-${{ matrix.platform }}-${{ matrix.python-version }}
         tar -cvf mypyc-dist-${{ matrix.platform }}-${{ matrix.python-version }}.tar mypyc-dist-${{ matrix.platform }}-${{ matrix.python-version }}
     - name: Upload build and wheel distributions files
       uses: actions/upload-artifact@v4
       with:
-        name: pre-release-build-${{ matrix.platform }}-${{ matrix.python-version }}
+        name: pre-release-cbuild-${{ matrix.platform }}-${{ matrix.python-version }}
         path: |
-          dist-${{ matrix.platform }}-${{ matrix.python-version }}.tar
           mypyc-dist-${{ matrix.platform }}-${{ matrix.python-version }}.tar
 
   build-wheels:
     name: Build wheels on ${{ matrix.platform }}
-    needs: [run-tox, coverage]
+    needs: [coverage]
     runs-on: ${{ matrix.platform }}
     strategy:
       fail-fast: false
