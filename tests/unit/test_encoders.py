@@ -24,12 +24,14 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
+import sys
 from enum import Enum
 import typing as t
 from pathlib import Path
 from collections import deque
 from dataclasses import dataclass
 
+import pytest
 from pydantic.main import BaseModel
 
 from flask_jsonrpc.encoders import serializable
@@ -71,9 +73,8 @@ def test_serializable() -> None:
     assert serializable('') == ''
     assert serializable(1) == 1
     assert serializable(EnumType.X) == 'x'
-    assert serializable(Path('/')) == '/'
     assert serializable({'key1': 'value1', 'key2': EnumType.X}) == {'key1': 'value1', 'key2': 'x'}
-    assert serializable([1, 2, EnumType.X, Path('/another/path')]) == [1, 2, 'x', '/another/path']
+    assert serializable([1, 2, EnumType.X, {'key1': 'value1'}]) == [1, 2, 'x', {'key1': 'value1'}]
     assert serializable(deque(['a', 'b', EnumType.X])) == ['a', 'b', 'x']
     assert serializable(GenericClass()) == {'attr1': 'value1', 'attr2': 2}
     assert serializable(
@@ -114,3 +115,14 @@ def test_serializable() -> None:
         {'x': 'str', 'y': 1, 'z': ['0', '1', '2']},
         {'x': 'str', 'y': 1, 'z': ['0', '1', '2']},
     ]
+
+
+@pytest.mark.skipif(sys.platform == 'win32', reason='does not run on windows')
+def test_serializable_path() -> None:
+    assert serializable(Path('/')) == '/'
+    assert serializable([1, 2, EnumType.X, Path('/another/path')]) == [1, 2, 'x', '/another/path']
+
+
+@pytest.mark.skipif(sys.platform != 'win32', reason='does run on windows')
+def test_serializable_path_win32() -> None:
+    assert serializable(Path('/')) == '\\'
