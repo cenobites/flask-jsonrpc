@@ -47,6 +47,15 @@ app = Flask('minimal')
 jsonrpc = JSONRPC(app, '/api', enable_web_browsable_api=True)
 
 
+class MyException(Exception):
+    pass
+
+
+@jsonrpc.errorhandler(MyException)
+def handle_my_exception(ex: MyException) -> t.Dict[str, t.Any]:
+    return {'message': 'It is a custom exception', 'code': '0001'}
+
+
 @jsonrpc.method('App.index')
 def index() -> str:
     return 'Welcome to Flask JSON-RPC'
@@ -80,6 +89,11 @@ def not_notify(string: str) -> str:
 @jsonrpc.method('App.fails')
 def fails(_string: t.Optional[str] = None) -> t.NoReturn:
     raise ValueError('example of fail')
+
+
+@jsonrpc.method('App.failsWithCustomException')
+def fails_with_custom_exception(_string: t.Optional[str] = None) -> t.NoReturn:
+    raise MyException('example of fail with custom exception that will be handled')
 
 
 @jsonrpc.method('App.sum')

@@ -26,6 +26,7 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 # isort:skip_file
+import typing as t
 import os
 import sys
 
@@ -48,6 +49,12 @@ app = Flask('modular')
 jsonrpc = JSONRPC(app, '/api', enable_web_browsable_api=True)
 jsonrpc.register_blueprint(app, user, url_prefix='/user', enable_web_browsable_api=True)
 jsonrpc.register_blueprint(app, article, url_prefix='/article', enable_web_browsable_api=True)
+
+jsonrpc.errorhandler(ValueError)
+
+
+def handle_value_error_exception(ex: ValueError) -> t.Dict[str, t.Any]:
+    return {'message': 'Generic global error handler does not work, :(', 'code': '0000'}
 
 
 @jsonrpc.method('App.index')

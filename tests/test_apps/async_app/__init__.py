@@ -70,6 +70,24 @@ class Color(NewColor):
         self.id = id
 
 
+class ColorError:
+    def __init__(self: Self, color_id: int, reason: str) -> None:
+        self.color_id = color_id
+        self.reason = reason
+
+
+class ColorException(Exception):
+    def __init__(self: Self, *args: object) -> None:
+        super().__init__(*args)
+
+
+class ColorNotFoundException(ColorException):
+    def __init__(self: Self, message: str, color_error: ColorError) -> None:
+        super().__init__(message)
+        self.message = message
+        self.color_error = color_error
+
+
 @dataclass
 class NewCar:
     name: str
@@ -81,6 +99,24 @@ class Car(NewCar):
     id: int
 
 
+@dataclass
+class CarError:
+    car_id: int
+    reason: str
+
+
+class CarException(Exception):
+    def __init__(self: Self, *args: object) -> None:
+        super().__init__(*args)
+
+
+class CarNotFoundException(CarException):
+    def __init__(self: Self, message: str, car_error: CarError) -> None:
+        super().__init__(message)
+        self.message = message
+        self.car_error = car_error
+
+
 class NewPet(BaseModel):
     name: str
     tag: str
@@ -88,6 +124,23 @@ class NewPet(BaseModel):
 
 class Pet(NewPet):
     id: int
+
+
+class PetError(BaseModel):
+    pet_id: int
+    reason: str
+
+
+class PetException(Exception):
+    def __init__(self: Self, *args: object) -> None:
+        super().__init__(*args)
+
+
+class PetNotFoundException(PetException):
+    def __init__(self: Self, message: str, pet_error: PetError) -> None:
+        super().__init__(message)
+        self.message = message
+        self.pet_error = pet_error
 
 
 class App:
@@ -126,6 +179,7 @@ class App:
 def async_jsonrpc_decorator(fn: t.Callable[..., str]) -> t.Callable[..., str]:
     @functools.wraps(fn)
     async def wrapped(*args, **kwargs) -> str:  # noqa: ANN002,ANN003
+        await asyncio.sleep(0)
         rv = await fn(*args, **kwargs)
         return f'{rv} from decorator, ;)'
 
@@ -139,6 +193,21 @@ def create_async_app(test_config: t.Optional[t.Dict[str, t.Any]] = None) -> Flas
         flask_app.config.update(test_config)
 
     jsonrpc = JSONRPC(flask_app, '/api', enable_web_browsable_api=True)
+
+    @jsonrpc.errorhandler(ColorNotFoundException)
+    async def handle_color_not_found_exc(exc: ColorNotFoundException) -> ColorError:
+        await asyncio.sleep(0)
+        return exc.color_error
+
+    async def handle_pet_not_found_exc(exc: PetNotFoundException) -> PetError:
+        await asyncio.sleep(0)
+        return exc.pet_error
+
+    jsonrpc.register_error_handler(PetNotFoundException, handle_pet_not_found_exc)
+
+    @jsonrpc.errorhandler(CarNotFoundException)
+    async def handle_car_not_found_exc(exc: CarNotFoundException) -> CarError:
+        return exc.car_error
 
     # pylint: disable=W0612
     @jsonrpc.method('jsonrpc.greeting')
@@ -227,29 +296,6 @@ def create_async_app(test_config: t.Optional[t.Dict[str, t.Any]] = None) -> Flas
         await asyncio.sleep(0)
         raise ValueError('no return')
 
-    @jsonrpc.method('jsonrpc.createColor')
-    async def create_color(color: NewColor) -> Color:
-        await asyncio.sleep(0)
-        return Color(id=1, name=color.name, tag=color.tag)
-
-    @jsonrpc.method('jsonrpc.createManyColor')
-    async def create_many_colors(colors: t.List[NewColor], color: t.Optional[NewColor] = None) -> t.List[Color]:
-        new_color = [Color(id=i, name=pet.name, tag=pet.tag) for i, pet in enumerate(colors)]
-        if color is not None:
-            return new_color + [Color(id=len(colors), name=color.name, tag=color.tag)]
-        await asyncio.sleep(0)
-        return new_color
-
-    @jsonrpc.method('jsonrpc.createManyFixColor')
-    async def create_many_fix_colors(colors: t.Dict[str, NewPet]) -> t.List[Color]:
-        await asyncio.sleep(0)
-        return [Color(id=int(color_id), name=color.name, tag=color.tag) for color_id, color in colors.items()]
-
-    @jsonrpc.method('jsonrpc.removeColor')
-    async def remove_color(color: t.Optional[Color] = None) -> t.Optional[Color]:
-        await asyncio.sleep(0)
-        return color
-
     @jsonrpc.method('jsonrpc.invalidUnion1')
     async def invalid_union_1(color: t.Union[Color, NewColor]) -> t.Union[Color, NewColor]:
         await asyncio.sleep(0)
@@ -265,6 +311,34 @@ def create_async_app(test_config: t.Optional[t.Dict[str, t.Any]] = None) -> Flas
         await asyncio.sleep(0)
         return x
 
+    @jsonrpc.method('jsonrpc.createColor')
+    async def create_color(color: NewColor) -> Color:
+        await asyncio.sleep(0)
+        return Color(id=1, name=color.name, tag=color.tag)
+
+    @jsonrpc.method('jsonrpc.createManyColor')
+    async def create_many_colors(colors: t.List[NewColor], color: t.Optional[NewColor] = None) -> t.List[Color]:
+        await asyncio.sleep(0)
+        new_color = [Color(id=i, name=pet.name, tag=pet.tag) for i, pet in enumerate(colors)]
+        if color is not None:
+            return new_color + [Color(id=len(colors), name=color.name, tag=color.tag)]
+        return new_color
+
+    @jsonrpc.method('jsonrpc.createManyFixColor')
+    async def create_many_fix_colors(colors: t.Dict[str, NewPet]) -> t.List[Color]:
+        await asyncio.sleep(0)
+        return [Color(id=int(color_id), name=color.name, tag=color.tag) for color_id, color in colors.items()]
+
+    @jsonrpc.method('jsonrpc.removeColor')
+    async def remove_color(color: t.Optional[Color] = None) -> t.Optional[Color]:
+        await asyncio.sleep(0)
+        if color is not None and color.id > 10:
+            raise ColorNotFoundException(
+                'Color not found',
+                ColorError(color_id=color.id, reason='The color with an ID greater than 10 does not exist.'),
+            )
+        return color
+
     @jsonrpc.method('jsonrpc.createPet')
     async def create_pet(pet: NewPet) -> Pet:
         await asyncio.sleep(0)
@@ -272,10 +346,10 @@ def create_async_app(test_config: t.Optional[t.Dict[str, t.Any]] = None) -> Flas
 
     @jsonrpc.method('jsonrpc.createManyPet')
     async def create_many_pets(pets: t.List[NewPet], pet: t.Optional[NewPet] = None) -> t.List[Pet]:
+        await asyncio.sleep(0)
         new_pets = [Pet(id=i, name=pet.name, tag=pet.tag) for i, pet in enumerate(pets)]
         if pet is not None:
             return new_pets + [Pet(id=len(pets), name=pet.name, tag=pet.tag)]
-        await asyncio.sleep(0)
         return new_pets
 
     @jsonrpc.method('jsonrpc.createManyFixPet')
@@ -286,6 +360,10 @@ def create_async_app(test_config: t.Optional[t.Dict[str, t.Any]] = None) -> Flas
     @jsonrpc.method('jsonrpc.removePet')
     async def remove_pet(pet: t.Optional[Pet] = None) -> t.Optional[Pet]:
         await asyncio.sleep(0)
+        if pet is not None and pet.id > 10:
+            raise PetNotFoundException(
+                'Pet not found', PetError(pet_id=pet.id, reason='The pet with an ID greater than 10 does not exist.')
+            )
         return pet
 
     @jsonrpc.method('jsonrpc.createCar')
@@ -309,6 +387,10 @@ def create_async_app(test_config: t.Optional[t.Dict[str, t.Any]] = None) -> Flas
     @jsonrpc.method('jsonrpc.removeCar')
     async def remove_car(car: t.Optional[Car] = None) -> t.Optional[Car]:
         await asyncio.sleep(0)
+        if car is not None and car.id > 10:
+            raise CarNotFoundException(
+                'Car not found', CarError(car_id=car.id, reason='The car with an ID greater than 10 does not exist.')
+            )
         return car
 
     class_app = App()

@@ -1,4 +1,4 @@
-# Copyright (c) 2012-2024, Cenobit Technologies, Inc. http://cenobit.es/
+# Copyright (c) 2020-2024, Cenobit Technologies, Inc. http://cenobit.es/
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -25,42 +25,29 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 import typing as t
-from dataclasses import dataclass
 
-from flask_jsonrpc import JSONRPCBlueprint
+# Python 3.10+
+try:
+    from typing import Self
+except ImportError:  # pragma: no cover
+    from typing_extensions import Self
 
-article = JSONRPCBlueprint('article', __name__)
-
-
-class ArticleException(Exception):
-    def __init__(self: t.Self, *args: object) -> None:
-        super().__init__(*args)
-
-
-class ArticleNotFoundException(ArticleException):
-    def __init__(self: t.Self, message: str, article_id: int) -> None:
-        super().__init__(message)
-        self.article_id = article_id
+if t.TYPE_CHECKING:
+    from .site import JSONRPCSite
 
 
-@dataclass
-class Article:
-    id: int
-    name: str
+class JSONRPCErrorHandlerDecoratorMixin:
+    def get_jsonrpc_site(self: Self) -> 'JSONRPCSite':
+        raise NotImplementedError('.get_jsonrpc_site must be overridden') from None
 
+    def register_error_handler(self: Self, exception: t.Type[Exception], fn: t.Callable[[t.Any], t.Any]) -> None:
+        self.get_jsonrpc_site().register_error_handler(exception, fn)
 
-@article.errorhandler(ArticleNotFoundException)
-def handle_user_not_found_exception(ex: ArticleNotFoundException) -> t.Dict[str, t.Any]:
-    return {'message': f'Article {ex.article_id} not found', 'code': '2001'}
+    def errorhandler(
+        self: Self, exception: t.Type[Exception]
+    ) -> t.Callable[[t.Callable[[t.Any], t.Any]], t.Callable[[t.Any], t.Any]]:
+        def decorator(fn: t.Callable[[t.Any], t.Any]) -> t.Callable[[t.Any], t.Any]:
+            self.register_error_handler(exception, fn)
+            return fn
 
-
-@article.method('Article.index')
-def index() -> str:
-    return 'Welcome to Article API'
-
-
-@article.method('Article.getArticle')
-def get_article(id: int) -> Article:
-    if id > 10:
-        raise ArticleNotFoundException('Article not found', article_id=id)
-    return Article(id=id, name='Founded')
+        return decorator

@@ -24,11 +24,51 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
+import typing as t
+
 from flask_jsonrpc import JSONRPCBlueprint
 
 user = JSONRPCBlueprint('user', __name__)
 
 
+class UserException(Exception):
+    def __init__(self: t.Self, *args: object) -> None:
+        super().__init__(*args)
+
+
+class UserNotFoundException(UserException):
+    def __init__(self: t.Self, message: str, user_id: int) -> None:
+        super().__init__(message)
+        self.user_id = user_id
+
+
+class User:
+    def __init__(self: t.Self, id: int, name: str) -> None:
+        self.id = id
+        self.name = name
+
+
+def handle_user_not_found_exception(ex: UserNotFoundException) -> t.Dict[str, t.Any]:
+    return {'message': f'User {ex.user_id} not found', 'code': '1001'}
+
+
+user.register_error_handler(UserNotFoundException, handle_user_not_found_exception)
+
+
 @user.method('User.index')
 def index() -> str:
     return 'Welcome to User API'
+
+
+@user.method('User.getUser')
+def get_user(id: int) -> User:
+    if id > 10:
+        raise UserNotFoundException('User not found', user_id=id)
+    return User(id, 'Founded')
+
+
+@user.method('User.removeUser')
+def remove_user(id: int) -> User:
+    if id > 10:
+        raise ValueError('User not found')
+    return User(id, 'Removed')

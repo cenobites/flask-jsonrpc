@@ -62,6 +62,7 @@ class JSONRPCSite:
     def __init__(self: Self, path: t.Optional[str] = None, base_url: t.Optional[str] = None) -> None:
         self.path = path
         self.base_url = base_url
+        self.error_handlers: t.Dict[t.Type[Exception], t.Callable[[t.Any], t.Any]] = {}
         self.view_funcs: t.OrderedDict[str, t.Callable[..., t.Any]] = OrderedDict()
         self.uuid: UUID = uuid4()
         self.name: str = 'Flask-JSONRPC'
@@ -85,6 +86,9 @@ class JSONRPCSite:
 
     def set_base_url(self: Self, base_url: t.Optional[str]) -> None:
         self.base_url = base_url
+
+    def register_error_handler(self: Self, exception: t.Type[Exception], fn: t.Callable[[t.Any], t.Any]) -> None:
+        self.error_handlers[exception] = fn
 
     def register(self: Self, name: str, view_func: t.Callable[..., t.Any]) -> None:
         self.view_funcs[name] = view_func
@@ -173,6 +177,17 @@ class JSONRPCSite:
         resp_view = self.handle_view_func(view_func, params)
         return self.make_response(req_json, resp_view)
 
+    def _find_error_handler(self: Self, exc: Exception) -> t.Optional[t.Callable[[t.Any], t.Any]]:
+        exc_class = type(exc)
+        if not self.error_handlers:
+            return None
+
+        for cls in exc_class.__mro__:
+            handler = self.error_handlers.get(cls)
+            if handler is not None:
+                return handler
+        return None
+
     def handle_dispatch_except(
         self: Self, req_json: t.Dict[str, t.Any]
     ) -> t.Tuple[t.Any, int, t.Union[Headers, t.Dict[str, str], t.Tuple[str], t.List[t.Tuple[str]]]]:
@@ -190,7 +205,11 @@ class JSONRPCSite:
             return response, e.status_code, JSONRPC_DEFAULT_HTTP_HEADERS
         except Exception as e:  # pylint: disable=W0703
             current_app.logger.exception('unexpected error')
-            jsonrpc_error = ServerError(data={'message': str(e)})
+            error_handler = self._find_error_handler(e)
+            jsonrpc_error_data = (
+                current_app.ensure_sync(error_handler)(e) if error_handler is not None else {'message': str(e)}
+            )
+            jsonrpc_error = ServerError(data=jsonrpc_error_data)
             response = {
                 'id': get(req_json, 'id'),
                 'jsonrpc': get(req_json, 'jsonrpc', JSONRPC_VERSION_DEFAULT),
