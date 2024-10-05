@@ -25,9 +25,7 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-# isort:skip_file
-import os
-import sys
+
 import typing as t
 
 from flask import Flask, request
@@ -35,15 +33,7 @@ from flask import Flask, request
 if t.TYPE_CHECKING:
     from flask.typing import ResponseReturnValue
 
-try:
-    from flask_jsonrpc import JSONRPC, JSONRPCView
-except ModuleNotFoundError:
-    project_dir, project_module_name = os.path.split(os.path.dirname(os.path.realpath(__file__)))
-    flask_jsonrpc_project_dir = os.path.join(project_dir, os.pardir, 'src')
-    if os.path.exists(flask_jsonrpc_project_dir) and flask_jsonrpc_project_dir not in sys.path:
-        sys.path.append(flask_jsonrpc_project_dir)
-
-    from flask_jsonrpc import JSONRPC, JSONRPCView
+from flask_jsonrpc import JSONRPC, JSONRPCView
 
 
 class UnauthorizedError(Exception):

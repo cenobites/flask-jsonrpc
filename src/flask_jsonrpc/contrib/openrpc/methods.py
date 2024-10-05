@@ -24,6 +24,8 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
+from __future__ import annotations
+
 import typing as t
 from collections import OrderedDict
 
@@ -46,7 +48,7 @@ OPENRPC_DISCOVER_SERVICE_METHOD_TYPE: str = 'method'
 
 
 def _openrpc_discover_method(
-    jsonrpc_sites: t.List['JSONRPCSite'], *, openrpc_schema: st.OpenRPCSchema
+    jsonrpc_sites: list[JSONRPCSite], *, openrpc_schema: st.OpenRPCSchema
 ) -> t.Callable[..., st.OpenRPCSchema]:
     @cache
     @extend_schema(
@@ -104,7 +106,7 @@ def _openrpc_discover_method(
 
 
 def openrpc_discover_method(
-    jsonrpc_sites: t.List['JSONRPCSite'], *, openrpc_schema: t.Optional[st.OpenRPCSchema] = None
+    jsonrpc_sites: list[JSONRPCSite], *, openrpc_schema: st.OpenRPCSchema | None = None
 ) -> t.Callable[..., st.OpenRPCSchema]:
     if openrpc_schema is None:
         jsonrpc_site = jsonrpc_sites[0]

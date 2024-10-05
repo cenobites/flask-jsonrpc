@@ -25,28 +25,15 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-# isort:skip_file
-import os
-import sys
-import typing as t
 import random
+import typing as t
 
 from flask import Flask
 
-try:
-    from flask_jsonrpc import JSONRPC
-except ModuleNotFoundError:
-    project_dir, project_module_name = os.path.split(os.path.dirname(os.path.realpath(__file__)))
-    flask_jsonrpc_project_dir = os.path.join(project_dir, os.pardir, 'src')
-    if os.path.exists(flask_jsonrpc_project_dir) and flask_jsonrpc_project_dir not in sys.path:
-        sys.path.append(flask_jsonrpc_project_dir)
-
-    from flask_jsonrpc import JSONRPC
-
 from pydantic import BaseModel
 
-from flask_jsonrpc.contrib.openrpc import OpenRPC
-from flask_jsonrpc.contrib.openrpc import typing as st
+from flask_jsonrpc import JSONRPC
+from flask_jsonrpc.contrib.openrpc import OpenRPC, typing as st
 
 app = Flask('openrpc')
 jsonrpc = JSONRPC(app, '/api', enable_web_browsable_api=True)

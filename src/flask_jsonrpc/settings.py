@@ -24,19 +24,18 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
+from __future__ import annotations
+
 import typing as t
 
 # Python 3.10+
-try:
-    from typing import Self
-except ImportError:  # pragma: no cover
-    from typing_extensions import Self
+from typing_extensions import Self
 
 DEFAULTS = {'DEFAULT_JSONRPC_METHOD': {'VALIDATE': True, 'NOTIFICATION': True}}
 
 
 class JSONRPCSettings:
-    def __init__(self: Self, defaults: t.Optional[t.Dict[str, t.Any]] = None) -> None:
+    def __init__(self: Self, defaults: dict[str, t.Any] | None = None) -> None:
         self.defaults = defaults or DEFAULTS
         self.setup(self.defaults)
 
@@ -50,7 +49,7 @@ class JSONRPCSettings:
         return val
 
     # XXX: https://mypyc.readthedocs.io/en/latest/differences_from_python.html#monkey-patching
-    def setup(self: Self, defaults: t.Dict[str, t.Any]) -> None:
+    def setup(self: Self, defaults: dict[str, t.Any]) -> None:
         for attr, val in defaults.items():
             setattr(JSONRPCSettings, attr, val)
 

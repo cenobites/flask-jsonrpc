@@ -24,19 +24,20 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
+from __future__ import annotations
+
 from types import GeneratorType
 import typing as t
 from numbers import Real, Integral, Rational
 from collections import OrderedDict, deque, defaultdict
 from collections.abc import Mapping
 
-from typing_inspect import is_new_type  # type: ignore
+from typing_extensions import (
+    Self,  # Python 3.10+
+    Literal,  # Python 3.8+
+)
 
-# Python 3.11+
-try:
-    from typing import Self
-except ImportError:  # pragma: no cover
-    from typing_extensions import Self
+from typing_inspect import is_new_type  # type: ignore
 
 # Python 3.10+
 try:
@@ -45,15 +46,9 @@ except ImportError:  # pragma: no cover
     UnionType = None  # type: ignore
     NoneType = type(None)  # type: ignore
 
-# Python 3.8+
-try:
-    from typing_extensions import Literal
-except ImportError:  # pragma: no cover
-    from typing import Literal  # type: ignore  # pylint: disable=C0412
-
 
 class JSONRPCNewType:
-    def __init__(self: Self, name: str, *types: t.Union[type, t.Tuple[t.Union[type, t.Tuple[type, ...]], ...]]) -> None:
+    def __init__(self: Self, name: str, *types: type | tuple[type | tuple[type, ...], ...]) -> None:
         self.name = name
         self.types = types
 

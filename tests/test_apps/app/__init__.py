@@ -26,7 +26,6 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 import os
-import sys
 import typing as t
 import functools
 from dataclasses import dataclass
@@ -41,15 +40,7 @@ except ImportError:  # pragma: no cover
 
 from pydantic import BaseModel
 
-try:
-    from flask_jsonrpc import JSONRPC
-except ModuleNotFoundError:
-    project_dir, project_module_name = os.path.split(os.path.dirname(os.path.realpath(__file__)))
-    flask_jsonrpc_project_dir = os.path.join(project_dir, os.pardir, os.pardir, 'src')
-    if os.path.exists(flask_jsonrpc_project_dir) and flask_jsonrpc_project_dir not in sys.path:
-        sys.path.append(flask_jsonrpc_project_dir)
-
-    from flask_jsonrpc import JSONRPC
+from flask_jsonrpc import JSONRPC
 
 
 class NewColor:
@@ -143,39 +134,52 @@ class PetNotFoundException(PetException):
 
 
 class App:
-    def index(self: Self, name: str = 'Flask JSON-RPC') -> str:
+    @staticmethod
+    def index(name: str = 'Flask JSON-RPC') -> str:
         return f'Hello {name}'
 
     @staticmethod
     def greeting(name: str = 'Flask JSON-RPC') -> str:
         return f'Hello {name}'
 
-    @classmethod
-    def hello(cls: t.Type[Self], name: str = 'Flask JSON-RPC') -> str:
+    @staticmethod
+    def hello(name: str = 'Flask JSON-RPC') -> str:
         return f'Hello {name}'
 
-    def echo(self: Self, string: str, _some: t.Any = None) -> str:  # noqa: ANN401
+    @staticmethod
+    def echo(string: str, _some: t.Any = None) -> str:  # noqa: ANN401
         return string
 
-    def notify(self: Self, _string: t.Optional[str] = None) -> None:
+    @staticmethod
+    def notify(_string: t.Optional[str] = None) -> None:
         pass
 
-    def not_allow_notify(self: Self, _string: t.Optional[str] = None) -> str:
+    @staticmethod
+    def not_allow_notify(_string: t.Optional[str] = None) -> str:
         return 'Now allow notify'
 
-    def fails(self: Self, n: int) -> int:
+    @staticmethod
+    def fails(n: int) -> int:
         if n % 2 == 0:
             return n
         raise ValueError('number is odd')
 
 
 def jsonrpc_decorator(fn: t.Callable[..., str]) -> t.Callable[..., str]:
-    @functools.wraps(fn)
-    def wrapped(*args, **kwargs) -> str:  # noqa: ANN002,ANN003
-        rv = fn(*args, **kwargs)
+    def decorator(string: str) -> str:
+        rv = fn(string)
         return f'{rv} from decorator, ;)'
 
-    return wrapped
+    return decorator
+
+
+def jsonrpc_decorator_wrapped(fn: t.Callable[..., str]) -> t.Callable[..., str]:
+    @functools.wraps(fn)
+    def decorator(string: str) -> str:
+        rv = fn(string)
+        return f'{rv} from decorator, ;)'
+
+    return decorator
 
 
 def create_app(test_config: t.Optional[t.Dict[str, t.Any]] = None) -> Flask:  # noqa: C901  pylint: disable=W0612
@@ -242,6 +246,12 @@ def create_app(test_config: t.Optional[t.Dict[str, t.Any]] = None) -> Flask:  # 
     @jsonrpc.method('jsonrpc.decorators')
     @jsonrpc_decorator
     def decorators(string: str) -> str:
+        return f'Hello {string}'
+
+    # pylint: disable=W0612
+    @jsonrpc.method('jsonrpc.decoratorsWrapped')
+    @jsonrpc_decorator_wrapped
+    def decoratorsWrapped(string: str) -> str:
         return f'Hello {string}'
 
     # pylint: disable=W0612

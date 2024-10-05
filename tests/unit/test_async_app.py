@@ -395,7 +395,7 @@ def test_app_create_with_method_without_annotation_on_return() -> None:
         assert rv.json == {
             'error': {
                 'code': -32602,
-                'data': {'message': 'return type of str must be a type; got NoneType instead'},
+                'data': {'message': 'return type of str must be a type; got None instead'},
                 'message': 'Invalid params',
                 'name': 'InvalidParamsError',
             },

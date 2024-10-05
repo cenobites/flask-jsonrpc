@@ -24,18 +24,17 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
+from __future__ import annotations
+
 import typing as t
 from collections import OrderedDict
 from urllib.parse import urlsplit
 
+# Python 3.10+
+from typing_extensions import Self
+
 from . import typing as fjt  # pylint: disable=W0404
 from .helpers import from_python_type
-
-# Python 3.10+
-try:
-    from typing import Self
-except ImportError:  # pragma: no cover
-    from typing_extensions import Self
 
 if t.TYPE_CHECKING:
     from flask_jsonrpc.site import JSONRPCSite
@@ -45,11 +44,11 @@ JSONRPC_DESCRIBE_SERVICE_METHOD_TYPE: str = 'method'
 
 
 class JSONRPCServiceDescriptor:
-    def __init__(self: Self, jsonrpc_site: 'JSONRPCSite') -> None:
+    def __init__(self: Self, jsonrpc_site: JSONRPCSite) -> None:
         self.jsonrpc_site = jsonrpc_site
         self.register(jsonrpc_site)
 
-    def register(self: Self, jsonrpc_site: 'JSONRPCSite') -> None:
+    def register(self: Self, jsonrpc_site: JSONRPCSite) -> None:
         def describe() -> fjt.ServiceDescribe:
             return self.service_describe()
 
@@ -69,7 +68,7 @@ class JSONRPCServiceDescriptor:
 
     def service_method_params_desc(
         self: Self, view_func: t.Callable[..., t.Any]
-    ) -> t.List[fjt.ServiceMethodParamsDescribe]:
+    ) -> list[fjt.ServiceMethodParamsDescribe]:
         return [
             fjt.ServiceMethodParamsDescribe(name=name, type=self.python_type_name(tp))
             for name, tp in getattr(view_func, 'jsonrpc_method_params', {}).items()

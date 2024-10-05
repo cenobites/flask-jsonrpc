@@ -24,7 +24,12 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
+from __future__ import annotations
+
 import typing as t
+
+# Python 3.10+
+from typing_extensions import Self
 
 from flask import typing as ft, current_app, make_response
 from flask.views import MethodView
@@ -33,18 +38,12 @@ from .site import JSONRPC_VERSION_DEFAULT, JSONRPC_DEFAULT_HTTP_HEADERS
 from .encoders import jsonify
 from .exceptions import JSONRPCError
 
-# Python 3.10+
-try:
-    from typing import Self
-except ImportError:  # pragma: no cover
-    from typing_extensions import Self
-
 if t.TYPE_CHECKING:
     from .site import JSONRPCSite
 
 
 class JSONRPCView(MethodView):
-    def __init__(self: Self, jsonrpc_site: 'JSONRPCSite') -> None:
+    def __init__(self: Self, jsonrpc_site: JSONRPCSite) -> None:
         self.jsonrpc_site = jsonrpc_site
 
     def post(self: Self) -> ft.ResponseReturnValue:

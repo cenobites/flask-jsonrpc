@@ -191,7 +191,7 @@ def test_app_create_modular_using_error_handler() -> None:
     jsonrpc_api_1 = JSONRPCBlueprint('jsonrpc_api_1', __name__)
 
     @jsonrpc_api_1.errorhandler(CustomException)
-    def handle_custom_exc_jsonrpc_api_1(exc: CustomException) -> t.Dict[str, t.Any]:
+    def handle_custom_exc_jsonrpc_api_1(exc: CustomException) -> str:
         return f"jsonrpc_api_1: {exc.data['message']}"
 
     # pylint: disable=W0612
@@ -207,7 +207,7 @@ def test_app_create_modular_using_error_handler() -> None:
     jsonrpc_api_2 = JSONRPCBlueprint('jsonrpc_api_2', __name__)
 
     @jsonrpc_api_2.errorhandler(CustomException)
-    def handle_custom_exc_jsonrpc_api_2(exc: CustomException) -> t.Dict[str, t.Any]:
+    def handle_custom_exc_jsonrpc_api_2(exc: CustomException) -> str:
         return f"jsonrpc_api_2: {exc.data['message']}"
 
     # pylint: disable=W0612
@@ -376,7 +376,7 @@ def test_app_create_with_method_without_annotation_on_return() -> None:
         assert rv.json == {
             'error': {
                 'code': -32602,
-                'data': {'message': 'return type of str must be a type; got NoneType instead'},
+                'data': {'message': 'return type of str must be a type; got None instead'},
                 'message': 'Invalid params',
                 'name': 'InvalidParamsError',
             },
