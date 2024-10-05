@@ -26,7 +26,6 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 import os
-import sys
 import typing as t
 import asyncio
 import functools
@@ -42,15 +41,7 @@ except ImportError:  # pragma: no cover
 
 from pydantic import BaseModel
 
-try:
-    from flask_jsonrpc import JSONRPC
-except ModuleNotFoundError:
-    project_dir, project_module_name = os.path.split(os.path.dirname(os.path.realpath(__file__)))
-    flask_jsonrpc_project_dir = os.path.join(project_dir, os.pardir, os.pardir, 'src')
-    if os.path.exists(flask_jsonrpc_project_dir) and flask_jsonrpc_project_dir not in sys.path:
-        sys.path.append(flask_jsonrpc_project_dir)
-
-    from flask_jsonrpc import JSONRPC
+from flask_jsonrpc import JSONRPC
 
 
 class NewColor:
@@ -144,7 +135,8 @@ class PetNotFoundException(PetException):
 
 
 class App:
-    async def index(self: Self, name: str = 'Flask JSON-RPC') -> str:
+    @staticmethod
+    async def index(name: str = 'Flask JSON-RPC') -> str:
         await asyncio.sleep(0)
         return f'Hello {name}'
 
@@ -153,37 +145,50 @@ class App:
         await asyncio.sleep(0)
         return f'Hello {name}'
 
-    @classmethod
-    async def hello(cls: t.Type[Self], name: str = 'Flask JSON-RPC') -> str:
+    @staticmethod
+    async def hello(name: str = 'Flask JSON-RPC') -> str:
         await asyncio.sleep(0)
         return f'Hello {name}'
 
-    async def echo(self: Self, string: str, _some: t.Any = None) -> str:  # noqa: ANN401
+    @staticmethod
+    async def echo(string: str, _some: t.Any = None) -> str:  # noqa: ANN401
         await asyncio.sleep(0)
         return string
 
-    async def notify(self: Self, _string: t.Optional[str] = None) -> None:
+    @staticmethod
+    async def notify(_string: t.Optional[str] = None) -> None:
         await asyncio.sleep(0)
 
-    async def not_allow_notify(self: Self, _string: t.Optional[str] = None) -> str:
+    @staticmethod
+    async def not_allow_notify(_string: t.Optional[str] = None) -> str:
         await asyncio.sleep(0)
         return 'Now allow notify'
 
-    async def fails(self: Self, n: int) -> int:
+    @staticmethod
+    async def fails(n: int) -> int:
         await asyncio.sleep(0)
         if n % 2 == 0:
             return n
         raise ValueError('number is odd')
 
 
-def async_jsonrpc_decorator(fn: t.Callable[..., str]) -> t.Callable[..., str]:
-    @functools.wraps(fn)
-    async def wrapped(*args, **kwargs) -> str:  # noqa: ANN002,ANN003
+def async_jsonrpc_decorator(fn: t.Callable[..., t.Awaitable[str]]) -> t.Callable[..., t.Awaitable[str]]:
+    async def decorator(string: str) -> str:
         await asyncio.sleep(0)
-        rv = await fn(*args, **kwargs)
+        rv = await fn(string)
         return f'{rv} from decorator, ;)'
 
-    return wrapped
+    return decorator
+
+
+def async_jsonrpc_decorator_wrapped(fn: t.Callable[..., t.Awaitable[str]]) -> t.Callable[..., t.Awaitable[str]]:
+    @functools.wraps(fn)
+    async def decorator(string: str) -> str:
+        await asyncio.sleep(0)
+        rv = await fn(string)
+        return f'{rv} from decorator, ;)'
+
+    return decorator
 
 
 def create_async_app(test_config: t.Optional[t.Dict[str, t.Any]] = None) -> Flask:  # noqa: C901  pylint: disable=W0612
@@ -223,12 +228,12 @@ def create_async_app(test_config: t.Optional[t.Dict[str, t.Any]] = None) -> Flas
 
     # pylint: disable=W0612
     @jsonrpc.method('jsonrpc.notify')
-    async def notify(_string: str = None) -> None:
+    async def notify(_string: t.Optional[str] = None) -> None:
         await asyncio.sleep(0)
 
     # pylint: disable=W0612
     @jsonrpc.method('jsonrpc.not_allow_notify', notification=False)
-    async def not_allow_notify(_string: str = None) -> str:
+    async def not_allow_notify(_string: t.Optional[str] = None) -> str:
         await asyncio.sleep(0)
         return 'Not allow notify'
 
@@ -258,6 +263,13 @@ def create_async_app(test_config: t.Optional[t.Dict[str, t.Any]] = None) -> Flas
     @jsonrpc.method('jsonrpc.decorators')
     @async_jsonrpc_decorator
     async def decorators(string: str) -> str:
+        await asyncio.sleep(0)
+        return f'Hello {string}'
+
+    # pylint: disable=W0612
+    @jsonrpc.method('jsonrpc.decoratorsWrapped')
+    @async_jsonrpc_decorator_wrapped
+    async def decorators_wrapped(string: str) -> str:
         await asyncio.sleep(0)
         return f'Hello {string}'
 

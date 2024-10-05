@@ -24,6 +24,8 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
+from __future__ import annotations
+
 import typing as t
 
 from pydantic.main import BaseModel
@@ -32,37 +34,37 @@ from . import typing as st
 
 
 class MethodExtendSchema(BaseModel):
-    name: t.Optional[str] = None
-    params: t.Optional[t.List[st.ContentDescriptor]] = None
-    result: t.Optional[st.ContentDescriptor] = None
-    tags: t.Optional[t.List[st.Tag]] = None
-    summary: t.Optional[str] = None
-    description: t.Optional[str] = None
-    external_docs: t.Optional[st.ExternalDocumentation] = None
-    deprecated: t.Optional[bool] = None
-    servers: t.Optional[t.List[st.Server]] = None
-    errors: t.Optional[t.List[st.Error]] = None
-    links: t.Optional[t.List[st.Link]] = None
-    param_structure: t.Optional[st.ParamStructure] = None
-    examples: t.Optional[t.List[st.ExamplePairing]] = None
-    x_security: t.Optional[t.Dict[str, t.List[str]]] = None
+    name: str | None = None
+    params: list[st.ContentDescriptor] | None = None
+    result: st.ContentDescriptor | None = None
+    tags: list[st.Tag] | None = None
+    summary: str | None = None
+    description: str | None = None
+    external_docs: st.ExternalDocumentation | None = None
+    deprecated: bool | None = None
+    servers: list[st.Server] | None = None
+    errors: list[st.Error] | None = None
+    links: list[st.Link] | None = None
+    param_structure: st.ParamStructure | None = None
+    examples: list[st.ExamplePairing] | None = None
+    x_security: dict[str, list[str]] | None = None
 
 
 def extend_schema(
-    name: t.Optional[str] = None,
-    params: t.Optional[t.List[st.ContentDescriptor]] = None,
-    tags: t.Optional[t.List[st.Tag]] = None,
-    summary: t.Optional[str] = None,
-    description: t.Optional[str] = None,
-    external_docs: t.Optional[st.ExternalDocumentation] = None,
-    result: t.Optional[st.ContentDescriptor] = None,
-    deprecated: t.Optional[bool] = None,
-    servers: t.Optional[t.List[st.Server]] = None,
-    errors: t.Optional[t.List[st.Error]] = None,
-    links: t.Optional[t.List[st.Link]] = None,
-    param_structure: t.Optional[st.ParamStructure] = None,
-    examples: t.Optional[t.List[st.ExamplePairing]] = None,
-    x_security: t.Optional[t.Dict[str, t.List[str]]] = None,
+    name: str | None = None,
+    params: list[st.ContentDescriptor] | None = None,
+    tags: list[st.Tag] | None = None,
+    summary: str | None = None,
+    description: str | None = None,
+    external_docs: st.ExternalDocumentation | None = None,
+    result: st.ContentDescriptor | None = None,
+    deprecated: bool | None = None,
+    servers: list[st.Server] | None = None,
+    errors: list[st.Error] | None = None,
+    links: list[st.Link] | None = None,
+    param_structure: st.ParamStructure | None = None,
+    examples: list[st.ExamplePairing] | None = None,
+    x_security: dict[str, list[str]] | None = None,
 ) -> t.Callable[..., t.Any]:
     def decorator(fn: t.Callable[..., t.Any]) -> t.Callable[..., t.Any]:
         method_schema = MethodExtendSchema(

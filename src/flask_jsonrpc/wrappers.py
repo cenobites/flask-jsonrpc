@@ -24,19 +24,19 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
+from __future__ import annotations
+
 import typing as t
-from inspect import _empty, ismethod, signature, isfunction
+from inspect import _empty, signature, isfunction
+import functools
 from collections import OrderedDict
+
+# Python 3.10+
+from typing_extensions import Self
 
 from typeguard import typechecked
 
 from .settings import settings
-
-# Python 3.10+
-try:
-    from typing import Self
-except ImportError:  # pragma: no cover
-    from typing_extensions import Self
 
 if t.TYPE_CHECKING:
     from .site import JSONRPCSite
@@ -44,7 +44,7 @@ if t.TYPE_CHECKING:
 
 
 class JSONRPCDecoratorMixin:
-    def _method_options(self: Self, options: t.Dict[str, t.Any]) -> t.Dict[str, t.Any]:
+    def _method_options(self: Self, options: dict[str, t.Any]) -> dict[str, t.Any]:
         default_options = {
             'validate': settings.DEFAULT_JSONRPC_METHOD['VALIDATE'],
             'notification': settings.DEFAULT_JSONRPC_METHOD['NOTIFICATION'],
@@ -71,13 +71,19 @@ class JSONRPCDecoratorMixin:
     def _get_function(self: Self, fn: t.Callable[..., t.Any]) -> t.Callable[..., t.Any]:
         if isfunction(fn):
             return fn
-        if ismethod(fn) and getattr(fn, '__func__', None):
-            return fn.__func__  # pytype: disable=attribute-error,bad-return-type
         raise ValueError('the view function must be either a function or a method') from None
 
+    def _get_function_and_wrappers(self: Self, fn: t.Callable[..., t.Any]) -> list[t.Callable[..., t.Any]]:
+        fn_wrapped = fn
+        wrapped_view_funcs = [fn]
+        while hasattr(fn_wrapped, '__wrapped__'):
+            fn_wrapped = fn_wrapped.__wrapped__
+            wrapped_view_funcs.append(fn_wrapped)
+        return wrapped_view_funcs
+
     def _get_type_hints_by_signature(
-        self: Self, fn: t.Callable[..., t.Any], fn_annotations: t.Dict[str, t.Any]
-    ) -> t.Dict[str, t.Any]:
+        self: Self, fn: t.Callable[..., t.Any], fn_annotations: dict[str, t.Any]
+    ) -> dict[str, t.Any]:
         sig = signature(fn)
         parameters = OrderedDict()
         for name in sig.parameters:
@@ -87,30 +93,38 @@ class JSONRPCDecoratorMixin:
         )
         return parameters
 
-    def _get_annotations(self: Self, fn: t.Callable[..., t.Any], fn_options: t.Dict[str, t.Any]) -> t.Dict[str, t.Any]:
+    def _get_annotations(self: Self, fn: t.Callable[..., t.Any], fn_options: dict[str, t.Any]) -> dict[str, t.Any]:
         fn_annotations = t.get_type_hints(fn)
         if not fn_options['validate']:
             fn_annotations = self._get_type_hints_by_signature(fn, fn_annotations)
-        if fn_annotations.get('self', None) == Self or ('self' in fn_annotations and not fn_options['validate']):
-            fn_annotations.pop('self', None)
-        if fn_annotations.get('cls', None) == t.Type[Self] or ('cls' in fn_annotations and not fn_options['validate']):
-            fn_annotations.pop('cls', None)
         return fn_annotations
 
-    def get_jsonrpc_site(self: Self) -> 'JSONRPCSite':
+    def _typechecked_wraps(self: Self, view_func: t.Callable[..., t.Any]) -> t.Callable[..., t.Any]:
+        wrapped_view_funcs = self._get_function_and_wrappers(view_func)
+        new_view_func = typechecked(wrapped_view_funcs.pop())
+        wrapped_view_funcs.append(new_view_func)
+
+        fn_wrapper = fn_wrapped = wrapped_view_funcs.pop()
+        while len(wrapped_view_funcs) > 0:
+            fn_wrapper = wrapped_view_funcs.pop()
+            functools.update_wrapper(fn_wrapper, fn_wrapped)
+            fn_wrapped = fn_wrapper
+        return fn_wrapper
+
+    def get_jsonrpc_site(self: Self) -> JSONRPCSite:
         raise NotImplementedError('.get_jsonrpc_site must be overridden') from None
 
-    def get_jsonrpc_site_api(self: Self) -> t.Type['JSONRPCView']:
+    def get_jsonrpc_site_api(self: Self) -> type[JSONRPCView]:
         raise NotImplementedError('.get_jsonrpc_site_api must be overridden') from None
 
     def register_view_function(
-        self: Self, view_func: t.Callable[..., t.Any], name: t.Optional[str] = None, **options: t.Dict[str, t.Any]
+        self: Self, view_func: t.Callable[..., t.Any], name: str | None = None, **options: dict[str, t.Any]
     ) -> t.Callable[..., t.Any]:
         fn = self._get_function(view_func)
         fn_options = self._method_options(options)
         fn_annotations = self._get_annotations(fn, fn_options)
         method_name = name if name else getattr(fn, '__name__', '<noname>')
-        view_func_wrapped = typechecked(view_func) if fn_options['validate'] else view_func
+        view_func_wrapped = self._typechecked_wraps(view_func) if fn_options['validate'] else view_func
         setattr(view_func_wrapped, 'jsonrpc_method_name', method_name)  # noqa: B010
         setattr(view_func_wrapped, 'jsonrpc_method_sig', fn_annotations)  # noqa: B010
         setattr(view_func_wrapped, 'jsonrpc_method_return', fn_annotations.pop('return', None))  # noqa: B010
@@ -121,22 +135,23 @@ class JSONRPCDecoratorMixin:
         self.get_jsonrpc_site().register(method_name, view_func_wrapped)
         return view_func_wrapped
 
-    def method(self: Self, name: t.Optional[str] = None, **options: t.Dict[str, t.Any]) -> t.Callable[..., t.Any]:
+    def method(self: Self, name: str | None = None, **options: dict[str, t.Any]) -> t.Callable[..., t.Any]:
         validate = options.get('validate', settings.DEFAULT_JSONRPC_METHOD['VALIDATE'])
 
         def decorator(fn: t.Callable[..., t.Any]) -> t.Callable[..., t.Any]:
+            fns = self._get_function_and_wrappers(fn)
             method_name = name if name else getattr(fn, '__name__', '<noname>')
-            if validate and not self._validate(fn):
+            if validate and not all(self._validate(f) for f in fns):
                 raise ValueError(f'no type annotations present to: {method_name}') from None
             return self.register_view_function(fn, name, **options)
 
         return decorator
 
-    def register_error_handler(self: Self, exception: t.Type[Exception], fn: t.Callable[[t.Any], t.Any]) -> None:
+    def register_error_handler(self: Self, exception: type[Exception], fn: t.Callable[[t.Any], t.Any]) -> None:
         self.get_jsonrpc_site().register_error_handler(exception, fn)
 
     def errorhandler(
-        self: Self, exception: t.Type[Exception]
+        self: Self, exception: type[Exception]
     ) -> t.Callable[[t.Callable[[t.Any], t.Any]], t.Callable[[t.Any], t.Any]]:
         def decorator(fn: t.Callable[[t.Any], t.Any]) -> t.Callable[[t.Any], t.Any]:
             self.register_error_handler(exception, fn)

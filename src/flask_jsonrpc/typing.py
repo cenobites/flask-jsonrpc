@@ -24,6 +24,8 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
+from __future__ import annotations
+
 import sys
 import typing as t
 
@@ -39,13 +41,13 @@ else:  # pragma: no cover
 class ServiceMethodParamsDescribe(BaseModel):
     type: str
     name: str
-    required: t.Optional[bool] = None
-    nullable: t.Optional[bool] = None
-    minimum: t.Optional[int] = None
-    maximum: t.Optional[int] = None
-    pattern: t.Optional[str] = None
-    length: t.Optional[int] = None
-    description: t.Optional[str] = None
+    required: bool | None = None
+    nullable: bool | None = None
+    minimum: int | None = None
+    maximum: int | None = None
+    pattern: str | None = None
+    length: int | None = None
+    description: str | None = None
 
 
 class ServiceMethodReturnsDescribe(BaseModel):
@@ -54,21 +56,21 @@ class ServiceMethodReturnsDescribe(BaseModel):
 
 class ServiceMethodDescribe(BaseModel):
     type: str
-    description: t.Optional[str] = None
-    options: t.Dict[str, t.Any] = {}
-    params: t.List[ServiceMethodParamsDescribe] = []
+    description: str | None = None
+    options: dict[str, t.Any] = {}
+    params: list[ServiceMethodParamsDescribe] = []
     returns: ServiceMethodReturnsDescribe
 
 
 class ServiceServersDescribe(BaseModel):
     url: str
-    description: t.Optional[str] = None
+    description: str | None = None
 
 
 class ServiceDescribe(BaseModel):
     id: str
     version: str
     name: str
-    description: t.Optional[str] = None
-    servers: t.List[ServiceServersDescribe]
+    description: str | None = None
+    servers: list[ServiceServersDescribe]
     methods: OrderedDict[str, ServiceMethodDescribe]

@@ -12,8 +12,6 @@ updates:
     directory: /requirements
     schedule:
       interval: daily
-    ignore:
-      - dependency-name: "typeguard"
     groups:
       python-requirements:
         patterns:

@@ -1,6 +1,6 @@
 [project]
 name = "Flask-JSONRPC"
-version = "4.0.0a1"
+version = "4.0.0a3"
 description = "Adds JSONRPC support to Flask."
 readme = {file = "README.md", content-type = "text/markdown"}
 license = {file = "LICENSE.txt"}
@@ -27,10 +27,11 @@ classifiers = [
 requires-python = ">=3.8"
 dependencies = [
     "Flask>=3.0.0,<4.0",
-    "typeguard==2.13.3",
+    "typeguard==4.3.0",
     "typing_extensions>=4.3.0",
     "typing_inspect==0.9.0",
     "pydantic!=1.8,!=1.8.1,!=2.0.0,!=2.0.1,!=2.1.0,<3.0.0,>=1.7.4",
+    "eval_type_backport==0.2.0"
 ]
 
 [project.optional-dependencies]
@@ -134,10 +135,21 @@ combine-as-imports = true
 order-by-type = true
 force-sort-within-sections = true
 split-on-trailing-comma = false
-section-order = ["future", "standard-library", "flask", "third-party", "first-party", "local-folder"]
+section-order = [
+    "future",
+    "standard-library",
+    "typing-extensions",
+    "flask",
+    "pydantic",
+    "third-party",
+    "first-party",
+    "local-folder"
+]
 
 [tool.ruff.lint.isort.sections]
 "flask" = ["flask"]
+"pydantic" = ["pydantic"]
+"typing-extensions" = ["typing_extensions"]
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"

@@ -25,13 +25,19 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 # pylint: disable=R0904
+from __future__ import annotations
+
 from uuid import UUID, uuid4
 import typing as t
 from collections import OrderedDict
 
+# Python 3.10+
+from typing_extensions import Self
+
 from flask import json, request, current_app
 
-from typeguard import qualified_name
+from typeguard import TypeCheckError
+from typeguard._utils import qualified_name
 from werkzeug.datastructures import Headers
 
 from .helpers import get
@@ -47,22 +53,16 @@ from .exceptions import (
     MethodNotFoundError,
 )
 
-# Python 3.10+
-try:
-    from typing import Self
-except ImportError:  # pragma: no cover
-    from typing_extensions import Self
-
 JSONRPC_VERSION_DEFAULT: str = '2.0'
-JSONRPC_DEFAULT_HTTP_HEADERS: t.Dict[str, str] = {}
+JSONRPC_DEFAULT_HTTP_HEADERS: dict[str, str] = {}
 JSONRPC_DEFAULT_HTTP_STATUS_CODE: int = 200
 
 
 class JSONRPCSite:
-    def __init__(self: Self, path: t.Optional[str] = None, base_url: t.Optional[str] = None) -> None:
+    def __init__(self: Self, path: str | None = None, base_url: str | None = None) -> None:
         self.path = path
         self.base_url = base_url
-        self.error_handlers: t.Dict[t.Type[Exception], t.Callable[[t.Any], t.Any]] = {}
+        self.error_handlers: dict[type[Exception], t.Callable[[t.Any], t.Any]] = {}
         self.view_funcs: t.OrderedDict[str, t.Callable[..., t.Any]] = OrderedDict()
         self.uuid: UUID = uuid4()
         self.name: str = 'Flask-JSONRPC'
@@ -84,18 +84,16 @@ class JSONRPCSite:
     def set_path(self: Self, path: str) -> None:
         self.path = path
 
-    def set_base_url(self: Self, base_url: t.Optional[str]) -> None:
+    def set_base_url(self: Self, base_url: str | None) -> None:
         self.base_url = base_url
 
-    def register_error_handler(self: Self, exception: t.Type[Exception], fn: t.Callable[[t.Any], t.Any]) -> None:
+    def register_error_handler(self: Self, exception: type[Exception], fn: t.Callable[[t.Any], t.Any]) -> None:
         self.error_handlers[exception] = fn
 
     def register(self: Self, name: str, view_func: t.Callable[..., t.Any]) -> None:
         self.view_funcs[name] = view_func
 
-    def dispatch_request(
-        self: Self,
-    ) -> t.Tuple[t.Any, int, t.Union[Headers, t.Dict[str, str], t.Tuple[str], t.List[t.Tuple[str]]]]:
+    def dispatch_request(self: Self) -> tuple[t.Any, int, Headers | dict[str, str] | tuple[str] | list[tuple[str]]]:
         if not self.validate_request():
             raise ParseError(
                 data={
@@ -143,7 +141,7 @@ class JSONRPCSite:
 
             # TODO: Enhance the checker to return the type
             view_fun_annotations = t.get_type_hints(view_func)
-            view_fun_return: t.Optional[t.Any] = view_fun_annotations.pop('return', None)
+            view_fun_return: t.Any | None = view_fun_annotations.pop('return', None)
             if validate and resp_view is not None and view_fun_return is None:
                 resp_view_qn = qualified_name(resp_view)
                 view_fun_return_qn = qualified_name(view_fun_return)
@@ -152,13 +150,13 @@ class JSONRPCSite:
                 ) from None
 
             return resp_view
-        except TypeError as e:
+        except (TypeError, TypeCheckError) as e:
             current_app.logger.exception('invalid type checked for: %s', view_func.__name__)
             raise InvalidParamsError(data={'message': str(e)}) from e
 
     def dispatch(
-        self: Self, req_json: t.Dict[str, t.Any]
-    ) -> t.Tuple[t.Any, int, t.Union[Headers, t.Dict[str, str], t.Tuple[str], t.List[t.Tuple[str]]]]:
+        self: Self, req_json: dict[str, t.Any]
+    ) -> tuple[t.Any, int, Headers | dict[str, str] | tuple[str] | list[tuple[str]]]:
         method_name = req_json['method']
         params = req_json.get('params', {})
         view_func = self.view_funcs.get(method_name)
@@ -177,7 +175,7 @@ class JSONRPCSite:
         resp_view = self.handle_view_func(view_func, params)
         return self.make_response(req_json, resp_view)
 
-    def _find_error_handler(self: Self, exc: Exception) -> t.Optional[t.Callable[[t.Any], t.Any]]:
+    def _find_error_handler(self: Self, exc: Exception) -> t.Callable[[t.Any], t.Any] | None:
         exc_class = type(exc)
         if not self.error_handlers:
             return None
@@ -189,8 +187,8 @@ class JSONRPCSite:
         return None
 
     def handle_dispatch_except(
-        self: Self, req_json: t.Dict[str, t.Any]
-    ) -> t.Tuple[t.Any, int, t.Union[Headers, t.Dict[str, str], t.Tuple[str], t.List[t.Tuple[str]]]]:
+        self: Self, req_json: dict[str, t.Any]
+    ) -> tuple[t.Any, int, Headers | dict[str, str] | tuple[str] | list[tuple[str]]]:
         try:
             if not self.validate(req_json):
                 raise InvalidRequestError(data={'message': f'Invalid JSON: {req_json!r}'}) from None
@@ -218,8 +216,8 @@ class JSONRPCSite:
             return response, jsonrpc_error.status_code, JSONRPC_DEFAULT_HTTP_HEADERS
 
     def batch_dispatch(
-        self: Self, reqs_json: t.List[t.Dict[str, t.Any]]
-    ) -> t.Tuple[t.List[t.Any], int, t.Union[Headers, t.Dict[str, str], t.Tuple[str], t.List[t.Tuple[str]]]]:
+        self: Self, reqs_json: list[dict[str, t.Any]]
+    ) -> tuple[list[t.Any], int, Headers | dict[str, str] | tuple[str] | list[tuple[str]]]:
         if not reqs_json:
             raise InvalidRequestError(data={'message': 'Empty array'}) from None
 
@@ -235,13 +233,13 @@ class JSONRPCSite:
             status_code = 204
         return resp_views, status_code, headers
 
-    def validate(self: Self, req_json: t.Dict[str, t.Any]) -> bool:
+    def validate(self: Self, req_json: dict[str, t.Any]) -> bool:
         return isinstance(req_json, dict) and 'method' in req_json
 
     def unpack_tuple_returns(
         self: Self,
         resp_view: t.Any,  # noqa: ANN401
-    ) -> t.Tuple[t.Any, int, t.Union[Headers, t.Dict[str, str], t.Tuple[str], t.List[t.Tuple[str]]]]:
+    ) -> tuple[t.Any, int, Headers | dict[str, str] | tuple[str] | list[tuple[str]]]:
         # https://github.com/pallets/flask/blob/d091bb00c0358e9f30006a064f3dbb671b99aeae/src/flask/app.py#L1981
         if isinstance(resp_view, tuple):
             len_resp_view = len(resp_view)
@@ -268,16 +266,16 @@ class JSONRPCSite:
 
     def make_response(
         self: Self,
-        req_json: t.Dict[str, t.Any],
+        req_json: dict[str, t.Any],
         resp_view: t.Any,  # noqa: ANN401
-    ) -> t.Tuple[t.Any, int, t.Union[Headers, t.Dict[str, str], t.Tuple[str], t.List[t.Tuple[str]]]]:
+    ) -> tuple[t.Any, int, Headers | dict[str, str] | tuple[str] | list[tuple[str]]]:
         rv, status_code, headers = self.unpack_tuple_returns(resp_view)
         if self.is_notification_request(req_json):
             return None, 204, headers
         resp = {'id': req_json.get('id'), 'jsonrpc': req_json.get('jsonrpc', JSONRPC_VERSION_DEFAULT), 'result': rv}
         return resp, status_code, headers
 
-    def is_notification_request(self: Self, req_json: t.Dict[str, t.Any]) -> bool:
+    def is_notification_request(self: Self, req_json: dict[str, t.Any]) -> bool:
         return 'id' not in req_json
 
     def is_batch_request(self: Self, req_json: t.Any) -> bool:  # noqa: ANN401

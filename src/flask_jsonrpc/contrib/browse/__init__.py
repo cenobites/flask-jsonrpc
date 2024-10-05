@@ -24,19 +24,18 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
+from __future__ import annotations
+
 import typing as t
 from collections import ChainMap
+
+# Python 3.10+
+from typing_extensions import Self
 
 from flask import Blueprint, request, render_template
 
 from flask_jsonrpc.helpers import urn
 from flask_jsonrpc.encoders import jsonify, serializable
-
-# Python 3.11+
-try:
-    from typing import Self
-except ImportError:  # pragma: no cover
-    from typing_extensions import Self
 
 if t.TYPE_CHECKING:
     from flask import Flask, typing as ft
@@ -47,19 +46,19 @@ if t.TYPE_CHECKING:
 
 class JSONRPCBrowse:
     def __init__(
-        self: Self, app: t.Optional['Flask'] = None, url_prefix: str = '/api/browse', base_url: t.Optional[str] = None
+        self: Self, app: Flask | None = None, url_prefix: str = '/api/browse', base_url: str | None = None
     ) -> None:
         self.app = app
         self.url_prefix = url_prefix
         self.base_url = base_url
-        self.jsonrpc_sites: t.Set[JSONRPCSite] = set()
+        self.jsonrpc_sites: set[JSONRPCSite] = set()
         if app:
             self.init_app(app)
 
-    def _service_methods_desc(self: Self) -> t.Dict[str, 'ServiceMethodDescribe']:
+    def _service_methods_desc(self: Self) -> dict[str, ServiceMethodDescribe]:
         return dict(ChainMap(*[site.describe().methods for site in self.jsonrpc_sites]))
 
-    def init_app(self: Self, app: 'Flask') -> None:
+    def init_app(self: Self, app: Flask) -> None:
         name = urn('browse', app.name, self.url_prefix)
         browse = Blueprint(name, __name__, template_folder='templates', static_folder='static')
         browse.add_url_rule('/', view_func=self.vf_index)
@@ -73,21 +72,21 @@ class JSONRPCBrowse:
             f'{self.url_prefix}/static/<path:filename>', 'urn:browse.static', view_func=app.send_static_file
         )
 
-    def register_jsonrpc_site(self: Self, jsonrpc_site: 'JSONRPCSite') -> None:
+    def register_jsonrpc_site(self: Self, jsonrpc_site: JSONRPCSite) -> None:
         self.jsonrpc_sites.add(jsonrpc_site)
 
     def vf_index(self: Self) -> str:
-        server_urls: t.Dict[str, str] = {}
+        server_urls: dict[str, str] = {}
         service_describes = [site.describe() for site in self.jsonrpc_sites]
         for service_describe in service_describes:
             server_urls.update({name: service_describe.servers[0].url for name in service_describe.methods})
         url_prefix = f"{request.script_root}{request.path.rstrip('/')}"
         return render_template('browse/index.html', url_prefix=url_prefix, server_urls=server_urls)
 
-    def vf_json_packages(self: Self) -> 'ft.ResponseReturnValue':
+    def vf_json_packages(self: Self) -> ft.ResponseReturnValue:
         service_methods = self._service_methods_desc()
         packages = sorted(service_methods.keys())
-        packages_tree: t.Dict[str, t.List[t.Dict[str, t.Any]]] = {}
+        packages_tree: dict[str, list[dict[str, t.Any]]] = {}
         for package in packages:
             # The rpc. prefix is a reserved method prefix for JSON-RPC 2.0 specification system extensions.
             if package.startswith('rpc.'):
@@ -98,7 +97,7 @@ class JSONRPCBrowse:
             )
         return jsonify(packages_tree)
 
-    def vf_json_method(self: Self, method_name: str) -> 'ft.ResponseReturnValue':
+    def vf_json_method(self: Self, method_name: str) -> ft.ResponseReturnValue:
         service_procedures = self._service_methods_desc()
         if method_name not in service_procedures:
             return jsonify({'message': 'Not found'}), 404

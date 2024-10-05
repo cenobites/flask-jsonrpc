@@ -27,8 +27,9 @@
 import typing as t
 from dataclasses import asdict, dataclass
 
-import pytest
 from pydantic.main import BaseModel
+
+import pytest
 
 from flask_jsonrpc.funcutils import loads
 

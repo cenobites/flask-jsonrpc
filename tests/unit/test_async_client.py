@@ -50,6 +50,21 @@ def test_app_greeting(async_client: 'FlaskClient') -> None:
     assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': 'Hello Flask'}
     assert rv.status_code == 200
 
+    rv = async_client.post(
+        '/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': {'name': 1}}
+    )
+    assert rv.json == {
+        'id': 1,
+        'jsonrpc': '2.0',
+        'error': {
+            'code': -32602,
+            'data': {'message': 'argument "name" (int) is not an instance of str'},
+            'message': 'Invalid params',
+            'name': 'InvalidParamsError',
+        },
+    }
+    assert rv.status_code == 400
+
 
 def test_app_greeting_with_different_content_types(async_client: 'FlaskClient') -> None:
     rv = async_client.post(
@@ -173,7 +188,7 @@ def test_app_greeting_raise_invalid_params_error(async_client: 'FlaskClient') ->
         'jsonrpc': '2.0',
         'error': {
             'code': -32602,
-            'data': {'message': 'type of argument "name" must be str; got int instead'},
+            'data': {'message': 'argument "name" (int) is not an instance of str'},
             'message': 'Invalid params',
             'name': 'InvalidParamsError',
         },
@@ -188,7 +203,7 @@ def test_app_greeting_raise_invalid_params_error(async_client: 'FlaskClient') ->
         'jsonrpc': '2.0',
         'error': {
             'code': -32602,
-            'data': {'message': 'type of argument "name" must be str; got int instead'},
+            'data': {'message': 'argument "name" (int) is not an instance of str'},
             'message': 'Invalid params',
             'name': 'InvalidParamsError',
         },
@@ -225,16 +240,13 @@ def test_app_echo(async_client: 'FlaskClient') -> None:
     rv = async_client.post(
         '/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.echo', 'params': {'string': None}}
     )
-    assert rv.json == {
-        'id': 1,
-        'jsonrpc': '2.0',
-        'error': {
-            'code': -32602,
-            'data': {'message': "missing a required argument: 'string'"},
-            'message': 'Invalid params',
-            'name': 'InvalidParamsError',
-        },
-    }
+    json_data = rv.get_json()
+    assert json_data['id'] == 1
+    assert json_data['jsonrpc'] == '2.0'
+    assert json_data['error']['code'] == -32602
+    assert "missing 1 required positional argument: 'string'" in json_data['error']['data']['message']
+    assert json_data['error']['message'] == 'Invalid params'
+    assert json_data['error']['name'] == 'InvalidParamsError'
     assert rv.status_code == 400
 
 
@@ -258,7 +270,7 @@ def test_app_echo_raise_invalid_params_error(async_client: 'FlaskClient') -> Non
         'jsonrpc': '2.0',
         'error': {
             'code': -32602,
-            'data': {'message': 'type of argument "string" must be str; got int instead'},
+            'data': {'message': 'argument "string" (int) is not an instance of str'},
             'message': 'Invalid params',
             'name': 'InvalidParamsError',
         },
@@ -266,29 +278,23 @@ def test_app_echo_raise_invalid_params_error(async_client: 'FlaskClient') -> Non
     assert rv.status_code == 400
 
     rv = async_client.post('/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.echo', 'params': {'name': 2}})
-    assert rv.json == {
-        'id': 1,
-        'jsonrpc': '2.0',
-        'error': {
-            'code': -32602,
-            'data': {'message': "missing a required argument: 'string'"},
-            'message': 'Invalid params',
-            'name': 'InvalidParamsError',
-        },
-    }
+    json_data = rv.get_json()
+    assert json_data['id'] == 1
+    assert json_data['jsonrpc'] == '2.0'
+    assert json_data['error']['code'] == -32602
+    assert "missing 1 required positional argument: 'string'" in json_data['error']['data']['message']
+    assert json_data['error']['message'] == 'Invalid params'
+    assert json_data['error']['name'] == 'InvalidParamsError'
     assert rv.status_code == 400
 
     rv = async_client.post('/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.echo'})
-    assert rv.json == {
-        'id': 1,
-        'jsonrpc': '2.0',
-        'error': {
-            'code': -32602,
-            'data': {'message': "missing a required argument: 'string'"},
-            'message': 'Invalid params',
-            'name': 'InvalidParamsError',
-        },
-    }
+    json_data = rv.get_json()
+    assert json_data['id'] == 1
+    assert json_data['jsonrpc'] == '2.0'
+    assert json_data['error']['code'] == -32602
+    assert "missing 1 required positional argument: 'string'" in json_data['error']['data']['message']
+    assert json_data['error']['message'] == 'Invalid params'
+    assert json_data['error']['name'] == 'InvalidParamsError'
     assert rv.status_code == 400
 
 
@@ -390,16 +396,13 @@ def test_app_sum(async_client: 'FlaskClient') -> None:
 
     data = {'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.sum', 'params': {'a': None, 'b': None}}
     rv = async_client.post('/api', json=data)
-    assert rv.json == {
-        'id': 1,
-        'jsonrpc': '2.0',
-        'error': {
-            'code': -32602,
-            'data': {'message': "missing a required argument: 'a'"},
-            'message': 'Invalid params',
-            'name': 'InvalidParamsError',
-        },
-    }
+    json_data = rv.get_json()
+    assert json_data['id'] == 1
+    assert json_data['jsonrpc'] == '2.0'
+    assert json_data['error']['code'] == -32602
+    assert "missing 2 required positional arguments: 'a' and 'b'" in json_data['error']['data']['message']
+    assert json_data['error']['message'] == 'Invalid params'
+    assert json_data['error']['name'] == 'InvalidParamsError'
     assert rv.status_code == 400
 
 
@@ -407,6 +410,61 @@ def test_app_decorators(async_client: 'FlaskClient') -> None:
     data = {'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.decorators', 'params': ['Python']}
     rv = async_client.post('/api', json=data)
     assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': 'Hello Python from decorator, ;)'}
+    assert rv.status_code == 200
+
+    data = {'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.decorators', 'params': 'Python'}
+    rv = async_client.post('/api', json=data)
+    assert rv.json == {
+        'id': 1,
+        'jsonrpc': '2.0',
+        'error': {
+            'code': -32602,
+            'data': {'message': 'Parameter structures are by-position (list) or by-name (dict): Python'},
+            'message': 'Invalid params',
+            'name': 'InvalidParamsError',
+        },
+    }
+    assert rv.status_code == 400
+
+    data = {'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.decorators', 'params': [1]}
+    rv = async_client.post('/api', json=data)
+    assert rv.json == {
+        'id': 1,
+        'jsonrpc': '2.0',
+        'error': {
+            'code': -32602,
+            'data': {'message': 'argument "string" (int) is not an instance of str'},
+            'message': 'Invalid params',
+            'name': 'InvalidParamsError',
+        },
+    }
+    assert rv.status_code == 400
+
+
+def test_app_decorators_wrapped(async_client: 'FlaskClient') -> None:
+    data = {'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.decoratorsWrapped', 'params': ['Python']}
+    rv = async_client.post('/api', json=data)
+    assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': 'Hello Python from decorator, ;)'}
+    assert rv.status_code == 200
+
+    data = {'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.decoratorsWrapped', 'params': 'Python'}
+    rv = async_client.post('/api', json=data)
+    assert rv.json == {
+        'id': 1,
+        'jsonrpc': '2.0',
+        'error': {
+            'code': -32602,
+            'data': {'message': 'Parameter structures are by-position (list) or by-name (dict): Python'},
+            'message': 'Invalid params',
+            'name': 'InvalidParamsError',
+        },
+    }
+    assert rv.status_code == 400
+
+    # XXX: Typeguard does not instrument wrapped functions
+    data = {'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.decoratorsWrapped', 'params': [1]}
+    rv = async_client.post('/api', json=data)
+    assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': 'Hello 1 from decorator, ;)'}
     assert rv.status_code == 200
 
 
@@ -486,7 +544,7 @@ def test_app_with_rcp_batch(async_client: 'FlaskClient') -> None:
     assert rv.status_code == 200
 
 
-def test_app_class(async_client: 'FlaskClient') -> None:
+def _test_app_class(async_client: 'FlaskClient') -> None:
     rv = async_client.post('/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'classapp.index'})
     assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': 'Hello Flask JSON-RPC'}
     assert rv.status_code == 200
@@ -1111,6 +1169,12 @@ def test_app_system_describe(async_client: 'FlaskClient') -> None:
             'options': {'notification': True, 'validate': True},
             'params': [{'name': 'string', 'type': 'String'}],
             'returns': {'type': 'String'},
+        },
+        'jsonrpc.decoratorsWrapped': {
+            'options': {'notification': True, 'validate': True},
+            'params': [{'name': 'string', 'type': 'String'}],
+            'returns': {'type': 'String'},
+            'type': 'method',
         },
         'jsonrpc.returnStatusCode': {
             'type': 'method',

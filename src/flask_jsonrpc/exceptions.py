@@ -24,17 +24,16 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
+from __future__ import annotations
+
 import sys
 import typing as t
 import traceback
 
-from flask import current_app
-
 # Python 3.10+
-try:
-    from typing import Self
-except ImportError:  # pragma: no cover
-    from typing_extensions import Self
+from typing_extensions import Self
+
+from flask import current_app
 
 try:
     from flaskext.babel import gettext as _  # type: ignore
@@ -57,16 +56,16 @@ class JSONRPCError(Exception):
     """
 
     code: int = 0
-    message: t.Optional[str] = None
-    data: t.Optional[t.Any] = None
+    message: str | None = None
+    data: t.Any | None = None
     status_code: int = 400
 
     def __init__(
         self: Self,
-        message: t.Optional[str] = None,
-        code: t.Optional[int] = None,
-        data: t.Optional[t.Any] = None,  # noqa: ANN401
-        status_code: t.Optional[int] = None,
+        message: str | None = None,
+        code: int | None = None,
+        data: t.Any | None = None,  # noqa: ANN401
+        status_code: int | None = None,
     ) -> None:
         """Setup the Exception and overwrite the default message"""
         super().__init__()
@@ -80,7 +79,7 @@ class JSONRPCError(Exception):
             self.status_code = status_code
 
     @property
-    def jsonrpc_format(self: Self) -> t.Dict[str, t.Any]:
+    def jsonrpc_format(self: Self) -> dict[str, t.Any]:
         """Return the Exception data in a format for JSON-RPC"""
         error = {'name': self.__class__.__name__, 'code': self.code, 'message': self.message, 'data': self.data}
 

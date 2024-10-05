@@ -31,8 +31,9 @@ from pathlib import Path
 from collections import deque
 from dataclasses import dataclass
 
-import pytest
 from pydantic.main import BaseModel
+
+import pytest
 
 from flask_jsonrpc.encoders import serializable
 

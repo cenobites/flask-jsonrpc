@@ -24,13 +24,12 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
+from __future__ import annotations
+
 import typing as t
 
-# Python 3.11+
-try:
-    from typing import Self
-except ImportError:  # pragma: no cover
-    from typing_extensions import Self
+# Python 3.10+
+from typing_extensions import Self
 
 from .methods import OPENRPC_DISCOVER_METHOD_NAME, openrpc_discover_method
 from .wrappers import OpenRPCExtendSchemaDecoratorMixin
@@ -46,10 +45,10 @@ if t.TYPE_CHECKING:
 class OpenRPC(OpenRPCExtendSchemaDecoratorMixin):
     def __init__(
         self: Self,
-        app: t.Optional['Flask'] = None,
-        jsonrpc_app: t.Optional['JSONRPC'] = None,
+        app: Flask | None = None,
+        jsonrpc_app: JSONRPC | None = None,
         *,
-        openrpc_schema: t.Optional['OpenRPCSchema'] = None,
+        openrpc_schema: OpenRPCSchema | None = None,
     ) -> None:
         self.app = app
         self.jsonrpc_app = jsonrpc_app
@@ -57,7 +56,7 @@ class OpenRPC(OpenRPCExtendSchemaDecoratorMixin):
         if app and jsonrpc_app:
             self.init_app(app, jsonrpc_app)
 
-    def init_app(self: Self, app: 'Flask', jsonrpc_app: 'JSONRPC') -> None:
+    def init_app(self: Self, app: Flask, jsonrpc_app: JSONRPC) -> None:
         jsonrpc_site = jsonrpc_app.get_jsonrpc_site()
         jsonrpc_sites = [japp.get_jsonrpc_site() for japp in jsonrpc_app.jsonrpc_apps]
         jsonrpc_app.get_jsonrpc_site().register(

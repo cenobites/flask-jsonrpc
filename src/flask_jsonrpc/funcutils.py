@@ -24,6 +24,8 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
+from __future__ import annotations
+
 import typing as t
 import inspect
 import dataclasses
@@ -96,7 +98,7 @@ def loads(param_type: t.Any, param_value: t.Any) -> t.Any:  # noqa: ANN401, C901
     return param_value
 
 
-def bindfy(view_func: t.Callable[..., t.Any], params: t.Dict[str, t.Any]) -> t.Dict[str, t.Any]:  # noqa: ANN401
+def bindfy(view_func: t.Callable[..., t.Any], params: dict[str, t.Any]) -> dict[str, t.Any]:  # noqa: ANN401
     binded_params = {}
     view_func_params = getattr(view_func, 'jsonrpc_method_params', {})
     for param_name, param_type in view_func_params.items():

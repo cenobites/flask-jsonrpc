@@ -24,15 +24,14 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
+from __future__ import annotations
+
 import typing as t
 
-from .utils import extend_schema
+# Python 3.10+
+from typing_extensions import Self
 
-# Python 3.11+
-try:
-    from typing import Self
-except ImportError:  # pragma: no cover
-    from typing_extensions import Self
+from .utils import extend_schema
 
 
 class OpenRPCExtendSchemaDecoratorMixin:

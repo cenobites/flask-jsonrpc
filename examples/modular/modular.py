@@ -25,25 +25,14 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-# isort:skip_file
 import typing as t
-import os
-import sys
 
 from flask import Flask
 
-try:
-    from flask_jsonrpc import JSONRPC
-except ModuleNotFoundError:
-    project_dir, project_module_name = os.path.split(os.path.dirname(os.path.realpath(__file__)))
-    flask_jsonrpc_project_dir = os.path.join(project_dir, os.pardir, 'src')
-    if os.path.exists(flask_jsonrpc_project_dir) and flask_jsonrpc_project_dir not in sys.path:
-        sys.path.append(flask_jsonrpc_project_dir)
-
-    from flask_jsonrpc import JSONRPC
-
 from api.user import user  # noqa: E402   pylint: disable=C0413,E0611
 from api.article import article  # noqa: E402   pylint: disable=C0413,E0611
+
+from flask_jsonrpc import JSONRPC
 
 app = Flask('modular')
 jsonrpc = JSONRPC(app, '/api', enable_web_browsable_api=True)

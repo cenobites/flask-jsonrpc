@@ -24,6 +24,8 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
+from __future__ import annotations
+
 import typing as t
 from operator import getitem
 import itertools
@@ -61,7 +63,7 @@ def urn(name: str, *args: t.Any) -> str:  # noqa: ANN401
     return f"urn:{name}{sep}{st.replace('::', ':')}".lower()
 
 
-def from_python_type(tp: t.Any, default: 't.Optional[JSONRPCNewType]' = Object) -> 't.Optional[JSONRPCNewType]':  # noqa: ANN401
+def from_python_type(tp: t.Any, default: JSONRPCNewType | None = Object) -> JSONRPCNewType | None:  # noqa: ANN401
     """Convert Python type to JSONRPCNewType.
 
     >>> str(from_python_type(str))
