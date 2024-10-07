@@ -29,7 +29,7 @@ from __future__ import annotations
 import typing as t
 from urllib.parse import urlsplit
 
-# Python 3.10+
+# Added in version 3.11.
 from typing_extensions import Self
 
 from flask import Flask

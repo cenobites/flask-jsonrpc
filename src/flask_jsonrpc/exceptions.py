@@ -30,7 +30,7 @@ import sys
 import typing as t
 import traceback
 
-# Python 3.10+
+# Added in version 3.11.
 from typing_extensions import Self
 
 from flask import current_app

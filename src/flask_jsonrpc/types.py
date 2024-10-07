@@ -33,13 +33,13 @@ from collections import OrderedDict, deque, defaultdict
 from collections.abc import Mapping
 
 from typing_extensions import (
-    Self,  # Python 3.10+
-    Literal,  # Python 3.8+
+    Self,  # Added in version 3.11.
+    Literal,  # Added in version 3.8.
 )
 
 from typing_inspect import is_new_type  # type: ignore
 
-# Python 3.10+
+# Added in version 3.10.
 try:
     from types import NoneType, UnionType
 except ImportError:  # pragma: no cover

@@ -31,7 +31,7 @@ from uuid import UUID, uuid4
 import typing as t
 from collections import OrderedDict
 
-# Python 3.10+
+# Added in version 3.11.
 from typing_extensions import Self
 
 from flask import json, request, current_app

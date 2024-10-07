@@ -29,7 +29,7 @@ from __future__ import annotations
 import typing as t
 from collections import ChainMap
 
-# Python 3.10+
+# Added in version 3.11.
 from typing_extensions import Self
 
 from flask import Blueprint, request, render_template
