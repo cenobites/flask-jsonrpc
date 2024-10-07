@@ -1,3 +1,3 @@
 # Tools
 # ------------------------------------------------------------------------------
-build==1.2.2  # https://github.com/pypa/build
+build==1.2.2.post1  # https://github.com/pypa/build
