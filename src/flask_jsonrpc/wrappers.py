@@ -31,7 +31,7 @@ from inspect import _empty, signature, isfunction
 import functools
 from collections import OrderedDict
 
-# Python 3.10+
+# Added in version 3.11.
 from typing_extensions import Self
 
 from typeguard import typechecked

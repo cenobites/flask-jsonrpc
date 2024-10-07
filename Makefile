@@ -1,4 +1,4 @@
-.PHONY: all clean test test-release release publish-test publish env
+.PHONY: all clean style typing test test-release release publish-test publish env
 
 VIRTUALENV_EXISTS := $(shell [ -d .venv ] && echo 1 || echo 0)
 
@@ -6,35 +6,39 @@ all: clean test
 	@python -c "print('OK')"
 
 clean:
-	@python setup.py clean
-	@find src/ -name "*.so" | xargs rm -rf
-	@find . -name "*.pyc" | xargs rm -rf
-	@find . -name "__pycache__" | xargs rm -rf
-	@find . -name ".coverage" | xargs rm -rf
-	@rm -rf .coverage coverage.* .eggs/ .mypy_cache/ .pytype/ .ruff_cache/ .pytest_cache/ .tox/ src/Flask_JSONRPC.egg-info/ htmlcov/ junit/ htmldoc/ build/ dist/ wheelhouse/
+	@find {src,examples,tests} -regex ".*\.\(so\|pyc\)" | xargs rm -rf
+	@find {src,examples,tests} -name "__pycache__" -o -name ".coverage" -o -name ".tox"  -o -name ".pytest_cache" -o -name ".ruff_cache"  -o -name ".pkg" -o -name ".tmp" | xargs rm -rf
+	@rm -rf .coverage coverage.* .eggs/ .mypy_cache/ .pytype/ .ruff_cache/ .pytest_cache/ .tox/ src/*.egg-info/ htmlcov/ junit/ htmldoc/ build/ dist/ wheelhouse/
 
 style:
 	@ruff check .
 	@ruff format .
 
+typing:
+	@mypy --install-types --non-interactive src/
+
 test: clean
 	@python -m pip install --upgrade tox
-	@python -m tox
+	@python -m tox -p all
 
-test-release: clean test
-	@docker-compose -f docker-compose.test.yml build --build-arg VERSION=$(shell date +%s)
-	@docker-compose -f docker-compose.test.yml up
+test-examples: clean
+	@python -m pip install --upgrade tox
+	@find examples/ -name "tox.ini" -print0 | xargs -0 -t -I % -P 4 tox -p all -c %
 
-release: clean test
+test-release: test
+	$(shell ./bin/docker-compose-test.sh)
+	$(shell ./bin/docker-compose-it.sh)
+
+release: test
 	@python -m pip install --upgrade -r requirements/cbuild.txt
 	@python -m build
 	@MYPYC_ENABLE=1 python setup.py bdist_wheel
 
-publish-test: clean release
+publish-test: release
 	@python -m pip install --upgrade twine
 	@python -m twine upload --repository testpypi dist/*
 
-publish: clean release
+publish: release
 	@python -m pip install --upgrade twine
 	@python -m twine upload dist/*
 

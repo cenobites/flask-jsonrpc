@@ -28,7 +28,7 @@ from __future__ import annotations
 
 import typing as t
 
-# Python 3.10+
+# Added in version 3.11.
 from typing_extensions import Self
 
 from .utils import extend_schema

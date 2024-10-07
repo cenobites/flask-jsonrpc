@@ -1,0 +1,25 @@
+[project]
+name = "minimal-async"
+version = "1.0.0"
+description = "Demonstrates a minimal async Flask-JSONRPC application."
+readme = {file = "README.md", content-type = "text/markdown"}
+license = {file = "LICENSE.txt"}
+authors = [{name = "Nycholas Oliveira", email = "nycholas@cenobit.es"}]
+maintainers = [{name = "Cenobit Technologies Inc.", email = "hi@cenobit.es"}]
+requires-python = ">=3.8"
+dependencies = ["Flask-JSONRPC@git+https://github.com/cenobites/flask-jsonrpc", "Flask[async]>=3.0.0,<4.0"]
+
+[project.optional-dependencies]
+test = ["pytest"]
+
+[build-system]
+requires = ["flit_core>=3.2,<4"]
+build-backend = "flit_core.buildapi"
+
+[tool.flit.module]
+name = "minimal_async"
+
+[tool.pytest.ini_options]
+pythonpath = "src/"
+testpaths = ["src/minimal_async", "tests"]
+filterwarnings = ["error"]

@@ -80,3 +80,27 @@ jobs:
     - name: Run tests
       run: |
         bash ./bin/docker-compose-it.sh
+
+  example-tests:
+    name: Examples | Unit tests
+    needs: does-it-run
+    runs-on: ${{ matrix.platform }}
+    strategy:
+      fail-fast: false
+      matrix:
+        platform:
+          - ubuntu-latest
+        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
+    steps:
+    - name: Checkout source at ${{ matrix.platform }}
+      uses: actions/checkout@v4
+    - name: Setup Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install dependencies
+      run: |
+        python -m pip install tox
+    - name: Run tests | ${{ matrix.python-version }}
+      run: |
+        find examples/ -name "tox.ini" -print0 | xargs -0 -t -I % -P 1 tox -e py,py-async -p all -c %

@@ -36,7 +36,7 @@ from pydantic.main import BaseModel, create_model
 from . import types as jsonrpc_types
 from .helpers import from_python_type
 
-# Python 3.10+
+# Added in version 3.10.
 try:
     from types import NoneType, UnionType
 except ImportError:  # pragma: no cover
