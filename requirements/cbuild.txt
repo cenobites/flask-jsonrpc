@@ -2,7 +2,7 @@
 
 # Tools
 # ------------------------------------------------------------------------------
-cibuildwheel==2.21.2  # https://github.com/pypa/cibuildwheel
+cibuildwheel==2.21.3  # https://github.com/pypa/cibuildwheel
 setuptools==75.1.0  # https://github.com/pypa/setuptools
 
 # Mypyc
