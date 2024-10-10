@@ -1,7 +1,7 @@
 # Documentation
 # ------------------------------------------------------------------------------
 Sphinx==8.0.2  # https://github.com/sphinx-doc/sphinx
-sphinx-tabs==3.4.5  # https://github.com/executablebooks/sphinx-tabs
+sphinx-tabs==3.4.7  # https://github.com/executablebooks/sphinx-tabs
 sphinx-issues==4.1.0  # https://github.com/sloria/sphinx-issues
 sphinxcontrib-log-cabinet==1.0.1  # https://github.com/davidism/sphinxcontrib-log-cabinet
 
