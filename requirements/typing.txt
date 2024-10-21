@@ -1,7 +1,7 @@
 # Type check
 # ------------------------------------------------------------------------------
-mypy==1.11.2;python_version>="3.11"  # https://github.com/python/mypy
+mypy==1.12.1;python_version>="3.11"  # https://github.com/python/mypy
 pytype==2024.1.5;python_version>="3.11" and python_version<"3.12"  # https://github.com/google/pytype
-types_setuptools==75.1.0.20240917  # https://github.com/python/typeshed
+types_setuptools==75.2.0.20241019  # https://github.com/python/typeshed
 typeguard==4.3.0  # https://github.com/agronholm/typeguard
-pyright==1.1.384;python_version>="3.11"  # https://github.com/microsoft/pyright
+pyright==1.1.385;python_version>="3.11"  # https://github.com/microsoft/pyright
