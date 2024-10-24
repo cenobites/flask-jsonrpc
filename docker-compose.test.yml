@@ -38,13 +38,3 @@ services:
     command: >
       sh -c "ruff check . &&
         pytest"
-
-  python3.8:
-    build:
-      context: .
-      dockerfile: Dockerfile.py38.test
-    environment:
-      - PRAGMA_VERSION=py3.8
-    command: >
-      sh -c "ruff check . &&
-        pytest"

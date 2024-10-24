@@ -33,14 +33,14 @@ jobs:
           - ubuntu-latest
     steps:
       - name: Check comment review
-        if: >- 
-          github.event_name == 'issue_comment' && 
+        if: >-
+          github.event_name == 'issue_comment' &&
           github.event.issue.pull_request &&
           contains(github.event.comment.body, 'github-actions-workflow-tests') == false
         uses: action-pack/cancel@v1
       - name: Comment about start of workflow
-        if: >- 
-          github.event_name == 'issue_comment' && 
+        if: >-
+          github.event_name == 'issue_comment' &&
           github.event.issue.pull_request &&
           contains(github.event.comment.body, 'github-actions-workflow-tests')
         env:
@@ -90,7 +90,7 @@ jobs:
       matrix:
         platform:
           - ubuntu-latest
-        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
+        python-version: ["3.9", "3.10", "3.11", "3.12"]
     steps:
     - name: Checkout source at ${{ matrix.platform }}
       uses: actions/checkout@v4
