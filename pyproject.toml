@@ -20,6 +20,7 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
     "Topic :: Software Development :: Libraries :: Application Frameworks",
 ]
@@ -245,7 +246,7 @@ exclude_lines = [
 [tool.mypy]
 plugins = ["pydantic.mypy"]
 files = ["src/flask_jsonrpc"]
-python_version = "3.12"
+python_version = "3.13"
 pretty = true
 strict = true
 show_error_codes = true
@@ -279,6 +280,6 @@ python_version = "3.11"
 disable = ["invalid-annotation"]
 
 [tool.pyright]
-pythonVersion = "3.12"
+pythonVersion = "3.13"
 include = ["src/flask_jsonrpc"]
 typeCheckingMode = "basic"

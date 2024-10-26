@@ -2,12 +2,12 @@ exclude: '.git|.tox|.venv|.vscode|__pycache__|.pytest_cache|.eggs|.mypy_cache|.p
 default_stages: [pre-commit]
 fail_fast: true
 default_language_version:
-  python: python3.12
+  python: python3.13
 ci:
   autoupdate_schedule: monthly
 repos:
 - repo: https://github.com/pre-commit/pre-commit-hooks
-  rev: v4.6.0
+  rev: v5.0.0
   hooks:
     - id: check-byte-order-marker
     - id: check-case-conflict
@@ -20,7 +20,7 @@ repos:
     - id: trailing-whitespace
     - id: debug-statements
 - repo: https://github.com/astral-sh/ruff-pre-commit
-  rev: v0.5.7
+  rev: v0.7.1
   hooks:
     - id: ruff
     - id: ruff-format

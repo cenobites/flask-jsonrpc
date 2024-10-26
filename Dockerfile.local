@@ -1,4 +1,4 @@
-FROM python:3.12-alpine AS builder
+FROM python:alpine AS builder
 
 RUN apk add --no-cache --update --virtual .build-deps \
         build-base \
@@ -31,7 +31,7 @@ RUN pip install pip wheel --upgrade \
         && python setup.py bdist_wheel --dist-dir /svc/dist \
         || pip wheel --wheel-dir=/svc/wheels -e ${PROJECT_PATH}
 
-FROM python:3.12-alpine
+FROM python:alpine
 
 ENV PYTHONUNBUFFERED=1 \
     DEBUG=0 \

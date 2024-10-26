@@ -35,7 +35,7 @@ jobs:
       if: ${{ matrix.language == 'python' }}
       uses: actions/setup-python@v5
       with:
-        python-version: '3.12'
+        python-version: '3.13'
     - name: Build Application using script
       if: ${{ matrix.language == 'python' }}
       run: |
