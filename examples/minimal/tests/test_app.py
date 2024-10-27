@@ -177,7 +177,7 @@ def test_multi_decorators(client: 'FlaskClient') -> None:
         },
     }
     assert rv.headers == Headers(
-        [('Content-Type', 'application/json'), ('Content-Length', '174'), ('X-JSONRPC-Tag', 'JSONRPC 2.0')]
+        [('Content-Type', 'application/json'), ('Content-Length', '169'), ('X-JSONRPC-Tag', 'JSONRPC 2.0')]
     )
     assert rv.status_code == 200
 
