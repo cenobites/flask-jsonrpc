@@ -135,4 +135,4 @@ def one_decorator() -> str:
 @check_terminal_id
 @jsonrpc_headers
 def multi_decorators() -> t.Dict[str, t.Any]:
-    return {'terminal_id': request.get_json(silent=True).get('terminal_id', 0), 'headers': str(request.headers)}
+    return {'terminal_id': request.get_json(silent=True).get('terminal_id', 0), 'headers': request.headers}

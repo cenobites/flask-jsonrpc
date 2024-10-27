@@ -152,4 +152,4 @@ async def one_decorator() -> str:
 @jsonrpc_headers
 async def multi_decorators() -> t.Dict[str, t.Any]:
     await asyncio.sleep(0)
-    return {'terminal_id': request.get_json(silent=True).get('terminal_id', 0), 'headers': str(request.headers)}
+    return {'terminal_id': request.get_json(silent=True).get('terminal_id', 0), 'headers': request.headers}
