@@ -215,7 +215,7 @@ def test_rpc_describe(client: 'FlaskClient') -> None:
         },
         'Petstore.get_pets': {
             'options': {'notification': True, 'validate': True},
-            'params': [{'name': 'tags', 'type': 'Object'}, {'name': 'limit', 'type': 'Number'}],
+            'params': [{'name': 'tags', 'type': 'Array'}, {'name': 'limit', 'type': 'Number'}],
             'returns': {'type': 'Array'},
             'type': 'method',
         },
