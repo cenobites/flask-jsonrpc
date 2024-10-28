@@ -26,8 +26,8 @@
 # POSSIBILITY OF SUCH DAMAGE.
 from __future__ import annotations
 
-import sys
 import typing as t
+from collections import OrderedDict
 
 from pydantic.main import BaseModel
 
@@ -67,4 +67,4 @@ class ServiceDescribe(BaseModel):
     name: str
     description: str | None = None
     servers: list[ServiceServersDescribe]
-    methods: t.OrderedDict[str, ServiceMethodDescribe]
+    methods: OrderedDict[str, ServiceMethodDescribe]

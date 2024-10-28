@@ -7,7 +7,7 @@ all: clean test
 
 clean:
 	@find {src,examples,tests} -regex ".*\.\(so\|pyc\)" | xargs rm -rf
-	@find {src,examples,tests} -name "__pycache__" -o -name ".coverage" -o -name ".tox"  -o -name ".pytest_cache" -o -name ".ruff_cache"  -o -name ".pkg" -o -name ".tmp" | xargs rm -rf
+	@find {src,examples,tests} -name "__pycache__" -o -name ".coverage" -o -name "junit" -o -name "coverage.lcov" -o -name "htmlcov" -o -name ".tox"  -o -name ".pytest_cache" -o -name ".ruff_cache"  -o -name ".pkg" -o -name ".tmp" | xargs rm -rf
 	@rm -rf .coverage coverage.* .eggs/ .mypy_cache/ .pytype/ .ruff_cache/ .pytest_cache/ .tox/ src/*.egg-info/ htmlcov/ junit/ htmldoc/ build/ dist/ wheelhouse/
 
 style:
@@ -33,6 +33,7 @@ release: test
 	@python -m pip install --upgrade -r requirements/cbuild.txt
 	@python -m build
 	@MYPYC_ENABLE=1 python setup.py bdist_wheel
+	@cibuildwheel
 
 publish-test: release
 	@python -m pip install --upgrade twine

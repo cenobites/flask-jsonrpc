@@ -29,16 +29,25 @@ import typing as t
 from numbers import Real, Number, Complex, Integral, Rational
 from collections import OrderedDict, defaultdict
 
+from typing_extensions import Literal
+
 import pytest
 
 from flask_jsonrpc import types
 
 
-def test_types() -> None:
+def test_types_empty_type() -> None:
+    empty_type = types.JSONRPCNewType('Empty', ())
+    assert not empty_type.check_type(str)
+
+
+def test_types_string() -> None:
     assert types.String.check_type(str)
     assert types.String.check_type(t.AnyStr)
     assert str(types.String) == 'String'
 
+
+def test_types_number() -> None:
     assert types.Number.check_type(int)
     assert types.Number.check_type(float)
     assert not types.Number.check_type(complex)
@@ -49,56 +58,85 @@ def test_types() -> None:
     assert not types.Number.check_type(Number)
     assert str(types.Number) == 'Number'
 
+
+def test_types_object() -> None:
     assert types.Object.check_type(dict)
-    assert types.Object.check_type(t.Dict)
+    assert types.Object.check_type(dict)
     assert types.Object.check_type(t.Any)
     assert str(types.Object) == 'Object'
 
+
+def test_types_array() -> None:
     assert types.Array.check_type(list)
     assert types.Array.check_type(tuple)
     assert types.Array.check_type(set)
-    assert types.Array.check_type(t.List)
-    assert types.Array.check_type(t.NamedTuple)
-    assert types.Array.check_type(t.Set)
-    assert types.Array.check_type(t.Tuple)
+    assert types.Array.check_type(list)
+    assert types.Array.check_type(set)
+    assert types.Array.check_type(tuple)
     assert types.Array.check_type(frozenset)
-    assert types.Array.check_type(t.FrozenSet)
+    assert types.Array.check_type(frozenset)
     assert str(types.Array) == 'Array'
 
+
+def test_types_boolean() -> None:
     assert types.Boolean.check_type(bool)
     assert str(types.Boolean) == 'Boolean'
 
+
+def test_types_null() -> None:
     assert types.Null.check_type(None)
     assert types.Null.check_type(type(None))  # noqa: E721
     assert types.Null.check_type(t.NoReturn)
+    assert types.Null.check_type(Literal[None])
+    assert not types.Object.check_type(Literal[None])
     assert str(types.Null) == 'Null'
 
 
-def test_types_others() -> None:
+def test_types_python_mapping() -> None:
     assert types.Object.check_type(OrderedDict)
     assert types.Object.check_type(defaultdict)
-    assert types.Object.check_type(t.DefaultDict)
+    assert types.Object.check_type(defaultdict)
     assert types.Object.check_type(t.Mapping)
 
 
-def test_types_complex() -> None:
+def test_types_type_var() -> None:
     T = t.TypeVar('T')
     S = t.TypeVar('S', int, float)
     X = t.TypeVar('X', bound=int)
-    U = types.Literal[str]
-    V = t.Final[str]
 
     assert types.Object.check_type(T)
     assert types.Number.check_type(S)
-    assert types.String.check_type(U)
     assert types.Number.check_type(X)
-    assert types.String.check_type(V)
+
+
+def test_types_literal() -> None:
+    assert types.String.check_type(Literal[str])
+    assert types.String.check_type(Literal['hello', 'world'])
+    assert not types.String.check_type(Literal[1, 2])
+
+
+def test_types_final() -> None:
+    assert types.String.check_type(t.Final[str])
+    assert not types.String.check_type(t.Final[int])
+
+
+def test_types_union() -> None:
     assert types.String.check_type(t.Union[str, None])
     assert types.String.check_type(t.Optional[str])
+    assert not types.String.check_type(t.Union[str, int])
+    assert not types.Number.check_type(t.Union[str, int])
+
+
+def test_types_custom_type() -> None:
+    class CustomType:
+        __supertype__ = str
+
+    custom_type = types.JSONRPCNewType('CustomType', str)
+    assert custom_type.check_type(CustomType())
 
 
 def test_types_from_fn() -> None:
-    def fn(_a: str, _b: int, _c: t.Dict[str, t.Any], _d: t.List[int], _e: t.Any) -> bool:  # noqa: ANN401
+    def fn(_a: str, _b: int, _c: dict[str, t.Any], _d: list[int], _e: t.Any) -> bool:  # noqa: ANN401
         return True
 
     fn_annotations = t.get_type_hints(fn)
@@ -110,9 +148,8 @@ def test_types_from_fn() -> None:
     assert types.Boolean.check_type(fn_annotations['return'])
 
 
-# pylint: disable=E1136
 @pytest.mark.skipif(sys.version_info < (3, 9), reason='requires python3.9 or higher')
-def test_generic_type_alias() -> None:
+def test_types_generic_type_alias() -> None:
     T = t.TypeVar('T')
 
     assert types.Array.check_type(list[int])
@@ -121,13 +158,12 @@ def test_generic_type_alias() -> None:
     assert types.Array.check_type(frozenset[int])
     assert types.Array.check_type(tuple[int])
     assert types.Object.check_type(dict[int, str])
-    assert types.Object.check_type(dict[int, T][str])
+    assert types.Object.check_type(dict[int, T][str])  # type: ignore
     assert types.Object.check_type(dict[int, list[int]])
 
 
-# pylint: disable=E1131
 @pytest.mark.skipif(sys.version_info < (3, 10), reason='requires python3.10 or higher')
-def test_union_type_expression() -> None:
+def test_types_union_type_expression() -> None:
     assert types.Array.check_type(list[int | str])
     assert types.String.check_type(str | bytearray)
     assert types.String.check_type(bytearray | str)
@@ -136,12 +172,11 @@ def test_union_type_expression() -> None:
 
 
 @pytest.mark.skipif(sys.version_info < (3, 10), reason='requires python3.10 or higher')
-def test_none_type() -> None:
+def test_types_none_type() -> None:
     assert types.Null.check_type(type(None))
-    assert types.Null.check_type(types.NoneType)
 
 
-def test_new_type() -> None:
+def test_types_new_type() -> None:
     UserId = t.NewType('UserId', int)
     UserUid = t.NewType('UserUid', str)
 

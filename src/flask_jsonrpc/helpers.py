@@ -56,11 +56,9 @@ def urn(name: str, *args: t.Any) -> str:  # noqa: ANN401
     """
     if not name:
         raise ValueError('name is required') from None
-    splitted_args = [arg.split('/') for arg in args]
-    st = ':'.join(list(itertools.chain(*splitted_args)))
-    st = st.rstrip(':').lstrip(':')
-    sep = ':' if len(args) > 0 else ''
-    return f"urn:{name}{sep}{st.replace('::', ':')}".lower()
+    splitted_args = [arg.replace(':', '/').split('/') for arg in args]
+    values = ['urn', name] + [st for st in list(itertools.chain(*splitted_args)) if st != '']
+    return ':'.join(values).lower()
 
 
 def from_python_type(tp: t.Any, default: JSONRPCNewType | None = Object) -> JSONRPCNewType | None:  # noqa: ANN401
@@ -127,6 +125,8 @@ def get(obj: t.Any, path: str, default: t.Any = None) -> t.Any:  # noqa: ANN401
         return default
     if not isinstance(obj, dict):
         return default
+    if path in obj:
+        return getitem(obj, path)
 
     obj_val = obj
     keys = path.split('.')

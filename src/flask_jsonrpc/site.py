@@ -24,7 +24,6 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-# pylint: disable=R0904
 from __future__ import annotations
 
 from uuid import UUID, uuid4
@@ -69,6 +68,23 @@ class JSONRPCSite:
         self.version: str = JSONRPC_VERSION_DEFAULT
         self.describe = JSONRPCServiceDescriptor(self).describe
 
+    def _is_notification_request(self: Self, req_json: dict[str, t.Any]) -> bool:
+        return 'id' not in req_json
+
+    def _is_batch_request(self: Self, req_json: t.Any) -> bool:  # noqa: ANN401
+        return isinstance(req_json, list)
+
+    def _find_error_handler(self: Self, exc: Exception) -> t.Callable[[t.Any], t.Any] | None:
+        exc_class = type(exc)
+        if not self.error_handlers:
+            return None
+
+        for cls in exc_class.__mro__:
+            handler = self.error_handlers.get(cls)
+            if handler is not None:
+                return handler
+        return None
+
     @property
     def is_json(self: Self) -> bool:
         """Check if the mimetype indicates JSON data, either
@@ -103,7 +119,7 @@ class JSONRPCSite:
             ) from None
 
         json_data = self.to_json(request.data)
-        if self.is_batch_request(json_data):
+        if self._is_batch_request(json_data):
             return self.batch_dispatch(json_data)
         return self.handle_dispatch_except(json_data)
 
@@ -164,7 +180,7 @@ class JSONRPCSite:
         if not view_func:
             raise MethodNotFoundError(data={'message': f'Method not found: {method_name}'}) from None
 
-        if self.is_notification_request(req_json) and not notification:
+        if self._is_notification_request(req_json) and not notification:
             raise InvalidRequestError(
                 data={
                     'message': f"The method {method_name!r} doesn't allow Notification "
@@ -174,17 +190,6 @@ class JSONRPCSite:
 
         resp_view = self.handle_view_func(view_func, params)
         return self.make_response(req_json, resp_view)
-
-    def _find_error_handler(self: Self, exc: Exception) -> t.Callable[[t.Any], t.Any] | None:
-        exc_class = type(exc)
-        if not self.error_handlers:
-            return None
-
-        for cls in exc_class.__mro__:
-            handler = self.error_handlers.get(cls)
-            if handler is not None:
-                return handler
-        return None
 
     def handle_dispatch_except(
         self: Self, req_json: dict[str, t.Any]
@@ -201,7 +206,7 @@ class JSONRPCSite:
                 'error': e.jsonrpc_format,
             }
             return response, e.status_code, JSONRPC_DEFAULT_HTTP_HEADERS
-        except Exception as e:  # pylint: disable=W0703
+        except Exception as e:
             current_app.logger.exception('unexpected error')
             error_handler = self._find_error_handler(e)
             jsonrpc_error_data = (
@@ -270,13 +275,7 @@ class JSONRPCSite:
         resp_view: t.Any,  # noqa: ANN401
     ) -> tuple[t.Any, int, Headers | dict[str, str] | tuple[str] | list[tuple[str]]]:
         rv, status_code, headers = self.unpack_tuple_returns(resp_view)
-        if self.is_notification_request(req_json):
+        if self._is_notification_request(req_json):
             return None, 204, headers
         resp = {'id': req_json.get('id'), 'jsonrpc': req_json.get('jsonrpc', JSONRPC_VERSION_DEFAULT), 'result': rv}
         return resp, status_code, headers
-
-    def is_notification_request(self: Self, req_json: dict[str, t.Any]) -> bool:
-        return 'id' not in req_json
-
-    def is_batch_request(self: Self, req_json: t.Any) -> bool:  # noqa: ANN401
-        return isinstance(req_json, list)

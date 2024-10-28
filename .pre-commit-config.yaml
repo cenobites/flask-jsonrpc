@@ -1,5 +1,5 @@
 exclude: '.git|.tox|.venv|.vscode|__pycache__|.pytest_cache|.eggs|.mypy_cache|.pytype|htmlcov|junit|htmldoc'
-default_stages: [commit]
+default_stages: [pre-commit]
 fail_fast: true
 default_language_version:
   python: python3.12

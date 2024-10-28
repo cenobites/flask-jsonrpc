@@ -41,7 +41,7 @@ jsonrpc.register_blueprint(app, article, url_prefix='/article', enable_web_brows
 jsonrpc.errorhandler(ValueError)
 
 
-def handle_value_error_exception(ex: ValueError) -> t.Dict[str, t.Any]:
+def handle_value_error_exception(ex: ValueError) -> dict[str, t.Any]:
     return {'message': 'Generic global error handler does not work, :(', 'code': '0000'}
 
 

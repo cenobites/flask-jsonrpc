@@ -1,4 +1,4 @@
-# Copyright (c) 2012-2024, Cenobit Technologies, Inc. http://cenobit.es/
+# Copyright (c) 2024-2024, Cenobit Technologies, Inc. http://cenobit.es/
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -24,57 +24,9 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-import typing as t
+import os
 
-import pytest
+from .app import create_app
 
-from ..test_apps.app import create_app
-from ..test_apps.async_app import create_async_app
-
-# Python 3.11+
-try:
-    from typing import Self
-except ImportError:  # pragma: no cover
-    from typing_extensions import Self  # noqa: F401
-
-if t.TYPE_CHECKING:
-    from flask import Flask
-    from flask.testing import FlaskClient, FlaskCliRunner
-
-
-@pytest.fixture(scope='module')
-def app() -> 't.Generator[Flask]':
-    """Create and configure a new app instance for each test."""
-    flask_app = create_app({'TESTING': True})
-
-    yield flask_app
-
-
-@pytest.fixture(scope='module')
-def async_app() -> 't.Generator[Flask]':
-    """Create and configure a new async app instance for each test."""
-    flask_app = create_async_app({'TESTING': True})
-
-    yield flask_app
-
-
-# pylint: disable=W0621
-@pytest.fixture(scope='module')
-def client(app: 'Flask') -> 'FlaskClient':
-    """A test client for the app."""
-    return app.test_client()
-
-
-# pylint: disable=W0621
-@pytest.fixture(scope='module')
-def async_client(async_app: 'Flask') -> 't.Generator[FlaskClient]':
-    """A test async client for the app."""
-    with async_app.test_client() as testing_client:
-        yield testing_client
-
-
-# pylint: disable=W0621
-@pytest.fixture
-def runner(app: 'Flask') -> 'FlaskCliRunner':
-    """A test runner for the app's Click commands."""
-    return app.test_cli_runner()
+app = create_app({'SERVER_NAME': os.getenv('FLASK_SERVER_NAME')})
+app.run(host='0.0.0.0')

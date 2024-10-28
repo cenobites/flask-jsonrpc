@@ -1,4 +1,4 @@
-# Copyright (c) 2022-2024, Cenobit Technologies, Inc. http://cenobit.es/
+# Copyright (c) 2024-2024, Cenobit Technologies, Inc. http://cenobit.es/
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -24,3 +24,9 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
+import os
+
+from .app import create_app
+
+app = create_app({'SERVER_NAME': os.getenv('FLASK_SERVER_NAME')})
+app.run(host='0.0.0.0')

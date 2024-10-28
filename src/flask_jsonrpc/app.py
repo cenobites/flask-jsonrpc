@@ -65,14 +65,14 @@ class JSONRPC(JSONRPCDecoratorMixin):
         if app:
             self.init_app(app)
 
+    def _make_jsonrpc_browse_url(self: Self, path: str) -> str:
+        return ''.join([path.rstrip('/'), '/browse'])
+
     def get_jsonrpc_site(self: Self) -> JSONRPCSite:
         return self.jsonrpc_site
 
     def get_jsonrpc_site_api(self: Self) -> type[JSONRPCView]:
         return self.jsonrpc_site_api
-
-    def _make_jsonrpc_browse_url(self: Self, path: str) -> str:
-        return ''.join([path.rstrip('/'), '/browse'])
 
     def init_app(self: Self, app: Flask) -> None:
         http_host = app.config.get('SERVER_NAME')

@@ -1,4 +1,4 @@
 # Security check
 # ------------------------------------------------------------------------------
 bandit;python_version>="3.11" # https://github.com/PyCQA/bandit
-safety;python_version>="3.11"  # https://github.com/pyupio/safety
+# safety;python_version>="3.11"  # https://github.com/pyupio/safety

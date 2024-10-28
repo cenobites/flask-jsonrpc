@@ -18,7 +18,7 @@ RUN set -ex \
     && pip install -r requirements/base.txt \
     && pip install -r requirements/style.txt \
     && pip install -r requirements/tests.txt \
-        poetry-core>=1.0.0 \
+    && pip install poetry-core>=1.0.0 \
     && apk del .build-deps \
     && addgroup -S kuchulu \
     && adduser \

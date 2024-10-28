@@ -57,3 +57,11 @@ class JSONRPCBlueprint(JSONRPCDecoratorMixin):
 
     def get_jsonrpc_site_api(self: Self) -> type[JSONRPCView]:
         return self.jsonrpc_site_api
+
+    def register(
+        self: Self,
+        view_func: t.Callable[..., t.Any],
+        name: str | None = None,
+        **options: t.Any,  # noqa: ANN401
+    ) -> None:
+        self.register_view_function(view_func, name, **options)

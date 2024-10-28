@@ -24,14 +24,17 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-
 import pytest
 
 from flask_jsonrpc.settings import JSONRPCSettings
 
 
-def test_settings() -> None:
+def test_settings_simple() -> None:
     settings = JSONRPCSettings({'setting': True})
     assert settings.setting is True
+
+
+def test_settings_invalid_attr() -> None:
+    settings = JSONRPCSettings({'setting': True})
     with pytest.raises(AttributeError, match="invalid setting: 'xxx'"):
         assert settings.xxx is None

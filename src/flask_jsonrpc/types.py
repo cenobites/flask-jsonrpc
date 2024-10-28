@@ -28,22 +28,15 @@ from __future__ import annotations
 
 from types import GeneratorType
 import typing as t
+import inspect
 from numbers import Real, Integral, Rational
 from collections import OrderedDict, deque, defaultdict
 from collections.abc import Mapping
 
-from typing_extensions import (
-    Self,  # Added in version 3.11.
-)
+import typing_inspect
 
-from typing_inspect import is_new_type  # type: ignore
-
-# Added in version 3.10.
-try:
-    from types import NoneType, UnionType
-except ImportError:  # pragma: no cover
-    UnionType = None  # type: ignore
-    NoneType = type(None)  # type: ignore
+# Added in version 3.11.
+from typing_extensions import Self
 
 
 class JSONRPCNewType:
@@ -51,34 +44,35 @@ class JSONRPCNewType:
         self.name = name
         self.types = types
 
-    def check_expected_type(self: Self, expected_type: t.Any) -> bool:  # noqa: ANN401
+    def _check_expected_type(self: Self, expected_type: t.Any) -> bool:  # noqa: ANN401
         return any(expected_type is tp for tp in self.types)
 
-    def check_expected_types(self: Self, expected_types: t.Any) -> bool:  # noqa: ANN401
-        return all(any(expt_tp is tp for tp in self.types) for expt_tp in expected_types)
+    def _check_expected_types(self: Self, expected_types: t.Any) -> bool:  # noqa: ANN401
+        return all(self.check_type(expt_tp) for expt_tp in expected_types)
 
-    def check_type_var(self: Self, expected_type: t.Any) -> bool:  # noqa: ANN401
+    def _check_type_var(self: Self, expected_type: t.Any) -> bool:  # noqa: ANN401
         bound_type = getattr(expected_type, '__bound__', None)
         if bound_type is None:
             expected_types = getattr(expected_type, '__constraints__', None)
             if not expected_types:
                 return self is Object
-            return self.check_expected_types(expected_types)
-        return self.check_expected_type(bound_type)
+            return self._check_expected_types(expected_types)
+        return self._check_expected_type(bound_type)
 
-    def check_new_type(self: Self, expected_type: t.Any) -> bool:  # noqa: ANN401
+    def _check_new_type(self: Self, expected_type: t.Any) -> bool:  # noqa: ANN401
         super_type = getattr(expected_type, '__supertype__', None)
-        return self.check_expected_type(super_type)
+        return self._check_expected_type(super_type)
 
-    def check_union(self: Self, expected_type: t.Any) -> bool:  # noqa: ANN401
+    def _check_union(self: Self, expected_type: t.Any) -> bool:  # noqa: ANN401
         expected_types = [expt_tp for expt_tp in t.get_args(expected_type) if expt_tp is not type(None)]  # noqa: E721
-        return self.check_expected_types(expected_types)
+        return self._check_expected_types(expected_types)
 
-    def check_args_type(self: Self, expected_type: t.Any) -> bool:  # noqa: ANN401
-        expected_types = t.get_args(expected_type)
-        return self.check_expected_types(expected_types)
+    def _check_args_type(self: Self, expected_type: t.Any) -> bool:  # noqa: ANN401
+        args = t.get_args(expected_type)
+        expected_types = [arg if inspect.isclass(arg) else type(arg) for arg in args]
+        return self._check_expected_types(expected_types)
 
-    def check_type(self: Self, o: t.Any) -> bool:  # pylint: disable=R0911 # noqa: ANN401
+    def check_type(self: Self, o: t.Any) -> bool:  # noqa: ANN401
         expected_type = o
         if expected_type is t.Any:
             return self is Object
@@ -86,29 +80,29 @@ class JSONRPCNewType:
         if expected_type is None or expected_type is t.NoReturn:
             expected_type = type(None)
 
-        if type(expected_type) is t.TypeVar:  # pylint: disable=C0123
-            return self.check_type_var(expected_type)
+        if typing_inspect.is_tuple_type(expected_type):
+            return self is Array
 
-        if is_new_type(expected_type):
-            return self.check_new_type(expected_type)
+        if typing_inspect.is_typevar(expected_type):
+            return self._check_type_var(expected_type)
+
+        if typing_inspect.is_new_type(expected_type) or hasattr(expected_type, '__supertype__'):
+            return self._check_new_type(expected_type)
+
+        if typing_inspect.is_union_type(expected_type):
+            return self._check_union(expected_type)
+
+        if typing_inspect.is_literal_type(expected_type):
+            return self._check_args_type(expected_type)
+
+        if typing_inspect.is_final_type(expected_type):
+            return self._check_args_type(expected_type)
 
         origin_type = t.get_origin(expected_type)
         if origin_type is not None:
-            if origin_type is t.Union or origin_type is UnionType:
-                return self.check_union(expected_type)
-
-            if origin_type is t.Tuple or origin_type is tuple:
-                return self is Array
-
-            if origin_type is t.Literal:
-                return self.check_args_type(expected_type)
-
-            if origin_type is t.Final:
-                return self.check_args_type(expected_type)
-
             expected_type = origin_type
 
-        return self.check_expected_type(expected_type)
+        return self._check_expected_type(expected_type)
 
     def __str__(self: Self) -> str:
         return self.name
@@ -116,10 +110,8 @@ class JSONRPCNewType:
 
 String = JSONRPCNewType('String', str, bytes, bytearray)
 Number = JSONRPCNewType('Number', int, float, Real, Rational, Integral)
-Object = JSONRPCNewType('Object', dict, t.Dict, defaultdict, OrderedDict, Mapping)
-Array = JSONRPCNewType(
-    'Array', list, set, t.Set, tuple, t.List, t.NamedTuple, frozenset, t.FrozenSet, GeneratorType, deque
-)
+Object = JSONRPCNewType('Object', dict, t.Dict, defaultdict, OrderedDict, Mapping)  # noqa: UP006
+Array = JSONRPCNewType('Array', list, t.List, set, t.Set, tuple, t.Tuple, frozenset, t.FrozenSet, GeneratorType, deque)  # type: ignore[arg-type]  # noqa: UP006
 Boolean = JSONRPCNewType('Boolean', bool)
-Null = JSONRPCNewType('Null', type(None), NoneType)
-Types = [String, Number, Object, Array, Boolean, Null]
+Null = JSONRPCNewType('Null', type(None), t.Literal[None])  # type: ignore[arg-type]
+Types = [Null, String, Number, Boolean, Array, Object]

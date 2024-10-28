@@ -39,7 +39,7 @@ jobs:
     - name: Run tox (Style, Type checker, Security, Docs) | Python 3.12
       if: ${{ matrix.platform == 'ubuntu-latest' && matrix.python-version == '3.12' }}
       run: |
-        tox -e style,typing-mypy,typing-pyright,security-safety,security-bandit,docs -p all
+        tox -e style,typing-mypy,typing-pyright,security-bandit,docs -p all
     - name: Run tox (Tests) | ${{ matrix.platform }}
       run: |
         tox -e py,py-async

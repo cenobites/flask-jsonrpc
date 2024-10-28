@@ -26,6 +26,9 @@
 # POSSIBILITY OF SUCH DAMAGE.
 import typing as t
 
+import pytest
+from multiplesite.app import UnauthorizedError
+
 if t.TYPE_CHECKING:
     from flask.testing import FlaskClient
 
@@ -44,6 +47,15 @@ def test_index_v2(client: 'FlaskClient') -> None:
     )
     assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': 'Welcome to Flask JSON-RPC Version API 2'}
     assert rv.status_code == 200
+
+
+def test_index_v2_with_invalid_auth(client: 'FlaskClient') -> None:
+    with pytest.raises(UnauthorizedError):
+        client.post(
+            '/api/v2',
+            json={'id': 1, 'jsonrpc': '2.0', 'method': 'App.index'},
+            headers={'X-Username': 'username', 'X-Password': 'invalid'},
+        )
 
 
 def test_rpc_describe_v1(client: 'FlaskClient') -> None:

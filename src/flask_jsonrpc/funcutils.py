@@ -26,22 +26,19 @@
 # POSSIBILITY OF SUCH DAMAGE.
 from __future__ import annotations
 
+from enum import Enum
 import typing as t
+from decimal import Decimal
 import inspect
 import dataclasses
+
+import typing_inspect
 
 from pydantic import ValidationError
 from pydantic.main import BaseModel, create_model
 
 from . import types as jsonrpc_types
 from .helpers import from_python_type
-
-# Added in version 3.10.
-try:
-    from types import NoneType, UnionType
-except ImportError:  # pragma: no cover
-    UnionType = None  # type: ignore
-    NoneType = type(None)  # type: ignore
 
 
 def loads(param_type: t.Any, param_value: t.Any) -> t.Any:  # noqa: ANN401, C901
@@ -51,33 +48,44 @@ def loads(param_type: t.Any, param_value: t.Any) -> t.Any:  # noqa: ANN401, C901
     if param_type is t.Any:
         return param_value
 
+    # XXX: The only type of union that is supported is: typing.Union[T, None] or typing.Optional[T]
+    if typing_inspect.is_union_type(param_type) or typing_inspect.is_optional_type(param_type):
+        obj_types = t.get_args(param_type)
+        if len(obj_types) == 2:
+            actual_type, check_type = obj_types
+            if actual_type is type(None):
+                actual_type, check_type = check_type, actual_type
+            if check_type is type(None):
+                return loads(actual_type, param_value)
+        raise TypeError(
+            'the only type of union that is supported is: typing.Union[T, None] or typing.Optional[T]'
+        ) from None
+
     jsonrpc_type = from_python_type(param_type, default=None)
     if jsonrpc_type is None:
         if inspect.isclass(param_type):
+            if issubclass(param_type, Enum):
+                return param_type(param_value)
+
+            if issubclass(param_type, Decimal):
+                return param_type(param_value)
+
             if issubclass(param_type, BaseModel):
-                base_model = t.cast(t.Type[BaseModel], param_type)  # type: ignore
+                base_model = t.cast(type[BaseModel], param_type)  # type: ignore
                 model = create_model(base_model.__name__, __base__=base_model)
                 try:
                     return model.model_validate(param_value)
                 except ValidationError as e:
                     raise TypeError(str(e)) from e
 
+            # XXX: typing.NamedTuple
+            if issubclass(param_type, tuple) and not typing_inspect.is_tuple_type(param_type):
+                return param_type(**param_value)
+
             if dataclasses.is_dataclass(param_type):
                 return param_type(**param_value)
 
             return param_type(**param_value)
-
-        # XXX: The only type of union that is supported is: typing.Union[T, None] or typing.Optional[T]
-        origin_type = t.get_origin(param_type)
-        if origin_type is not None and (origin_type is t.Union or origin_type is UnionType):
-            obj_types = t.get_args(param_type)
-            if len(obj_types) == 2:
-                actual_type, check_type = obj_types
-                if check_type is NoneType:
-                    return loads(actual_type, param_value)
-            raise TypeError(
-                'the only type of union that is supported is: typing.Union[T, None] or typing.Optional[T]'
-            ) from None
         return param_value
 
     if jsonrpc_types.Object.name == jsonrpc_type.name:
@@ -94,7 +102,18 @@ def loads(param_type: t.Any, param_value: t.Any) -> t.Any:  # noqa: ANN401, C901
         item_type = t.get_args(param_type)[0]
         for item in param_value:
             loaded_list.append(loads(item_type, item))
-        return loaded_list
+        param_type_origin = t.get_origin(param_type)
+        return param_type_origin(loaded_list)
+
+    if typing_inspect.is_literal_type(param_type):
+        return param_value
+
+    if typing_inspect.is_final_type(param_type):
+        return param_value
+
+    if issubclass(param_type, (bytes, bytearray)):
+        return param_type(param_value.encode('utf-8'))
+
     return param_value
 
 

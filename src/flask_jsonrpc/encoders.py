@@ -38,7 +38,9 @@ from flask import typing as ft, jsonify as _jsonify
 from pydantic.main import BaseModel
 
 
-def serializable(obj: t.Any) -> t.Any:  # noqa: ANN401
+def serializable(obj: t.Any) -> t.Any:  # noqa: ANN401, C901
+    if isinstance(obj, (bytes, bytearray)):
+        return obj.decode('utf-8')
     if isinstance(obj, Enum):
         return obj.value
     if isinstance(obj, PurePath):

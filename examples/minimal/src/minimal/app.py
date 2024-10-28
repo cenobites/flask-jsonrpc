@@ -60,7 +60,7 @@ class MyException(Exception):
 
 
 @jsonrpc.errorhandler(MyException)
-def handle_my_exception(ex: MyException) -> t.Dict[str, t.Any]:
+def handle_my_exception(ex: MyException) -> dict[str, t.Any]:
     return {'message': 'It is a custom exception', 'code': '0001'}
 
 
@@ -80,7 +80,7 @@ def hello_default_args(string: str = 'Flask JSON-RPC') -> str:
 
 
 @jsonrpc.method('App.argsValidate')
-def args_validate(a1: int, a2: str, a3: bool, a4: t.List[t.Any], a5: t.Dict[t.Any, t.Any]) -> str:
+def args_validate(a1: int, a2: str, a3: bool, a4: list[t.Any], a5: dict[t.Any, t.Any]) -> str:
     return f'Number: {a1}, String: {a2}, Boolean: {a3}, Array: {a4}, Object: {a5}'
 
 
@@ -134,5 +134,5 @@ def one_decorator() -> str:
 @jsonrpc.method('App.multiDecorators')
 @check_terminal_id
 @jsonrpc_headers
-def multi_decorators() -> t.Dict[str, t.Any]:
+def multi_decorators() -> dict[str, t.Any]:
     return {'terminal_id': request.get_json(silent=True).get('terminal_id', 0), 'headers': dict(request.headers)}

@@ -121,7 +121,7 @@ PETS = [Pet(id=1, name='Bob', tag='dog'), Pet(id=2, name='Eve', tag='cat'), Pet(
     ),
 )
 @jsonrpc.method('Petstore.get_pets')
-def get_pets(tags: t.Optional[t.List[str]] = None, limit: t.Optional[int] = None) -> t.List[Pet]:
+def get_pets(tags: t.Optional[list[str]] = None, limit: t.Optional[int] = None) -> list[Pet]:
     pets = PETS
     if tags is not None:
         pets = [pet for pet in pets if pet.tag in tags]

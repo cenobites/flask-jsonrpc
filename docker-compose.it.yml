@@ -15,7 +15,8 @@ services:
       - .pytest_cache/test-results/app:/app/test-results
       - .pytest_cache/screnshots/app:/app/.pytest_cache/screnshots
     depends_on:
-      - nginx
+      nginx:
+        condition: service_healthy
     networks:
       - default
 
@@ -27,11 +28,17 @@ services:
       - FLASK_SERVER_NAME=app:5000
     user: ${UID:-0}:${GID:-0}
     command: >
-      python app.py
+      python -m app
     ports:
       - '5000:5000'
     networks:
       - default
+    healthcheck:
+      test: wget -qO - app:5000/health || exit 1
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
 
   async-sut:
     build:
@@ -45,11 +52,14 @@ services:
       - API_URL=https://async-app.flask-jsonrpc.cenobit.es/api
       - BROWSABLE_API_URL=https://async-app.flask-jsonrpc.cenobit.es/api/browse
     user: ${UID:-0}:${GID:-0}
+    command: >
+      ./wait-for.sh async-app.flask-jsonrpc.cenobit.es:80 -t 600 -- pytest -n auto --junitxml=test-results/junit.xml test_async_app.py
     volumes:
       - .pytest_cache/test-results/async-app:/app/test-results
       - .pytest_cache/screnshots/async-app:/app/.pytest_cache/screnshots
     depends_on:
-      - nginx
+      nginx:
+        condition: service_healthy
     networks:
       - default
 
@@ -63,11 +73,17 @@ services:
       - FLASK_SERVER_NAME=async-app:5000
     user: ${UID:-0}:${GID:-0}
     command: >
-      python async-app.py
+      python -m async_app
     ports:
       - '5001:5000'
     networks:
       - default
+    healthcheck:
+      test: wget -qO - async-app:5000/health || exit 1
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
 
   mypyc-sut:
     build:
@@ -85,7 +101,8 @@ services:
       - .pytest_cache/test-results/app:/app/test-results
       - .pytest_cache/screnshots/app:/app/.pytest_cache/screnshots
     depends_on:
-      - nginx
+      nginx:
+        condition: service_healthy
     networks:
       - default
 
@@ -99,11 +116,17 @@ services:
       - FLASK_SERVER_NAME=mypyc-app:5000
     user: ${UID:-0}:${GID:-0}
     command: >
-      python app.py
+      python -m app
     ports:
       - '5002:5000'
     networks:
       - default
+    healthcheck:
+      test: wget -qO - mypyc-app:5000/health || exit 1
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
 
   nginx:
     image: nginx:mainline-alpine
@@ -115,15 +138,24 @@ services:
       - .docker/nginx/ssl:/etc/nginx/ssl
       - .docker/nginx/nginx.conf:/etc/nginx/nginx.conf
     depends_on:
-      - app
-      - async-app
-      - mypyc-app
+      app:
+        condition: service_healthy
+      async-app:
+        condition: service_healthy
+      mypyc-app:
+        condition: service_healthy
     networks:
       default:
         aliases:
           - app.flask-jsonrpc.cenobit.es
           - async-app.flask-jsonrpc.cenobit.es
           - mypyc-app.flask-jsonrpc.cenobit.es
+    healthcheck:
+      test: wget -qO - nginx:80/health || exit 1
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
 
 networks:
   default:

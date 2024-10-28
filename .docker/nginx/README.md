@@ -12,6 +12,6 @@ $ openssl dhparam -out ssl/ssl-dhparam.pem 4096
 See [here](https://github.com/FiloSottile/mkcert#installation) how to install mkcert.
 ```
 $ mkcert -install
-$ mkcert -key-file ssl/flask-jsonrpc.cenobit.es.key -cert-file ssl/flask-jsonrpc.cenobit.es.crt *.flask-jsonrpc.cenobit.es
-$ cp -rf "$(mkcert -CAROOT)/rootCA.pem" ../certs/
+$ mkcert -key-file ssl/flask-jsonrpc.cenobit.es.key -cert-file ssl/flask-jsonrpc.cenobit.es.crt '*.flask-jsonrpc.cenobit.es'
+$ cp -rf "$(mkcert -CAROOT)/rootCA.pem" ../certs/Cenobit_Root_CA.pem
 ```

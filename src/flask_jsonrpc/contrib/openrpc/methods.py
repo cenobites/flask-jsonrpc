@@ -27,18 +27,13 @@
 from __future__ import annotations
 
 import typing as t
+from functools import lru_cache
 from collections import OrderedDict
 
 from flask_jsonrpc.encoders import serializable
 
 from . import typing as st
 from .utils import MethodExtendSchema, extend_schema
-
-# Python 3.9+
-try:
-    from functools import cache
-except ImportError:  # pragma: no cover
-    from functools import lru_cache as cache
 
 if t.TYPE_CHECKING:
     from flask_jsonrpc.site import JSONRPCSite
@@ -50,7 +45,7 @@ OPENRPC_DISCOVER_SERVICE_METHOD_TYPE: str = 'method'
 def _openrpc_discover_method(
     jsonrpc_sites: list[JSONRPCSite], *, openrpc_schema: st.OpenRPCSchema
 ) -> t.Callable[..., st.OpenRPCSchema]:
-    @cache
+    @lru_cache
     @extend_schema(
         name=OPENRPC_DISCOVER_METHOD_NAME,
         description='Returns an OpenRPC schema as a description of this service',
@@ -77,16 +72,19 @@ def _openrpc_discover_method(
             )
 
         for name, (method_describe, view_func) in service_describe_methods.items():
-            fn_openrpc_method_schema = getattr(view_func, 'openrpc_method_schema', MethodExtendSchema())  # noqa: B010
-            method_schema = {
+            fn_openrpc_method_schema: MethodExtendSchema = t.cast(
+                MethodExtendSchema, getattr(view_func, 'openrpc_method_schema', MethodExtendSchema())
+            )
+            method_schema: dict[str, t.Any] = {
                 'name': fn_openrpc_method_schema.name or name,
                 'description': fn_openrpc_method_schema.description or method_describe.description,
+                'params': [],
                 'result': {
                     'name': 'default',
                     'schema': {'type': st.SchemaDataType.from_rpc_describe_type(method_describe.returns.type)},
                 },
             }
-            method_params_schema = []
+            method_params_schema: list[dict[str, t.Any]] = []
             for param in method_describe.params:
                 method_params_schema.append(
                     {
@@ -102,7 +100,7 @@ def _openrpc_discover_method(
             openrpc_schema.methods.append(method_schema_merged)
         return openrpc_schema
 
-    return cached_openrpc_discover_method  # pyright: ignore
+    return cached_openrpc_discover_method  # type: ignore[no-any-return]  # pyright: ignore
 
 
 def openrpc_discover_method(

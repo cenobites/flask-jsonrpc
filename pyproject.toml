@@ -1,6 +1,6 @@
 [project]
 name = "Flask-JSONRPC"
-version = "4.0.0a3"
+version = "4.0.0a5"
 description = "Adds JSONRPC support to Flask."
 readme = {file = "README.md", content-type = "text/markdown"}
 license = {file = "LICENSE.txt"}
@@ -60,6 +60,17 @@ include = [
     "tox.ini",
 ]
 exclude = [
+    ".tox/",
+    "venv/",
+    ".venv/",
+    ".venv.*/",
+    "**/venv/",
+    "**/.venv/",
+    "**/.venv.*",
+    "**/.tox/",
+    "**/junit/",
+    "**/htmlcov/",
+    "**/coverage.*",
     "docs/_build/",
 ]
 
@@ -71,9 +82,6 @@ include-package-data = true
 where = ["src"]
 namespaces = false
 
-[tool.distutils.bdist_wheel]
-universal = true
-
 [tool.cibuildwheel]
 before-all = "uname -a"
 build-verbosity = 1
@@ -84,6 +92,15 @@ skip = [
     "*-win32",
     "pp*",
 ]
+test-requires = [
+    "pytest",
+    "pytest-cov",
+    "pytest-xdist",
+    "pytest-sugar",
+    "pytest-env",
+    "requests"
+]
+test-command = "pytest -n auto -vv --tb=short --rootdir={project} {project}/tests --cov-fail-under=0"
 
 [tool.cibuildwheel.environment]
 MYPYC_ENABLE = "1"
@@ -120,7 +137,7 @@ inline-quotes = "single"
 docstring-quotes = "double"
 
 [tool.ruff.lint.flake8-type-checking]
-exempt-modules = ["typing", "typing_extensions"]
+exempt-modules = ["typing", "typing_extensions", "annotated_types"]
 
 [tool.ruff.lint.flake8-bandit]
 check-typed-exception = true
@@ -148,7 +165,7 @@ section-order = [
 [tool.ruff.lint.isort.sections]
 "flask" = ["flask"]
 "pydantic" = ["pydantic"]
-"typing-extensions" = ["typing_extensions"]
+"typing-extensions" = ["typing_inspect", "typing_extensions"]
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"
@@ -174,6 +191,7 @@ filterwarnings = [
     "ignore::pytest.PytestUnraisableExceptionWarning"
 ]
 norecursedirs = [
+    "tests/shared",
     "tests/test_apps",
     "tests/integration",
 ]
@@ -230,12 +248,14 @@ files = ["src/flask_jsonrpc"]
 python_version = "3.12"
 pretty = true
 strict = true
-check_untyped_defs = true
+show_error_codes = true
 ignore_errors = false
 ignore_missing_imports = false
-show_error_codes = true
-disallow_any_generics = true
+warn_redundant_casts = true
+warn_unused_ignores = true
 no_implicit_reexport = true
+check_untyped_defs = true
+disallow_any_generics = true
 disallow_untyped_defs = true
 
 [[tool.mypy.overrides]]
@@ -243,6 +263,7 @@ module = [
     "asgiref.*",
     "mypy-werkzeug.datastructures.*",
     "typeguard.*",
+    "typing_inspect.*",
     "dotenv.*",
 ]
 ignore_missing_imports = true
