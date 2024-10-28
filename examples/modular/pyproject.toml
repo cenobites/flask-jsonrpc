@@ -6,7 +6,7 @@ readme = {file = "README.md", content-type = "text/markdown"}
 license = {file = "LICENSE.txt"}
 authors = [{name = "Nycholas Oliveira", email = "nycholas@cenobit.es"}]
 maintainers = [{name = "Cenobit Technologies Inc.", email = "hi@cenobit.es"}]
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 dependencies = ["Flask-JSONRPC@git+https://github.com/cenobites/flask-jsonrpc"]
 
 [project.optional-dependencies]

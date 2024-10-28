@@ -25,8 +25,9 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 import typing as t
-
 from werkzeug.datastructures import Headers
+
+from tests.utils import EqMock
 
 if t.TYPE_CHECKING:
     from flask.testing import FlaskClient
@@ -87,7 +88,7 @@ def test_not_notify(client: 'FlaskClient') -> None:
             'code': -32600,
             'data': {
                 'message': "The method 'App.notNotify' doesn't allow Notification Request "
-                "object (without an 'id' member)"
+                           "object (without an 'id' member)"
             },
             'message': 'Invalid Request',
             'name': 'InvalidRequestError',
@@ -166,16 +167,17 @@ def test_multi_decorators(client: 'FlaskClient') -> None:
         'id': 1,
         'jsonrpc': '2.0',
         'result': {
-            'headers': 'User-Agent: Werkzeug/3.0.4\r\n'
-            'Host: localhost\r\n'
-            'Content-Type: application/json\r\n'
-            'Content-Length: 78\r\n'
-            '\r\n',
             'terminal_id': 1,
+            'headers': {
+                'User-Agent': EqMock(),
+                'Host': 'localhost',
+                'Content-Type': 'application/json',
+                'Content-Length': '78',
+            }
         },
     }
     assert rv.headers == Headers(
-        [('Content-Type', 'application/json'), ('Content-Length', '174'), ('X-JSONRPC-Tag', 'JSONRPC 2.0')]
+        [('Content-Type', 'application/json'), ('Content-Length', '169'), ('X-JSONRPC-Tag', 'JSONRPC 2.0')]
     )
     assert rv.status_code == 200
 

@@ -34,7 +34,6 @@ from collections.abc import Mapping
 
 from typing_extensions import (
     Self,  # Added in version 3.11.
-    Literal,  # Added in version 3.8.
 )
 
 from typing_inspect import is_new_type  # type: ignore
@@ -101,7 +100,7 @@ class JSONRPCNewType:
             if origin_type is t.Tuple or origin_type is tuple:
                 return self is Array
 
-            if origin_type is Literal:
+            if origin_type is t.Literal:
                 return self.check_args_type(expected_type)
 
             if origin_type is t.Final:

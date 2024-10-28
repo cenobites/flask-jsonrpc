@@ -31,12 +31,6 @@ import typing as t
 
 from pydantic.main import BaseModel
 
-# Python 3.8
-if sys.version_info[:2] == (3, 8):  # pragma: no cover
-    from typing import OrderedDict
-else:  # pragma: no cover
-    from collections import OrderedDict
-
 
 class ServiceMethodParamsDescribe(BaseModel):
     type: str
@@ -73,4 +67,4 @@ class ServiceDescribe(BaseModel):
     name: str
     description: str | None = None
     servers: list[ServiceServersDescribe]
-    methods: OrderedDict[str, ServiceMethodDescribe]
+    methods: t.OrderedDict[str, ServiceMethodDescribe]
