@@ -1,5 +1,9 @@
 name: Tests [Docker]
 
+concurrency:
+  group: testing
+  cancel-in-progress: true
+
 on:
   push:
     branches:

@@ -1,5 +1,7 @@
 name: Build and publish release
 
+concurrency: production
+
 on:
   push:
     tags:
@@ -77,8 +79,10 @@ jobs:
     name: Publish to PyPI and generate GitHub release ${{ github.ref_name }}
     needs: [build, build-wheels]
     runs-on: ${{ matrix.platform }}
+    environment: production
     permissions:
       contents: write
+      id-token: write
     strategy:
       fail-fast: false
       matrix:
@@ -111,8 +115,6 @@ jobs:
     - name: Publish distribution to PyPI
       uses: pypa/gh-action-pypi-publish@v1.10.3
       with:
-        user: __token__
-        password: ${{ secrets.PYPI_API_TOKEN }}
         packages-dir: dist-${{ matrix.platform }}-${{ matrix.python-version }}/
     - name: Create GitHub Release
       id: create_release
