@@ -53,7 +53,7 @@ class Article:
 
 
 @article.errorhandler(ArticleNotFoundException)
-def handle_user_not_found_exception(ex: ArticleNotFoundException) -> t.Dict[str, t.Any]:
+def handle_user_not_found_exception(ex: ArticleNotFoundException) -> dict[str, t.Any]:
     return {'message': f'Article {ex.article_id} not found', 'code': '2001'}
 
 

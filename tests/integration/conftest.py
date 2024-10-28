@@ -46,7 +46,6 @@ class APITestCase(unittest.TestCase):
     def setUp(self: Self) -> None:
         urllib3.disable_warnings()
         session = requests.Session()
-        session.headers.update({'Content-Type': 'application/json'})
         session.verify = False
         self.requests = session
 

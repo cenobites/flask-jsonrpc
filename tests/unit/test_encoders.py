@@ -26,16 +26,17 @@
 # POSSIBILITY OF SUCH DAMAGE.
 import sys
 from enum import Enum
-import typing as t
 from pathlib import Path
 from collections import deque
 from dataclasses import dataclass
+
+from flask import Flask
 
 from pydantic.main import BaseModel
 
 import pytest
 
-from flask_jsonrpc.encoders import serializable
+from flask_jsonrpc.encoders import jsonify, serializable
 
 # Python 3.10+
 try:
@@ -60,24 +61,51 @@ class GenericClass:
 class DataClassType:
     x: str
     y: int
-    z: t.List[str]
+    z: list[str]
 
 
 class PydanticType(BaseModel):
     x: str
     y: int
-    z: t.List[str]
+    z: list[str]
 
 
-def test_serializable() -> None:
-    assert serializable(None) is None
+def test_serializable_simple() -> None:
     assert serializable('') == ''
+    assert serializable(b'') == ''
     assert serializable(1) == 1
+
+
+def test_serializable_none() -> None:
+    assert serializable(None) is None
+
+
+def test_serializable_enum() -> None:
     assert serializable(EnumType.X) == 'x'
+
+
+def test_serializable_dict() -> None:
     assert serializable({'key1': 'value1', 'key2': EnumType.X}) == {'key1': 'value1', 'key2': 'x'}
+
+
+def test_serializable_list() -> None:
     assert serializable([1, 2, EnumType.X, {'key1': 'value1'}]) == [1, 2, 'x', {'key1': 'value1'}]
     assert serializable(deque(['a', 'b', EnumType.X])) == ['a', 'b', 'x']
+
+
+def test_serializable_pure_class() -> None:
     assert serializable(GenericClass()) == {'attr1': 'value1', 'attr2': 2}
+
+
+def test_serializable_dataclass() -> None:
+    assert serializable(DataClassType(x='str', y=1, z=['0', '1', '2'])) == {'x': 'str', 'y': 1, 'z': ['0', '1', '2']}
+
+
+def test_serializable_pydatic_model() -> None:
+    assert serializable(PydanticType(x='str', y=1, z=['0', '1', '2'])) == {'x': 'str', 'y': 1, 'z': ['0', '1', '2']}
+
+
+def test_serializable_comlex_dict() -> None:
     assert serializable(
         {
             'str': 'x',
@@ -97,6 +125,9 @@ def test_serializable() -> None:
         'pydantic': {'x': 'str', 'y': 1, 'z': ['0', '1', '2']},
         'str': 'x',
     }
+
+
+def test_serializable_complex_list() -> None:
     assert serializable(
         [
             'x',
@@ -127,3 +158,13 @@ def test_serializable_path() -> None:
 @pytest.mark.skipif(sys.platform != 'win32', reason='does run on windows')
 def test_serializable_path_win32() -> None:
     assert serializable(Path('/')) == '\\'
+
+
+def test_jsonify_simple() -> None:
+    app = Flask('jsonify')
+
+    with app.app_context():
+        assert jsonify('').response == [b'""\n']
+        assert jsonify(1).response == [b'1\n']
+        assert jsonify({}).response == [b'{}\n']
+        assert jsonify({'key': 1}).response == [b'{"key":1}\n']

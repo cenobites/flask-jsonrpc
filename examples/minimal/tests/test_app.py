@@ -25,6 +25,7 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 import typing as t
+
 from werkzeug.datastructures import Headers
 
 from tests.utils import EqMock
@@ -88,7 +89,7 @@ def test_not_notify(client: 'FlaskClient') -> None:
             'code': -32600,
             'data': {
                 'message': "The method 'App.notNotify' doesn't allow Notification Request "
-                           "object (without an 'id' member)"
+                "object (without an 'id' member)"
             },
             'message': 'Invalid Request',
             'name': 'InvalidRequestError',
@@ -173,7 +174,7 @@ def test_multi_decorators(client: 'FlaskClient') -> None:
                 'Host': 'localhost',
                 'Content-Type': 'application/json',
                 'Content-Length': '78',
-            }
+            },
         },
     }
     assert rv.headers == Headers(

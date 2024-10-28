@@ -34,7 +34,7 @@ from flask import Flask
 import pytest
 from werkzeug.datastructures import Headers
 
-from flask_jsonrpc import JSONRPC, JSONRPCBlueprint
+from flask_jsonrpc import JSONRPC
 
 # Python 3.10+
 try:
@@ -46,7 +46,7 @@ pytest.importorskip('asgiref')
 
 
 class CustomException(Exception):
-    def __init__(self: Self, message: str, data: t.Dict[str, t.Any]) -> None:
+    def __init__(self: Self, message: str, data: dict[str, t.Any]) -> None:
         super().__init__(message)
         self.message = message
         self.data = data
@@ -56,35 +56,29 @@ def test_app_create() -> None:
     app = Flask('test_app', instance_relative_config=True)
     jsonrpc = JSONRPC(app, '/api', enable_web_browsable_api=True)
 
-    # pylint: disable=W0612
     @jsonrpc.method('app.index')
     async def index() -> str:
         await asyncio.sleep(0)
         return 'Welcome to Flask JSON-RPC'
 
-    # pylint: disable=W0612
     @jsonrpc.method('app.fn0')
     async def fn0() -> None:
         await asyncio.sleep(0)
 
-    # pylint: disable=W0612
     @jsonrpc.method('app.fn1')
     async def fn1() -> str:
         await asyncio.sleep(0)
         return 'Bar'
 
-    # pylint: disable=W0612
     @jsonrpc.method('app.fn2')
     async def fn2(s: str) -> str:
         await asyncio.sleep(0)
         return f'Foo {s}'
 
-    # pylint: disable=W0612
     async def fn3(s: str) -> str:
         await asyncio.sleep(0)
         return f'Foo {s}'
 
-    # pylint: disable=W0612
     @jsonrpc.method('app.fn4', notification=False)
     async def fn4(s: str) -> str:
         await asyncio.sleep(0)
@@ -163,17 +157,15 @@ def test_app_create_using_error_handler() -> None:
     jsonrpc = JSONRPC(app, '/api', enable_web_browsable_api=True)
 
     @jsonrpc.errorhandler(CustomException)
-    async def handle_custom_exc(exc: CustomException) -> t.Dict[str, t.Any]:
+    async def handle_custom_exc(exc: CustomException) -> dict[str, t.Any]:
         await asyncio.sleep(0)
         return exc.data
 
-    # pylint: disable=W0612
     @jsonrpc.method('app.index')
     async def index() -> str:
         await asyncio.sleep(0)
         return 'Welcome to Flask JSON-RPC'
 
-    # pylint: disable=W0612
     @jsonrpc.method('app.errorhandler')
     async def fn0() -> t.NoReturn:
         await asyncio.sleep(0)
@@ -198,92 +190,11 @@ def test_app_create_using_error_handler() -> None:
         assert rv.status_code == 500
 
 
-def test_app_create_modular_using_error_handler() -> None:
-    jsonrpc_api_1 = JSONRPCBlueprint('jsonrpc_api_1', __name__)
-
-    @jsonrpc_api_1.errorhandler(CustomException)
-    async def handle_custom_exc_jsonrpc_api_1(exc: CustomException) -> t.Dict[str, t.Any]:
-        await asyncio.sleep(0)
-        return f"jsonrpc_api_1: {exc.data['message']}"
-
-    # pylint: disable=W0612
-    @jsonrpc_api_1.method('blue1.index')
-    async def index_b1() -> str:
-        await asyncio.sleep(0)
-        return 'b1 index'
-
-    # pylint: disable=W0612
-    @jsonrpc_api_1.method('blue1.errorhandler')
-    async def error_b1() -> t.NoReturn:
-        await asyncio.sleep(0)
-        raise CustomException('Testing error handler', data={'message': 'Flask JSON-RPC', 'code': '0000'})
-
-    jsonrpc_api_2 = JSONRPCBlueprint('jsonrpc_api_2', __name__)
-
-    @jsonrpc_api_2.errorhandler(CustomException)
-    async def handle_custom_exc_jsonrpc_api_2(exc: CustomException) -> t.Dict[str, t.Any]:
-        await asyncio.sleep(0)
-        return f"jsonrpc_api_2: {exc.data['message']}"
-
-    # pylint: disable=W0612
-    @jsonrpc_api_2.method('blue2.index')
-    async def index_b2() -> str:
-        await asyncio.sleep(0)
-        return 'b2 index'
-
-    # pylint: disable=W0612
-    @jsonrpc_api_2.method('blue2.errorhandler')
-    async def error_b2() -> t.NoReturn:
-        await asyncio.sleep(0)
-        raise CustomException('Testing error handler', data={'message': 'Flask JSON-RPC', 'code': '0000'})
-
-    app = Flask('test_app', instance_relative_config=True)
-    jsonrpc = JSONRPC(app, '/api', enable_web_browsable_api=True)
-    jsonrpc.register_blueprint(app, jsonrpc_api_1, url_prefix='/b1')
-    jsonrpc.register_blueprint(app, jsonrpc_api_2, url_prefix='/b2')
-
-    with app.test_client() as client:
-        rv = client.post('/api/b1', json={'id': 1, 'jsonrpc': '2.0', 'method': 'blue1.index', 'params': []})
-        assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': 'b1 index'}
-        assert rv.status_code == 200
-
-        rv = client.post('/api/b1', json={'id': 1, 'jsonrpc': '2.0', 'method': 'blue1.errorhandler', 'params': []})
-        assert rv.json == {
-            'id': 1,
-            'jsonrpc': '2.0',
-            'error': {
-                'code': -32000,
-                'data': 'jsonrpc_api_1: Flask JSON-RPC',
-                'message': 'Server error',
-                'name': 'ServerError',
-            },
-        }
-        assert rv.status_code == 500
-
-        rv = client.post('/api/b2', json={'id': 1, 'jsonrpc': '2.0', 'method': 'blue2.index', 'params': []})
-        assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': 'b2 index'}
-        assert rv.status_code == 200
-
-        rv = client.post('/api/b2', json={'id': 1, 'jsonrpc': '2.0', 'method': 'blue2.errorhandler', 'params': []})
-        assert rv.json == {
-            'id': 1,
-            'jsonrpc': '2.0',
-            'error': {
-                'code': -32000,
-                'data': 'jsonrpc_api_2: Flask JSON-RPC',
-                'message': 'Server error',
-                'name': 'ServerError',
-            },
-        }
-        assert rv.status_code == 500
-
-
 def test_app_create_with_server_name() -> None:
     app = Flask('test_app', instance_relative_config=True)
     app.config.update({'SERVER_NAME': 'domain:80'})
     jsonrpc = JSONRPC(app, '/api', enable_web_browsable_api=True)
 
-    # pylint: disable=W0612
     @jsonrpc.method('app.index')
     async def index() -> str:
         await asyncio.sleep(0)
@@ -299,7 +210,6 @@ def test_app_create_without_register_app() -> None:
     app = Flask('test_app', instance_relative_config=True)
     jsonrpc = JSONRPC(service_url='/api', enable_web_browsable_api=True)
 
-    # pylint: disable=W0612
     @jsonrpc.method('app.fn2')
     async def fn1(s: str) -> str:
         await asyncio.sleep(0)
@@ -318,22 +228,21 @@ def test_app_create_with_method_without_annotation() -> None:
     jsonrpc = JSONRPC(app, '/api', enable_web_browsable_api=True)
 
     with pytest.raises(ValueError, match='no type annotations present to: app.fn1'):
-        # pylint: disable=W0612
+
         @jsonrpc.method('app.fn1')
         async def fn1(s):  # noqa: ANN001,ANN202
             await asyncio.sleep(0)
             return f'Foo {s}'
 
-    # pylint: disable=W0612
     @jsonrpc.method('app.fn2')
     async def fn2(s: str) -> str:
         await asyncio.sleep(0)
         return f'Bar {s}'
 
     with pytest.raises(ValueError, match='no type annotations present to: app.fn3'):
-        # pylint: disable=W0612
+
         @jsonrpc.method('app.fn3')
-        async def fn3(s):  # pylint: disable=W0612 # noqa: ANN001,ANN202
+        async def fn3(s):  # noqa: ANN001,ANN202
             await asyncio.sleep(0)
             return f'Poo {s}'
 
@@ -342,28 +251,26 @@ def test_app_create_with_method_without_annotation_on_params() -> None:
     app = Flask('test_app', instance_relative_config=True)
     jsonrpc = JSONRPC(app, '/api', enable_web_browsable_api=True)
 
-    # pylint: disable=W0612
     @jsonrpc.method('app.fn4')
     async def fn4() -> None:
         await asyncio.sleep(0)
 
     with pytest.raises(ValueError, match='no type annotations present to: app.fn2'):
-        # pylint: disable=W0612
+
         @jsonrpc.method('app.fn2')
         async def fn2(s) -> str:  # noqa: ANN001
             await asyncio.sleep(0)
             return f'Foo {s}'
 
-    # pylint: disable=W0612
     @jsonrpc.method('app.fn1')
     async def fn1(s: str) -> str:
         await asyncio.sleep(0)
         return f'Bar {s}'
 
     with pytest.raises(ValueError, match='no type annotations present to: app.fn3'):
-        # pylint: disable=W0612
+
         @jsonrpc.method('app.fn3')
-        async def fn3(s):  # pylint: disable=W0612 # noqa: ANN001,ANN202
+        async def fn3(s):  # noqa: ANN001,ANN202
             await asyncio.sleep(0)
             return f'Poo {s}'
 
@@ -372,19 +279,16 @@ def test_app_create_with_method_without_annotation_on_return() -> None:
     app = Flask('test_app', instance_relative_config=True)
     jsonrpc = JSONRPC(app, '/api', enable_web_browsable_api=True)
 
-    # pylint: disable=W0612
     @jsonrpc.method('app.fn1')
     async def fn1(s: str):  # noqa: ANN202
         await asyncio.sleep(0)
         return f'Foo {s}'
 
-    # pylint: disable=W0612
     @jsonrpc.method('app.fn2')
     async def fn2(s: str) -> str:
         await asyncio.sleep(0)
         return f'Bar {s}'
 
-    # pylint: disable=W0612
     @jsonrpc.method('app.fn3')
     async def fn3(s: str) -> t.NoReturn:
         await asyncio.sleep(0)
@@ -427,7 +331,7 @@ def test_app_create_with_wrong_return() -> None:
     jsonrpc = JSONRPC(app, '/api', enable_web_browsable_api=True)
 
     @jsonrpc.method('app.fn1')
-    async def fn2(s: str) -> t.Tuple[str, int, int, int]:  # pylint: disable=W0612
+    async def fn2(s: str) -> tuple[str, int, int, int]:
         await asyncio.sleep(0)
         return f'Bar {s}', 1, 2, 3
 
@@ -455,7 +359,6 @@ def test_app_create_with_invalid_view_func() -> None:
     app = Flask('test_app', instance_relative_config=True)
     jsonrpc = JSONRPC(app, service_url='/api', enable_web_browsable_api=True)
 
-    # pylint: disable=W0612
     @jsonrpc.method('app.fn2')
     async def fn1(s: str) -> str:
         await asyncio.sleep(0)
@@ -475,38 +378,32 @@ def test_app_create_multiple_jsonrpc_versions() -> None:
     jsonrpc_v1 = JSONRPC(app, '/api/v1', enable_web_browsable_api=True)
     jsonrpc_v2 = JSONRPC(app, '/api/v2', enable_web_browsable_api=True)
 
-    # pylint: disable=W0612
     @jsonrpc_v1.method('app.fn2')
     async def fn1_v1(s: str) -> str:
         await asyncio.sleep(0)
         return f'v1: Foo {s}'
 
-    # pylint: disable=W0612
     @jsonrpc_v2.method('app.fn2')
     async def fn1_v2(s: str) -> str:
         await asyncio.sleep(0)
         return f'v2: Foo {s}'
 
-    # pylint: disable=W0612
     @jsonrpc_v1.method('app.fn3')
     async def fn3(s: str) -> str:
         await asyncio.sleep(0)
         return f'Poo {s}'
 
-    # pylint: disable=W0612
     @jsonrpc_v2.method('app.fn1')
     async def fn2(s: str) -> str:
         await asyncio.sleep(0)
         return f'Bar {s}'
 
-    # pylint: disable=W0612
     async def fn4_v1(s: str) -> str:
         await asyncio.sleep(0)
         return f'Poo {s}'
 
     jsonrpc_v1.register(fn4_v1)
 
-    # pylint: disable=W0612
     async def fn4_v2(s: str) -> str:
         await asyncio.sleep(0)
         return f'Bar {s}'
@@ -539,108 +436,43 @@ def test_app_create_multiple_jsonrpc_versions() -> None:
         assert rv.status_code == 200
 
 
-def test_app_create_modular_apps() -> None:
-    jsonrpc_api_1 = JSONRPCBlueprint('jsonrpc_api_1', __name__)
-
-    # pylint: disable=W0612
-    @jsonrpc_api_1.method('blue1.fn2')
-    async def fn1_b1(s: str) -> str:
-        await asyncio.sleep(0)
-        return f'b1: Foo {s}'
-
-    jsonrpc_api_2 = JSONRPCBlueprint('jsonrpc_api_2', __name__)
-
-    # pylint: disable=W0612
-    @jsonrpc_api_2.method('blue2.fn2')
-    async def fn1_b2(s: str) -> str:
-        await asyncio.sleep(0)
-        return f'b2: Foo {s}'
-
-    # pylint: disable=W0612
-    @jsonrpc_api_2.method('blue2.fn1')
-    async def fn2_b2(s: str) -> str:
-        await asyncio.sleep(0)
-        return f'b2: Bar {s}'
-
-    jsonrpc_api_3 = JSONRPCBlueprint('jsonrpc_api_3', __name__)
-
-    # pylint: disable=W0612
-    @jsonrpc_api_3.method('blue3.fn2')
-    async def fn1_b3(s: str) -> str:
-        await asyncio.sleep(0)
-        return f'b3: Foo {s}'
-
-    app = Flask('test_app', instance_relative_config=True)
-    jsonrpc = JSONRPC(app, '/api', enable_web_browsable_api=True)
-    jsonrpc.register_blueprint(app, jsonrpc_api_1, url_prefix='/b1')
-    jsonrpc.register_blueprint(app, jsonrpc_api_2, url_prefix='/b2')
-    jsonrpc.register_blueprint(app, jsonrpc_api_3, url_prefix='/b3')
-
-    with app.test_client() as client:
-        rv = client.post('/api/b1', json={'id': 1, 'jsonrpc': '2.0', 'method': 'blue1.fn2', 'params': [':)']})
-        assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': 'b1: Foo :)'}
-        assert rv.status_code == 200
-
-        rv = client.post('/api/b2', json={'id': 1, 'jsonrpc': '2.0', 'method': 'blue2.fn2', 'params': [':)']})
-        assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': 'b2: Foo :)'}
-        assert rv.status_code == 200
-
-        rv = client.post('/api/b2', json={'id': 1, 'jsonrpc': '2.0', 'method': 'blue2.fn1', 'params': [':)']})
-        assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': 'b2: Bar :)'}
-        assert rv.status_code == 200
-
-        rv = client.post('/api/b3', json={'id': 1, 'jsonrpc': '2.0', 'method': 'blue3.fn2', 'params': [':)']})
-        assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': 'b3: Foo :)'}
-        assert rv.status_code == 200
-
-
-# pylint: disable=R0915
-
-
 def test_app_create_with_rcp_batch() -> None:
     app = Flask('test_app', instance_relative_config=True)
     jsonrpc = JSONRPC(app, '/api', enable_web_browsable_api=True)
 
-    # pylint: disable=W0612
     @jsonrpc.method('sum')
     async def sum_(a: int, b: int) -> int:
         await asyncio.sleep(0)
         return a + b
 
-    # pylint: disable=W0612
     @jsonrpc.method('subtract')
     async def subtract(a: int, b: int) -> int:
         await asyncio.sleep(0)
         return a - b
 
-    # pylint: disable=W0612
     @jsonrpc.method('get_user')
-    async def get_user(uid: str) -> t.Dict[str, t.Any]:
+    async def get_user(uid: str) -> dict[str, t.Any]:
         await asyncio.sleep(0)
         return {'uid': uid, 'name': 'John Dee'}
 
-    # pylint: disable=W0612
     @jsonrpc.method('notify_sum')
-    async def notify_sum(numbers: t.List[int]) -> int:
+    async def notify_sum(numbers: list[int]) -> int:
         await asyncio.sleep(0)
         s = sum(x**2 for x in numbers)
         return s
 
-    # pylint: disable=W0612
     @jsonrpc.method('headers1')
-    async def headers1() -> t.Tuple[float, int, t.List[t.Tuple[str, t.Any]]]:
+    async def headers1() -> tuple[float, int, list[tuple[str, t.Any]]]:
         await asyncio.sleep(0)
         return 3.141592653589793, 200, [('X-Header-1-a', 'a1'), ('X-Header-1-b', 'b1')]
 
-    # pylint: disable=W0612
     @jsonrpc.method('headers2')
-    async def headers2() -> t.Tuple[float, int, t.Tuple[str, t.Any]]:
+    async def headers2() -> tuple[float, int, tuple[str, t.Any]]:
         await asyncio.sleep(0)
         return 3.141592653589793, 201, ('X-Header-2-a', 'a2')
 
-    # pylint: disable=W0612
     @jsonrpc.method('headers3')
-    async def headers3() -> t.Tuple[float, int, Headers]:
+    async def headers3() -> tuple[float, int, Headers]:
         await asyncio.sleep(0)
         headers = Headers()
         headers.set('X-Header-3-a', 'a3')
@@ -648,15 +480,13 @@ def test_app_create_with_rcp_batch() -> None:
         headers.set('X-Header-3-c', 'c3')
         return 3.141592653589793, 200, headers
 
-    # pylint: disable=W0612
     @jsonrpc.method('headers4')
-    async def headers4() -> t.Tuple[float, int, t.Dict[str, t.Any]]:
+    async def headers4() -> tuple[float, int, dict[str, t.Any]]:
         await asyncio.sleep(0)
         return 3.141592653589793, 200, {'X-Header-4-a': 'a4', 'X-Header-4-b': 'b4'}
 
-    # pylint: disable=W0612
     @jsonrpc.method('headers_duplicate')
-    async def headers_duplicate() -> t.Tuple[float, int, t.Dict[str, t.Any]]:
+    async def headers_duplicate() -> tuple[float, int, dict[str, t.Any]]:
         await asyncio.sleep(0)
         return (
             3.141592653589793,

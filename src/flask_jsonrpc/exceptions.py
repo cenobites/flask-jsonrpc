@@ -40,7 +40,7 @@ try:
 
     _("You're lazy...")  # this function lazy-loads settings (pragma: no cover)
 except (ImportError, NameError):
-    _ = lambda t, *a, **k: t  # noqa: E731  pylint: disable=C3001
+    _ = lambda t, *a, **k: t  # noqa: E731
 
 
 class JSONRPCError(Exception):

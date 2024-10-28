@@ -35,23 +35,19 @@ def test_browse_create() -> None:
     app = Flask('test_browse', instance_relative_config=True)
     jsonrpc = JSONRPC(app, '/api', enable_web_browsable_api=True)
 
-    # pylint: disable=W0612
     @jsonrpc.method('app.fn1', validate=False)
     def fn1(s):  # noqa: ANN001,ANN202
         """Function app.fn1"""
         return f'Foo {s}'
 
-    # pylint: disable=W0612
     @jsonrpc.method('app.fn2', notification=True)
     def fn2(s: str) -> str:
         return f'Foo {s}'
 
-    # pylint: disable=W0612
     @jsonrpc.method('app.fn3', notification=False)
     def fn3(s: str) -> str:
         return f'Foo {s}'
 
-    # pylint: disable=W0612
     @jsonrpc.method('app.fn4', validate=False)
     def fn4(s, t: int, u, v: str, x, z):  # noqa: ANN001,ANN202
         return f'Not validate: {s} {t} {u} {v} {x} {z}'
@@ -205,7 +201,6 @@ def test_browse_create_without_register_app() -> None:
     app = Flask('test_browse', instance_relative_config=True)
     jsonrpc = JSONRPC(service_url='/api', enable_web_browsable_api=True)
 
-    # pylint: disable=W0612
     @jsonrpc.method('app.fn2')
     def fn1(s: str) -> str:
         return f'Foo {s}'
@@ -242,22 +237,18 @@ def test_browse_create_multiple_jsonrpc_versions() -> None:
     jsonrpc_v1 = JSONRPC(app, '/api/v1', enable_web_browsable_api=True)
     jsonrpc_v2 = JSONRPC(app, '/api/v2', enable_web_browsable_api=True)
 
-    # pylint: disable=W0612
     @jsonrpc_v1.method('app.fn2')
     def fn1_v1(s: str) -> str:
         return f'v1: Foo {s}'
 
-    # pylint: disable=W0612
     @jsonrpc_v1.method('app.fn3')
     def fn3(s: str) -> str:
         return f'Poo {s}'
 
-    # pylint: disable=W0612
     @jsonrpc_v2.method('app.fn2')
     def fn1_v2(s: str) -> str:
         return f'v2: Foo {s}'
 
-    # pylint: disable=W0612
     @jsonrpc_v2.method('app.fn1')
     def fn2(s: str) -> str:
         return f'Bar {s}'
@@ -356,31 +347,26 @@ def test_browse_create_multiple_jsonrpc_versions() -> None:
 def test_browse_create_modular_apps() -> None:
     jsonrpc_api_1 = JSONRPCBlueprint('jsonrpc_api_1', __name__)
 
-    # pylint: disable=W0612
     @jsonrpc_api_1.method('blue1.fn2')
     def fn1_b1(s: str) -> str:
         return f'b1: Foo {s}'
 
     jsonrpc_api_2 = JSONRPCBlueprint('jsonrpc_api_2', __name__)
 
-    # pylint: disable=W0612
     @jsonrpc_api_2.method('blue2.fn2')
     def fn1_b2(s: str) -> str:
         return f'b2: Foo {s}'
 
-    # pylint: disable=W0612
     @jsonrpc_api_2.method('blue2.fn1')
     def fn2_b2(s: str) -> str:
         return f'b2: Bar {s}'
 
-    # pylint: disable=W0612
     @jsonrpc_api_2.method('blue2.not_notify', notification=False)
     def fn3_b2(s: str) -> str:
         return f'fn3 b2: Foo {s}'
 
     jsonrpc_api_3 = JSONRPCBlueprint('jsonrpc_api_3', __name__)
 
-    # pylint: disable=W0612
     @jsonrpc_api_3.method('blue3.fn2')
     def fn1_b3(s: str) -> str:
         return f'fn1 b3: Foo {s}'

@@ -11,4 +11,4 @@ graft docs
 prune docs/_build
 graft examples
 graft tests
-global-exclude *~ *.py[cod] *.so *.swp *.editorconfig __pycache__
+global-exclude *~ *.py[cod] *.so *.swp *.editorconfig __pycache__ .tox **/.tox venv .venv .venv.* **/venv **/.venv **/.venv.*

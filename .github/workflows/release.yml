@@ -57,10 +57,17 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
+      - name: Prepare build
+        run: |
+          python -m pip install tomlkit
+          python bin/cibw-before-build.py
       - name: Install cbuild dependencies
         run: python -m pip install -r requirements/cbuild.txt
       - name: Build wheels
-        run: python -m cibuildwheel --output-dir wheelhouse
+        uses: pypa/cibuildwheel@v2.21.2
+        with:
+          package-dir: .
+          output-dir: wheelhouse
       - uses: actions/upload-artifact@v4
         with:
           name: release-cibw-wheels-${{ matrix.platform }}-${{ matrix.python-version }}

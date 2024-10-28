@@ -1,4 +1,4 @@
-FROM python:3.12-alpine as builder
+FROM python:3.12-alpine AS builder
 
 RUN apk add --no-cache --update --virtual .build-deps \
         build-base \
@@ -77,6 +77,4 @@ USER flask_user
 ARG VERSION=1
 RUN echo "Version: ${VERSION}"
 
-COPY .docker/* /app/
-COPY tests/test_apps/app/__init__.py /app/app.py
-COPY tests/test_apps/async_app/__init__.py /app/async_app.py
+COPY .docker/* tests/test_apps/ /app/

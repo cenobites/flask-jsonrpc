@@ -50,13 +50,11 @@ def test_openrpc_create() -> None:
         ),
     )
 
-    # pylint: disable=W0612
     @jsonrpc.method('app.fn1', validate=False)
     def fn1(s):  # noqa: ANN001,ANN202
         """Function app.fn1"""
         return f'Foo {s}'
 
-    # pylint: disable=W0612
     @openrpc.extend_schema(
         name='FN2',
         summary='Function app.fn2',
@@ -88,7 +86,6 @@ def test_openrpc_create() -> None:
     def fn2(s: str) -> str:
         return f'Foo {s}'
 
-    # pylint: disable=W0612
     @openrpc.extend_schema(
         name='FN3',
         summary='Function app.fn3',
@@ -120,13 +117,11 @@ def test_openrpc_create() -> None:
     def fn3(s: str) -> str:
         return f'Foo {s}'
 
-    # pylint: disable=W0612
     @openrpc.extend_schema(name='FN4')
     @jsonrpc.method('app.fn4', notification=False)
     def fn4(s: str) -> str:
         return f'Foo {s}'
 
-    # pylint: disable=W0612
     @jsonrpc.method('app.fn5', validate=False)
     def fn5(s, t: int, u, v: str, x, z):  # noqa: ANN001,ANN202
         return f'Not validate: {s} {t} {u} {v} {x} {z}'
@@ -273,29 +268,24 @@ def test_openrpc_create_by_autogenerate() -> None:
     openrpc = OpenRPC()
     openrpc.init_app(app, jsonrpc)
 
-    # pylint: disable=W0612
     @jsonrpc.method('app.fn1', validate=False)
     def fn1(s):  # noqa: ANN001,ANN202
         """Function app.fn1"""
         return f'Foo {s}'
 
-    # pylint: disable=W0612
     @jsonrpc.method('app.fn2', notification=True)
     def fn2(s: str) -> str:
         return f'Foo {s}'
 
-    # pylint: disable=W0612
     @jsonrpc.method('app.fn3', validate=False)
     def fn3(s: str) -> str:
         return f'Foo {s}'
 
-    # pylint: disable=W0612
     @openrpc.extend_schema(name='FN3')
     @jsonrpc.method('app.fn4', notification=False)
     def fn4(s: str) -> str:
         return f'Foo {s}'
 
-    # pylint: disable=W0612
     @jsonrpc.method('app.fn5', validate=False)
     def fn5(s, t: int, u, v: str, x, z):  # noqa: ANN001,ANN202
         return f'Not validate: {s} {t} {u} {v} {x} {z}'
@@ -387,14 +377,12 @@ def test_openrpc_create_by_autogenerate() -> None:
 def test_openrpc_create_with_blueprint() -> None:
     article = JSONRPCBlueprint('article', __name__)
 
-    # pylint: disable=W0612
     @article.method('Article.index')
     def article_index() -> str:
         return 'Welcome to Article API'
 
     user = JSONRPCBlueprint('user', __name__)
 
-    # pylint: disable=W0612
     @user.method('User.index')
     def user_index() -> str:
         return 'Welcome to User API'
@@ -405,7 +393,6 @@ def test_openrpc_create_with_blueprint() -> None:
     jsonrpc.register_blueprint(app, article, url_prefix='/article')
     openrpc = OpenRPC(app=app, jsonrpc_app=jsonrpc)
 
-    # pylint: disable=W0612
     @openrpc.extend_schema(name='App.index')
     @jsonrpc.method('App.index')
     def index() -> str:
@@ -499,7 +486,6 @@ def test_openrpc_disabled() -> None:
     app = Flask('test_openrpc', instance_relative_config=True)
     jsonrpc = JSONRPC(app, '/api')
 
-    # pylint: disable=W0612
     @jsonrpc.method('app.fn1', validate=False)
     def fn1(s):  # noqa: ANN001,ANN202
         """Function app.fn1"""

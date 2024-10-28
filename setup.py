@@ -25,6 +25,8 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
+from __future__ import annotations
+
 import os
 import sys
 import typing as t
@@ -32,19 +34,19 @@ import pathlib
 
 import setuptools
 
-
-def find_python_files(path: pathlib.Path) -> t.List[pathlib.Path]:
-    return path.rglob('*.py')
-
-
 USE_MYPYC = os.getenv('MYPYC_ENABLE', 'False').lower() in ('true', 't', '1')
 if len(sys.argv) > 1 and sys.argv[1] == '--use-mypyc':
     USE_MYPYC = True
 
 setup_attrs = {'name': 'Flask-JSONRPC', 'packages': setuptools.find_packages()}
 
+
+def find_python_files(path: pathlib.Path) -> t.Generator[pathlib.Path, None, None]:
+    return path.rglob('*.py')
+
+
 if USE_MYPYC:
-    from mypyc.build import mypycify  # pylint: disable=E0611
+    from mypyc.build import mypycify
 
     project_dir = pathlib.Path(__file__).resolve().parent
 
@@ -56,6 +58,8 @@ if USE_MYPYC:
     ext_modules = [
         '--config-file',
         str(project_dir / 'pyproject.toml'),
+        '--install-types',
+        '--non-interactive',
         '--strict',
         '--check-untyped-defs',
         '--ignore-missing-imports',
@@ -70,7 +74,7 @@ if USE_MYPYC:
     ext_modules.extend([str(p) for p in discovered if p.relative_to(project_dir).as_posix() not in blocklist])
 
     opt_level = os.getenv('MYPYC_OPT_LEVEL', '3')
-    setup_attrs['requires'] = ['mypy']
+    setup_attrs['requires'] = ['mypy', 'pydantic']
     setup_attrs['ext_modules'] = mypycify(ext_modules, opt_level=opt_level, verbose=True)
     setup_attrs['package_data'] = {'flask_jsonrpc.contrib.browse': ['static*', 'templates*']}
 

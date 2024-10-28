@@ -51,7 +51,7 @@ class User:
         self.name = name
 
 
-def handle_user_not_found_exception(ex: UserNotFoundException) -> t.Dict[str, t.Any]:
+def handle_user_not_found_exception(ex: UserNotFoundException) -> dict[str, t.Any]:
     return {'message': f'User {ex.user_id} not found', 'code': '1001'}
 
 

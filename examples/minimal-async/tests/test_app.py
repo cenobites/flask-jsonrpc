@@ -174,7 +174,7 @@ def test_multi_decorators(client: 'FlaskClient') -> None:
                 'Host': 'localhost',
                 'Content-Type': 'application/json',
                 'Content-Length': '78',
-            }
+            },
         },
     }
     assert rv.headers == Headers(
