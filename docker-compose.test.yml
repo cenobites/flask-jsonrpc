@@ -1,4 +1,14 @@
 services:
+  python3.13:
+    build:
+      context: .
+      dockerfile: Dockerfile.py313.test
+    environment:
+      - PRAGMA_VERSION=py3.13
+    command: >
+      sh -c "ruff check . &&
+        pytest"
+
   python3.12:
     build:
       context: .
