@@ -17,8 +17,6 @@ on:
     paths-ignore:
       - 'docs/**'
       - '*.md'
-  issue_comment:
-    types: [created]
 
 permissions:
   contents: read
@@ -27,35 +25,8 @@ permissions:
   pull-requests: write
 
 jobs:
-  does-it-run:
-    name: Does it run?
-    runs-on: ${{ matrix.platform }}
-    strategy:
-      fail-fast: false
-      matrix:
-        platform:
-          - ubuntu-latest
-    steps:
-      - name: Check comment review
-        if: >-
-          github.event_name == 'issue_comment' &&
-          github.event.issue.pull_request &&
-          contains(github.event.comment.body, 'github-actions-workflow-tests') == false
-        uses: action-pack/cancel@v1
-      - name: Comment about start of workflow
-        if: >-
-          github.event_name == 'issue_comment' &&
-          github.event.issue.pull_request &&
-          contains(github.event.comment.body, 'github-actions-workflow-tests')
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PR: ${{ github.event.issue.pull_request.html_url }}
-        run: |
-          gh pr comment $PR --body 'Running "Tests [Docker]" workflow.'
-
   unit-tests:
     name: Unit tests
-    needs: does-it-run
     runs-on: ${{ matrix.platform }}
     strategy:
       fail-fast: false
@@ -71,7 +42,6 @@ jobs:
 
   integration-tests:
     name: Integration tests
-    needs: does-it-run
     runs-on: ${{ matrix.platform }}
     strategy:
       fail-fast: false
@@ -87,7 +57,6 @@ jobs:
 
   example-tests:
     name: Examples | Unit tests
-    needs: does-it-run
     runs-on: ${{ matrix.platform }}
     strategy:
       fail-fast: false
