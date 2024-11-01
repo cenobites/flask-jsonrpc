@@ -66,7 +66,7 @@ jobs:
       - name: Install cbuild dependencies
         run: python -m pip install -r requirements/cbuild.txt
       - name: Build wheels
-        uses: pypa/cibuildwheel@v2.21.2
+        uses: pypa/cibuildwheel@v2.21.3
         with:
           package-dir: .
           output-dir: wheelhouse
@@ -113,7 +113,7 @@ jobs:
         mv release-cibw-wheels/* dist-${{ matrix.platform }}-${{ matrix.python-version }}/
         twine check --strict dist-${{ matrix.platform }}-${{ matrix.python-version }}/*
     - name: Publish distribution to PyPI
-      uses: pypa/gh-action-pypi-publish@v1.10.3
+      uses: pypa/gh-action-pypi-publish@v1.11.0
       with:
         packages-dir: dist-${{ matrix.platform }}-${{ matrix.python-version }}/
     - name: Create GitHub Release
