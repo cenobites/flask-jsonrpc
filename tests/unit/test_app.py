@@ -24,11 +24,10 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-import json
 import uuid
 import typing as t
 
-from flask import Flask
+from flask import Flask, json
 
 import pytest
 from werkzeug.datastructures import Headers
