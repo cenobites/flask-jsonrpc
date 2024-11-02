@@ -26,7 +26,8 @@
 # POSSIBILITY OF SUCH DAMAGE.
 # pylint: disable=duplicate-code,too-many-public-methods
 import os
-import json
+
+from flask import json
 
 from .conftest import APITestCase
 
