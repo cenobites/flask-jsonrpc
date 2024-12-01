@@ -166,7 +166,7 @@ jobs:
           python -m pip install tomlkit
           python bin/cibw-before-build.py
       - name: Build wheels
-        uses: pypa/cibuildwheel@v2.21.3
+        uses: pypa/cibuildwheel@v2.22.0
         with:
           package-dir: .
           output-dir: wheelhouse
@@ -214,7 +214,7 @@ jobs:
         twine check --strict dist-${{ matrix.platform }}-${{ matrix.python-version }}/*
     - name: Publish distribution to TestPyPI
       continue-on-error: true
-      uses: pypa/gh-action-pypi-publish@v1.11.0
+      uses: pypa/gh-action-pypi-publish@v1.12.2
       with:
         repository-url: https://test.pypi.org/legacy/
         packages-dir: dist-${{ matrix.platform }}-${{ matrix.python-version }}/
