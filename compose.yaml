@@ -1,0 +1,19 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - PYTHON_VERSION=3.13
+    environment:
+      - FLASK_SERVER_NAME=app:5000
+    command: python -m app
+    ports:
+      - "5000:5000"
+    healthcheck:
+      test: wget -qO - http://app:5000/health || exit 1
+      interval: 5s
+      retries: 5
+
+networks:
+  default:
