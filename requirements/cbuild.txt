@@ -2,10 +2,10 @@
 
 # Tools
 # ------------------------------------------------------------------------------
-cibuildwheel==2.21.3  # https://github.com/pypa/cibuildwheel
-setuptools==75.3.0  # https://github.com/pypa/setuptools
+cibuildwheel==2.22.0  # https://github.com/pypa/cibuildwheel
+setuptools==75.6.0  # https://github.com/pypa/setuptools
 
 # Mypyc
 # ------------------------------------------------------------------------------
-mypy[mypyc]==1.13.0  # https://github.com/python/mypy
+mypy[mypyc]==1.14.1  # https://github.com/python/mypy
 mypy-extensions==1.0.0  # https://github.com/python/mypy_extensions
