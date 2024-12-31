@@ -1,16 +1,21 @@
+[build-system]
+requires = ["flit_core>=3.2,<4"]
+build-backend = "flit_core.buildapi"
+
 [project]
 name = "Flask-JSONRPC"
 version = "4.0.0a7"
 description = "Adds JSONRPC support to Flask."
-readme = {file = "README.md", content-type = "text/markdown"}
-license = {file = "LICENSE.txt"}
-authors = [{name = "Nycholas Oliveira", email = "nycholas@cenobit.es"}]
-maintainers = [{name = "Cenobit Technologies Inc.", email = "hi@cenobit.es"}]
+readme = { file = "README.md", content-type = "text/markdown" }
+license = { file = "LICENSE.txt" }
+authors = [{ name = "Nycholas Oliveira", email = "nycholas@cenobit.es" }]
+maintainers = [{ name = "Cenobit Technologies Inc.", email = "hi@cenobit.es" }]
 keywords = ["flask", "flask-extensions", "jsonrpc"]
 classifiers = [
+    "Intended Audience :: Information Technology",
+    "Intended Audience :: Developers",
     "Development Status :: 5 - Production/Stable",
     "Environment :: Web Environment",
-    "Intended Audience :: Developers",
     "License :: OSI Approved :: BSD License",
     "Operating System :: OS Independent",
     "Programming Language :: Python",
@@ -23,6 +28,10 @@ classifiers = [
     "Programming Language :: Python :: 3.13",
     "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
     "Topic :: Software Development :: Libraries :: Application Frameworks",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Software Development :: Libraries",
+    "Framework :: Flask",
+    "Typing :: Typed",
 ]
 requires-python = ">=3.9"
 dependencies = [
@@ -45,9 +54,57 @@ Documentation = "https://flask-jsonrpc.readthedocs.io/"
 "Issue Tracker" = "https://github.com/cenobites/flask-jsonrpc/issues/"
 Website = "https://flask-jsonrpc.readthedocs.io/"
 
-[build-system]
-requires = ["flit_core>=3.2,<4"]
-build-backend = "flit_core.buildapi"
+[dependency-groups]
+dev = [
+    'coverage[toml]',
+    'pytz',
+    'dirty-equals',
+    'eval-type-backport',
+    'pytest',
+    'pytest-mock',
+    'pytest-pretty',
+    'pytest-examples',
+    'faker',
+    'pytest-benchmark',
+    'pytest-codspeed',
+    'pytest-memray; platform_python_implementation == "CPython" and platform_system != "Windows"',
+    'packaging',
+    'jsonschema',
+]
+docs = [
+    'autoflake',
+    'mkdocs',
+    'mkdocs-exclude',
+    'mkdocs-material[imaging]',
+    'mkdocs-redirects',
+    'mkdocstrings-python',
+    'tomli',
+    'pyupgrade',
+    'mike',
+    'requests',
+]
+linting = [
+    'eval-type-backport',
+    'ruff',
+    'pyright',
+]
+testing = [
+    'cloudpickle',
+    'ansi2html',
+    'devtools',
+]
+typechecking = [
+    'mypy',
+    'pyright',
+]
+
+all = [
+  { include-group = 'dev' },
+  { include-group = 'docs' },
+  { include-group = 'linting' },
+  { include-group = 'testing' },
+  { include-group = 'typechecking' },
+]
 
 [tool.flit.module]
 name = "flask_jsonrpc"
@@ -116,18 +173,18 @@ target-version = "py39"
 
 [tool.ruff.lint]
 select = [
-    "E",    # pycodestyle error
-    "W",    # pycodestyle warning
-    "F",    # pyflakes
-    "UP",   # pyupgrade
-    "ANN",  # flake8-annotations
-    "B",    # flake8-bugbear
-    "Q",    # flake8-quotes
-    "SIM",  # flake8-simplify
-    "T",    # flake8-type-checking
-    "B",    # flake8-bandit
-    "C",    # flake8-copyright
-    "I",    # isort
+    "E", # pycodestyle error
+    "W", # pycodestyle warning
+    "F", # pyflakes
+    "UP", # pyupgrade
+    "ANN", # flake8-annotations
+    "B", # flake8-bugbear
+    "Q", # flake8-quotes
+    "SIM", # flake8-simplify
+    "T", # flake8-type-checking
+    "B", # flake8-bandit
+    "C", # flake8-copyright
+    "I", # isort
 ]
 
 [tool.ruff.lint.mccabe]
