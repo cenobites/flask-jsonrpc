@@ -28,6 +28,9 @@ import random
 import typing as t
 from dataclasses import dataclass
 
+# Added in version 3.11.
+from typing_extensions import Self
+
 from flask import Flask
 
 from flask_jsonrpc import JSONRPC
@@ -76,6 +79,16 @@ openrpc = OpenRPC(
 )
 
 
+class PetBaseException(Exception):
+    def __init__(self: Self, message: str) -> None:
+        super().__init__(message)
+
+
+class PetNotFoundException(PetBaseException):
+    def __init__(self: Self, pet_id: int) -> None:
+        super().__init__(message=f'Pet not found: {pet_id}')
+
+
 @dataclass
 class NewPet:
     name: str
@@ -88,6 +101,11 @@ class Pet(NewPet):
 
 
 PETS = [Pet(id=1, name='Bob', tag='dog'), Pet(id=2, name='Eve', tag='cat'), Pet(id=3, name='Alice', tag='bird')]
+
+
+@jsonrpc.errorhandler(PetNotFoundException)
+def handle_pet_not_found_exc(ex: PetNotFoundException) -> dict[str, str]:
+    return {'message': str(ex), 'code': '1001'}
 
 
 @openrpc.extend_schema(
@@ -142,8 +160,8 @@ def get_pets(tags: t.Optional[list[str]] = None, limit: t.Optional[int] = None) 
     ),
 )
 @jsonrpc.method('Petstore.create_pet')
-def create_pet(name: str, tag: str) -> Pet:
-    pet = Pet(id=random.randint(4, 100), name=name, tag=tag)
+def create_pet(new_pet: NewPet) -> Pet:
+    pet = Pet(id=random.randint(4, 100), name=new_pet.name, tag=new_pet.tag)
     PETS.append(pet)
     return pet
 
@@ -164,7 +182,7 @@ def create_pet(name: str, tag: str) -> Pet:
     ),
 )
 @jsonrpc.method('Petstore.get_pet_by_id')
-def get_pet_by_id(id: int) -> Pet:
+def get_pet_by_id(id: int) -> t.Optional[Pet]:
     pet = [pet for pet in PETS if pet.id == id]
     return None if len(pet) == 0 else pet[0]
 
@@ -183,6 +201,10 @@ def get_pet_by_id(id: int) -> Pet:
     result=st.ContentDescriptor(name='pet', description='pet deleted', schema_=st.Schema()),
 )
 @jsonrpc.method('Petstore.delete_pet_by_id')
-def delete_pet_by_id(id: int) -> None:
+def delete_pet_by_id(id: int) -> Pet:
     global PETS
+    removed = [pet for pet in PETS if pet.id == id]
+    if len(removed) == 0:
+        raise PetNotFoundException(id)
     PETS = [pet for pet in PETS if pet.id != id]  # noqa: F823, F841
+    return removed[0]

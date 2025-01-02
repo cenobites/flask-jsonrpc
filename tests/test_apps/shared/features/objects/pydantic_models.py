@@ -73,12 +73,12 @@ def handle_pet_not_found_exc(exc: PetNotFoundException) -> PetError:
 jsonrpc.register_error_handler(PetNotFoundException, handle_pet_not_found_exc)
 
 
-@jsonrpc.method('jsonrpc.createPet')
+@jsonrpc.method('objects.pydantic_models.createPet')
 def create_pet(pet: NewPet) -> Pet:
     return Pet(id=1, name=pet.name, tag=pet.tag)
 
 
-@jsonrpc.method('jsonrpc.createManyPet')
+@jsonrpc.method('objects.pydantic_models.createManyPet')
 def create_many_pets(pets: list[NewPet], pet: t.Optional[NewPet] = None) -> list[Pet]:
     new_pets = [Pet(id=i, name=pet.name, tag=pet.tag) for i, pet in enumerate(pets)]
     if pet is not None:
@@ -86,12 +86,12 @@ def create_many_pets(pets: list[NewPet], pet: t.Optional[NewPet] = None) -> list
     return new_pets
 
 
-@jsonrpc.method('jsonrpc.createManyFixPet')
+@jsonrpc.method('objects.pydantic_models.createManyFixPet')
 def create_many_fix_pets(pets: dict[str, NewPet]) -> list[Pet]:
     return [Pet(id=int(pet_id), name=pet.name, tag=pet.tag) for pet_id, pet in pets.items()]
 
 
-@jsonrpc.method('jsonrpc.removePet')
+@jsonrpc.method('objects.pydantic_models.removePet')
 def remove_pet(pet: t.Optional[Pet] = None) -> t.Optional[Pet]:
     if pet is not None and pet.id > 10:
         raise PetNotFoundException(

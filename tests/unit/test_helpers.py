@@ -109,6 +109,9 @@ def test_from_python_type_with_pure_class() -> None:
         attr2: int
 
     assert str(from_python_type(ClassTest)) == 'Object'
+    assert str(from_python_type(t.Union[ClassTest, None])) == 'Object'
+    assert str(from_python_type(t.Optional[ClassTest])) == 'Object'
+    assert str(from_python_type(t.Optional[ClassTest], default=None)) == 'None'
 
 
 def test_from_python_type_with_dataclass() -> None:

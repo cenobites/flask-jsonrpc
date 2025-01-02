@@ -25,7 +25,6 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 import typing as t
-from numbers import Real
 
 from flask import Flask, request
 
@@ -38,7 +37,7 @@ jsonrpc = JSONRPC(app, '/api', enable_web_browsable_api=True)
 def check_terminal_id(fn: t.Callable[..., t.Any]) -> t.Any:  # noqa: ANN401
     def wrapped() -> t.Any:  # noqa: ANN401
         terminal_id = int(request.get_json(silent=True).get('terminal_id', 0))
-        if terminal_id <= 0:
+        if terminal_id < 0:
             raise ValueError('Invalid terminal ID')
         rv = fn()
         return rv
@@ -105,7 +104,7 @@ def fails_with_custom_exception(_string: t.Optional[str] = None) -> t.NoReturn:
 
 
 @jsonrpc.method('App.sum')
-def sum_(a: Real, b: Real) -> Real:
+def sum_(a: float, b: float) -> float:
     return a + b
 
 

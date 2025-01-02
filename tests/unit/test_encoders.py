@@ -70,10 +70,36 @@ class PydanticType(BaseModel):
     z: list[str]
 
 
-def test_serializable_simple() -> None:
-    assert serializable('') == ''
-    assert serializable(b'') == ''
+def test_serializable_bool() -> None:
+    assert serializable(True) is True
+    assert serializable(False) is False
+
+
+def test_serializable_int() -> None:
     assert serializable(1) == 1
+    assert serializable(0) == 0
+    assert serializable(-1) == -1
+
+
+def test_serializable_float() -> None:
+    assert serializable(1.0) == 1.0
+    assert serializable(0.0) == 0.0
+    assert serializable(-1.0) == -1.0
+
+
+def test_serializable_str() -> None:
+    assert serializable('string') == 'string'
+    assert serializable('') == ''
+
+
+def test_serializable_bytes() -> None:
+    assert serializable(b'bytes') == 'bytes'
+    assert serializable(b'') == ''
+
+
+def test_serializable_memoryview() -> None:
+    assert serializable(memoryview(b'bytes')) == 'bytes'
+    assert serializable(memoryview(b'')) == ''
 
 
 def test_serializable_none() -> None:

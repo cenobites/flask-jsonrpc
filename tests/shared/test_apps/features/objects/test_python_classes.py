@@ -36,7 +36,7 @@ def test_app_with_pythonclass(session: 'Session', api_url: str) -> None:
         json={
             'id': 1,
             'jsonrpc': '2.0',
-            'method': 'jsonrpc.createColor',
+            'method': 'objects.python_classes.createColor',
             'params': {'color': {'name': 'Blue', 'tag': 'good'}},
         },
     )
@@ -45,7 +45,12 @@ def test_app_with_pythonclass(session: 'Session', api_url: str) -> None:
 
     rv = session.post(
         f'{api_url}/objects/python-classes',
-        json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.createColor', 'params': {'color': {'name': 'Red'}}},
+        json={
+            'id': 1,
+            'jsonrpc': '2.0',
+            'method': 'objects.python_classes.createColor',
+            'params': {'color': {'name': 'Red'}},
+        },
     )
     assert rv.status_code == 400
     data = rv.json()
@@ -61,7 +66,7 @@ def test_app_with_pythonclass(session: 'Session', api_url: str) -> None:
         json={
             'id': 1,
             'jsonrpc': '2.0',
-            'method': 'jsonrpc.createManyColor',
+            'method': 'objects.python_classes.createManyColor',
             'params': {'colors': [{'name': 'Blue', 'tag': 'good'}, {'name': 'Red', 'tag': 'bad'}]},
         },
     )
@@ -77,7 +82,7 @@ def test_app_with_pythonclass(session: 'Session', api_url: str) -> None:
         json={
             'id': 1,
             'jsonrpc': '2.0',
-            'method': 'jsonrpc.createManyColor',
+            'method': 'objects.python_classes.createManyColor',
             'params': {'colors': [{'name': 'Blue', 'tag': 'good'}], 'color': {'name': 'Red', 'tag': 'bad'}},
         },
     )
@@ -93,7 +98,7 @@ def test_app_with_pythonclass(session: 'Session', api_url: str) -> None:
         json={
             'id': 1,
             'jsonrpc': '2.0',
-            'method': 'jsonrpc.createManyColor',
+            'method': 'objects.python_classes.createManyColor',
             'params': [
                 [{'name': 'Blue', 'tag': 'good'}, {'name': 'Red', 'tag': 'bad'}],
                 {'name': 'Green', 'tag': 'yay'},
@@ -116,7 +121,7 @@ def test_app_with_pythonclass(session: 'Session', api_url: str) -> None:
         json={
             'id': 1,
             'jsonrpc': '2.0',
-            'method': 'jsonrpc.createManyFixColor',
+            'method': 'objects.python_classes.createManyFixColor',
             'params': {'colors': {'1': {'name': 'Blue', 'tag': 'good'}}},
         },
     )
@@ -128,7 +133,7 @@ def test_app_with_pythonclass(session: 'Session', api_url: str) -> None:
         json={
             'id': 1,
             'jsonrpc': '2.0',
-            'method': 'jsonrpc.removeColor',
+            'method': 'objects.python_classes.removeColor',
             'params': {'color': {'id': 1, 'name': 'Blue', 'tag': 'good'}},
         },
     )
@@ -137,14 +142,14 @@ def test_app_with_pythonclass(session: 'Session', api_url: str) -> None:
 
     rv = session.post(
         f'{api_url}/objects/python-classes',
-        json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.removeColor', 'params': {'color': None}},
+        json={'id': 1, 'jsonrpc': '2.0', 'method': 'objects.python_classes.removeColor', 'params': {'color': None}},
     )
     assert rv.status_code == 200
     assert rv.json() == {'id': 1, 'jsonrpc': '2.0', 'result': None}
 
     rv = session.post(
         f'{api_url}/objects/python-classes',
-        json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.removeColor', 'params': []},
+        json={'id': 1, 'jsonrpc': '2.0', 'method': 'objects.python_classes.removeColor', 'params': []},
     )
     assert rv.status_code == 200
     assert rv.json() == {'id': 1, 'jsonrpc': '2.0', 'result': None}
@@ -154,7 +159,7 @@ def test_app_with_pythonclass(session: 'Session', api_url: str) -> None:
         json={
             'id': 1,
             'jsonrpc': '2.0',
-            'method': 'jsonrpc.removeColor',
+            'method': 'objects.python_classes.removeColor',
             'params': {'color': {'id': 100, 'name': 'Blue', 'tag': 'good'}},
         },
     )
@@ -177,39 +182,107 @@ def test_app_system_describe(session: 'Session', api_url: str) -> None:
     assert data['id'] == 1
     assert data['jsonrpc'] == '2.0'
     assert data['result']['name'] == 'Flask-JSONRPC'
-    assert data['result']['version'] == '2.0'
+    assert data['result']['version'] == '1.0.0'
     assert data['result']['servers'] is not None
     assert 'url' in data['result']['servers'][0]
     assert data['result']['methods'] == {
-        'jsonrpc.createColor': {
-            'options': {'notification': True, 'validate': True},
-            'params': [{'name': 'color', 'type': 'Object'}],
-            'returns': {'type': 'Object'},
+        'objects.python_classes.createColor': {
+            'name': 'objects.python_classes.createColor',
+            'notification': True,
+            'params': [
+                {
+                    'name': 'color',
+                    'properties': {
+                        'name': {'name': 'name', 'type': 'String'},
+                        'tag': {'name': 'tag', 'type': 'String'},
+                    },
+                    'type': 'Object',
+                }
+            ],
+            'returns': {
+                'name': 'default',
+                'properties': {
+                    'id': {'name': 'id', 'type': 'Number'},
+                    'name': {'name': 'name', 'type': 'String'},
+                    'tag': {'name': 'tag', 'type': 'String'},
+                },
+                'type': 'Object',
+            },
             'type': 'method',
+            'validation': True,
         },
-        'jsonrpc.createManyColor': {
-            'options': {'notification': True, 'validate': True},
-            'params': [{'name': 'colors', 'type': 'Array'}, {'name': 'color', 'type': 'Object'}],
-            'returns': {'type': 'Array'},
+        'objects.python_classes.createManyColor': {
+            'name': 'objects.python_classes.createManyColor',
+            'notification': True,
+            'params': [
+                {'name': 'colors', 'type': 'Array'},
+                {
+                    'name': 'color',
+                    'properties': {
+                        'name': {'name': 'name', 'type': 'String'},
+                        'tag': {'name': 'tag', 'type': 'String'},
+                    },
+                    'type': 'Object',
+                },
+            ],
+            'returns': {'name': 'default', 'type': 'Array'},
             'type': 'method',
+            'validation': True,
         },
-        'jsonrpc.createManyFixColor': {
-            'options': {'notification': True, 'validate': True},
+        'objects.python_classes.createManyFixColor': {
+            'name': 'objects.python_classes.createManyFixColor',
+            'notification': True,
             'params': [{'name': 'colors', 'type': 'Object'}],
-            'returns': {'type': 'Array'},
+            'returns': {'name': 'default', 'type': 'Array'},
             'type': 'method',
+            'validation': True,
         },
-        'jsonrpc.removeColor': {
-            'options': {'notification': True, 'validate': True},
-            'params': [{'name': 'color', 'type': 'Object'}],
-            'returns': {'type': 'Object'},
+        'objects.python_classes.removeColor': {
+            'name': 'objects.python_classes.removeColor',
+            'notification': True,
+            'params': [
+                {
+                    'name': 'color',
+                    'properties': {
+                        'id': {'name': 'id', 'type': 'Number'},
+                        'name': {'name': 'name', 'type': 'String'},
+                        'tag': {'name': 'tag', 'type': 'String'},
+                    },
+                    'type': 'Object',
+                }
+            ],
+            'returns': {
+                'name': 'default',
+                'properties': {
+                    'id': {'name': 'id', 'type': 'Number'},
+                    'name': {'name': 'name', 'type': 'String'},
+                    'tag': {'name': 'tag', 'type': 'String'},
+                },
+                'type': 'Object',
+            },
             'type': 'method',
+            'validation': True,
         },
         'rpc.describe': {
+            'name': 'rpc.describe',
+            'summary': 'RPC Describe',
             'description': 'Service description for JSON-RPC 2.0',
-            'options': {},
+            'notification': False,
             'params': [],
-            'returns': {'type': 'Object'},
+            'returns': {
+                'name': 'default',
+                'type': 'Object',
+                'properties': {
+                    'description': {'name': 'description', 'type': 'String'},
+                    'id': {'name': 'id', 'type': 'String'},
+                    'methods': {'name': 'methods', 'type': 'Null'},
+                    'name': {'name': 'name', 'type': 'String'},
+                    'servers': {'name': 'servers', 'type': 'Null'},
+                    'title': {'name': 'title', 'type': 'String'},
+                    'version': {'name': 'version', 'type': 'String'},
+                },
+            },
             'type': 'method',
+            'validation': False,
         },
     }

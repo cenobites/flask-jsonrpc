@@ -32,21 +32,22 @@ if t.TYPE_CHECKING:
 
 def test_app_echo(session: 'Session', api_url: str) -> None:
     rv = session.post(
-        f'{api_url}/jsonrpc-basic', json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.echo', 'params': ['Python']}
+        f'{api_url}/jsonrpc-basic',
+        json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc_basic.echo', 'params': ['Python']},
     )
     assert rv.json() == {'id': 1, 'jsonrpc': '2.0', 'result': 'Python'}
     assert rv.status_code == 200
 
     rv = session.post(
         f'{api_url}/jsonrpc-basic',
-        json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.echo', 'params': {'string': 'Flask'}},
+        json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc_basic.echo', 'params': {'string': 'Flask'}},
     )
     assert rv.json() == {'id': 1, 'jsonrpc': '2.0', 'result': 'Flask'}
     assert rv.status_code == 200
 
     rv = session.post(
         f'{api_url}/jsonrpc-basic',
-        json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.echo', 'params': {'string': None}},
+        json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc_basic.echo', 'params': {'string': None}},
     )
     json_data = rv.json()
     assert json_data['id'] == 1
@@ -60,7 +61,7 @@ def test_app_echo(session: 'Session', api_url: str) -> None:
 
 def test_app_echo_raise_invalid_params_error(session: 'Session', api_url: str) -> None:
     rv = session.post(
-        f'{api_url}/jsonrpc-basic', json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.echo', 'params': 'Wrong'}
+        f'{api_url}/jsonrpc-basic', json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc_basic.echo', 'params': 'Wrong'}
     )
     assert rv.json() == {
         'id': 1,
@@ -75,7 +76,7 @@ def test_app_echo_raise_invalid_params_error(session: 'Session', api_url: str) -
     assert rv.status_code == 400
 
     rv = session.post(
-        f'{api_url}/jsonrpc-basic', json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.echo', 'params': [1]}
+        f'{api_url}/jsonrpc-basic', json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc_basic.echo', 'params': [1]}
     )
     assert rv.json() == {
         'id': 1,
@@ -90,7 +91,8 @@ def test_app_echo_raise_invalid_params_error(session: 'Session', api_url: str) -
     assert rv.status_code == 400
 
     rv = session.post(
-        f'{api_url}/jsonrpc-basic', json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.echo', 'params': {'name': 2}}
+        f'{api_url}/jsonrpc-basic',
+        json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc_basic.echo', 'params': {'name': 2}},
     )
     json_data = rv.json()
     assert json_data['id'] == 1
@@ -101,7 +103,7 @@ def test_app_echo_raise_invalid_params_error(session: 'Session', api_url: str) -
     assert json_data['error']['name'] == 'InvalidParamsError'
     assert rv.status_code == 400
 
-    rv = session.post(f'{api_url}/jsonrpc-basic', json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.echo'})
+    rv = session.post(f'{api_url}/jsonrpc-basic', json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc_basic.echo'})
     json_data = rv.json()
     assert json_data['id'] == 1
     assert json_data['jsonrpc'] == '2.0'
@@ -113,24 +115,24 @@ def test_app_echo_raise_invalid_params_error(session: 'Session', api_url: str) -
 
 
 def test_app_notify(session: 'Session', api_url: str) -> None:
-    rv = session.post(f'{api_url}/jsonrpc-basic', json={'jsonrpc': '2.0', 'method': 'jsonrpc.notify'})
+    rv = session.post(f'{api_url}/jsonrpc-basic', json={'jsonrpc': '2.0', 'method': 'jsonrpc_basic.notify'})
     assert rv.text == ''
     assert rv.status_code == 204
 
     rv = session.post(
-        f'{api_url}/jsonrpc-basic', json={'jsonrpc': '2.0', 'method': 'jsonrpc.notify', 'params': ['Some string']}
+        f'{api_url}/jsonrpc-basic', json={'jsonrpc': '2.0', 'method': 'jsonrpc_basic.notify', 'params': ['Some string']}
     )
     assert rv.text == ''
     assert rv.status_code == 204
 
 
 def test_app_not_allow_notify(session: 'Session', api_url: str) -> None:
-    rv = session.post(f'{api_url}/jsonrpc-basic', json={'jsonrpc': '2.0', 'method': 'jsonrpc.not_allow_notify'})
+    rv = session.post(f'{api_url}/jsonrpc-basic', json={'jsonrpc': '2.0', 'method': 'jsonrpc_basic.not_allow_notify'})
     assert rv.json() == {
         'error': {
             'code': -32600,
             'data': {
-                'message': "The method 'jsonrpc.not_allow_notify' doesn't allow Notification Request "
+                'message': "The method 'jsonrpc_basic.not_allow_notify' doesn't allow Notification Request "
                 "object (without an 'id' member)"
             },
             'message': 'Invalid Request',
@@ -143,14 +145,14 @@ def test_app_not_allow_notify(session: 'Session', api_url: str) -> None:
 
     rv = session.post(
         f'{api_url}/jsonrpc-basic',
-        json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.not_allow_notify', 'params': ['Some string']},
+        json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc_basic.not_allow_notify', 'params': ['Some string']},
     )
     assert rv.json() == {'id': 1, 'jsonrpc': '2.0', 'result': 'Not allow notify'}
     assert rv.status_code == 200
 
 
 def test_app_no_return(session: 'Session', api_url: str) -> None:
-    rv = session.post(f'{api_url}/jsonrpc-basic', json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.noReturn'})
+    rv = session.post(f'{api_url}/jsonrpc-basic', json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc_basic.noReturn'})
     assert rv.json() == {
         'error': {'code': -32000, 'data': {'message': 'no return'}, 'message': 'Server error', 'name': 'ServerError'},
         'id': 1,
@@ -161,13 +163,13 @@ def test_app_no_return(session: 'Session', api_url: str) -> None:
 
 def test_app_fails(session: 'Session', api_url: str) -> None:
     rv = session.post(
-        f'{api_url}/jsonrpc-basic', json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.fails', 'params': [2]}
+        f'{api_url}/jsonrpc-basic', json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc_basic.fails', 'params': [2]}
     )
     assert rv.json() == {'id': 1, 'jsonrpc': '2.0', 'result': 2}
     assert rv.status_code == 200
 
     rv = session.post(
-        f'{api_url}/jsonrpc-basic', json={'id': '1', 'jsonrpc': '2.0', 'method': 'jsonrpc.fails', 'params': [1]}
+        f'{api_url}/jsonrpc-basic', json={'id': '1', 'jsonrpc': '2.0', 'method': 'jsonrpc_basic.fails', 'params': [1]}
     )
     assert rv.json() == {
         'id': '1',
@@ -186,7 +188,7 @@ def test_app_strange_echo(session: 'Session', api_url: str) -> None:
     data = {
         'id': 1,
         'jsonrpc': '2.0',
-        'method': 'jsonrpc.strangeEcho',
+        'method': 'jsonrpc_basic.strangeEcho',
         'params': ['string', {'a': 1}, ['a', 'b', 'c'], 23, 'Flask'],
     }
     rv = session.post(f'{api_url}/jsonrpc-basic', json=data)
@@ -196,7 +198,7 @@ def test_app_strange_echo(session: 'Session', api_url: str) -> None:
     data = {
         'id': 1,
         'jsonrpc': '2.0',
-        'method': 'jsonrpc.strangeEcho',
+        'method': 'jsonrpc_basic.strangeEcho',
         'params': ['string', {'a': 1}, ['a', 'b', 'c'], 23],
     }
     rv = session.post(f'{api_url}/jsonrpc-basic', json=data)
@@ -205,17 +207,17 @@ def test_app_strange_echo(session: 'Session', api_url: str) -> None:
 
 
 def test_app_sum(session: 'Session', api_url: str) -> None:
-    data = {'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.sum', 'params': [1, 3]}
+    data = {'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc_basic.sum', 'params': [1, 3]}
     rv = session.post(f'{api_url}/jsonrpc-basic', json=data)
     assert rv.json() == {'id': 1, 'jsonrpc': '2.0', 'result': 4}
     assert rv.status_code == 200
 
-    data = {'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.sum', 'params': [0.5, 1.5]}
+    data = {'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc_basic.sum', 'params': [0.5, 1.5]}
     rv = session.post(f'{api_url}/jsonrpc-basic', json=data)
     assert rv.json() == {'id': 1, 'jsonrpc': '2.0', 'result': 2.0}
     assert rv.status_code == 200
 
-    data = {'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.sum', 'params': {'a': None, 'b': None}}
+    data = {'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc_basic.sum', 'params': {'a': None, 'b': None}}
     rv = session.post(f'{api_url}/jsonrpc-basic', json=data)
     json_data = rv.json()
     assert json_data['id'] == 1
@@ -230,7 +232,7 @@ def test_app_sum(session: 'Session', api_url: str) -> None:
 def test_app_return_status_code(session: 'Session', api_url: str) -> None:
     rv = session.post(
         f'{api_url}/jsonrpc-basic',
-        json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.returnStatusCode', 'params': ['OK']},
+        json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc_basic.returnStatusCode', 'params': ['OK']},
     )
     assert rv.json() == {'id': 1, 'jsonrpc': '2.0', 'result': 'Status Code OK'}
     assert rv.status_code == 201
@@ -239,7 +241,7 @@ def test_app_return_status_code(session: 'Session', api_url: str) -> None:
 def test_app_return_headers(session: 'Session', api_url: str) -> None:
     rv = session.post(
         f'{api_url}/jsonrpc-basic',
-        json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.returnHeaders', 'params': ['OK']},
+        json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc_basic.returnHeaders', 'params': ['OK']},
     )
     assert rv.json() == {'id': 1, 'jsonrpc': '2.0', 'result': 'Headers OK'}
     assert rv.status_code == 200
@@ -249,7 +251,7 @@ def test_app_return_headers(session: 'Session', api_url: str) -> None:
 def test_app_return_status_code_and_headers(session: 'Session', api_url: str) -> None:
     rv = session.post(
         f'{api_url}/jsonrpc-basic',
-        json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.returnStatusCodeAndHeaders', 'params': ['OK']},
+        json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc_basic.returnStatusCodeAndHeaders', 'params': ['OK']},
     )
     assert rv.json() == {'id': 1, 'jsonrpc': '2.0', 'result': 'Status Code and Headers OK'}
     assert rv.status_code == 400
@@ -257,16 +259,16 @@ def test_app_return_status_code_and_headers(session: 'Session', api_url: str) ->
 
 
 def test_app_with_rcp_batch(session: 'Session', api_url: str) -> None:
-    rv = session.post(f'{api_url}/jsonrpc-basic', json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting'})
+    rv = session.post(f'{api_url}/jsonrpc-basic', json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc_basic.greeting'})
     assert rv.json() == {'id': 1, 'jsonrpc': '2.0', 'result': 'Hello Flask JSON-RPC'}
     assert rv.status_code == 200
 
     rv = session.post(
         f'{api_url}/jsonrpc-basic',
         json=[
-            {'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': ['Python']},
-            {'id': 2, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': ['Flask']},
-            {'id': 3, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': ['JSON-RCP']},
+            {'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc_basic.greeting', 'params': ['Python']},
+            {'id': 2, 'jsonrpc': '2.0', 'method': 'jsonrpc_basic.greeting', 'params': ['Flask']},
+            {'id': 3, 'jsonrpc': '2.0', 'method': 'jsonrpc_basic.greeting', 'params': ['JSON-RCP']},
         ],
     )
     assert rv.json() == [
@@ -279,10 +281,10 @@ def test_app_with_rcp_batch(session: 'Session', api_url: str) -> None:
     rv = session.post(
         f'{api_url}/jsonrpc-basic',
         json=[
-            {'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': ['Python']},
-            {'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': ['Flask']},
+            {'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc_basic.greeting', 'params': ['Python']},
+            {'jsonrpc': '2.0', 'method': 'jsonrpc_basic.greeting', 'params': ['Flask']},
             {'id': 3, 'jsonrpc': '2.0', 'params': ['Flask']},
-            {'id': 4, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': ['JSON-RCP']},
+            {'id': 4, 'jsonrpc': '2.0', 'method': 'jsonrpc_basic.greeting', 'params': ['JSON-RCP']},
         ],
     )
     assert rv.json() == [
@@ -301,41 +303,49 @@ def test_app_with_rcp_batch(session: 'Session', api_url: str) -> None:
     ]
     assert rv.status_code == 200
 
-    rv = session.post(f'{api_url}/jsonrpc-basic', json={'id': 2, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting'})
+    rv = session.post(f'{api_url}/jsonrpc-basic', json={'id': 2, 'jsonrpc': '2.0', 'method': 'jsonrpc_basic.greeting'})
     assert rv.json() == {'id': 2, 'jsonrpc': '2.0', 'result': 'Hello Flask JSON-RPC'}
     assert rv.status_code == 200
 
 
 def test_app_system_describe(session: 'Session', api_url: str) -> None:
     rv = session.post(f'{api_url}/jsonrpc-basic', json={'id': 1, 'jsonrpc': '2.0', 'method': 'rpc.describe'})
+    assert rv.status_code == 200
     data = rv.json()
     assert data['id'] == 1
     assert data['jsonrpc'] == '2.0'
     assert data['result']['name'] == 'Flask-JSONRPC'
-    assert data['result']['version'] == '2.0'
+    assert data['result']['version'] == '1.0.0'
     assert data['result']['servers'] is not None
     assert 'url' in data['result']['servers'][0]
     assert data['result']['methods'] == {
-        'jsonrpc.echo': {
-            'options': {'notification': True, 'validate': True},
+        'jsonrpc_basic.echo': {
+            'name': 'jsonrpc_basic.echo',
+            'notification': True,
             'params': [{'name': 'string', 'type': 'String'}, {'name': '_some', 'type': 'Object'}],
-            'returns': {'type': 'String'},
+            'returns': {'name': 'default', 'type': 'String'},
             'type': 'method',
+            'validation': True,
         },
-        'jsonrpc.fails': {
-            'options': {'notification': True, 'validate': True},
+        'jsonrpc_basic.fails': {
+            'name': 'jsonrpc_basic.fails',
+            'notification': True,
             'params': [{'name': 'n', 'type': 'Number'}],
-            'returns': {'type': 'Number'},
+            'returns': {'name': 'default', 'type': 'Number'},
             'type': 'method',
+            'validation': True,
         },
-        'jsonrpc.greeting': {
-            'options': {'notification': True, 'validate': True},
+        'jsonrpc_basic.greeting': {
+            'name': 'jsonrpc_basic.greeting',
+            'notification': True,
             'params': [{'name': 'name', 'type': 'String'}],
-            'returns': {'type': 'String'},
+            'returns': {'name': 'default', 'type': 'String'},
             'type': 'method',
+            'validation': True,
         },
-        'jsonrpc.mixin_not_validate': {
-            'options': {'notification': True, 'validate': False},
+        'jsonrpc_basic.mixin_not_validate': {
+            'name': 'jsonrpc_basic.mixin_not_validate',
+            'notification': True,
             'params': [
                 {'name': 's', 'type': 'Object'},
                 {'name': 't', 'type': 'Number'},
@@ -344,53 +354,69 @@ def test_app_system_describe(session: 'Session', api_url: str) -> None:
                 {'name': 'x', 'type': 'Object'},
                 {'name': 'z', 'type': 'Object'},
             ],
-            'returns': {'type': 'Object'},
+            'returns': {'name': 'default', 'type': 'Object'},
             'type': 'method',
+            'validation': False,
         },
-        'jsonrpc.noReturn': {
-            'options': {'notification': True, 'validate': True},
+        'jsonrpc_basic.noReturn': {
+            'name': 'jsonrpc_basic.noReturn',
+            'notification': True,
             'params': [{'name': '_string', 'type': 'String'}],
-            'returns': {'type': 'Null'},
+            'returns': {'name': 'default', 'type': 'Null'},
             'type': 'method',
+            'validation': True,
         },
-        'jsonrpc.not_allow_notify': {
-            'options': {'notification': False, 'validate': True},
+        'jsonrpc_basic.not_allow_notify': {
+            'name': 'jsonrpc_basic.not_allow_notify',
+            'notification': False,
             'params': [{'name': '_string', 'type': 'String'}],
-            'returns': {'type': 'String'},
+            'returns': {'name': 'default', 'type': 'String'},
             'type': 'method',
+            'validation': True,
         },
-        'jsonrpc.not_validate': {
-            'options': {'notification': True, 'validate': False},
+        'jsonrpc_basic.not_validate': {
+            'name': 'jsonrpc_basic.not_validate',
+            'notification': True,
             'params': [{'name': 's', 'type': 'Object'}],
-            'returns': {'type': 'Object'},
+            'returns': {'name': 'default', 'type': 'Object'},
             'type': 'method',
+            'validation': False,
         },
-        'jsonrpc.notify': {
-            'options': {'notification': True, 'validate': True},
+        'jsonrpc_basic.notify': {
+            'name': 'jsonrpc_basic.notify',
+            'notification': True,
             'params': [{'name': '_string', 'type': 'String'}],
-            'returns': {'type': 'Null'},
+            'returns': {'name': 'default', 'type': 'Null'},
             'type': 'method',
+            'validation': True,
         },
-        'jsonrpc.returnHeaders': {
-            'options': {'notification': True, 'validate': True},
+        'jsonrpc_basic.returnHeaders': {
+            'name': 'jsonrpc_basic.returnHeaders',
+            'notification': True,
             'params': [{'name': 's', 'type': 'String'}],
-            'returns': {'type': 'Array'},
+            'returns': {'name': 'default', 'type': 'Array'},
             'type': 'method',
+            'validation': True,
         },
-        'jsonrpc.returnStatusCode': {
-            'options': {'notification': True, 'validate': True},
+        'jsonrpc_basic.returnStatusCode': {
+            'name': 'jsonrpc_basic.returnStatusCode',
+            'notification': True,
             'params': [{'name': 's', 'type': 'String'}],
-            'returns': {'type': 'Array'},
+            'returns': {'name': 'default', 'type': 'Array'},
             'type': 'method',
+            'validation': True,
         },
-        'jsonrpc.returnStatusCodeAndHeaders': {
-            'options': {'notification': True, 'validate': True},
+        'jsonrpc_basic.returnStatusCodeAndHeaders': {
+            'name': 'jsonrpc_basic.returnStatusCodeAndHeaders',
+            'notification': True,
             'params': [{'name': 's', 'type': 'String'}],
-            'returns': {'type': 'Array'},
+            'returns': {'name': 'default', 'type': 'Array'},
             'type': 'method',
+            'validation': True,
         },
-        'jsonrpc.strangeEcho': {
-            'options': {'notification': True, 'validate': True},
+        'jsonrpc_basic.strangeEcho': {
+            'name': 'jsonrpc_basic.strangeEcho',
+            'notification': True,
             'params': [
                 {'name': 'string', 'type': 'String'},
                 {'name': 'omg', 'type': 'Object'},
@@ -398,21 +424,38 @@ def test_app_system_describe(session: 'Session', api_url: str) -> None:
                 {'name': 'nowai', 'type': 'Number'},
                 {'name': 'yeswai', 'type': 'String'},
             ],
-            'returns': {'type': 'Array'},
+            'returns': {'name': 'default', 'type': 'Array'},
             'type': 'method',
+            'validation': True,
         },
-        'jsonrpc.sum': {
-            'options': {'notification': True, 'validate': True},
+        'jsonrpc_basic.sum': {
+            'name': 'jsonrpc_basic.sum',
+            'notification': True,
             'params': [{'name': 'a', 'type': 'Number'}, {'name': 'b', 'type': 'Number'}],
-            'returns': {'type': 'Number'},
+            'returns': {'name': 'default', 'type': 'Number'},
             'type': 'method',
+            'validation': True,
         },
         'rpc.describe': {
+            'name': 'rpc.describe',
+            'summary': 'RPC Describe',
             'description': 'Service description for JSON-RPC 2.0',
-            'options': {},
+            'notification': False,
             'params': [],
-            'returns': {'type': 'Object'},
+            'returns': {
+                'name': 'default',
+                'type': 'Object',
+                'properties': {
+                    'description': {'name': 'description', 'type': 'String'},
+                    'id': {'name': 'id', 'type': 'String'},
+                    'methods': {'name': 'methods', 'type': 'Null'},
+                    'name': {'name': 'name', 'type': 'String'},
+                    'servers': {'name': 'servers', 'type': 'Null'},
+                    'title': {'name': 'title', 'type': 'String'},
+                    'version': {'name': 'version', 'type': 'String'},
+                },
+            },
             'type': 'method',
+            'validation': False,
         },
     }
-    assert rv.status_code == 200

@@ -1,6 +1,6 @@
 [project]
 name = "Flask-JSONRPC"
-version = "4.0.0a5"
+version = "4.0.0a8"
 description = "Adds JSONRPC support to Flask."
 readme = {file = "README.md", content-type = "text/markdown"}
 license = {file = "LICENSE.txt"}
@@ -32,6 +32,7 @@ dependencies = [
     "typing-inspect==0.9.0", # https://github.com/ilevkivskyi/typing_inspect
     "pydantic>=1.7.4,!=1.8,!=1.8.1,!=2.0.0,!=2.0.1,!=2.1.0,<3.0.0", # https://github.com/pydantic/pydantic
     "eval-type-backport==0.2.2", # https://github.com/alexmojaki/eval_type_backport
+    "annotated-types==0.7.0",  # https://github.com/annotated-types/annotated-types
 ]
 
 [project.optional-dependencies]
@@ -270,7 +271,7 @@ section-order = [
 [tool.ruff.lint.isort.sections]
 "flask" = ["flask"]
 "pydantic" = ["pydantic"]
-"typing-extensions" = ["typing_inspect", "typing_extensions"]
+"typing-extensions" = ["typing_inspect", "typing_extensions", "annotated_types"]
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"
@@ -314,7 +315,6 @@ source = [
     "tests",
 ]
 omit = [
-    "*/settings.py",
     "*/fixtures.py",
     "*/tests.py",
     "*/test_*.py",
@@ -345,6 +345,7 @@ exclude_lines = [
     "if __name__ == .__main__.:",
     "if TYPE_CHECKING:",
     "if t\\.TYPE_CHECKING:",
+    "if sys\\.version_info"
 ]
 
 [tool.mypy]
