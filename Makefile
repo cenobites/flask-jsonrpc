@@ -1,4 +1,4 @@
-.PHONY: all clean style typing test test-release release env
+.PHONY: all clean style typing test test-cov-unit test-examples test-release release env uv-lock
 
 VIRTUALENV_EXISTS := $(shell [ -d .venv ] && echo 1 || echo 0)
 
@@ -21,6 +21,25 @@ typing:
 test: clean
 	@uv run tox run
 
+test-cov-unit:
+	@REPORT="\nUnit Tests:\n"; \
+	ALLOW_ASYNC=$$(python3 -c "import importlib.util; print(1 if importlib.util.find_spec('asgiref') else 0)"); \
+	for TEST_FILE in $(shell find tests/unit -name "test_*.py"); do \
+        TEST_NAME=$$(basename $${TEST_FILE} .py); \
+        PY_MODULE=$$(echo flask_jsonrpc.$${TEST_FILE} | sed 's|/|.|g' | sed 's|.py$$||' | sed 's|test_||' | sed 's|tests.unit.||' | sed 's|.openrpc.app|.openrpc|' | sed 's|.browse.app|.browse|' | sed 's|.async_app|.app|'); \
+		if [ $${ALLOW_ASYNC} -eq 0 ] && [[ $${TEST_FILE} == *"async"* ]]; then \
+			continue; \
+		fi; \
+        pytest --cov-reset --cov=$${PY_MODULE} $${TEST_FILE} -vv; \
+        if [ $$? -ne 0 ]; then \
+            REPORT+=" + Unit Tests $${TEST_FILE} for $${PY_MODULE} failed (pytest --cov-reset --cov-report=html --cov=$${PY_MODULE} $${TEST_FILE} -vv)\n"; \
+		else \
+			REPORT+=" + Unit Tests $${TEST_FILE} for $${PY_MODULE} passed\n"; \
+        fi; \
+    done; \
+	echo $${REPORT}
+
+
 test-examples: clean
 	@find examples/ -name "tox.ini" -print0 | xargs -0 -I {} -P 4 uv run tox run -e py,py-async -c {}
 
@@ -38,3 +57,10 @@ ifeq ($(VIRTUALENV_EXISTS), 0)
 endif
 	@uv sync --locked
 	@echo "To activate the virtualenv, run: source .venv/bin/activate"
+
+uv-lock:
+	@uv lock -U
+	@for dir in examples/*/; do \
+		echo "Updating lock file for $$dir"; \
+		uv lock -U --directory "$$dir"; \
+	done

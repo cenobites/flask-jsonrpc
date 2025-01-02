@@ -1,4 +1,4 @@
-exclude: '.git|.tox|.venv|.vscode|__pycache__|.pytest_cache|.eggs|.mypy_cache|.pytype|htmlcov|junit|htmldoc'
+exclude: '.git|.tox|.venv|.vscode|__pycache__|.ruff_cache|.pytest_cache|.eggs|.mypy_cache|.pytype|htmlcov|junit|htmldoc|test-results|prof'
 default_stages: [pre-commit]
 fail_fast: true
 default_language_version:
@@ -7,7 +7,7 @@ ci:
   autoupdate_schedule: weekly
 repos:
 - repo: https://github.com/pre-commit/pre-commit-hooks
-  rev: v5.0.0
+  rev: v6.0.0
   hooks:
     - id: check-ast
     - id: check-builtin-literals
@@ -26,11 +26,11 @@ repos:
     - id: end-of-file-fixer
     - id: trailing-whitespace
 - repo: https://github.com/astral-sh/ruff-pre-commit
-  rev: v0.7.1
+  rev: v0.14.0
   hooks:
     - id: ruff
     - id: ruff-format
 - repo: https://github.com/astral-sh/uv-pre-commit
-  rev: 0.8.0
+  rev: 0.9.3
   hooks:
     - id: uv-lock

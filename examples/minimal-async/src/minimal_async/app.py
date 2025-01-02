@@ -26,7 +26,6 @@
 # POSSIBILITY OF SUCH DAMAGE.
 import typing as t
 import asyncio
-from numbers import Real
 
 from flask import Flask, request
 
@@ -40,7 +39,7 @@ def check_terminal_id(fn: t.Callable[..., t.Any]) -> t.Any:  # noqa: ANN401
     async def wrapped() -> t.Any:  # noqa: ANN401
         await asyncio.sleep(0)
         terminal_id = int(request.get_json(silent=True).get('terminal_id', 0))
-        if terminal_id <= 0:
+        if terminal_id < 0:
             raise ValueError('Invalid terminal ID')
         rv = await fn()
         return rv
@@ -116,7 +115,7 @@ async def fails_with_custom_exception(_string: t.Optional[str] = None) -> t.NoRe
 
 
 @jsonrpc.method('App.sum')
-async def sum_(a: Real, b: Real) -> Real:
+async def sum_(a: float, b: float) -> float:
     await asyncio.sleep(0)
     return a + b
 

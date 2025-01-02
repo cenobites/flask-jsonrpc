@@ -44,12 +44,14 @@ class JSONRPCBlueprint(JSONRPCDecoratorMixin):
         self: Self,
         name: str,
         import_name: str,
+        version: str = '1.0.0',
         jsonrpc_site: type[JSONRPCSite] = default_jsonrpc_site,
         jsonrpc_site_api: type[JSONRPCView] = default_jsonrpc_site_api,
     ) -> None:
         self.name = name
         self.import_name = import_name
-        self.jsonrpc_site = jsonrpc_site()
+        self.version = version
+        self.jsonrpc_site = jsonrpc_site(version=version)
         self.jsonrpc_site_api = jsonrpc_site_api
 
     def get_jsonrpc_site(self: Self) -> JSONRPCSite:

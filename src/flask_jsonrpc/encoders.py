@@ -29,9 +29,12 @@ from __future__ import annotations
 from enum import Enum
 from types import GeneratorType
 import typing as t
+import inspect
 from pathlib import PurePath
 from collections import deque
 import dataclasses
+
+from typing_extensions import Buffer  # pytype: disable=not-supported-yet
 
 from flask import typing as ft, jsonify as _jsonify
 
@@ -41,6 +44,8 @@ from pydantic.main import BaseModel
 def serializable(obj: t.Any) -> t.Any:  # noqa: ANN401, C901
     if isinstance(obj, (bytes, bytearray)):
         return obj.decode('utf-8')
+    if isinstance(obj, Buffer):
+        return bytes(obj).decode('utf-8')
     if isinstance(obj, Enum):
         return obj.value
     if isinstance(obj, PurePath):
@@ -62,7 +67,7 @@ def serializable(obj: t.Any) -> t.Any:  # noqa: ANN401, C901
         return serializable(obj_dict)
     if isinstance(obj, BaseModel):
         return serializable(obj.model_dump(exclude_none=True, by_alias=True))
-    if hasattr(obj, '__dict__'):
+    if not inspect.isbuiltin(obj) and getattr(obj, '__module__', '') != 'builtins' and hasattr(obj, '__dict__'):
         return obj.__dict__
     return obj
 

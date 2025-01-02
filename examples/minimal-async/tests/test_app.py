@@ -26,12 +26,16 @@
 # POSSIBILITY OF SUCH DAMAGE.
 import typing as t
 
+import pytest
 from werkzeug.datastructures import Headers
 
 from tests.utils import EqMock
 
 if t.TYPE_CHECKING:
     from flask.testing import FlaskClient
+
+
+pytest.importorskip('asgiref')
 
 
 def test_index(client: 'FlaskClient') -> None:
@@ -189,12 +193,13 @@ def test_rpc_describe(client: 'FlaskClient') -> None:
     assert data['id'] == 1
     assert data['jsonrpc'] == '2.0'
     assert data['result']['name'] == 'Flask-JSONRPC'
-    assert data['result']['version'] == '2.0'
+    assert data['result']['version'] == '1.0.0'
     assert data['result']['servers'] is not None
     assert 'url' in data['result']['servers'][0]
     assert data['result']['methods'] == {
         'App.argsValidate': {
-            'options': {'notification': True, 'validate': True},
+            'name': 'App.argsValidate',
+            'notification': True,
             'params': [
                 {'name': 'a1', 'type': 'Number'},
                 {'name': 'a2', 'type': 'String'},
@@ -202,92 +207,134 @@ def test_rpc_describe(client: 'FlaskClient') -> None:
                 {'name': 'a4', 'type': 'Array'},
                 {'name': 'a5', 'type': 'Object'},
             ],
-            'returns': {'type': 'String'},
+            'returns': {'name': 'default', 'type': 'String'},
             'type': 'method',
+            'validation': True,
         },
         'App.divide': {
-            'options': {'notification': True, 'validate': True},
+            'name': 'App.divide',
+            'notification': True,
             'params': [{'name': 'a', 'type': 'Number'}, {'name': 'b', 'type': 'Number'}],
-            'returns': {'type': 'Number'},
+            'returns': {'name': 'default', 'type': 'Number'},
             'type': 'method',
+            'validation': True,
         },
         'App.fails': {
-            'options': {'notification': True, 'validate': True},
+            'name': 'App.fails',
+            'notification': True,
             'params': [{'name': '_string', 'type': 'String'}],
-            'returns': {'type': 'Null'},
+            'returns': {'name': 'default', 'type': 'Null'},
             'type': 'method',
+            'validation': True,
         },
         'App.failsWithCustomException': {
-            'options': {'notification': True, 'validate': True},
+            'name': 'App.failsWithCustomException',
+            'notification': True,
             'params': [{'name': '_string', 'type': 'String'}],
-            'returns': {'type': 'Null'},
+            'returns': {'name': 'default', 'type': 'Null'},
             'type': 'method',
+            'validation': True,
         },
         'App.greeting': {
-            'options': {'notification': True, 'validate': True},
+            'name': 'App.greeting',
+            'notification': True,
             'params': [{'name': 'name', 'type': 'String'}],
-            'returns': {'type': 'String'},
+            'returns': {'name': 'default', 'type': 'String'},
             'type': 'method',
+            'validation': True,
         },
         'App.helloDefaultArgs': {
-            'options': {'notification': True, 'validate': True},
+            'name': 'App.helloDefaultArgs',
+            'notification': True,
             'params': [{'name': 'string', 'type': 'String'}],
-            'returns': {'type': 'String'},
+            'returns': {'name': 'default', 'type': 'String'},
             'type': 'method',
+            'validation': True,
         },
         'App.index': {
-            'options': {'notification': True, 'validate': True},
+            'name': 'App.index',
+            'notification': True,
             'params': [],
-            'returns': {'type': 'String'},
+            'returns': {'name': 'default', 'type': 'String'},
             'type': 'method',
+            'validation': True,
         },
         'App.multiDecorators': {
-            'options': {'notification': True, 'validate': True},
+            'name': 'App.multiDecorators',
+            'notification': True,
             'params': [],
-            'returns': {'type': 'Object'},
+            'returns': {'name': 'default', 'type': 'Object'},
             'type': 'method',
+            'validation': True,
         },
         'App.multiply': {
-            'options': {'notification': True, 'validate': True},
+            'name': 'App.multiply',
+            'notification': True,
             'params': [{'name': 'a', 'type': 'Number'}, {'name': 'b', 'type': 'Number'}],
-            'returns': {'type': 'Number'},
+            'returns': {'name': 'default', 'type': 'Number'},
             'type': 'method',
+            'validation': True,
         },
         'App.notNotify': {
-            'options': {'notification': False, 'validate': True},
+            'name': 'App.notNotify',
+            'notification': False,
             'params': [{'name': 'string', 'type': 'String'}],
-            'returns': {'type': 'String'},
+            'returns': {'name': 'default', 'type': 'String'},
             'type': 'method',
+            'validation': True,
         },
         'App.notify': {
-            'options': {'notification': True, 'validate': True},
+            'name': 'App.notify',
+            'notification': True,
             'params': [{'name': '_string', 'type': 'String'}],
-            'returns': {'type': 'Null'},
+            'returns': {'name': 'default', 'type': 'Null'},
             'type': 'method',
+            'validation': True,
         },
         'App.oneDecorator': {
-            'options': {'notification': True, 'validate': True},
+            'name': 'App.oneDecorator',
+            'notification': True,
             'params': [],
-            'returns': {'type': 'Object'},
+            'returns': {'name': 'default', 'type': 'Object'},
             'type': 'method',
+            'validation': True,
         },
         'App.subtract': {
-            'options': {'notification': True, 'validate': True},
+            'name': 'App.subtract',
+            'notification': True,
             'params': [{'name': 'a', 'type': 'Number'}, {'name': 'b', 'type': 'Number'}],
-            'returns': {'type': 'Number'},
+            'returns': {'name': 'default', 'type': 'Number'},
             'type': 'method',
+            'validation': True,
         },
         'App.sum': {
-            'options': {'notification': True, 'validate': True},
+            'name': 'App.sum',
+            'notification': True,
             'params': [{'name': 'a', 'type': 'Number'}, {'name': 'b', 'type': 'Number'}],
-            'returns': {'type': 'Number'},
+            'returns': {'name': 'default', 'type': 'Number'},
             'type': 'method',
+            'validation': True,
         },
         'rpc.describe': {
+            'name': 'rpc.describe',
             'description': 'Service description for JSON-RPC 2.0',
-            'options': {},
+            'notification': False,
             'params': [],
-            'returns': {'type': 'Object'},
+            'returns': {
+                'name': 'default',
+                'properties': {
+                    'description': {'name': 'description', 'type': 'String'},
+                    'id': {'name': 'id', 'type': 'String'},
+                    'methods': {'name': 'methods', 'type': 'Null'},
+                    'name': {'name': 'name', 'type': 'String'},
+                    'servers': {'name': 'servers', 'type': 'Null'},
+                    'title': {'name': 'title', 'type': 'String'},
+                    'version': {'name': 'version', 'type': 'String'},
+                },
+                'type': 'Object',
+            },
+            'summary': 'RPC Describe',
             'type': 'method',
+            'validation': False,
         },
     }

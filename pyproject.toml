@@ -1,6 +1,6 @@
 [project]
 name = "Flask-JSONRPC"
-version = "4.0.0a5"
+version = "4.0.0a8"
 description = "Adds JSONRPC support to Flask."
 readme = {file = "README.md", content-type = "text/markdown"}
 license = {file = "LICENSE.txt"}
@@ -32,6 +32,7 @@ dependencies = [
     "typing-inspect==0.9.0", # https://github.com/ilevkivskyi/typing_inspect
     "pydantic>=1.7.4,!=1.8,!=1.8.1,!=2.0.0,!=2.0.1,!=2.1.0,<3.0.0", # https://github.com/pydantic/pydantic
     "eval-type-backport==0.2.2", # https://github.com/alexmojaki/eval_type_backport
+    "annotated-types==0.7.0",  # https://github.com/annotated-types/annotated-types
 ]
 
 [project.optional-dependencies]
@@ -61,6 +62,11 @@ tests = [
     "pytest-xdist==3.6.1",  # https://github.com/pytest-dev/pytest-xdist
     "pytest-sugar==1.0.0",  # https://github.com/Frozenball/pytest-sugar
     "pytest-env==1.1.5",  # https://github.com/MobileDynasty/pytest-env
+    "pytest-rerunfailures==16.1;python_version>='3.10'",  # https://github.com/pytest-dev/pytest-rerunfailures
+    "pytest-repeat==0.9.4",  # https://github.com/pytest-dev/pytest-repeat
+    "pytest-profiling==1.8.1",  # https://github.com/man-group/pytest-plugins
+    "pytest-clarity==1.0.1",  # https://github.com/darrenburns/pytest-clarity
+    "pytest-randomly==4.0.1",  # https://github.com/pytest-dev/pytest-randomly
     "typeguard==4.4.1",  # https://github.com/agronholm/typeguard
     "coverage~=7.6.4",  # https://github.com/nedbat/coveragepy
     "requests==2.32.3",  # https://github.com/psf/requests
@@ -203,7 +209,7 @@ skip = [
     "pp*",
 ]
 test-groups = ["tests"]
-test-command = "py.test -n auto -vv --tb=short --rootdir={project} {project}/tests --cov-fail-under=0"
+test-command = "py.test -n auto -rsxX -vv --tb=short --rootdir={project} {project}/tests --cov-fail-under=0"
 
 [tool.cibuildwheel.environment]
 CIBW_PROJECT_REQUIRES_PYTHON = ">=3.11,<3.14"
@@ -270,7 +276,7 @@ section-order = [
 [tool.ruff.lint.isort.sections]
 "flask" = ["flask"]
 "pydantic" = ["pydantic"]
-"typing-extensions" = ["typing_inspect", "typing_extensions"]
+"typing-extensions" = ["typing_inspect", "typing_extensions", "annotated_types"]
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"
@@ -283,7 +289,7 @@ docstring-code-format = true
 docstring-code-line-length = 79
 
 [tool.pytest.ini_options]
-addopts = "--pyargs --doctest-modules --junitxml=junit/test-results.xml --cov-report=html --cov-report=term --cov-report=lcov --cov=flask_jsonrpc --cov-fail-under=100"
+addopts = "-rsxX -vv --pyargs --doctest-modules --numprocesses=auto --count=10 --profile --junitxml=junit/test-results.xml --cov-report=html --cov-report=term --cov-report=lcov --cov=flask_jsonrpc --cov-fail-under=100"
 junit_family = "xunit2"
 python_files = ["tests.py", "test_*.py", "*_tests.py"]
 pythonpath = "src/"
@@ -305,6 +311,10 @@ required_plugins = [
     "pytest-xdist==3.6.1",
     "pytest-sugar==1.0.0",
     "pytest-env==1.1.5",
+    "pytest-repeat==0.9.4",
+    "pytest-profiling==1.8.1",
+    "pytest-clarity==1.0.1",
+    "pytest-randomly==4.0.1",
 ]
 
 [tool.coverage.run]
@@ -314,7 +324,6 @@ source = [
     "tests",
 ]
 omit = [
-    "*/settings.py",
     "*/fixtures.py",
     "*/tests.py",
     "*/test_*.py",
@@ -345,6 +354,7 @@ exclude_lines = [
     "if __name__ == .__main__.:",
     "if TYPE_CHECKING:",
     "if t\\.TYPE_CHECKING:",
+    "if sys\\.version_info"
 ]
 
 [tool.mypy]

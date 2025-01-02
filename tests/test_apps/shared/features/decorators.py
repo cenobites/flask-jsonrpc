@@ -50,13 +50,13 @@ def jsonrpc_decorator_wrapped(fn: t.Callable[..., str]) -> t.Callable[..., str]:
 jsonrpc = JSONRPCBlueprint('decorators', __name__)
 
 
-@jsonrpc.method('jsonrpc.decorator')
+@jsonrpc.method('decorators.decorator')
 @jsonrpc_decorator
 def decorator(string: str) -> str:
     return f'Hello {string}'
 
 
-@jsonrpc.method('jsonrpc.wrappedDecorator')
+@jsonrpc.method('decorators.wrappedDecorator')
 @jsonrpc_decorator_wrapped
 def wrappedDecorator(string: str) -> str:
     return f'Hello {string}'

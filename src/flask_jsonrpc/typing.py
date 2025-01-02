@@ -37,39 +37,74 @@ class BaseModel(PydanticModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
 
-class ServiceMethodParamsDescribe(BaseModel):
-    type: str
+class Field(BaseModel):
     name: str
+    type: str
+    summary: str | None = None
+    description: str | None = None
+    properties: t.Mapping[str, Field] | None = None
+    examples: list[t.Any] | None = None
     required: bool | None = None
+    deprecated: bool | None = None
     nullable: bool | None = None
-    minimum: int | None = None
-    maximum: int | None = None
-    pattern: str | None = None
-    length: int | None = None
+    minimum: float | None = None
+    maximum: float | None = None
+    multiple_of: float | None = None
+    min_length: int | None = None
+    max_length: int | None = None
+    pattern: str | t.Pattern[str] | None = None
+    allow_inf_nan: bool | None = None
+    max_digits: int | None = None
+    decimal_places: int | None = None
+
+
+class ExampleField(BaseModel):
+    name: str
+    value: t.Any
+    summary: str | None = None
     description: str | None = None
 
 
-class ServiceMethodReturnsDescribe(BaseModel):
-    type: str
-
-
-class ServiceMethodDescribe(BaseModel):
-    type: str
+class Example(BaseModel):
+    name: str | None = None
+    summary: str | None = None
     description: str | None = None
-    options: dict[str, t.Any] = {}
-    params: list[ServiceMethodParamsDescribe] = []
-    returns: ServiceMethodReturnsDescribe
+    params: list[ExampleField] | None = None
+    returns: ExampleField | None = None
 
 
-class ServiceServersDescribe(BaseModel):
+class Error(BaseModel):
+    code: int
+    message: str
+    data: t.Any | None = None
+    status_code: int
+
+
+class Method(BaseModel):
+    name: str
+    type: str
+    summary: str | None = None
+    description: str | None = None
+    validation: bool = True
+    notification: bool = True
+    deprecated: bool | None = None
+    params: list[Field] = []
+    returns: Field
+    tags: list[str] | None = None
+    errors: list[Error] | None = None
+    examples: list[Example] | None = None
+
+
+class Server(BaseModel):
     url: str
     description: str | None = None
 
 
 class ServiceDescribe(BaseModel):
     id: str
-    version: str
     name: str
+    version: str
+    title: str | None = None
     description: str | None = None
-    servers: list[ServiceServersDescribe]
-    methods: OrderedDict[str, ServiceMethodDescribe]
+    servers: list[Server]
+    methods: OrderedDict[str, Method]

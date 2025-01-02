@@ -43,7 +43,12 @@ def test_get_pets(client: 'FlaskClient') -> None:
 def test_create_pet(client: 'FlaskClient') -> None:
     rv = client.post(
         '/api',
-        json={'id': 1, 'jsonrpc': '2.0', 'method': 'Petstore.create_pet', 'params': {'name': 'Tequila', 'tag': 'cat'}},
+        json={
+            'id': 1,
+            'jsonrpc': '2.0',
+            'method': 'Petstore.create_pet',
+            'params': {'new_pet': {'name': 'Tequila', 'tag': 'cat'}},
+        },
     )
     json_data = rv.get_json()
     assert json_data['id'] == 1
@@ -62,7 +67,7 @@ def test_get_by_id(client: 'FlaskClient') -> None:
 
 def test_delete_by_id(client: 'FlaskClient') -> None:
     rv = client.post('/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'Petstore.delete_pet_by_id', 'params': [2]})
-    assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': None}
+    assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': {'id': 2, 'name': 'Eve', 'tag': 'cat'}}
     assert rv.status_code == 200
 
 
@@ -196,40 +201,79 @@ def test_rpc_describe(client: 'FlaskClient') -> None:
     assert data['id'] == 1
     assert data['jsonrpc'] == '2.0'
     assert data['result']['name'] == 'Flask-JSONRPC'
-    assert data['result']['version'] == '2.0'
+    assert data['result']['version'] == '1.0.0'
     assert data['result']['servers'] is not None
     assert 'url' in data['result']['servers'][0]
     assert data['result']['methods'] == {
         'Petstore.create_pet': {
-            'options': {'notification': True, 'validate': True},
-            'params': [{'name': 'name', 'type': 'String'}, {'name': 'tag', 'type': 'String'}],
-            'returns': {'type': 'Object'},
+            'name': 'Petstore.create_pet',
+            'notification': True,
+            'params': [
+                {
+                    'name': 'new_pet',
+                    'properties': {
+                        'name': {'name': 'name', 'type': 'String'},
+                        'tag': {'name': 'tag', 'type': 'String'},
+                    },
+                    'type': 'Object',
+                }
+            ],
+            'returns': {'name': 'default', 'properties': {'id': {'name': 'id', 'type': 'Number'}}, 'type': 'Object'},
             'type': 'method',
+            'validation': True,
         },
         'Petstore.delete_pet_by_id': {
-            'options': {'notification': True, 'validate': True},
+            'name': 'Petstore.delete_pet_by_id',
+            'notification': True,
             'params': [{'name': 'id', 'type': 'Number'}],
-            'returns': {'type': 'Null'},
+            'returns': {'name': 'default', 'properties': {'id': {'name': 'id', 'type': 'Number'}}, 'type': 'Object'},
             'type': 'method',
+            'validation': True,
         },
         'Petstore.get_pet_by_id': {
-            'options': {'notification': True, 'validate': True},
+            'name': 'Petstore.get_pet_by_id',
+            'notification': True,
             'params': [{'name': 'id', 'type': 'Number'}],
-            'returns': {'type': 'Object'},
+            'returns': {'name': 'default', 'properties': {'id': {'name': 'id', 'type': 'Number'}}, 'type': 'Object'},
             'type': 'method',
+            'validation': True,
         },
         'Petstore.get_pets': {
-            'options': {'notification': True, 'validate': True},
+            'name': 'Petstore.get_pets',
+            'notification': True,
             'params': [{'name': 'tags', 'type': 'Array'}, {'name': 'limit', 'type': 'Number'}],
-            'returns': {'type': 'Array'},
+            'returns': {'name': 'default', 'type': 'Array'},
             'type': 'method',
+            'validation': True,
         },
         'rpc.describe': {
+            'name': 'rpc.describe',
             'description': 'Service description for JSON-RPC 2.0',
-            'options': {},
+            'notification': False,
             'params': [],
-            'returns': {'type': 'Object'},
+            'returns': {
+                'name': 'default',
+                'properties': {
+                    'description': {'name': 'description', 'type': 'String'},
+                    'id': {'name': 'id', 'type': 'String'},
+                    'methods': {'name': 'methods', 'type': 'Null'},
+                    'name': {'name': 'name', 'type': 'String'},
+                    'servers': {'name': 'servers', 'type': 'Null'},
+                    'title': {'name': 'title', 'type': 'String'},
+                    'version': {'name': 'version', 'type': 'String'},
+                },
+                'type': 'Object',
+            },
+            'summary': 'RPC Describe',
             'type': 'method',
+            'validation': False,
         },
-        'rpc.discover': {'options': {}, 'params': [], 'returns': {'type': 'Null'}, 'type': 'method'},
+        'rpc.discover': {
+            'name': 'rpc.discover',
+            'notification': False,
+            'params': [],
+            'returns': {'name': 'default', 'type': 'Null'},
+            'type': 'method',
+            'validation': False,
+        },
     }

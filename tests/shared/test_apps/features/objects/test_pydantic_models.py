@@ -36,7 +36,7 @@ def test_app_with_pydantic(session: 'Session', api_url: str) -> None:
         json={
             'id': 1,
             'jsonrpc': '2.0',
-            'method': 'jsonrpc.createPet',
+            'method': 'objects.pydantic_models.createPet',
             'params': {'pet': {'name': 'Eve', 'tag': 'dog'}},
         },
     )
@@ -45,7 +45,12 @@ def test_app_with_pydantic(session: 'Session', api_url: str) -> None:
 
     rv = session.post(
         f'{api_url}/objects/pydantic-models',
-        json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.createPet', 'params': {'pet': {'name': 'Eve'}}},
+        json={
+            'id': 1,
+            'jsonrpc': '2.0',
+            'method': 'objects.pydantic_models.createPet',
+            'params': {'pet': {'name': 'Eve'}},
+        },
     )
     assert rv.status_code == 400
     data = rv.json()
@@ -67,7 +72,7 @@ def test_app_with_pydantic(session: 'Session', api_url: str) -> None:
         json={
             'id': 1,
             'jsonrpc': '2.0',
-            'method': 'jsonrpc.createManyPet',
+            'method': 'objects.pydantic_models.createManyPet',
             'params': {'pets': [{'name': 'Eve', 'tag': 'dog'}, {'name': 'Lou', 'tag': 'dog'}]},
         },
     )
@@ -83,7 +88,7 @@ def test_app_with_pydantic(session: 'Session', api_url: str) -> None:
         json={
             'id': 1,
             'jsonrpc': '2.0',
-            'method': 'jsonrpc.createManyPet',
+            'method': 'objects.pydantic_models.createManyPet',
             'params': {'pets': [{'name': 'Eve', 'tag': 'dog'}], 'pet': {'name': 'Lou', 'tag': 'dog'}},
         },
     )
@@ -99,7 +104,7 @@ def test_app_with_pydantic(session: 'Session', api_url: str) -> None:
         json={
             'id': 1,
             'jsonrpc': '2.0',
-            'method': 'jsonrpc.createManyPet',
+            'method': 'objects.pydantic_models.createManyPet',
             'params': [
                 [{'name': 'Eve', 'tag': 'dog'}, {'name': 'Lou', 'tag': 'dog'}],
                 {'name': 'Tequila', 'tag': 'cat'},
@@ -122,7 +127,7 @@ def test_app_with_pydantic(session: 'Session', api_url: str) -> None:
         json={
             'id': 1,
             'jsonrpc': '2.0',
-            'method': 'jsonrpc.createManyFixPet',
+            'method': 'objects.pydantic_models.createManyFixPet',
             'params': {'pets': {'1': {'name': 'Eve', 'tag': 'dog'}}},
         },
     )
@@ -134,7 +139,7 @@ def test_app_with_pydantic(session: 'Session', api_url: str) -> None:
         json={
             'id': 1,
             'jsonrpc': '2.0',
-            'method': 'jsonrpc.removePet',
+            'method': 'objects.pydantic_models.removePet',
             'params': {'pet': {'id': 1, 'name': 'Eve', 'tag': 'dog'}},
         },
     )
@@ -143,14 +148,14 @@ def test_app_with_pydantic(session: 'Session', api_url: str) -> None:
 
     rv = session.post(
         f'{api_url}/objects/pydantic-models',
-        json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.removePet', 'params': {'pet': None}},
+        json={'id': 1, 'jsonrpc': '2.0', 'method': 'objects.pydantic_models.removePet', 'params': {'pet': None}},
     )
     assert rv.status_code == 200
     assert rv.json() == {'id': 1, 'jsonrpc': '2.0', 'result': None}
 
     rv = session.post(
         f'{api_url}/objects/pydantic-models',
-        json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.removePet', 'params': []},
+        json={'id': 1, 'jsonrpc': '2.0', 'method': 'objects.pydantic_models.removePet', 'params': []},
     )
     assert rv.status_code == 200
     assert rv.json() == {'id': 1, 'jsonrpc': '2.0', 'result': None}
@@ -160,7 +165,7 @@ def test_app_with_pydantic(session: 'Session', api_url: str) -> None:
         json={
             'id': 1,
             'jsonrpc': '2.0',
-            'method': 'jsonrpc.removePet',
+            'method': 'objects.pydantic_models.removePet',
             'params': {'pet': {'id': 100, 'name': 'Lou', 'tag': 'dog'}},
         },
     )
@@ -183,39 +188,107 @@ def test_app_system_describe(session: 'Session', api_url: str) -> None:
     assert data['id'] == 1
     assert data['jsonrpc'] == '2.0'
     assert data['result']['name'] == 'Flask-JSONRPC'
-    assert data['result']['version'] == '2.0'
+    assert data['result']['version'] == '1.0.0'
     assert data['result']['servers'] is not None
     assert 'url' in data['result']['servers'][0]
     assert data['result']['methods'] == {
-        'jsonrpc.createManyFixPet': {
-            'options': {'notification': True, 'validate': True},
+        'objects.pydantic_models.createManyFixPet': {
+            'name': 'objects.pydantic_models.createManyFixPet',
+            'notification': True,
             'params': [{'name': 'pets', 'type': 'Object'}],
-            'returns': {'type': 'Array'},
+            'returns': {'name': 'default', 'type': 'Array'},
             'type': 'method',
+            'validation': True,
         },
-        'jsonrpc.createManyPet': {
-            'options': {'notification': True, 'validate': True},
-            'params': [{'name': 'pets', 'type': 'Array'}, {'name': 'pet', 'type': 'Object'}],
-            'returns': {'type': 'Array'},
+        'objects.pydantic_models.createManyPet': {
+            'name': 'objects.pydantic_models.createManyPet',
+            'notification': True,
+            'params': [
+                {'name': 'pets', 'type': 'Array'},
+                {
+                    'name': 'pet',
+                    'properties': {
+                        'name': {'name': 'name', 'type': 'String'},
+                        'tag': {'name': 'tag', 'type': 'String'},
+                    },
+                    'type': 'Object',
+                },
+            ],
+            'returns': {'name': 'default', 'type': 'Array'},
             'type': 'method',
+            'validation': True,
         },
-        'jsonrpc.createPet': {
-            'options': {'notification': True, 'validate': True},
-            'params': [{'name': 'pet', 'type': 'Object'}],
-            'returns': {'type': 'Object'},
+        'objects.pydantic_models.createPet': {
+            'name': 'objects.pydantic_models.createPet',
+            'notification': True,
+            'params': [
+                {
+                    'name': 'pet',
+                    'properties': {
+                        'name': {'name': 'name', 'type': 'String'},
+                        'tag': {'name': 'tag', 'type': 'String'},
+                    },
+                    'type': 'Object',
+                }
+            ],
+            'returns': {
+                'name': 'default',
+                'properties': {
+                    'id': {'name': 'id', 'type': 'Number'},
+                    'name': {'name': 'name', 'type': 'String'},
+                    'tag': {'name': 'tag', 'type': 'String'},
+                },
+                'type': 'Object',
+            },
             'type': 'method',
+            'validation': True,
         },
-        'jsonrpc.removePet': {
-            'options': {'notification': True, 'validate': True},
-            'params': [{'name': 'pet', 'type': 'Object'}],
-            'returns': {'type': 'Object'},
+        'objects.pydantic_models.removePet': {
+            'name': 'objects.pydantic_models.removePet',
+            'notification': True,
+            'params': [
+                {
+                    'name': 'pet',
+                    'properties': {
+                        'id': {'name': 'id', 'type': 'Number'},
+                        'name': {'name': 'name', 'type': 'String'},
+                        'tag': {'name': 'tag', 'type': 'String'},
+                    },
+                    'type': 'Object',
+                }
+            ],
+            'returns': {
+                'name': 'default',
+                'properties': {
+                    'id': {'name': 'id', 'type': 'Number'},
+                    'name': {'name': 'name', 'type': 'String'},
+                    'tag': {'name': 'tag', 'type': 'String'},
+                },
+                'type': 'Object',
+            },
             'type': 'method',
+            'validation': True,
         },
         'rpc.describe': {
+            'name': 'rpc.describe',
             'description': 'Service description for JSON-RPC 2.0',
-            'options': {},
+            'notification': False,
             'params': [],
-            'returns': {'type': 'Object'},
+            'returns': {
+                'name': 'default',
+                'properties': {
+                    'description': {'name': 'description', 'type': 'String'},
+                    'id': {'name': 'id', 'type': 'String'},
+                    'methods': {'name': 'methods', 'type': 'Null'},
+                    'name': {'name': 'name', 'type': 'String'},
+                    'servers': {'name': 'servers', 'type': 'Null'},
+                    'title': {'name': 'title', 'type': 'String'},
+                    'version': {'name': 'version', 'type': 'String'},
+                },
+                'type': 'Object',
+            },
+            'summary': 'RPC Describe',
             'type': 'method',
+            'validation': False,
         },
     }

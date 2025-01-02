@@ -32,18 +32,18 @@
 
 {% raw %}
 <div class="content-main">
-    <div class="page-header"><h1>{{module.name}}(<span ng-repeat="param in module.params">{{param.name}}: {{param.type}}<span ng-if="!$last">, </span></span>) -> {{module.returns.type}}</h1></div>
-    <blockquote class="method-description">{{ module.description }}</blockquote>
+    <div class="page-header method-signature"><h1>{{module.name}}(<span ng-repeat="param in module.params">{{param.name}}: {{param.type}}<span ng-if="!$last">, </span></span>) -> {{module.returns.type}}</h1></div>
+    <blockquote class="method-signature-description">{{ module.description }}</blockquote>
     <span >
       <p><b>Request:</b></p>
       <div class="request-info" style="clear: both">
           <pre class="prettyprint"><b>{{ response.config.method }}</b> {{ response.config.url }}
-<span ng-bind-html="requestObject|json|prettyprint"></span></pre>
+<span ng-bind-html="requestObject|json|prettyprint" class="request-content"></span></pre>
       </div>
       <p><b>Response:</b></p>
       <div class="response-info">
           <pre class="prettyprint"><div class="meta nocode"><b>HTTP {{ response.statusCode }}{{ response.status }}</b>
-<span ng-bind-html="responseObject|json|prettyprint"></span></div></pre>
+<span ng-bind-html="responseObject|json|prettyprint" class="response-content"></span></div></pre>
       </div>
   </span>
 </div>

@@ -27,9 +27,11 @@
 from __future__ import annotations
 
 import typing as t
-from inspect import _empty, signature, isfunction
+from inspect import Parameter, _empty, signature, isfunction
 import functools
 from collections import OrderedDict
+
+import typing_inspect
 
 # Added in version 3.11.
 from typing_extensions import Self
@@ -37,6 +39,7 @@ from typing_extensions import Self
 from typeguard import typechecked
 
 from .settings import settings
+from .types.methods import MethodAnnotated
 
 if t.TYPE_CHECKING:
     from .site import JSONRPCSite
@@ -71,7 +74,7 @@ class JSONRPCDecoratorMixin:
     def _get_function(self: Self, fn: t.Callable[..., t.Any]) -> t.Callable[..., t.Any]:
         if isfunction(fn):
             return fn
-        raise ValueError('the view function must be either a function or a method') from None
+        raise ValueError('the view function must be either a function or a staticmethod') from None
 
     def _get_function_and_wrappers(self: Self, fn: t.Callable[..., t.Any]) -> list[t.Callable[..., t.Any]]:
         fn_wrapped = fn
@@ -93,8 +96,23 @@ class JSONRPCDecoratorMixin:
         )
         return parameters
 
+    def _get_default_params(self: Self, fn: t.Callable[..., t.Any]) -> dict[str, t.Any]:
+        sig = signature(fn)
+        return {k: v.default for k, v in sig.parameters.items() if v.default is not Parameter.empty}
+
     def _get_annotations(self: Self, fn: t.Callable[..., t.Any], fn_options: dict[str, t.Any]) -> dict[str, t.Any]:
-        fn_annotations = t.get_type_hints(fn)
+        # Changed in version 3.11: Previously, Optional[t] was added
+        # for function and method annotations if a default value equal
+        # to None was set. Now the annotation is returned unchanged.
+        fn_annotations = t.get_type_hints(fn, include_extras=True)
+        default_params = self._get_default_params(fn)
+        for k, v in default_params.items():
+            if fn_annotations.get(k) is type(None):
+                continue
+            if v is None and typing_inspect.is_optional_type(fn_annotations.get(k)):
+                kv_args = t.get_args(fn_annotations[k])
+                if t.get_origin(kv_args[0]) is t.Annotated:  # pragma: no cover
+                    fn_annotations[k] = kv_args[0]
         if not fn_options['validate']:
             fn_annotations = self._get_type_hints_by_signature(fn, fn_annotations)
         return fn_annotations
@@ -118,24 +136,36 @@ class JSONRPCDecoratorMixin:
         raise NotImplementedError('.get_jsonrpc_site_api must be overridden') from None
 
     def register_view_function(
-        self: Self, view_func: t.Callable[..., t.Any], name: str | None = None, **options: dict[str, t.Any]
+        self: Self,
+        view_func: t.Callable[..., t.Any],
+        name: str | None = None,
+        annotation: type[MethodAnnotated] | None = None,
+        **options: dict[str, t.Any],
     ) -> t.Callable[..., t.Any]:
         fn = self._get_function(view_func)
         fn_options = self._method_options(options)
         fn_annotations = self._get_annotations(fn, fn_options)
+        fn_default_params = self._get_default_params(fn)
         method_name = name if name else getattr(fn, '__name__', '<noname>')
         view_func_wrapped = self._typechecked_wraps(view_func) if fn_options['validate'] else view_func
         setattr(view_func_wrapped, 'jsonrpc_method_name', method_name)  # noqa: B010
-        setattr(view_func_wrapped, 'jsonrpc_method_sig', fn_annotations)  # noqa: B010
-        setattr(view_func_wrapped, 'jsonrpc_method_return', fn_annotations.pop('return', None))  # noqa: B010
+        setattr(view_func_wrapped, 'jsonrpc_method_sig', fn_annotations.copy())  # noqa: B010
+        setattr(view_func_wrapped, 'jsonrpc_method_return', fn_annotations.pop('return', type(None)))  # noqa: B010
         setattr(view_func_wrapped, 'jsonrpc_method_params', fn_annotations)  # noqa: B010
+        setattr(view_func_wrapped, 'jsonrpc_method_default_params', fn_default_params)  # noqa: B010
+        setattr(view_func_wrapped, 'jsonrpc_method_annotations', annotation)  # noqa: B010
         setattr(view_func_wrapped, 'jsonrpc_validate', fn_options['validate'])  # noqa: B010
         setattr(view_func_wrapped, 'jsonrpc_notification', fn_options['notification'])  # noqa: B010
         setattr(view_func_wrapped, 'jsonrpc_options', fn_options)  # noqa: B010
         self.get_jsonrpc_site().register(method_name, view_func_wrapped)
         return view_func_wrapped
 
-    def method(self: Self, name: str | None = None, **options: dict[str, t.Any]) -> t.Callable[..., t.Any]:
+    def method(
+        self: Self,
+        name: str | None = None,
+        annotation: type[MethodAnnotated] | None = None,
+        **options: dict[str, t.Any],
+    ) -> t.Callable[..., t.Any]:
         validate = options.get('validate', settings.DEFAULT_JSONRPC_METHOD['VALIDATE'])
 
         def decorator(fn: t.Callable[..., t.Any]) -> t.Callable[..., t.Any]:
@@ -143,7 +173,7 @@ class JSONRPCDecoratorMixin:
             method_name = name if name else getattr(fn, '__name__', '<noname>')
             if validate and not all(self._validate(f) for f in fns):
                 raise ValueError(f'no type annotations present to: {method_name}') from None
-            return self.register_view_function(fn, name, **options)
+            return self.register_view_function(fn, name, annotation, **options)
 
         return decorator
 

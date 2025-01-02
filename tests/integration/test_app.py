@@ -39,25 +39,27 @@ API_URL = os.environ['API_URL']
 
 
 def test_greeting(session: 'Session') -> None:
-    rv = session.post(API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting'})
+    rv = session.post(API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.greeting'})
     assert rv.status_code == 200
     assert rv.json() == {'id': 1, 'jsonrpc': '2.0', 'result': 'Hello Flask JSON-RPC'}
 
-    rv = session.post(API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': ['Python']})
+    rv = session.post(API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.greeting', 'params': ['Python']})
     assert rv.json() == {'id': 1, 'jsonrpc': '2.0', 'result': 'Hello Python'}
     assert rv.status_code == 200
 
-    rv = session.post(
-        API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': {'name': 'Flask'}}
-    )
+    rv = session.post(API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.greeting', 'params': {'name': 'Flask'}})
     assert rv.json() == {'id': 1, 'jsonrpc': '2.0', 'result': 'Hello Flask'}, rv.json()
+    assert rv.status_code == 200
+
+    rv = session.post(API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.greeting', 'params': ['αβγδε 中文 🚀']})
+    assert rv.json() == {'id': 1, 'jsonrpc': '2.0', 'result': 'Hello αβγδε 中文 🚀'}
     assert rv.status_code == 200
 
 
 def test_app_greeting_with_different_content_types(session: 'Session') -> None:
     rv = session.post(
         API_URL,
-        data=json.dumps({'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting'}),
+        data=json.dumps({'id': 1, 'jsonrpc': '2.0', 'method': 'app.greeting'}),
         headers={'Content-Type': 'application/json-rpc'},
     )
     assert rv.json() == {'id': 1, 'jsonrpc': '2.0', 'result': 'Hello Flask JSON-RPC'}
@@ -65,7 +67,7 @@ def test_app_greeting_with_different_content_types(session: 'Session') -> None:
 
     rv = session.post(
         API_URL,
-        data=json.dumps({'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': ['Python']}),
+        data=json.dumps({'id': 1, 'jsonrpc': '2.0', 'method': 'app.greeting', 'params': ['Python']}),
         headers={'Content-Type': 'application/json'},
     )
     assert rv.json() == {'id': 1, 'jsonrpc': '2.0', 'result': 'Hello Python'}
@@ -73,7 +75,7 @@ def test_app_greeting_with_different_content_types(session: 'Session') -> None:
 
     rv = session.post(
         API_URL,
-        data=json.dumps({'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': {'name': 'Flask'}}),
+        data=json.dumps({'id': 1, 'jsonrpc': '2.0', 'method': 'app.greeting', 'params': {'name': 'Flask'}}),
         headers={'Content-Type': 'application/json'},
     )
     assert rv.json() == {'id': 1, 'jsonrpc': '2.0', 'result': 'Hello Flask'}
@@ -81,7 +83,7 @@ def test_app_greeting_with_different_content_types(session: 'Session') -> None:
 
 
 def test_greeting_raise_parse_error(session: 'Session') -> None:
-    rv = session.post(API_URL, data={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting'})
+    rv = session.post(API_URL, data={'id': 1, 'jsonrpc': '2.0', 'method': 'app.greeting'})
     assert rv.json() == {
         'id': None,
         'jsonrpc': '2.0',
@@ -99,7 +101,7 @@ def test_greeting_raise_parse_error(session: 'Session') -> None:
 
     rv = session.post(
         API_URL,
-        data="{'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting'}",
+        data="{'id': 1, 'jsonrpc': '2.0', 'method': 'app.greeting'}",
         headers={'Content-Type': 'application/json'},
     )
     assert rv.json() == {
@@ -107,7 +109,7 @@ def test_greeting_raise_parse_error(session: 'Session') -> None:
         'jsonrpc': '2.0',
         'error': {
             'code': -32700,
-            'data': {'message': "Invalid JSON: b\"{'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting'}\""},
+            'data': {'message': "Invalid JSON: b\"{'id': 1, 'jsonrpc': '2.0', 'method': 'app.greeting'}\""},
             'message': 'Parse error',
             'name': 'ParseError',
         },
@@ -117,7 +119,7 @@ def test_greeting_raise_parse_error(session: 'Session') -> None:
     rv = session.post(
         API_URL,
         data="""[
-            {'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': ['Flask'], 'id': '1'},
+            {'jsonrpc': '2.0', 'method': 'app.greeting', 'params': ['Flask'], 'id': '1'},
             {'jsonrpc': '2.0', 'method'
         ]""",
         headers={'Content-Type': 'application/json'},
@@ -127,7 +129,7 @@ def test_greeting_raise_parse_error(session: 'Session') -> None:
             'code': -32700,
             'data': {
                 'message': "Invalid JSON: b\"[\\n            {'jsonrpc': '2.0', "
-                "'method': 'jsonrpc.greeting', 'params': ['Flask'], 'id': "
+                "'method': 'app.greeting', 'params': ['Flask'], 'id': "
                 "'1'},\\n            {'jsonrpc': '2.0', 'method'\\n        "
                 ']"'
             },
@@ -156,7 +158,7 @@ def test_greeting_raise_invalid_request_error(session: 'Session') -> None:
 
 
 def test_greeting_raise_invalid_params_error(session: 'Session') -> None:
-    rv = session.post(API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': 'Wrong'})
+    rv = session.post(API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.greeting', 'params': 'Wrong'})
     assert rv.json() == {
         'id': 1,
         'jsonrpc': '2.0',
@@ -169,7 +171,7 @@ def test_greeting_raise_invalid_params_error(session: 'Session') -> None:
     }
     assert rv.status_code == 400
 
-    rv = session.post(API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': [1]})
+    rv = session.post(API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.greeting', 'params': [1]})
     assert rv.json() == {
         'id': 1,
         'jsonrpc': '2.0',
@@ -182,7 +184,7 @@ def test_greeting_raise_invalid_params_error(session: 'Session') -> None:
     }
     assert rv.status_code == 400
 
-    rv = session.post(API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': {'name': 2}})
+    rv = session.post(API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.greeting', 'params': {'name': 2}})
     assert rv.json() == {
         'id': 1,
         'jsonrpc': '2.0',
@@ -195,7 +197,7 @@ def test_greeting_raise_invalid_params_error(session: 'Session') -> None:
     }
     assert rv.status_code == 400
 
-    rv = session.post(API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': {'name': 2}})
+    rv = session.post(API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.greeting', 'params': {'name': 2}})
     assert rv.json() == {
         'id': 1,
         'jsonrpc': '2.0',
@@ -208,7 +210,7 @@ def test_greeting_raise_invalid_params_error(session: 'Session') -> None:
     }
     assert rv.status_code == 400
 
-    rv = session.post(API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': {'name': 2}})
+    rv = session.post(API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.greeting', 'params': {'name': 2}})
     assert rv.json() == {
         'id': 1,
         'jsonrpc': '2.0',
@@ -221,7 +223,7 @@ def test_greeting_raise_invalid_params_error(session: 'Session') -> None:
     }
     assert rv.status_code == 400
 
-    rv = session.post(API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': {'name': 2}})
+    rv = session.post(API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.greeting', 'params': {'name': 2}})
     assert rv.json() == {
         'id': 1,
         'jsonrpc': '2.0',

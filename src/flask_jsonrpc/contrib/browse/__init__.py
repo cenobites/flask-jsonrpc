@@ -41,7 +41,7 @@ if t.TYPE_CHECKING:
     from flask import Flask, typing as ft
 
     from flask_jsonrpc.site import JSONRPCSite
-    from flask_jsonrpc.typing import ServiceMethodDescribe
+    from flask_jsonrpc.typing import Method
 
 
 class JSONRPCBrowse:
@@ -55,7 +55,7 @@ class JSONRPCBrowse:
         if app:
             self.init_app(app)
 
-    def _service_methods_desc(self: Self) -> dict[str, ServiceMethodDescribe]:
+    def _service_methods_desc(self: Self) -> dict[str, Method]:
         return dict(ChainMap(*[site.describe().methods for site in self.jsonrpc_sites]))
 
     def init_app(self: Self, app: Flask) -> None:

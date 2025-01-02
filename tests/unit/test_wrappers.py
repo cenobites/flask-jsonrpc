@@ -27,8 +27,11 @@
 import typing as t
 from functools import wraps
 
+import pytest
+
 from flask_jsonrpc.views import JSONRPCView
 from flask_jsonrpc.wrappers import JSONRPCDecoratorMixin
+from flask_jsonrpc.types.methods import Summary, MethodAnnotated, JSONRPC_Method_T
 
 # Python 3.11+
 try:
@@ -63,12 +66,154 @@ def test_jsonrpc_register_view_function_simple() -> None:
     jsonrpc_app = JSONRPCApp()
     view_func_wrapped = jsonrpc_app.register_view_function(view_func, 'view_func')
     assert view_func_wrapped.jsonrpc_method_name == 'view_func'
-    assert view_func_wrapped.jsonrpc_method_sig == {'name': str}
+    assert view_func_wrapped.jsonrpc_method_sig == {'name': str, 'return': str}
     assert view_func_wrapped.jsonrpc_method_return is str
     assert view_func_wrapped.jsonrpc_method_params == {'name': str}
     assert view_func_wrapped.jsonrpc_validate is True
     assert view_func_wrapped.jsonrpc_notification is True
     assert view_func_wrapped.jsonrpc_options == {'notification': True, 'validate': True}
+
+    view_func_wrapped = jsonrpc_app.method('view_func')(view_func)
+    assert view_func_wrapped.jsonrpc_method_name == 'view_func'
+    assert view_func_wrapped.jsonrpc_method_sig == {'name': str, 'return': str}
+    assert view_func_wrapped.jsonrpc_method_return is str
+    assert view_func_wrapped.jsonrpc_method_params == {'name': str}
+    assert view_func_wrapped.jsonrpc_validate is True
+    assert view_func_wrapped.jsonrpc_notification is True
+    assert view_func_wrapped.jsonrpc_options == {'notification': True, 'validate': True}
+
+
+def test_jsonrpc_register_view_function_without_params() -> None:
+    def view_func() -> str:
+        return 'Hello world'
+
+    jsonrpc_app = JSONRPCApp()
+    view_func_wrapped = jsonrpc_app.method('view_func')(view_func)
+    assert view_func_wrapped.jsonrpc_method_name == 'view_func'
+    assert view_func_wrapped.jsonrpc_method_sig == {'return': str}
+    assert view_func_wrapped.jsonrpc_method_return is str
+    assert view_func_wrapped.jsonrpc_method_params == {}
+    assert view_func_wrapped.jsonrpc_validate is True
+    assert view_func_wrapped.jsonrpc_notification is True
+    assert view_func_wrapped.jsonrpc_options == {'notification': True, 'validate': True}
+
+
+def test_jsonrpc_register_view_function_without_return() -> None:
+    def view_func(name: str) -> None:
+        pass
+
+    jsonrpc_app = JSONRPCApp()
+    view_func_wrapped = jsonrpc_app.method('view_func')(view_func)
+    assert view_func_wrapped.jsonrpc_method_name == 'view_func'
+    assert view_func_wrapped.jsonrpc_method_sig == {'name': str, 'return': type(None)}
+    assert view_func_wrapped.jsonrpc_method_return is type(None)
+    assert view_func_wrapped.jsonrpc_method_params == {'name': str}
+    assert view_func_wrapped.jsonrpc_validate is True
+    assert view_func_wrapped.jsonrpc_notification is True
+    assert view_func_wrapped.jsonrpc_options == {'notification': True, 'validate': True}
+
+
+def test_jsonrpc_register_view_function_without_params_and_return() -> None:
+    def view_func() -> None:
+        pass
+
+    jsonrpc_app = JSONRPCApp()
+    view_func_wrapped = jsonrpc_app.method('view_func')(view_func)
+    assert view_func_wrapped.jsonrpc_method_name == 'view_func'
+    assert view_func_wrapped.jsonrpc_method_sig == {'return': type(None)}
+    assert view_func_wrapped.jsonrpc_method_return is type(None)
+    assert view_func_wrapped.jsonrpc_method_params == {}
+    assert view_func_wrapped.jsonrpc_validate is True
+    assert view_func_wrapped.jsonrpc_notification is True
+    assert view_func_wrapped.jsonrpc_options == {'notification': True, 'validate': True}
+
+
+def test_jsonrpc_register_view_function_with_default_params() -> None:
+    def view_func(name: str = 'World', person: t.Optional[str] = None) -> str:
+        return f'Hello {name}, {person or "Anonymous"}!'
+
+    jsonrpc_app = JSONRPCApp()
+    view_func_wrapped = jsonrpc_app.method('view_func')(view_func)
+    assert view_func_wrapped.jsonrpc_method_name == 'view_func'
+    assert view_func_wrapped.jsonrpc_method_sig == {'return': str, 'name': str, 'person': t.Optional[str]}
+    assert view_func_wrapped.jsonrpc_method_return is str
+    assert view_func_wrapped.jsonrpc_method_params == {'name': str, 'person': t.Optional[str]}
+    assert view_func_wrapped.jsonrpc_validate is True
+    assert view_func_wrapped.jsonrpc_notification is True
+    assert view_func_wrapped.jsonrpc_options == {'notification': True, 'validate': True}
+
+
+def test_jsonrpc_register_view_function_with_none_params_and_returns() -> None:
+    def view_func(person: type(None) = None) -> None:  # type: ignore
+        pass
+
+    jsonrpc_app = JSONRPCApp()
+    view_func_wrapped = jsonrpc_app.method('view_func')(view_func)
+    assert view_func_wrapped.jsonrpc_method_name == 'view_func'
+    assert view_func_wrapped.jsonrpc_method_sig == {'return': type(None), 'person': type(None)}
+    assert view_func_wrapped.jsonrpc_method_return is type(None)
+    assert view_func_wrapped.jsonrpc_method_params == {'person': type(None)}
+    assert view_func_wrapped.jsonrpc_validate is True
+    assert view_func_wrapped.jsonrpc_notification is True
+    assert view_func_wrapped.jsonrpc_options == {'notification': True, 'validate': True}
+
+
+def test_jsonrpc_register_view_function_annotated() -> None:
+    def view_func(
+        name: t.Annotated[str, 'metadata'], person: t.Annotated[t.Optional[str], 'metadata'] = None
+    ) -> t.Annotated[str, 'metadata']:
+        return f'Hello {name}, {person or "Anonymous"}!'
+
+    jsonrpc_app = JSONRPCApp()
+    view_func_wrapped = jsonrpc_app.method('view_func', MethodAnnotated[Summary('summary')])(view_func)
+    assert view_func_wrapped.jsonrpc_method_name == 'view_func'
+    assert view_func_wrapped.jsonrpc_method_sig == {
+        'name': t.Annotated[str, 'metadata'],
+        'person': t.Annotated[t.Optional[str], 'metadata'],
+        'return': t.Annotated[str, 'metadata'],
+    }
+    assert view_func_wrapped.jsonrpc_method_return is t.Annotated[str, 'metadata']
+    assert view_func_wrapped.jsonrpc_method_params == {
+        'name': t.Annotated[str, 'metadata'],
+        'person': t.Annotated[t.Optional[str], 'metadata'],
+    }
+    assert view_func_wrapped.jsonrpc_method_annotations == t.Annotated[JSONRPC_Method_T, Summary(summary='summary')]
+    assert view_func_wrapped.jsonrpc_validate is True
+    assert view_func_wrapped.jsonrpc_notification is True
+    assert view_func_wrapped.jsonrpc_options == {'notification': True, 'validate': True}
+
+
+def test_jsonrpc_register_view_function_not_validate() -> None:
+    def view_func(name):  # noqa: ANN001, ANN202
+        return f'Hello {name}'
+
+    jsonrpc_app = JSONRPCApp()
+    view_func_wrapped = jsonrpc_app.method('view_func', None, **{'validate': False})(view_func)
+    assert view_func_wrapped.jsonrpc_method_name == 'view_func'
+    assert view_func_wrapped.jsonrpc_method_sig == {'name': t.Any, 'return': t.Any}
+    assert view_func_wrapped.jsonrpc_method_return == t.Any
+    assert view_func_wrapped.jsonrpc_method_params == {'name': t.Any}
+    assert view_func_wrapped.jsonrpc_validate is False
+    assert view_func_wrapped.jsonrpc_notification is True
+    assert view_func_wrapped.jsonrpc_options == {'notification': True, 'validate': False}
+
+
+def test_jsonrpc_register_view_function_without_type_hints() -> None:
+    def view_func(name):  # noqa: ANN001, ANN202
+        return f'Hello {name}'
+
+    jsonrpc_app = JSONRPCApp()
+    view_func_wrapped = jsonrpc_app.register_view_function(view_func, 'view_func')
+    assert view_func_wrapped.jsonrpc_method_name == 'view_func'
+    assert view_func_wrapped.jsonrpc_method_sig == {}
+    assert view_func_wrapped.jsonrpc_method_return is type(None)
+    assert view_func_wrapped.jsonrpc_method_params == {}
+    assert view_func_wrapped.jsonrpc_validate is True
+    assert view_func_wrapped.jsonrpc_notification is True
+    assert view_func_wrapped.jsonrpc_options == {'notification': True, 'validate': True}
+
+    with pytest.raises(ValueError):
+        jsonrpc_app.method('view_func')(view_func)
 
 
 def test_jsonrpc_register_view_function_decorated() -> None:
@@ -83,9 +228,9 @@ def test_jsonrpc_register_view_function_decorated() -> None:
         return f'Hello {name}'
 
     jsonrpc_app = JSONRPCApp()
-    view_func_wrapped = jsonrpc_app.register_view_function(view_func, 'view_func')
+    view_func_wrapped = jsonrpc_app.method('view_func')(view_func)
     assert view_func_wrapped.jsonrpc_method_name == 'view_func'
-    assert view_func_wrapped.jsonrpc_method_sig == {'name': str}
+    assert view_func_wrapped.jsonrpc_method_sig == {'name': str, 'return': str}
     assert view_func_wrapped.jsonrpc_method_return is str
     assert view_func_wrapped.jsonrpc_method_params == {'name': str}
     assert view_func_wrapped.jsonrpc_validate is True
@@ -106,11 +251,56 @@ def test_jsonrpc_register_view_function_wrapped_decorator() -> None:
         return f'Hello {name}'
 
     jsonrpc_app = JSONRPCApp()
-    view_func_wrapped = jsonrpc_app.register_view_function(view_func, 'view_func')
+    view_func_wrapped = jsonrpc_app.method('view_func')(view_func)
     assert view_func_wrapped.jsonrpc_method_name == 'view_func'
-    assert view_func_wrapped.jsonrpc_method_sig == {'name': str}
+    assert view_func_wrapped.jsonrpc_method_sig == {'name': str, 'return': str}
     assert view_func_wrapped.jsonrpc_method_return is str
     assert view_func_wrapped.jsonrpc_method_params == {'name': str}
     assert view_func_wrapped.jsonrpc_validate is True
     assert view_func_wrapped.jsonrpc_notification is True
     assert view_func_wrapped.jsonrpc_options == {'notification': True, 'validate': True}
+
+
+def test_jsonrpc_register_view_function_from_class() -> None:
+    class Api:
+        def view_func(self: Self, name: str) -> str:
+            return f'Hello {name}'
+
+        @staticmethod
+        def view_func_staticmethod(name: str) -> str:
+            return f'Hello {name}'
+
+        @classmethod
+        def view_func_classmethod(cls: 'type[Api]', name: str) -> str:
+            return f'Hello {name}'
+
+    jsonrpc_app = JSONRPCApp()
+    view_func_wrapped = jsonrpc_app.method('view_func')(Api.view_func)
+    assert view_func_wrapped.jsonrpc_method_name == 'view_func'
+    assert view_func_wrapped.jsonrpc_method_sig == {'name': str, 'return': str, 'self': Self}
+    assert view_func_wrapped.jsonrpc_method_return is str
+    assert view_func_wrapped.jsonrpc_method_params == {'name': str, 'self': Self}
+    assert view_func_wrapped.jsonrpc_validate is True
+    assert view_func_wrapped.jsonrpc_notification is True
+    assert view_func_wrapped.jsonrpc_options == {'notification': True, 'validate': True}
+
+    view_func_staticmethod_wrapped = jsonrpc_app.method('view_func_staticmethod')(Api.view_func_staticmethod)
+    assert view_func_staticmethod_wrapped.jsonrpc_method_name == 'view_func_staticmethod'
+    assert view_func_staticmethod_wrapped.jsonrpc_method_sig == {'name': str, 'return': str}
+    assert view_func_staticmethod_wrapped.jsonrpc_method_return is str
+    assert view_func_staticmethod_wrapped.jsonrpc_method_params == {'name': str}
+    assert view_func_staticmethod_wrapped.jsonrpc_validate is True
+    assert view_func_staticmethod_wrapped.jsonrpc_notification is True
+    assert view_func_staticmethod_wrapped.jsonrpc_options == {'notification': True, 'validate': True}
+
+    with pytest.raises(ValueError):
+        jsonrpc_app.register_view_function(Api.view_func_classmethod, 'view_func_classmethod')
+
+
+def test_jsonrpc_register_error_handler_simple() -> None:
+    def value_error_handle(ex: ValueError) -> str:
+        return 'ValueError'
+
+    jsonrpc_app = JSONRPCApp()
+    jsonrpc_app.register_error_handler(ValueError, value_error_handle)
+    jsonrpc_app.errorhandler(ValueError)(value_error_handle)

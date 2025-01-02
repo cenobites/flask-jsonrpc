@@ -38,6 +38,12 @@ from shared.features.types.python_stds import jsonrpc as jsonrpc_types_python_st
 from shared.features.objects.python_classes import jsonrpc as jsonrpc_objects_python_classes_app
 from shared.features.objects.pydantic_models import jsonrpc as jsonrpc_objects_pydantic_models_app
 from shared.features.objects.python_dataclasses import jsonrpc as jsonrpc_objects_python_dataclasses_app
+from shared.features.types.python_stds_annotated import jsonrpc as jsonrpc_types_python_annotated_stds_app
+from shared.features.types.python_classes_annotated import jsonrpc as jsonrpc_objects_python_classes_annotated_app
+from shared.features.types.pydantic_models_annotated import jsonrpc as jsonrpc_objects_pydantic_models_annotated_app
+from shared.features.types.python_dataclasses_annotated import (
+    jsonrpc as jsonrpc_objects_python_dataclasses_annotated_app,
+)
 
 from flask_jsonrpc import JSONRPC
 
@@ -94,6 +100,30 @@ def create_app(test_config: t.Optional[dict[str, t.Any]] = None) -> Flask:  # no
     )
     jsonrpc.register_blueprint(
         flask_app,
+        jsonrpc_types_python_annotated_stds_app,
+        url_prefix='/types/python-stds-annotated',
+        enable_web_browsable_api=True,
+    )
+    jsonrpc.register_blueprint(
+        flask_app,
+        jsonrpc_objects_python_classes_annotated_app,
+        url_prefix='/types/python-classes-annotated',
+        enable_web_browsable_api=True,
+    )
+    jsonrpc.register_blueprint(
+        flask_app,
+        jsonrpc_objects_python_dataclasses_annotated_app,
+        url_prefix='/types/python-dataclasses-annotated',
+        enable_web_browsable_api=True,
+    )
+    jsonrpc.register_blueprint(
+        flask_app,
+        jsonrpc_objects_pydantic_models_annotated_app,
+        url_prefix='/types/pydantic-models-annotated',
+        enable_web_browsable_api=True,
+    )
+    jsonrpc.register_blueprint(
+        flask_app,
         jsonrpc_objects_python_classes_app,
         url_prefix='/objects/python-classes',
         enable_web_browsable_api=True,
@@ -116,39 +146,39 @@ def create_app(test_config: t.Optional[dict[str, t.Any]] = None) -> Flask:  # no
     def handle_value_error_exception(ex: ValueError) -> dict[str, t.Any]:
         return {'message': 'Generic global error handler does not work, :(', 'code': '0000'}
 
-    @jsonrpc.method('jsonrpc.greeting')
+    @jsonrpc.method('app.greeting')
     def greeting(name: str = 'Flask JSON-RPC') -> str:
         return f'Hello {name}'
 
-    @jsonrpc.method('jsonrpc.echo')
+    @jsonrpc.method('app.echo')
     def echo(string: str, _some: t.Any = None) -> str:  # noqa: ANN401
         return string
 
-    @jsonrpc.method('jsonrpc.notify')
+    @jsonrpc.method('app.notify')
     def notify(_string: t.Optional[str] = None) -> None:
         pass
 
-    @jsonrpc.method('jsonrpc.fails')
+    @jsonrpc.method('app.fails')
     def fails(n: int) -> int:
         if n % 2 == 0:
             return n
         raise ValueError('number is odd')
 
-    @jsonrpc.method('jsonrpc.decorators')
+    @jsonrpc.method('app.decorators')
     @jsonrpc_decorator
     def decorators(string: str) -> str:
         return f'Hello {string}'
 
-    @jsonrpc.method('jsonrpc.wrappedDecorators')
+    @jsonrpc.method('app.wrappedDecorators')
     @jsonrpc_decorator_wrapped
     def wrapped_decorators(string: str) -> str:
         return f'Hello {string}'
 
-    @jsonrpc.method('jsonrpc.failsWithCustomException')
+    @jsonrpc.method('app.failsWithCustomException')
     def fails_with_custom_exception(_string: t.Optional[str] = None) -> t.NoReturn:
         raise MyException('example of fail with custom exception that will be handled')
 
-    @jsonrpc.method('jsonrpc.failsWithCustomExceptionNotRegistered')
+    @jsonrpc.method('app.failsWithCustomExceptionNotRegistered')
     def fails_with_custom_exception_not_registered(_string: t.Optional[str] = None) -> t.NoReturn:
         raise MyNotRegisteredException('example of fail with custom exception that will not be handled')
 

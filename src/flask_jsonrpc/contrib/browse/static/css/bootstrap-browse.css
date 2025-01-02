@@ -371,7 +371,7 @@ body {
     margin-right: 16px;
     padding: 1ex 0 0.5ex 2.5em;
 }
-.chrome-title {
+.breadcrumb-title {
     float: left;
     font-size: 14px;
     font-weight: bold;
@@ -380,7 +380,7 @@ body {
     padding-bottom: 1px;
     white-space: nowrap;
 }
-.chrome-title-clear {
+.breadcrumb-title-clear {
     clear: both;
     font-size: 1px;
     height: 1px;
