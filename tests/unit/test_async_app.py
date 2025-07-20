@@ -115,8 +115,7 @@ def test_app_create() -> None:
             'error': {
                 'code': -32600,
                 'data': {
-                    'message': "The method 'app.fn4' doesn't allow Notification Request "
-                    "object (without an 'id' member)"
+                    'message': "The method 'app.fn4' doesn't allow Notification Request object (without an 'id' member)"
                 },
                 'message': 'Invalid Request',
                 'name': 'InvalidRequestError',

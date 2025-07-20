@@ -38,7 +38,7 @@
       </div>
       <div id="scrollable-sections">
         <ul class="nav nav-tabs nav-stacked">
-          <li><a id="logo-link" href="#/" ng-click="goToDashboard()" ng-class="{active:routeIs('/')}"><i class="icon icon-home"></i> Dashboard</a></li>
+          <li><a href="#/" ng-click="goToDashboard()" ng-class="{active:routeIs('/')}"><i class="icon icon-home"></i> Dashboard</a></li>
           {% raw %}
           <li class="dropdown" ng-repeat="(packageName, modules) in packages">
             <a data-toggle="collapse" data-target="#{{packageName}}"><i class="icon icon-folder-open"></i> {{packageName}}</a>

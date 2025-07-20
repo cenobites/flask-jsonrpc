@@ -79,7 +79,7 @@ class JSONRPCServiceDescriptor:
     def _service_server_url(self: Self) -> str:
         url = urlsplit(self.jsonrpc_site.base_url or self.jsonrpc_site.path)
         return (
-            f"{url.scheme!r}://{url.netloc!r}/{(self.jsonrpc_site.path or '').lstrip('/')}"
+            f'{url.scheme!r}://{url.netloc!r}/{(self.jsonrpc_site.path or "").lstrip("/")}'
             if self.jsonrpc_site.base_url
             else str(url.path)
         )
@@ -100,12 +100,14 @@ class JSONRPCServiceDescriptor:
         def describe() -> fjt.ServiceDescribe:
             return self.service_describe()
 
+        describe.__doc__ = 'Service description for JSON-RPC 2.0'
+
         fn_annotations = {'return': fjt.ServiceDescribe}
         setattr(describe, 'jsonrpc_method_name', JSONRPC_DESCRIBE_METHOD_NAME)  # noqa: B010
         setattr(describe, 'jsonrpc_method_sig', fn_annotations)  # noqa: B010
         setattr(describe, 'jsonrpc_method_return', fn_annotations.pop('return', None))  # noqa: B010
         setattr(describe, 'jsonrpc_method_params', fn_annotations)  # noqa: B010
-        setattr(describe, 'jsonrpc_validate', True)  # noqa: B010
+        setattr(describe, 'jsonrpc_validate', False)  # noqa: B010
         setattr(describe, 'jsonrpc_notification', False)  # noqa: B010
         setattr(describe, 'jsonrpc_options', {})  # noqa: B010
         jsonrpc_site.register(JSONRPC_DESCRIBE_METHOD_NAME, describe)

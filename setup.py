@@ -34,7 +34,7 @@ import pathlib
 
 import setuptools
 
-USE_MYPYC = os.getenv('MYPYC_ENABLE', 'False').lower() in ('true', 't', '1')
+USE_MYPYC = os.getenv('SETUPTOOLS_BUILD_ENABLE_MYPYC', 'False').lower() in ('true', 't', '1')
 if len(sys.argv) > 1 and sys.argv[1] == '--use-mypyc':
     USE_MYPYC = True
 

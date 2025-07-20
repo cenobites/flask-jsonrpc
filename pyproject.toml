@@ -1,6 +1,6 @@
 [project]
 name = "Flask-JSONRPC"
-version = "4.0.0a7"
+version = "4.0.0a5"
 description = "Adds JSONRPC support to Flask."
 readme = {file = "README.md", content-type = "text/markdown"}
 license = {file = "LICENSE.txt"}
@@ -24,14 +24,14 @@ classifiers = [
     "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
     "Topic :: Software Development :: Libraries :: Application Frameworks",
 ]
-requires-python = ">=3.9"
+requires-python = ">=3.9,<3.14"
 dependencies = [
-    "Flask>=3.0.0,<4.0",
-    "typeguard==4.4.0",
-    "typing_extensions>=4.3.0",
-    "typing_inspect==0.9.0",
-    "pydantic!=1.8,!=1.8.1,!=2.0.0,!=2.0.1,!=2.1.0,<3.0.0,>=1.7.4",
-    "eval_type_backport==0.2.0"
+    "Flask>=3.0.0,<4.0", # https://github.com/pallets/flask
+    "typeguard==4.4.1", # https://github.com/agronholm/typeguard
+    "typing-extensions>=4.3.0", # https://github.com/python/typing/blob/master/typing_extensions/README.rst
+    "typing-inspect==0.9.0", # https://github.com/ilevkivskyi/typing_inspect
+    "pydantic>=1.7.4,!=1.8,!=1.8.1,!=2.0.0,!=2.0.1,!=2.1.0,<3.0.0", # https://github.com/pydantic/pydantic
+    "eval-type-backport==0.2.2", # https://github.com/alexmojaki/eval_type_backport
 ]
 
 [project.optional-dependencies]
@@ -45,22 +45,94 @@ Documentation = "https://flask-jsonrpc.readthedocs.io/"
 "Issue Tracker" = "https://github.com/cenobites/flask-jsonrpc/issues/"
 Website = "https://flask-jsonrpc.readthedocs.io/"
 
+[dependency-groups]
+dev = [
+    "ipdb",  # https://github.com/gotcha/ipdb
+    "tox<4.30",  # https://github.com/tox-dev/tox
+    "tox-uv",  # https://github.com/tox-dev/tox-uv
+]
+pre-commit = [
+    "pre-commit",
+    "pre-commit-uv",
+]
+tests = [
+    "pytest==8.3.3",  # https://github.com/pytest-dev/pytest
+    "pytest-cov==6.0.0",  # https://github.com/pytest-dev/pytest-cov
+    "pytest-xdist==3.6.1",  # https://github.com/pytest-dev/pytest-xdist
+    "pytest-sugar==1.0.0",  # https://github.com/Frozenball/pytest-sugar
+    "pytest-env==1.1.5",  # https://github.com/MobileDynasty/pytest-env
+    "typeguard==4.4.1",  # https://github.com/agronholm/typeguard
+    "coverage~=7.6.4",  # https://github.com/nedbat/coveragepy
+    "requests==2.32.3",  # https://github.com/psf/requests
+]
+integration-tests = [
+    {include-group = "tests"},
+    "pytest-playwright==0.7.0",  # https://github.com/microsoft/playwright-python
+    "playwright==1.54.0",  # https://github.com/microsoft/playwright-python
+]
+style = [
+    "ruff==0.7.1",  # https://github.com/astral-sh/ruff
+]
+typing = [
+    "mypy==1.18.2;python_version>='3.11'",  # https://github.com/python/mypy
+    "types_setuptools==75.2.0.20241025",  # https://github.com/python/typeshed
+    "typeguard==4.4.1",  # https://github.com/agronholm/typeguard
+    "pyright==1.1.406;python_version>='3.11'",  # https://github.com/microsoft/pyright
+]
+security = [
+    "bandit;python_version>='3.11'", # https://github.com/PyCQA/bandit
+    "safety;python_version>='3.11'",  # https://github.com/pyupio/safety
+]
+build = [
+    "hatch==1.4.0",  # https://github.com/pypa/hatch
+]
+cbuild = [
+    "cibuildwheel==3.2.0;python_version>='3.11'",  # https://github.com/pypa/cibuildwheel
+    "hatch-mypyc==0.16.0",  # https://github.com/ofek/hatch-mypyc
+    "mypy[mypyc]==1.18.2",  # https://github.com/python/mypy
+    "mypy-extensions==1.1.0",  # https://github.com/python/mypy_extensions
+    "setuptools>=77.0.0",  # https://github.com/pypa/setuptools
+]
+docs = [
+    "Sphinx==8.1.3;python_version>='3.10'",  # https://github.com/sphinx-doc/sphinx
+    "sphinx-tabs==3.4.7",  # https://github.com/executablebooks/sphinx-tabs
+    "sphinx-issues==5.0.0",  # https://github.com/sloria/sphinx-issues
+    "sphinxcontrib-log-cabinet==1.0.1",  # https://github.com/davidism/sphinxcontrib-log-cabinet
+    "Pallets-Sphinx-Themes==2.3.0",  # https://github.com/pallets/pallets-sphinx-themes
+]
+
+# Uncomment the following to use setuptools as the build backend for Mypyc builds.
+# [build-system]
+# requires = [
+#     "wheel>=0.42",
+#     "setuptools>=77.0.0",
+#     "mypy==1.18.2",
+#     "pydantic>=1.7.4,!=1.8,!=1.8.1,!=2.0.0,!=2.0.1,!=2.1.0,<3.0.0"
+# ]
+# build-backend = "setuptools.build_meta"
+
 [build-system]
-requires = ["flit_core>=3.2,<4"]
-build-backend = "flit_core.buildapi"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
-[tool.flit.module]
-name = "flask_jsonrpc"
+[tool.hatch.build.targets.wheel]
+only-include = ["src/flask_jsonrpc"]
+packages = ["src/flask_jsonrpc"]
 
-[tool.flit.sdist]
+[tool.hatch.build.targets.sdist]
+ignore-vcs = true
 include = [
+    "src/flask_jsonrpc",
     "docs/",
     "examples/",
-    "requirements/",
     "tests/",
-    "tox.ini",
+    "uv.lock",
 ]
 exclude = [
+    ".devcontainer",
+    ".docker",
+    ".github",
+    "bin/",
     ".tox/",
     "venv/",
     ".venv/",
@@ -75,6 +147,35 @@ exclude = [
     "docs/_build/",
 ]
 
+[tool.hatch.build.targets.wheel.hooks.mypyc]
+enable-by-default = false
+require-runtime-dependencies = true
+dependencies = [
+    "wheel>=0.42",
+    "setuptools>=77.0.0",
+    "mypy==1.18.2",
+    "hatch-mypyc==0.16.0"
+]
+mypy-args = [
+    "--config-file=pyproject.toml.bak",  # hatch-mypyc issue #37
+    "--install-types",
+    "--non-interactive",
+    "--strict",
+    "--check-untyped-defs",
+    "--ignore-missing-imports",
+    "--disallow-untyped-defs",
+    "--disable-error-code=unused-ignore",
+    "--disable-error-code=no-any-return",
+    "--disable-error-code=call-arg",
+    "--disable-error-code=misc",
+]
+
+[tool.hatch.build.targets.wheel.hooks.mypyc.options]
+opt_level = "3"
+debug_level = "0"
+strip_asserts = true
+include_runtime_files = true
+
 [tool.setuptools]
 zip-safe = false
 include-package-data = true
@@ -83,8 +184,16 @@ include-package-data = true
 where = ["src"]
 namespaces = false
 
+[tool.uv]
+package = true
+default-groups = ["dev", "pre-commit", "tests", "style", "typing"]
+
+[tool.uv.build-backend]
+module-name = "flask_jsonrpc"
+
 [tool.cibuildwheel]
 before-all = "uname -a"
+build-frontend = "build[uv]"
 build-verbosity = 1
 skip = [
     "cp3{8,9,10}-*",
@@ -93,18 +202,13 @@ skip = [
     "*-win32",
     "pp*",
 ]
-test-requires = [
-    "pytest",
-    "pytest-cov",
-    "pytest-xdist",
-    "pytest-sugar",
-    "pytest-env",
-    "requests"
-]
-test-command = "pytest -n auto -vv --tb=short --rootdir={project} {project}/tests --cov-fail-under=0"
+test-groups = ["tests"]
+test-command = "py.test -n auto -vv --tb=short --rootdir={project} {project}/tests --cov-fail-under=0"
 
 [tool.cibuildwheel.environment]
-MYPYC_ENABLE = "1"
+CIBW_PROJECT_REQUIRES_PYTHON = ">=3.11,<3.14"
+SETUPTOOLS_BUILD_ENABLE_MYPYC = "1"
+HATCH_BUILD_HOOK_ENABLE_MYPYC = "0"
 
 [tool.ruff]
 src = ["src"]
@@ -197,10 +301,10 @@ norecursedirs = [
     "tests/integration",
 ]
 required_plugins = [
-    "pytest-cov",
-    "pytest-xdist",
-    "pytest-sugar",
-    "pytest-env",
+    "pytest-cov==6.0.0",
+    "pytest-xdist==3.6.1",
+    "pytest-sugar==1.0.0",
+    "pytest-env==1.1.5",
 ]
 
 [tool.coverage.run]
@@ -258,6 +362,7 @@ no_implicit_reexport = true
 check_untyped_defs = true
 disallow_any_generics = true
 disallow_untyped_defs = true
+follow_imports = "silent"
 
 [[tool.mypy.overrides]]
 module = [
@@ -274,12 +379,94 @@ init_forbid_extra = true
 init_typed = true
 warn_required_dynamic_aliases = true
 
-[tool.pytype]
-inputs = ["src/flask_jsonrpc"]
-python_version = "3.11"
-disable = ["invalid-annotation"]
-
 [tool.pyright]
 pythonVersion = "3.13"
 include = ["src/flask_jsonrpc"]
 typeCheckingMode = "basic"
+
+[tool.tox]
+requires = [
+    "tox<4.30",  # tox-dev issue: #3602
+    "tox-uv>=1.26.1"
+]
+env_list = [
+    "py3.13", "py3.12", "py3.11", "py3.10", "py3.9",
+    "py3.13-async", "py3.12-async", "py3.11-async", "py3.10-async", "py3.9-async",
+    "style",
+    "typing",
+    "security",
+    "docs"
+]
+skip_missing_interpreters = true
+
+[tool.tox.env_run_base]
+package = "wheel"
+wheel_build_env = ".pkg"
+runner = "uv-venv-lock-runner"
+env_tmp_dir = "{toxworkdir}/tmp/{envname}"
+constrain_package_deps = true
+use_frozen_constraints = true
+deps = [
+    "async: .[async]",
+]
+dependency_groups = [
+    "tests",
+]
+no_default_groups = true
+commands = [[
+    "pytest", "-n", "auto", "-vv", "--tb=short", "--basetemp={env_tmp_dir}",
+    {replace = "posargs", default = [], extend = true}
+]]
+
+[tool.tox.env.style]
+runner = "uv-venv-lock-runner"
+base_python = ["3.13"]
+dependency_groups = [
+    "pre-commit"
+]
+no_default_groups = true
+commands = [[
+    "pre-commit", "run", "--all-files", "--show-diff-on-failure"
+]]
+
+[tool.tox.env.typing]
+runner = "uv-venv-lock-runner"
+base_python = ["3.13"]
+dependency_groups = [
+    "typing"
+]
+no_default_groups = true
+commands = [
+    ["mypy", "--install-types", "--non-interactive", "src/"],
+    ["pyright"],
+]
+
+[tool.tox.env.security]
+runner = "uv-venv-lock-runner"
+base_python = ["3.13"]
+dependency_groups = [
+    "security"
+]
+no_default_groups = true
+commands = [
+    # ["safety", "scan"],
+    ["bandit", "-r", "src/"],
+]
+
+[tool.tox.env.docs]
+runner = "uv-venv-lock-runner"
+base_python = ["3.13"]
+dependency_groups = [
+    "docs"
+]
+no_default_groups = true
+commands = [[
+    "sphinx-build", "-W", "-b", "html", "-d", "{envtmpdir}/doctrees", "docs", "{envtmpdir}/html"
+]]
+
+[tool.tox.env.update-requirements]
+base_python = ["3.13"]
+dependency_groups = []
+no_default_groups = true
+skip_install = true
+commands = [["uv", "lock", {replace = "posargs", default = ["-U"], extend = true}]]

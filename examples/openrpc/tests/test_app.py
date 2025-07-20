@@ -100,7 +100,12 @@ def test_rpc_discover(client: 'FlaskClient') -> None:
             'version': '1.0.0',
         },
         'methods': [
-            {'name': 'rpc.describe', 'params': [], 'result': {'name': 'default', 'schema': {'type': 'object'}}},
+            {
+                'name': 'rpc.describe',
+                'description': 'Service description for JSON-RPC 2.0',
+                'params': [],
+                'result': {'name': 'default', 'schema': {'type': 'object'}},
+            },
             {
                 'description': 'Returns an OpenRPC schema as a description of this service',
                 'name': 'rpc.discover',
@@ -155,7 +160,7 @@ def test_rpc_discover(client: 'FlaskClient') -> None:
                 },
             },
             {
-                'description': 'Returns a user based on a single ID, if the user does not have ' 'access to the pet',
+                'description': 'Returns a user based on a single ID, if the user does not have access to the pet',
                 'name': 'Petstore.get_pet_by_id',
                 'params': [
                     {'description': 'ID of pet to fetch', 'name': 'id', 'required': True, 'schema': {'type': 'integer'}}
@@ -219,6 +224,12 @@ def test_rpc_describe(client: 'FlaskClient') -> None:
             'returns': {'type': 'Array'},
             'type': 'method',
         },
-        'rpc.describe': {'options': {}, 'params': [], 'returns': {'type': 'Object'}, 'type': 'method'},
+        'rpc.describe': {
+            'description': 'Service description for JSON-RPC 2.0',
+            'options': {},
+            'params': [],
+            'returns': {'type': 'Object'},
+            'type': 'method',
+        },
         'rpc.discover': {'options': {}, 'params': [], 'returns': {'type': 'Null'}, 'type': 'method'},
     }

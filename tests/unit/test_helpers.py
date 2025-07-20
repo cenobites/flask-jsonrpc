@@ -27,7 +27,7 @@
 import typing as t
 from dataclasses import dataclass
 
-from pydantic import BaseModel
+from pydantic.main import BaseModel
 
 import pytest
 

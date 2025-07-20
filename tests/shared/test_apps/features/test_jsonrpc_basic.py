@@ -407,6 +407,12 @@ def test_app_system_describe(session: 'Session', api_url: str) -> None:
             'returns': {'type': 'Number'},
             'type': 'method',
         },
-        'rpc.describe': {'options': {}, 'params': [], 'returns': {'type': 'Object'}, 'type': 'method'},
+        'rpc.describe': {
+            'description': 'Service description for JSON-RPC 2.0',
+            'options': {},
+            'params': [],
+            'returns': {'type': 'Object'},
+            'type': 'method',
+        },
     }
     assert rv.status_code == 200

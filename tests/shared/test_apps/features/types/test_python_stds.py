@@ -186,7 +186,7 @@ def test_union_with_two_types(session: 'Session', api_url: str) -> None:
         'error': {
             'code': -32602,
             'data': {
-                'message': 'the only type of union that is supported is: typing.Union[T, ' 'None] or typing.Optional[T]'
+                'message': 'the only type of union that is supported is: typing.Union[T, None] or typing.Optional[T]'
             },
             'message': 'Invalid params',
             'name': 'InvalidParamsError',
@@ -203,7 +203,7 @@ def test_union_with_two_types(session: 'Session', api_url: str) -> None:
         'error': {
             'code': -32602,
             'data': {
-                'message': 'the only type of union that is supported is: typing.Union[T, ' 'None] or typing.Optional[T]'
+                'message': 'the only type of union that is supported is: typing.Union[T, None] or typing.Optional[T]'
             },
             'message': 'Invalid params',
             'name': 'InvalidParamsError',
@@ -436,5 +436,11 @@ def test_app_system_describe(session: 'Session', api_url: str) -> None:
             'returns': {'type': 'Number'},
             'type': 'method',
         },
-        'rpc.describe': {'options': {}, 'params': [], 'returns': {'type': 'Object'}, 'type': 'method'},
+        'rpc.describe': {
+            'description': 'Service description for JSON-RPC 2.0',
+            'options': {},
+            'params': [],
+            'returns': {'type': 'Object'},
+            'type': 'method',
+        },
     }

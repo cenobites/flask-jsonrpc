@@ -113,6 +113,7 @@ htmlcov/
 .coverage
 .coverage.*
 coverage.*
+coverage.lcov
 .cache
 nosetests.xml
 coverage.xml
@@ -179,13 +180,13 @@ celerybeat.pid
 # Environments
 .env
 .venv
-.venv.*
+.venv*
 env/
 venv/
+venv.*
 ENV/
 env.bak/
 venv.bak/
-venv.*
 
 # Spyder project settings
 .spyderproject

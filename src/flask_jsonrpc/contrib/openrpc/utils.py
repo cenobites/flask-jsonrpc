@@ -28,9 +28,14 @@ from __future__ import annotations
 
 import typing as t
 
-from pydantic.main import BaseModel
+from pydantic import ConfigDict
+from pydantic.main import BaseModel as PydanticModel
 
 from . import typing as st
+
+
+class BaseModel(PydanticModel):
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
 
 class MethodExtendSchema(BaseModel):

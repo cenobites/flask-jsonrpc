@@ -29,9 +29,14 @@ from __future__ import annotations
 from enum import Enum
 import typing as t
 
-from pydantic import Field, BaseModel, AliasChoices
+from pydantic import Field, ConfigDict, AliasChoices
+from pydantic.main import BaseModel as PydanticModel
 
 OPENRPC_VERSION_DEFAULT: str = '1.3.2'
+
+
+class BaseModel(PydanticModel):
+    model_config = ConfigDict(validate_by_alias=True, validate_by_name=True, arbitrary_types_allowed=True)
 
 
 class OAuth2FlowType(Enum):

@@ -146,6 +146,7 @@ def session(app: 'Flask') -> t.Generator[requests.Session, None, None]:
     session.verify = False
     session.mount('http://', FlaskClientAdapter(app=app))
     yield session
+    session.close()
 
 
 @pytest.fixture(scope='function')
@@ -155,3 +156,4 @@ def async_session(async_app: 'Flask') -> t.Generator[requests.Session, None, Non
     session.verify = False
     session.mount('http://', FlaskClientAdapter(app=async_app))
     yield session
+    session.close()

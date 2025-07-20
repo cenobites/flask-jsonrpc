@@ -48,23 +48,19 @@ def test_app_with_pydantic(session: 'Session', api_url: str) -> None:
         json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.createPet', 'params': {'pet': {'name': 'Eve'}}},
     )
     assert rv.status_code == 400
-    assert rv.json() == {
-        'id': 1,
-        'jsonrpc': '2.0',
-        'error': {
-            'code': -32602,
-            'data': {
-                'message': '1 validation error for NewPet\n'
-                'tag\n'
-                "  Field required [type=missing, input_value={'name': 'Eve'}, "
-                'input_type=dict]\n'
-                '    For further information visit '
-                'https://errors.pydantic.dev/2.9/v/missing'
-            },
-            'message': 'Invalid params',
-            'name': 'InvalidParamsError',
-        },
-    }
+    data = rv.json()
+    assert data['id'] == 1
+    assert data['jsonrpc'] == '2.0'
+    assert data['error']['code'] == -32602
+    assert data['error']['name'] == 'InvalidParamsError'
+    assert data['error']['message'] == 'Invalid params'
+    assert (
+        '1 validation error for NewPet\n'
+        'tag\n'
+        "  Field required [type=missing, input_value={'name': 'Eve'}, "
+        'input_type=dict]\n'
+        '    For further information visit '
+    ) in data['error']['data']['message']
 
     rv = session.post(
         f'{api_url}/objects/pydantic-models',
@@ -215,5 +211,11 @@ def test_app_system_describe(session: 'Session', api_url: str) -> None:
             'returns': {'type': 'Object'},
             'type': 'method',
         },
-        'rpc.describe': {'options': {}, 'params': [], 'returns': {'type': 'Object'}, 'type': 'method'},
+        'rpc.describe': {
+            'description': 'Service description for JSON-RPC 2.0',
+            'options': {},
+            'params': [],
+            'returns': {'type': 'Object'},
+            'type': 'method',
+        },
     }

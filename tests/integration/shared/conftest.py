@@ -32,6 +32,11 @@ import urllib3
 import requests
 
 
+@pytest.fixture(autouse=True, scope='module')
+def setup_module() -> None:
+    urllib3.disable_warnings()
+
+
 @pytest.fixture(scope='session')
 def api_url() -> str:
     return os.environ['API_URL']
@@ -39,15 +44,15 @@ def api_url() -> str:
 
 @pytest.fixture(scope='function')
 def session() -> t.Generator[requests.Session, None, None]:
-    urllib3.disable_warnings()
     session = requests.Session()
     session.verify = False
     yield session
+    session.close()
 
 
 @pytest.fixture(scope='function')
 def async_session() -> t.Generator[requests.Session, None, None]:
-    urllib3.disable_warnings()
     session = requests.Session()
     session.verify = False
     yield session
+    session.close()

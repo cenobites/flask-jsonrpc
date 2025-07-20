@@ -52,7 +52,7 @@ def _openrpc_discover_method(
         params=[],
         result=st.ContentDescriptor(
             name='OpenRPC Schema',
-            schema=st.Schema(ref='https://raw.githubusercontent.com/open-rpc/meta-schema/master/schema.json'),
+            schema_=st.Schema(ref='https://raw.githubusercontent.com/open-rpc/meta-schema/master/schema.json'),  # pyright: ignore
         ),
     )
     def cached_openrpc_discover_method() -> st.OpenRPCSchema:

@@ -3,16 +3,20 @@ updates:
   - package-ecosystem: github-actions
     directory: /
     schedule:
-      interval: monthly
+      interval: weekly
     groups:
       github-actions:
         patterns:
           - '*'
+
   - package-ecosystem: pip
-    directory: /requirements
+    directories: 
+      - /pyproject.toml
+      - /examples/**/pyproject.toml
     schedule:
       interval: daily
     groups:
       python-requirements:
         patterns:
           - '*'
+

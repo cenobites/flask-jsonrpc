@@ -26,216 +26,225 @@
 # POSSIBILITY OF SUCH DAMAGE.
 # pylint: disable=duplicate-code,too-many-public-methods
 import os
+import typing as t
 
 from flask import json
 
-from .conftest import APITestCase
+from requests import Session
+
+if t.TYPE_CHECKING:
+    from requests import Session
 
 API_URL = os.environ['API_URL']
 
-# Python 3.11+
-try:
-    from typing import Self
-except ImportError:  # pragma: no cover
-    from typing_extensions import Self
+
+def test_greeting(session: 'Session') -> None:
+    rv = session.post(API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting'})
+    assert rv.status_code == 200
+    assert rv.json() == {'id': 1, 'jsonrpc': '2.0', 'result': 'Hello Flask JSON-RPC'}
+
+    rv = session.post(API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': ['Python']})
+    assert rv.json() == {'id': 1, 'jsonrpc': '2.0', 'result': 'Hello Python'}
+    assert rv.status_code == 200
+
+    rv = session.post(
+        API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': {'name': 'Flask'}}
+    )
+    assert rv.json() == {'id': 1, 'jsonrpc': '2.0', 'result': 'Hello Flask'}, rv.json()
+    assert rv.status_code == 200
 
 
-class APITest(APITestCase):
-    def test_greeting(self: Self) -> None:
-        rv = self.requests.post(API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting'})
-        self.assertDictEqual({'id': 1, 'jsonrpc': '2.0', 'result': 'Hello Flask JSON-RPC'}, rv.json())
-        self.assertEqual(200, rv.status_code)
+def test_app_greeting_with_different_content_types(session: 'Session') -> None:
+    rv = session.post(
+        API_URL,
+        data=json.dumps({'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting'}),
+        headers={'Content-Type': 'application/json-rpc'},
+    )
+    assert rv.json() == {'id': 1, 'jsonrpc': '2.0', 'result': 'Hello Flask JSON-RPC'}
+    assert rv.status_code == 200
 
-        rv = self.requests.post(
-            API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': ['Python']}
-        )
-        self.assertDictEqual({'id': 1, 'jsonrpc': '2.0', 'result': 'Hello Python'}, rv.json())
-        self.assertEqual(200, rv.status_code)
+    rv = session.post(
+        API_URL,
+        data=json.dumps({'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': ['Python']}),
+        headers={'Content-Type': 'application/json'},
+    )
+    assert rv.json() == {'id': 1, 'jsonrpc': '2.0', 'result': 'Hello Python'}
+    assert rv.status_code == 200
 
-        rv = self.requests.post(
-            API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': {'name': 'Flask'}}
-        )
-        self.assertDictEqual({'id': 1, 'jsonrpc': '2.0', 'result': 'Hello Flask'}, rv.json())
-        self.assertEqual(200, rv.status_code)
+    rv = session.post(
+        API_URL,
+        data=json.dumps({'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': {'name': 'Flask'}}),
+        headers={'Content-Type': 'application/json'},
+    )
+    assert rv.json() == {'id': 1, 'jsonrpc': '2.0', 'result': 'Hello Flask'}
+    assert rv.status_code == 200
 
-    def test_app_greeting_with_different_content_types(self: Self) -> None:
-        rv = self.requests.post(
-            API_URL,
-            data=json.dumps({'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting'}),
-            headers={'Content-Type': 'application/json-rpc'},
-        )
-        self.assertDictEqual({'id': 1, 'jsonrpc': '2.0', 'result': 'Hello Flask JSON-RPC'}, rv.json())
-        self.assertEqual(200, rv.status_code)
 
-        rv = self.requests.post(
-            API_URL,
-            data=json.dumps({'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': ['Python']}),
-            headers={'Content-Type': 'application/json'},
-        )
-        self.assertDictEqual({'id': 1, 'jsonrpc': '2.0', 'result': 'Hello Python'}, rv.json())
-        self.assertEqual(200, rv.status_code)
-
-        rv = self.requests.post(
-            API_URL,
-            data=json.dumps({'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': {'name': 'Flask'}}),
-            headers={'Content-Type': 'application/json'},
-        )
-        self.assertDictEqual({'id': 1, 'jsonrpc': '2.0', 'result': 'Hello Flask'}, rv.json())
-        self.assertEqual(200, rv.status_code)
-
-    def test_greeting_raise_parse_error(self: Self) -> None:
-        rv = self.requests.post(API_URL, data={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting'})
-        self.assertDictEqual(
-            {
-                'id': None,
-                'jsonrpc': '2.0',
-                'error': {
-                    'code': -32700,
-                    'data': {
-                        'message': 'Invalid mime type for JSON: application/x-www-form-urlencoded, '
-                        'use header Content-Type: application/json'
-                    },
-                    'message': 'Parse error',
-                    'name': 'ParseError',
-                },
+def test_greeting_raise_parse_error(session: 'Session') -> None:
+    rv = session.post(API_URL, data={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting'})
+    assert rv.json() == {
+        'id': None,
+        'jsonrpc': '2.0',
+        'error': {
+            'code': -32700,
+            'message': 'Parse error',
+            'name': 'ParseError',
+            'data': {
+                'message': 'Invalid mime type for JSON: application/x-www-form-urlencoded, '
+                'use header Content-Type: application/json'
             },
-            rv.json(),
-        )
-        self.assertEqual(400, rv.status_code)
+        },
+    }
+    assert rv.status_code == 400
 
-        rv = self.requests.post(
-            API_URL,
-            data="{'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting'}",
-            headers={'Content-Type': 'application/json'},
-        )
-        self.assertDictEqual(
-            {
-                'id': None,
-                'jsonrpc': '2.0',
-                'error': {
-                    'code': -32700,
-                    'data': {
-                        'message': "Invalid JSON: b\"{'id': 1, " "'jsonrpc': '2.0', " "'method': 'jsonrpc.greeting'}\""
-                    },
-                    'message': 'Parse error',
-                    'name': 'ParseError',
-                },
-            },
-            rv.json(),
-        )
-        self.assertEqual(400, rv.status_code)
+    rv = session.post(
+        API_URL,
+        data="{'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting'}",
+        headers={'Content-Type': 'application/json'},
+    )
+    assert rv.json() == {
+        'id': None,
+        'jsonrpc': '2.0',
+        'error': {
+            'code': -32700,
+            'data': {'message': "Invalid JSON: b\"{'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting'}\""},
+            'message': 'Parse error',
+            'name': 'ParseError',
+        },
+    }
+    assert rv.status_code == 400
 
-        rv = self.requests.post(
-            API_URL,
-            data="""[
-                {'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': ['Flask'], 'id': '1'},
-                {'jsonrpc': '2.0', 'method'
-            ]""",
-            headers={'Content-Type': 'application/json'},
-        )
-        self.assertDictEqual(
-            {
-                'id': None,
-                'jsonrpc': '2.0',
-                'error': {
-                    'code': -32700,
-                    'data': {
-                        'message': 'Invalid JSON: b"[\\n                '
-                        "{'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', "
-                        "'params': ['Flask'], 'id': '1'},\\n                "
-                        "{'jsonrpc': '2.0', 'method'\\n            ]\""
-                    },
-                    'message': 'Parse error',
-                    'name': 'ParseError',
-                },
+    rv = session.post(
+        API_URL,
+        data="""[
+            {'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': ['Flask'], 'id': '1'},
+            {'jsonrpc': '2.0', 'method'
+        ]""",
+        headers={'Content-Type': 'application/json'},
+    )
+    assert rv.json() == {
+        'error': {
+            'code': -32700,
+            'data': {
+                'message': "Invalid JSON: b\"[\\n            {'jsonrpc': '2.0', "
+                "'method': 'jsonrpc.greeting', 'params': ['Flask'], 'id': "
+                "'1'},\\n            {'jsonrpc': '2.0', 'method'\\n        "
+                ']"'
             },
-            rv.json(),
-        )
-        self.assertEqual(400, rv.status_code)
+            'message': 'Parse error',
+            'name': 'ParseError',
+        },
+        'id': None,
+        'jsonrpc': '2.0',
+    }
+    assert rv.status_code == 400
 
-    def test_greeting_raise_invalid_request_error(self: Self) -> None:
-        rv = self.requests.post(API_URL, json={'id': 1, 'jsonrpc': '2.0'})
-        self.assertDictEqual(
-            {
-                'id': 1,
-                'jsonrpc': '2.0',
-                'error': {
-                    'code': -32600,
-                    'data': {'message': "Invalid JSON: {'id': 1, 'jsonrpc': '2.0'}"},
-                    'message': 'Invalid Request',
-                    'name': 'InvalidRequestError',
-                },
-            },
-            rv.json(),
-        )
-        self.assertEqual(400, rv.status_code)
 
-    def test_greeting_raise_invalid_params_error(self: Self) -> None:
-        rv = self.requests.post(
-            API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': 'Wrong'}
-        )
-        self.assertDictEqual(
-            {
-                'id': 1,
-                'jsonrpc': '2.0',
-                'error': {
-                    'code': -32602,
-                    'data': {'message': 'Parameter structures are by-position (list) or by-name (dict): Wrong'},
-                    'message': 'Invalid params',
-                    'name': 'InvalidParamsError',
-                },
-            },
-            rv.json(),
-        )
-        self.assertEqual(400, rv.status_code)
+def test_greeting_raise_invalid_request_error(session: 'Session') -> None:
+    rv = session.post(API_URL, json={'id': 1, 'jsonrpc': '2.0'})
+    assert rv.json() == {
+        'id': 1,
+        'jsonrpc': '2.0',
+        'error': {
+            'code': -32600,
+            'data': {'message': "Invalid JSON: {'id': 1, 'jsonrpc': '2.0'}"},
+            'message': 'Invalid Request',
+            'name': 'InvalidRequestError',
+        },
+    }
+    assert rv.status_code == 400
 
-        rv = self.requests.post(API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': [1]})
-        self.assertDictEqual(
-            {
-                'id': 1,
-                'jsonrpc': '2.0',
-                'error': {
-                    'code': -32602,
-                    'data': {'message': 'argument "name" (int) is not an instance of str'},
-                    'message': 'Invalid params',
-                    'name': 'InvalidParamsError',
-                },
-            },
-            rv.json(),
-        )
-        self.assertEqual(400, rv.status_code)
 
-        rv = self.requests.post(
-            API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': {'name': 2}}
-        )
-        self.assertDictEqual(
-            {
-                'id': 1,
-                'jsonrpc': '2.0',
-                'error': {
-                    'code': -32602,
-                    'data': {'message': 'argument "name" (int) is not an instance of str'},
-                    'message': 'Invalid params',
-                    'name': 'InvalidParamsError',
-                },
-            },
-            rv.json(),
-        )
-        self.assertEqual(400, rv.status_code)
+def test_greeting_raise_invalid_params_error(session: 'Session') -> None:
+    rv = session.post(API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': 'Wrong'})
+    assert rv.json() == {
+        'id': 1,
+        'jsonrpc': '2.0',
+        'error': {
+            'code': -32602,
+            'data': {'message': 'Parameter structures are by-position (list) or by-name (dict): Wrong'},
+            'message': 'Invalid params',
+            'name': 'InvalidParamsError',
+        },
+    }
+    assert rv.status_code == 400
 
-    def test_greeting_raise_method_not_found_error(self: Self) -> None:
-        rv = self.requests.post(API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'method-not-found'})
-        self.assertDictEqual(
-            {
-                'id': 1,
-                'jsonrpc': '2.0',
-                'error': {
-                    'code': -32601,
-                    'data': {'message': 'Method not found: method-not-found'},
-                    'message': 'Method not found',
-                    'name': 'MethodNotFoundError',
-                },
-            },
-            rv.json(),
-        )
-        self.assertEqual(400, rv.status_code)
+    rv = session.post(API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': [1]})
+    assert rv.json() == {
+        'id': 1,
+        'jsonrpc': '2.0',
+        'error': {
+            'code': -32602,
+            'data': {'message': 'argument "name" (int) is not an instance of str'},
+            'message': 'Invalid params',
+            'name': 'InvalidParamsError',
+        },
+    }
+    assert rv.status_code == 400
+
+    rv = session.post(API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': {'name': 2}})
+    assert rv.json() == {
+        'id': 1,
+        'jsonrpc': '2.0',
+        'error': {
+            'code': -32602,
+            'data': {'message': 'argument "name" (int) is not an instance of str'},
+            'message': 'Invalid params',
+            'name': 'InvalidParamsError',
+        },
+    }
+    assert rv.status_code == 400
+
+    rv = session.post(API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': {'name': 2}})
+    assert rv.json() == {
+        'id': 1,
+        'jsonrpc': '2.0',
+        'error': {
+            'code': -32602,
+            'data': {'message': 'argument "name" (int) is not an instance of str'},
+            'message': 'Invalid params',
+            'name': 'InvalidParamsError',
+        },
+    }
+    assert rv.status_code == 400
+
+    rv = session.post(API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': {'name': 2}})
+    assert rv.json() == {
+        'id': 1,
+        'jsonrpc': '2.0',
+        'error': {
+            'code': -32602,
+            'data': {'message': 'argument "name" (int) is not an instance of str'},
+            'message': 'Invalid params',
+            'name': 'InvalidParamsError',
+        },
+    }
+    assert rv.status_code == 400
+
+    rv = session.post(API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': {'name': 2}})
+    assert rv.json() == {
+        'id': 1,
+        'jsonrpc': '2.0',
+        'error': {
+            'code': -32602,
+            'data': {'message': 'argument "name" (int) is not an instance of str'},
+            'message': 'Invalid params',
+            'name': 'InvalidParamsError',
+        },
+    }
+    assert rv.status_code == 400
+
+
+def test_greeting_raise_method_not_found_error(session: 'Session') -> None:
+    rv = session.post(API_URL, json={'id': 1, 'jsonrpc': '2.0', 'method': 'method-not-found'})
+    assert rv.json() == {
+        'id': 1,
+        'jsonrpc': '2.0',
+        'error': {
+            'code': -32601,
+            'data': {'message': 'Method not found: method-not-found'},
+            'message': 'Method not found',
+            'name': 'MethodNotFoundError',
+        },
+    }
+    assert rv.status_code == 400

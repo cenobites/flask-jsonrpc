@@ -156,7 +156,7 @@ class JSONRPCSite:
             resp_view = current_app.ensure_sync(view_func)(**sanitazed_params)
 
             # TODO: Enhance the checker to return the type
-            view_fun_annotations = t.get_type_hints(view_func)
+            view_fun_annotations = t.get_type_hints(view_func) if validate else {}
             view_fun_return: t.Any | None = view_fun_annotations.pop('return', None)
             if validate and resp_view is not None and view_fun_return is None:
                 resp_view_qn = qualified_name(resp_view)
@@ -167,7 +167,7 @@ class JSONRPCSite:
 
             return resp_view
         except (TypeError, TypeCheckError) as e:
-            current_app.logger.exception('invalid type checked for: %s', view_func.__name__)
+            current_app.logger.exception('invalid type checked for: %s', getattr(view_func, '__name__', view_func))
             raise InvalidParamsError(data={'message': str(e)}) from e
 
     def dispatch(
@@ -198,15 +198,15 @@ class JSONRPCSite:
             if not self.validate(req_json):
                 raise InvalidRequestError(data={'message': f'Invalid JSON: {req_json!r}'}) from None
             return self.dispatch(req_json)
-        except JSONRPCError as e:
-            current_app.logger.exception('jsonrpc error')
-            response = {
-                'id': get(req_json, 'id'),
-                'jsonrpc': get(req_json, 'jsonrpc', JSONRPC_VERSION_DEFAULT),
-                'error': e.jsonrpc_format,
-            }
-            return response, e.status_code, JSONRPC_DEFAULT_HTTP_HEADERS
         except Exception as e:
+            if isinstance(e, JSONRPCError):  # mypyc: https://docs.python.org/3/glossary.html#term-EAFP
+                current_app.logger.exception('jsonrpc error')
+                response = {
+                    'id': get(req_json, 'id'),
+                    'jsonrpc': get(req_json, 'jsonrpc', JSONRPC_VERSION_DEFAULT),
+                    'error': e.jsonrpc_format,
+                }
+                return response, e.status_code, JSONRPC_DEFAULT_HTTP_HEADERS
             current_app.logger.exception('unexpected error')
             error_handler = self._find_error_handler(e)
             jsonrpc_error_data = (

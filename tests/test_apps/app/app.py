@@ -26,22 +26,48 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 import typing as t
+import functools
 
 from flask import Flask, jsonify
 
-from flask_jsonrpc import JSONRPC
+from shared.features.class_apps import jsonrpc as jsonrpc_class_apps_app
+from shared.features.decorators import jsonrpc as jsonrpc_decorators_app
+from shared.features.jsonrpc_basic import jsonrpc as jsonrpc_jsonrpc_basic_app
+from shared.features.error_handlers import jsonrpc as jsonrpc_error_handlers_app
+from shared.features.types.python_stds import jsonrpc as jsonrpc_types_python_std_app
+from shared.features.objects.python_classes import jsonrpc as jsonrpc_objects_python_classes_app
+from shared.features.objects.pydantic_models import jsonrpc as jsonrpc_objects_pydantic_models_app
+from shared.features.objects.python_dataclasses import jsonrpc as jsonrpc_objects_python_dataclasses_app
 
-from .features.class_apps import jsonrpc as jsonrpc_class_apps_app
-from .features.decorators import jsonrpc as jsonrpc_decorators_app
-from .features.jsonrpc_basic import jsonrpc as jsonrpc_jsonrpc_basic_app
-from .features.error_handlers import jsonrpc as jsonrpc_error_handlers_app
-from .features.types.python_stds import jsonrpc as jsonrpc_types_python_std_app
-from .features.objects.python_classes import jsonrpc as jsonrpc_objects_python_classes_app
-from .features.objects.pydantic_models import jsonrpc as jsonrpc_objects_pydantic_models_app
-from .features.objects.python_dataclasses import jsonrpc as jsonrpc_objects_python_dataclasses_app
+from flask_jsonrpc import JSONRPC
 
 if t.TYPE_CHECKING:
     from flask import Response
+
+
+def jsonrpc_decorator(fn: t.Callable[..., str]) -> t.Callable[..., str]:
+    def decorator(string: str) -> str:
+        rv = fn(string)
+        return f'{rv} from decorator, ;)'
+
+    return decorator
+
+
+def jsonrpc_decorator_wrapped(fn: t.Callable[..., str]) -> t.Callable[..., str]:
+    @functools.wraps(fn)
+    def decorator(string: str) -> str:
+        rv = fn(string)
+        return f'{rv} from decorator, ;)'
+
+    return decorator
+
+
+class MyException(Exception):
+    pass
+
+
+class MyNotRegisteredException(Exception):
+    pass
 
 
 def create_app(test_config: t.Optional[dict[str, t.Any]] = None) -> Flask:  # noqa: C901
@@ -93,6 +119,38 @@ def create_app(test_config: t.Optional[dict[str, t.Any]] = None) -> Flask:  # no
     @jsonrpc.method('jsonrpc.greeting')
     def greeting(name: str = 'Flask JSON-RPC') -> str:
         return f'Hello {name}'
+
+    @jsonrpc.method('jsonrpc.echo')
+    def echo(string: str, _some: t.Any = None) -> str:  # noqa: ANN401
+        return string
+
+    @jsonrpc.method('jsonrpc.notify')
+    def notify(_string: t.Optional[str] = None) -> None:
+        pass
+
+    @jsonrpc.method('jsonrpc.fails')
+    def fails(n: int) -> int:
+        if n % 2 == 0:
+            return n
+        raise ValueError('number is odd')
+
+    @jsonrpc.method('jsonrpc.decorators')
+    @jsonrpc_decorator
+    def decorators(string: str) -> str:
+        return f'Hello {string}'
+
+    @jsonrpc.method('jsonrpc.wrappedDecorators')
+    @jsonrpc_decorator_wrapped
+    def wrapped_decorators(string: str) -> str:
+        return f'Hello {string}'
+
+    @jsonrpc.method('jsonrpc.failsWithCustomException')
+    def fails_with_custom_exception(_string: t.Optional[str] = None) -> t.NoReturn:
+        raise MyException('example of fail with custom exception that will be handled')
+
+    @jsonrpc.method('jsonrpc.failsWithCustomExceptionNotRegistered')
+    def fails_with_custom_exception_not_registered(_string: t.Optional[str] = None) -> t.NoReturn:
+        raise MyNotRegisteredException('example of fail with custom exception that will not be handled')
 
     @flask_app.route('/health')
     def health() -> 'Response':

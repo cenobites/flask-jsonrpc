@@ -1,17 +1,32 @@
 {
-    "name": "cenobites/flask-jsonrpc",
-    "image": "mcr.microsoft.com/devcontainers/python:3",
-    "customizations": {
-      "vscode": {
-        "settings": {
-          "python.defaultInterpreterPath": "${workspaceFolder}/.venv",
-          "python.terminal.activateEnvInCurrentTerminal": true,
-          "python.terminal.launchArgs": [
-            "-X",
-            "dev"
-          ]
-        }
-      }
-    },
-    "onCreateCommand": ".devcontainer/on-create-command.sh"
-  }
+  "name": "cenobites/flask-jsonrpc",
+  "dockerComposeFile": "../.devcontainer/compose.yml",
+  "service": "vscode",
+  "runServices": [
+    "vscode"
+  ],
+  "workspaceFolder": "/workspace",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "charliermarsh.ruff",
+        "kevinrose.vsc-python-indent",
+        "mosapride.zenkaku",
+        "ms-azuretools.vscode-docker",
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "njpwerner.autodocstring",
+        "redhat.vscode-yaml",
+        "shardulm94.trailing-spaces",
+        "tamasfe.even-better-toml",
+        "yzhang.markdown-all-in-one"
+      ]
+    }
+  },
+  "containerEnv": {
+    "UV_PROJECT_ENVIRONMENT": "/home/vscode/.venv"
+  },
+  "postCreateCommand": "uv sync --frozen",
+  "postStartCommand": "uv run pre-commit install",
+  "remoteUser": "vscode"
+}
