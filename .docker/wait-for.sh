@@ -21,6 +21,7 @@ USAGE
 
 wait_for() {
   for i in `seq $TIMEOUT` ; do
+    echo "Waiting for $HOST:$PORT..."
     nc -z "$HOST" "$PORT" > /dev/null 2>&1
 
     result=$?

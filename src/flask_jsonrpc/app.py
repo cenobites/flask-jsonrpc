@@ -80,9 +80,9 @@ class JSONRPC(JSONRPCDecoratorMixin):
         url_scheme = app.config['PREFERRED_URL_SCHEME']
         url = urlsplit(self.path)
 
-        self.path = f"{app_root.rstrip('/')}{url.path}"
+        self.path = f'{app_root.rstrip("/")}{url.path}'
         self.base_url = (
-            f"{url.scheme or url_scheme}://{url.netloc or http_host}/{self.path.lstrip('/')}" if http_host else None
+            f'{url.scheme or url_scheme}://{url.netloc or http_host}/{self.path.lstrip("/")}' if http_host else None
         )
 
         self.get_jsonrpc_site().set_path(self.path)
@@ -117,7 +117,7 @@ class JSONRPC(JSONRPCDecoratorMixin):
         path_url = urlsplit(path)
 
         url = urlsplit(self.base_url or path)
-        base_url = f"{url.scheme}://{url.netloc}/{url.path.lstrip('/')}" if self.base_url else None
+        base_url = f'{url.scheme}://{url.netloc}/{url.path.lstrip("/")}' if self.base_url else None
 
         jsonrpc_app.get_jsonrpc_site().set_path(path_url.path)
         jsonrpc_app.get_jsonrpc_site().set_base_url(base_url)

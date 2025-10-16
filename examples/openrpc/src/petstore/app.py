@@ -44,8 +44,7 @@ openrpc = OpenRPC(
             version='1.0.0',
             title='Petstore Expanded',
             description=(
-                'A sample API that uses a petstore as an example to '
-                'demonstrate features in the OpenRPC specification'
+                'A sample API that uses a petstore as an example to demonstrate features in the OpenRPC specification'
             ),
             terms_of_service='https://open-rpc.org',
             contact=st.Contact(name='OpenRPC Team', email='doesntexist@open-rpc.org', url='https://open-rpc.org'),
@@ -106,18 +105,18 @@ PETS = [Pet(id=1, name='Bob', tag='dog'), Pet(id=2, name='Eve', tag='cat'), Pet(
         st.ContentDescriptor(
             name='tags',
             description='tags to filter by',
-            schema=st.Schema(type=st.SchemaDataType.ARRAY, items=st.Schema(type=st.SchemaDataType.STRING)),
+            schema_=st.Schema(type=st.SchemaDataType.ARRAY, items=st.Schema(type=st.SchemaDataType.STRING)),
         ),
         st.ContentDescriptor(
             name='limit',
             description='maximum number of results to return',
-            schema=st.Schema(type=st.SchemaDataType.INTEGER),
+            schema_=st.Schema(type=st.SchemaDataType.INTEGER),
         ),
     ],
     result=st.ContentDescriptor(
         name='pet',
         description='pet response',
-        schema=st.Schema(type=st.SchemaDataType.ARRAY, items=st.Schema(ref='#/components/schemas/Pet')),
+        schema_=st.Schema(type=st.SchemaDataType.ARRAY, items=st.Schema(ref='#/components/schemas/Pet')),
     ),
 )
 @jsonrpc.method('Petstore.get_pets')
@@ -135,11 +134,11 @@ def get_pets(tags: t.Optional[list[str]] = None, limit: t.Optional[int] = None) 
     description='Creates a new pet in the store.  Duplicates are allowed',
     params=[
         st.ContentDescriptor(
-            name='newPet', description='Pet to add to the store.', schema=st.Schema(ref='#/components/schemas/NewPet')
+            name='newPet', description='Pet to add to the store.', schema_=st.Schema(ref='#/components/schemas/NewPet')
         )
     ],
     result=st.ContentDescriptor(
-        name='pet', description='the newly created pet', schema=st.Schema(ref='#/components/schemas/Pet')
+        name='pet', description='the newly created pet', schema_=st.Schema(ref='#/components/schemas/Pet')
     ),
 )
 @jsonrpc.method('Petstore.create_pet')
@@ -154,11 +153,14 @@ def create_pet(name: str, tag: str) -> Pet:
     description='Returns a user based on a single ID, if the user does not have access to the pet',
     params=[
         st.ContentDescriptor(
-            name='id', description='ID of pet to fetch', required=True, schema=st.Schema(type=st.SchemaDataType.INTEGER)
+            name='id',
+            description='ID of pet to fetch',
+            required=True,
+            schema_=st.Schema(type=st.SchemaDataType.INTEGER),
         )
     ],
     result=st.ContentDescriptor(
-        name='pet', description='pet response', schema=st.Schema(ref='#/components/schemas/Pet')
+        name='pet', description='pet response', schema_=st.Schema(ref='#/components/schemas/Pet')
     ),
 )
 @jsonrpc.method('Petstore.get_pet_by_id')
@@ -175,10 +177,10 @@ def get_pet_by_id(id: int) -> Pet:
             name='id',
             description='ID of pet to delete',
             required=True,
-            schema=st.Schema(type=st.SchemaDataType.INTEGER),
+            schema_=st.Schema(type=st.SchemaDataType.INTEGER),
         )
     ],
-    result=st.ContentDescriptor(name='pet', description='pet deleted', schema=st.Schema()),
+    result=st.ContentDescriptor(name='pet', description='pet deleted', schema_=st.Schema()),
 )
 @jsonrpc.method('Petstore.delete_pet_by_id')
 def delete_pet_by_id(id: int) -> None:

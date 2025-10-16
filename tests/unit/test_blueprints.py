@@ -107,7 +107,7 @@ def test_jsonrpc_blueprint_using_error_handler() -> None:
 
     @jsonrpc_api_1.errorhandler(CustomException)
     def handle_custom_exc_jsonrpc_api_1(exc: CustomException) -> str:
-        return f"jsonrpc_api_1: {exc.data['message']}"
+        return f'jsonrpc_api_1: {exc.data["message"]}'
 
     @jsonrpc_api_1.method('blue1.index')
     def index_b1() -> str:
@@ -121,7 +121,7 @@ def test_jsonrpc_blueprint_using_error_handler() -> None:
 
     @jsonrpc_api_2.errorhandler(CustomException)
     def handle_custom_exc_jsonrpc_api_2(exc: CustomException) -> str:
-        return f"jsonrpc_api_2: {exc.data['message']}"
+        return f'jsonrpc_api_2: {exc.data["message"]}'
 
     @jsonrpc_api_2.method('blue2.index')
     def index_b2() -> str:

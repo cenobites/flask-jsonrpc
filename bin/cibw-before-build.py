@@ -25,13 +25,24 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
+import sys
+
 from tomlkit import dumps
-import tomllib
+
+if sys.version_info < (3, 11):
+    import tomli as tomllib
+else:
+    import tomllib
 
 with open('pyproject.toml', 'rb') as fp:
     pyproject = tomllib.load(fp)
 
-pyproject['build-system']['requires'] = ['setuptools>=61.0', 'wheel>=0.42', 'mypy', 'pydantic']
+pyproject['build-system']['requires'] = [
+    'wheel>=0.42',
+    'setuptools>=77.0',
+    'mypy==1.18.2',
+    'pydantic>=1.7.4,!=1.8,!=1.8.1,!=2.0.0,!=2.0.1,!=2.1.0,<3.0.0',
+]
 pyproject['build-system']['build-backend'] = 'setuptools.build_meta'
 
 with open('pyproject.toml', 'w') as fp:

@@ -25,49 +25,37 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 import os
-import time
+import typing as t
 from pathlib import Path
-import unittest
 
+import pytest
 import urllib3
 import requests
-from selenium import webdriver
-
-# Python 3.11+
-try:
-    from typing import Self
-except ImportError:  # pragma: no cover
-    from typing_extensions import Self
 
 WEB_DRIVER_SCREENSHOT_DIR = Path(os.environ['PYTEST_CACHE_DIR']) / 'screenshots'
 
 
-class APITestCase(unittest.TestCase):
-    def setUp(self: Self) -> None:
-        urllib3.disable_warnings()
-        session = requests.Session()
-        session.verify = False
-        self.requests = session
+@pytest.fixture(autouse=True, scope='module')
+def setup_module() -> None:
+    urllib3.disable_warnings()
 
 
-class WebDriverTestCase(unittest.TestCase):
-    def setUp(self: Self) -> None:
-        chrome_prefs = {}
-        chrome_options = webdriver.ChromeOptions()
-        chrome_options.add_argument('--no-sandbox')
-        chrome_options.add_argument('--headless')
-        chrome_options.add_argument('--disable-gpu')
-        chrome_options.add_argument('--allow-insecure-localhost')
-        chrome_options.add_argument('--ignore-certificate-errors')
-        chrome_options.add_experimental_option('prefs', chrome_prefs)
-        chrome_options.accept_insecure_certs = True
-        self.driver = webdriver.Chrome(options=chrome_options)
-        self.driver.delete_all_cookies()
-        self.driver.implicitly_wait(10)
-        self.addCleanup(self.driver.quit)
-        self.addCleanup(self.take_screenshot)
-        if not WEB_DRIVER_SCREENSHOT_DIR.exists():
-            WEB_DRIVER_SCREENSHOT_DIR.mkdir(parents=True)
+@pytest.fixture(scope='session')
+def browser_context_args(browser_context_args: dict[str, t.Any]) -> dict[str, t.Any]:
+    return {**browser_context_args, 'ignore_https_errors': True, 'viewport': {'width': 1280, 'height': 720}}
 
-    def take_screenshot(self: Self) -> None:
-        self.driver.get_screenshot_as_file(str(WEB_DRIVER_SCREENSHOT_DIR / f'{self.id()}-{time.time()}.png'))
+
+@pytest.fixture(scope='function')
+def session() -> t.Generator[requests.Session, None, None]:
+    session = requests.Session()
+    session.verify = False
+    yield session
+    session.close()
+
+
+@pytest.fixture(scope='function')
+def async_session() -> t.Generator[requests.Session, None, None]:
+    session = requests.Session()
+    session.verify = False
+    yield session
+    session.close()

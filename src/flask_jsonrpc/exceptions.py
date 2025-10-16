@@ -55,9 +55,9 @@ class JSONRPCError(Exception):
                               JSON-RPC over HTTP Errors section
     """
 
-    code: int = 0
     message: str | None = None
-    data: t.Any | None = None
+    code: int = 0
+    data: t.Any | None = None  # noqa: ANN401
     status_code: int = 400
 
     def __init__(
@@ -69,14 +69,10 @@ class JSONRPCError(Exception):
     ) -> None:
         """Setup the Exception and overwrite the default message"""
         super().__init__()
-        if message is not None:
-            self.message = message
-        if code is not None:
-            self.code = code
-        if data is not None:
-            self.data = data
-        if status_code is not None:
-            self.status_code = status_code
+        self.message = message or self.message
+        self.code = code or self.code
+        self.data = data or self.data
+        self.status_code = status_code or self.status_code
 
     @property
     def jsonrpc_format(self: Self) -> dict[str, t.Any]:
@@ -107,36 +103,66 @@ class ParseError(JSONRPCError):
     An error occurred on the server while parsing the JSON text.
     """
 
-    code = -32700
-    message = _('Parse error')
+    def __init__(
+        self: Self,
+        message: str | None = _('Parse error'),
+        code: int | None = -32700,
+        data: t.Any | None = None,  # noqa: ANN401
+        status_code: int | None = 400,
+    ) -> None:
+        super().__init__(message, code, data, status_code)
 
 
 class InvalidRequestError(JSONRPCError):
     """The JSON sent is not a valid Request object."""
 
-    code = -32600
-    message = _('Invalid Request')
+    def __init__(
+        self: Self,
+        message: str | None = _('Invalid Request'),
+        code: int | None = -32600,
+        data: t.Any | None = None,  # noqa: ANN401
+        status_code: int | None = 400,
+    ) -> None:
+        super().__init__(message, code, data, status_code)
 
 
 class MethodNotFoundError(JSONRPCError):
     """The method does not exist / is not available."""
 
-    code = -32601
-    message = _('Method not found')
+    def __init__(
+        self: Self,
+        message: str | None = _('Method not found'),
+        code: int | None = -32601,
+        data: t.Any | None = None,  # noqa: ANN401
+        status_code: int | None = 400,
+    ) -> None:
+        super().__init__(message, code, data, status_code)
 
 
 class InvalidParamsError(JSONRPCError):
     """Invalid method parameter(s)."""
 
-    code = -32602
-    message = _('Invalid params')
+    def __init__(
+        self: Self,
+        message: str | None = _('Invalid params'),
+        code: int | None = -32602,
+        data: t.Any | None = None,  # noqa: ANN401
+        status_code: int | None = 400,
+    ) -> None:
+        super().__init__(message, code, data, status_code)
 
 
 class InternalError(JSONRPCError):
     """Internal JSON-RPC error."""
 
-    code = -32603
-    message = _('Internal error')
+    def __init__(
+        self: Self,
+        message: str | None = _('Internal error'),
+        code: int | None = -32603,
+        data: t.Any | None = None,  # noqa: ANN401
+        status_code: int | None = 400,
+    ) -> None:
+        super().__init__(message, code, data, status_code)
 
 
 class ServerError(JSONRPCError):
@@ -145,6 +171,11 @@ class ServerError(JSONRPCError):
     code: -32000 to -32099 Server error.
     """
 
-    code = -32000
-    message = _('Server error')
-    status_code = 500
+    def __init__(
+        self: Self,
+        message: str | None = _('Server error'),
+        code: int | None = -32000,
+        data: t.Any | None = None,  # noqa: ANN401
+        status_code: int | None = 500,
+    ) -> None:
+        super().__init__(message, code, data, status_code)

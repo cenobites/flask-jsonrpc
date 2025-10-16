@@ -32,6 +32,7 @@ wait_for()
     WAITFORIT_start_ts=$(date +%s)
     while :
     do
+        echo "Waiting for $WAITFORIT_HOST:$WAITFORIT_PORT..."
         if [[ $WAITFORIT_ISBUSY -eq 1 ]]; then
             nc -z $WAITFORIT_HOST $WAITFORIT_PORT
             WAITFORIT_result=$?

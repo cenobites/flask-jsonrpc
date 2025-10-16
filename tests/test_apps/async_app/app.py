@@ -25,12 +25,20 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-import os
 import typing as t
 import asyncio
 import functools
 
 from flask import Flask, jsonify
+
+from shared.features.class_apps import jsonrpc as jsonrpc_class_apps_app
+from shared.features.decorators import jsonrpc as jsonrpc_decorators_app
+from shared.features.jsonrpc_basic import jsonrpc as jsonrpc_jsonrpc_basic_app
+from shared.features.error_handlers import jsonrpc as jsonrpc_error_handlers_app
+from shared.features.types.python_stds import jsonrpc as jsonrpc_types_python_std_app
+from shared.features.objects.python_classes import jsonrpc as jsonrpc_objects_python_classes_app
+from shared.features.objects.pydantic_models import jsonrpc as jsonrpc_objects_pydantic_models_app
+from shared.features.objects.python_dataclasses import jsonrpc as jsonrpc_objects_python_dataclasses_app
 
 from flask_jsonrpc import JSONRPC
 
@@ -72,6 +80,45 @@ def create_app(test_config: t.Optional[dict[str, t.Any]] = None) -> Flask:  # no
         flask_app.config.update(test_config)
 
     jsonrpc = JSONRPC(flask_app, '/api', enable_web_browsable_api=True)
+    jsonrpc.register_blueprint(
+        flask_app, jsonrpc_jsonrpc_basic_app, url_prefix='/jsonrpc-basic', enable_web_browsable_api=True
+    )
+    jsonrpc.register_blueprint(
+        flask_app, jsonrpc_class_apps_app, url_prefix='/class-apps', enable_web_browsable_api=True
+    )
+    jsonrpc.register_blueprint(
+        flask_app, jsonrpc_decorators_app, url_prefix='/decorators', enable_web_browsable_api=True
+    )
+    jsonrpc.register_blueprint(
+        flask_app, jsonrpc_error_handlers_app, url_prefix='/error-handlers', enable_web_browsable_api=True
+    )
+    jsonrpc.register_blueprint(
+        flask_app, jsonrpc_types_python_std_app, url_prefix='/types/python-stds', enable_web_browsable_api=True
+    )
+    jsonrpc.register_blueprint(
+        flask_app,
+        jsonrpc_objects_python_classes_app,
+        url_prefix='/objects/python-classes',
+        enable_web_browsable_api=True,
+    )
+    jsonrpc.register_blueprint(
+        flask_app,
+        jsonrpc_objects_python_dataclasses_app,
+        url_prefix='/objects/python-dataclasses',
+        enable_web_browsable_api=True,
+    )
+    jsonrpc.register_blueprint(
+        flask_app,
+        jsonrpc_objects_pydantic_models_app,
+        url_prefix='/objects/pydantic-models',
+        enable_web_browsable_api=True,
+    )
+
+    jsonrpc.errorhandler(ValueError)
+
+    async def handle_value_error_exception(ex: ValueError) -> dict[str, t.Any]:
+        await asyncio.sleep(0)
+        return {'message': 'Generic global error handler does not work, :(', 'code': '0000'}
 
     @jsonrpc.errorhandler(MyException)
     async def handle_my_exception(ex: MyException) -> dict[str, t.Any]:
@@ -126,8 +173,3 @@ def create_app(test_config: t.Optional[dict[str, t.Any]] = None) -> Flask:  # no
         return jsonify({'status': 'UP'})
 
     return flask_app
-
-
-if __name__ == '__main__':
-    app = create_app({'SERVER_NAME': os.getenv('FLASK_SERVER_NAME')})
-    app.run(host='0.0.0.0')

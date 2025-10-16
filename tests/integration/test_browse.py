@@ -26,21 +26,12 @@
 # POSSIBILITY OF SUCH DAMAGE.
 import os
 
-from selenium.webdriver.common.by import By
-
-from .conftest import WebDriverTestCase
-
-# Python 3.11+
-try:
-    from typing import Self
-except ImportError:  # pragma: no cover
-    from typing_extensions import Self
+from playwright.sync_api import Page, expect
 
 BROWSABLE_API_URL = os.environ['BROWSABLE_API_URL']
 
 
-class WebBrowsableAPITest(WebDriverTestCase):
-    def test_index(self: Self) -> None:
-        self.driver.get(BROWSABLE_API_URL)
-        logo_link = self.driver.find_element(By.XPATH, '//*[@id="logo-link"]')
-        self.assertEqual('Web browsable API', logo_link.text)
+def test_index(page: Page) -> None:
+    page.goto(BROWSABLE_API_URL)
+    logo_link = page.locator('#logo-link')
+    expect(logo_link).to_have_text('Web browsable API')

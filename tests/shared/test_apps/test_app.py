@@ -229,12 +229,60 @@ def test_app_system_describe(session: 'Session', api_url: str) -> None:
     assert data['result']['servers'] is not None
     assert 'url' in data['result']['servers'][0]
     assert data['result']['methods'] == {
+        'jsonrpc.decorators': {
+            'options': {'notification': True, 'validate': True},
+            'params': [{'name': 'string', 'type': 'String'}],
+            'returns': {'type': 'String'},
+            'type': 'method',
+        },
+        'jsonrpc.echo': {
+            'options': {'notification': True, 'validate': True},
+            'params': [{'name': 'string', 'type': 'String'}, {'name': '_some', 'type': 'Object'}],
+            'returns': {'type': 'String'},
+            'type': 'method',
+        },
+        'jsonrpc.fails': {
+            'options': {'notification': True, 'validate': True},
+            'params': [{'name': 'n', 'type': 'Number'}],
+            'returns': {'type': 'Number'},
+            'type': 'method',
+        },
+        'jsonrpc.failsWithCustomException': {
+            'options': {'notification': True, 'validate': True},
+            'params': [{'name': '_string', 'type': 'String'}],
+            'returns': {'type': 'Null'},
+            'type': 'method',
+        },
+        'jsonrpc.failsWithCustomExceptionNotRegistered': {
+            'options': {'notification': True, 'validate': True},
+            'params': [{'name': '_string', 'type': 'String'}],
+            'returns': {'type': 'Null'},
+            'type': 'method',
+        },
         'jsonrpc.greeting': {
             'options': {'notification': True, 'validate': True},
             'params': [{'name': 'name', 'type': 'String'}],
             'returns': {'type': 'String'},
             'type': 'method',
         },
-        'rpc.describe': {'options': {}, 'params': [], 'returns': {'type': 'Object'}, 'type': 'method'},
+        'jsonrpc.notify': {
+            'options': {'notification': True, 'validate': True},
+            'params': [{'name': '_string', 'type': 'String'}],
+            'returns': {'type': 'Null'},
+            'type': 'method',
+        },
+        'jsonrpc.wrappedDecorators': {
+            'options': {'notification': True, 'validate': True},
+            'params': [{'name': 'string', 'type': 'String'}],
+            'returns': {'type': 'String'},
+            'type': 'method',
+        },
+        'rpc.describe': {
+            'description': 'Service description for JSON-RPC 2.0',
+            'options': {},
+            'params': [],
+            'returns': {'type': 'Object'},
+            'type': 'method',
+        },
     }
     assert rv.status_code == 200

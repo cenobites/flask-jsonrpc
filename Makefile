@@ -1,4 +1,4 @@
-.PHONY: all clean style typing test test-release release publish-test publish env
+.PHONY: all clean style typing test test-release release env
 
 VIRTUALENV_EXISTS := $(shell [ -d .venv ] && echo 1 || echo 0)
 
@@ -7,44 +7,34 @@ all: clean test
 
 clean:
 	@find {src,examples,tests} -regex ".*\.\(so\|pyc\)" | xargs rm -rf
-	@find {src,examples,tests} -name "__pycache__" -o -name ".coverage" -o -name "junit" -o -name "coverage.lcov" -o -name "htmlcov" -o -name ".tox"  -o -name ".pytest_cache" -o -name ".ruff_cache"  -o -name ".pkg" -o -name ".tmp" | xargs rm -rf
-	@rm -rf .coverage coverage.* .eggs/ .mypy_cache/ .pytype/ .ruff_cache/ .pytest_cache/ .tox/ src/*.egg-info/ htmlcov/ junit/ htmldoc/ build/ dist/ wheelhouse/
+	@find {src,examples,tests} -name "__pycache__" -o -name ".coverage" -o -name "junit" -o -name "coverage.lcov" -o -name "htmlcov" -o -name ".tox"  -o -name ".pytest_cache" -o -name ".ruff_cache"  -o -name ".pkg" -o -name ".tmp" -o -name "*.so" | xargs rm -rf
+	@rm -rf .coverage coverage.* .eggs/ .mypy_cache/ .pytype/ .ruff_cache/ .pytest_cache/ .tox/ src/*.egg-info/ htmlcov/ junit/ htmldoc/ build/ dist/ wheelhouse/ __pycache__/
 
 style:
-	@ruff check .
-	@ruff format .
+	@uv run ruff check .
+	@uv run ruff format .
 
 typing:
-	@mypy --install-types --non-interactive src/
+	@uv run mypy --install-types --non-interactive src/
+	@uv run pyright
 
 test: clean
-	@python -m pip install --upgrade tox
-	@python -m tox -p all
+	@uv run tox run
 
 test-examples: clean
-	@python -m pip install --upgrade tox
-	@find examples/ -name "tox.ini" -print0 | xargs -0 -t -I % -P 4 tox -p all -c %
+	@find examples/ -name "tox.ini" -print0 | xargs -0 -I {} -P 4 uv run tox run -e py,py-async -c {}
 
-test-release: test
+test-release: clean test
 	$(shell ./bin/docker-compose-test.sh)
 	$(shell ./bin/docker-compose-it.sh)
 
 release: test
-	@python -m pip install --upgrade -r requirements/cbuild.txt
-	@python -m build
-	@MYPYC_ENABLE=1 python setup.py bdist_wheel
-	@cibuildwheel
-
-publish-test: release
-	@python -m pip install --upgrade twine
-	@python -m twine upload --repository testpypi dist/*
-
-publish: release
-	@python -m pip install --upgrade twine
-	@python -m twine upload dist/*
+	@uv build
+	@uv tool run twine check --strict dist/*
 
 env:
 ifeq ($(VIRTUALENV_EXISTS), 0)
-	@python -m venv --upgrade-deps .venv
-	@.venv/bin/pip install -r requirements/local.txt
+	@uv venv --clear
 endif
+	@uv sync --locked
+	@echo "To activate the virtualenv, run: source .venv/bin/activate"

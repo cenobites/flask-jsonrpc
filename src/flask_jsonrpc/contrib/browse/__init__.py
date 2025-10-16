@@ -79,8 +79,8 @@ class JSONRPCBrowse:
         server_urls: dict[str, str] = {}
         service_describes = [site.describe() for site in self.jsonrpc_sites]
         for service_describe in service_describes:
-            server_urls.update({name: service_describe.servers[0].url for name in service_describe.methods})
-        url_prefix = f"{request.script_root}{request.path.rstrip('/')}"
+            server_urls.update(dict.fromkeys(service_describe.methods, service_describe.servers[0].url))
+        url_prefix = f'{request.script_root}{request.path.rstrip("/")}'
         return render_template('browse/index.html', url_prefix=url_prefix, server_urls=server_urls)
 
     def vf_json_packages(self: Self) -> ft.ResponseReturnValue:

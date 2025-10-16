@@ -1,9 +1,24 @@
 services:
+  unit-tests:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: unit-tests
+      args:
+        - DOCKER_BUILD_TARGET=unit-tests
+    command: >
+      sh -c "py.test"
+
   sut:
     build:
       context: .
-      dockerfile: Dockerfile.it
+      dockerfile: Dockerfile
+      target: integration-tests
+      args:
+        - PYTHON_DOCKER_IMAGE_TAG=3.13-slim
+        - DOCKER_BUILD_TARGET=integration-tests
     environment:
+      - CI=1
       - PYTEST_CACHE_DIR=.pytest_cache
       - SITE_DOMAIN=app.flask-jsonrpc.cenobit.es
       - SITE_PORT=80
@@ -15,6 +30,8 @@ services:
       - .pytest_cache/test-results/app:/app/test-results
       - .pytest_cache/screnshots/app:/app/.pytest_cache/screnshots
     depends_on:
+      app:
+        condition: service_healthy
       nginx:
         condition: service_healthy
     networks:
@@ -23,7 +40,10 @@ services:
   app:
     build:
       context: .
-      dockerfile: Dockerfile.local
+      dockerfile: Dockerfile
+      target: app
+      args:
+        - DOCKER_BUILD_TARGET=app
     environment:
       - FLASK_SERVER_NAME=app:5000
     user: ${UID:-0}:${GID:-0}
@@ -40,11 +60,38 @@ services:
       retries: 5
       start_period: 5s
 
+  nginx:
+    image: nginx:mainline-alpine
+    ports:
+      - '80:80'
+      - '443:443'
+    volumes:
+      - .docker/nginx/ssl:/etc/nginx/ssl
+      - .docker/nginx/conf.d/app.flask-jsonrpc.cenobit.es.conf:/etc/nginx/nginx.conf
+    depends_on:
+      app:
+        condition: service_healthy
+    networks:
+      default:
+        aliases:
+          - app.flask-jsonrpc.cenobit.es
+    healthcheck:
+      test: wget -qO - nginx:80/health || exit 1
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
+
   async-sut:
     build:
       context: .
-      dockerfile: Dockerfile.it
+      dockerfile: Dockerfile
+      target: integration-tests
+      args:
+        - PYTHON_DOCKER_IMAGE_TAG=3.13-slim
+        - DOCKER_BUILD_TARGET=integration-tests
     environment:
+      - CI=1
       - PYTEST_CACHE_DIR=.pytest_cache
       - SITE_DOMAIN=async-app.flask-jsonrpc.cenobit.es
       - SITE_PORT=80
@@ -53,12 +100,14 @@ services:
       - BROWSABLE_API_URL=https://async-app.flask-jsonrpc.cenobit.es/api/browse
     user: ${UID:-0}:${GID:-0}
     command: >
-      ./wait-for.sh async-app.flask-jsonrpc.cenobit.es:80 -t 600 -- pytest -n auto --junitxml=test-results/junit.xml test_async_app.py
+      ./wait-for-it.sh async-app.flask-jsonrpc.cenobit.es:80 -t 600 -- py.test -n auto -vv --tb=short --junitxml=test-results/junit.xml
     volumes:
       - .pytest_cache/test-results/async-app:/app/test-results
       - .pytest_cache/screnshots/async-app:/app/.pytest_cache/screnshots
     depends_on:
-      nginx:
+      async-app:
+        condition: service_healthy
+      async-nginx:
         condition: service_healthy
     networks:
       - default
@@ -66,9 +115,10 @@ services:
   async-app:
     build:
       context: .
-      dockerfile: Dockerfile.local
+      dockerfile: Dockerfile
+      target: app
       args:
-        - FLASK_ASYNC=1
+        - DOCKER_BUILD_TARGET=app
     environment:
       - FLASK_SERVER_NAME=async-app:5000
     user: ${UID:-0}:${GID:-0}
@@ -85,11 +135,38 @@ services:
       retries: 5
       start_period: 5s
 
+  async-nginx:
+    image: nginx:mainline-alpine
+    ports:
+      - '80:80'
+      - '443:443'
+    volumes:
+      - .docker/nginx/ssl:/etc/nginx/ssl
+      - .docker/nginx/conf.d/async-app.flask-jsonrpc.cenobit.es.conf:/etc/nginx/nginx.conf
+    depends_on:
+      async-app:
+        condition: service_healthy
+    networks:
+      default:
+        aliases:
+          - async-app.flask-jsonrpc.cenobit.es
+    healthcheck:
+      test: wget -qO - async-nginx:80/health || exit 1
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
+
   mypyc-sut:
     build:
       context: .
-      dockerfile: Dockerfile.it
+      dockerfile: Dockerfile
+      target: integration-tests
+      args:
+        - PYTHON_DOCKER_IMAGE_TAG=3.13-slim
+        - DOCKER_BUILD_TARGET=integration-tests
     environment:
+      - CI=1
       - PYTEST_CACHE_DIR=.pytest_cache
       - SITE_DOMAIN=mypyc-app.flask-jsonrpc.cenobit.es
       - SITE_PORT=80
@@ -101,7 +178,7 @@ services:
       - .pytest_cache/test-results/app:/app/test-results
       - .pytest_cache/screnshots/app:/app/.pytest_cache/screnshots
     depends_on:
-      nginx:
+      mypyc-nginx:
         condition: service_healthy
     networks:
       - default
@@ -109,9 +186,10 @@ services:
   mypyc-app:
     build:
       context: .
-      dockerfile: Dockerfile.local
+      dockerfile: Dockerfile
+      target: app
       args:
-        - MYPYC_ENABLE=1
+        - DOCKER_BUILD_TARGET=mypyc-app
     environment:
       - FLASK_SERVER_NAME=mypyc-app:5000
     user: ${UID:-0}:${GID:-0}
@@ -128,30 +206,23 @@ services:
       retries: 5
       start_period: 5s
 
-  nginx:
+  mypyc-nginx:
     image: nginx:mainline-alpine
     ports:
       - '80:80'
       - '443:443'
     volumes:
-      - .docker/nginx/conf.d:/etc/nginx/conf.d
       - .docker/nginx/ssl:/etc/nginx/ssl
-      - .docker/nginx/nginx.conf:/etc/nginx/nginx.conf
+      - .docker/nginx/conf.d/mypyc-app.flask-jsonrpc.cenobit.es.conf:/etc/nginx/nginx.conf
     depends_on:
-      app:
-        condition: service_healthy
-      async-app:
-        condition: service_healthy
       mypyc-app:
         condition: service_healthy
     networks:
       default:
         aliases:
-          - app.flask-jsonrpc.cenobit.es
-          - async-app.flask-jsonrpc.cenobit.es
           - mypyc-app.flask-jsonrpc.cenobit.es
     healthcheck:
-      test: wget -qO - nginx:80/health || exit 1
+      test: wget -qO - mypyc-nginx:80/health || exit 1
       interval: 5s
       timeout: 3s
       retries: 5
@@ -159,3 +230,14 @@ services:
 
 networks:
   default:
+    driver: bridge
+    driver_opts:
+      com.docker.network.bridge.enable_icc: "true"
+      com.docker.network.bridge.enable_ip_masquerade: "true"
+      com.docker.network.bridge.host_binding_ipv4: "172.20.0.1"
+      com.docker.network.driver.mtu: "1500"
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.20.0.0/16
+          gateway: 172.20.0.1

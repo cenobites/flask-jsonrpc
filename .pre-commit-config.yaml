@@ -4,23 +4,33 @@ fail_fast: true
 default_language_version:
   python: python3.13
 ci:
-  autoupdate_schedule: monthly
+  autoupdate_schedule: weekly
 repos:
 - repo: https://github.com/pre-commit/pre-commit-hooks
   rev: v5.0.0
   hooks:
-    - id: check-byte-order-marker
+    - id: check-ast
+    - id: check-builtin-literals
     - id: check-case-conflict
     - id: check-executables-have-shebangs
+    - id: check-illegal-windows-names
     - id: check-json
     - id: check-merge-conflict
+    - id: check-shebang-scripts-are-executable
+    - id: check-symlinks
+    - id: check-toml
     - id: check-yaml
-    - id: end-of-file-fixer
-    - id: mixed-line-ending
-    - id: trailing-whitespace
     - id: debug-statements
+    - id: fix-byte-order-marker
+    - id: mixed-line-ending
+    - id: end-of-file-fixer
+    - id: trailing-whitespace
 - repo: https://github.com/astral-sh/ruff-pre-commit
   rev: v0.7.1
   hooks:
     - id: ruff
     - id: ruff-format
+- repo: https://github.com/astral-sh/uv-pre-commit
+  rev: 0.8.0
+  hooks:
+    - id: uv-lock

@@ -7,20 +7,68 @@ license = {file = "LICENSE.txt"}
 authors = [{name = "Nycholas Oliveira", email = "nycholas@cenobit.es"}]
 maintainers = [{name = "Cenobit Technologies Inc.", email = "hi@cenobit.es"}]
 requires-python = ">=3.9"
-dependencies = ["Flask-JSONRPC@git+https://github.com/cenobites/flask-jsonrpc"]
+dependencies = ["Flask-JSONRPC"]
 
 [project.optional-dependencies]
 async = ["Flask[async]>=3.0.0,<4.0"]
-test = ["pytest"]
+
+[dependency-groups]
+dev = [
+    "tox>=4.30",
+    "tox-uv>=1.26.1"
+]
+tests = [
+    "pytest==8.3.3",
+    "pytest-cov==6.0.0",
+    "pytest-xdist==3.6.1",
+    "pytest-sugar==1.0.0",
+    "pytest-env==1.1.5"
+]
 
 [build-system]
-requires = ["flit_core>=3.2,<4"]
-build-backend = "flit_core.buildapi"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
-[tool.flit.module]
-name = "hrx"
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/hrx"]
+
+[tool.uv.sources]
+Flask-JSONRPC = { path = "../../", editable = true }
 
 [tool.pytest.ini_options]
 pythonpath = "src/"
 testpaths = ["src/hrx", "tests"]
 filterwarnings = ["error"]
+
+[tool.tox]
+requires = [
+    "tox>=4.30",
+    "tox-uv>=1.26.1"
+]
+env_list = [
+    "py3.13", "py3.12", "py3.11", "py3.10", "py3.9",
+    "py3.13-async", "py3.12-async", "py3.11-async", "py3.10-async", "py3.9-async",
+]
+skip_missing_interpreters = true
+
+[tool.tox.env_run_base]
+package = "wheel"
+wheel_build_env = ".pkg"
+runner = "uv-venv-lock-runner"
+env_tmp_dir = "{toxworkdir}/tmp/{envname}"
+constrain_package_deps = true
+use_frozen_constraints = true
+deps = [
+    "async: .[async]"
+]
+dependency_groups = [
+    "tests",
+]
+no_default_groups = true
+commands = [[
+    "pytest", "-n", "auto", "-vv", "--tb=short", "--basetemp={env_tmp_dir}",
+    {replace = "posargs", default = [], extend = true}
+]]

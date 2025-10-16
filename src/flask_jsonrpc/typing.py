@@ -29,7 +29,12 @@ from __future__ import annotations
 import typing as t
 from collections import OrderedDict
 
-from pydantic.main import BaseModel
+from pydantic import ConfigDict
+from pydantic.main import BaseModel as PydanticModel
+
+
+class BaseModel(PydanticModel):
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
 
 class ServiceMethodParamsDescribe(BaseModel):

@@ -74,7 +74,13 @@ def test_rpc_describe_v1(client: 'FlaskClient') -> None:
             'returns': {'type': 'String'},
             'type': 'method',
         },
-        'rpc.describe': {'options': {}, 'params': [], 'returns': {'type': 'Object'}, 'type': 'method'},
+        'rpc.describe': {
+            'description': 'Service description for JSON-RPC 2.0',
+            'options': {},
+            'params': [],
+            'returns': {'type': 'Object'},
+            'type': 'method',
+        },
     }
 
 
@@ -98,5 +104,11 @@ def test_rpc_describe_v2(client: 'FlaskClient') -> None:
             'returns': {'type': 'String'},
             'type': 'method',
         },
-        'rpc.describe': {'options': {}, 'params': [], 'returns': {'type': 'Object'}, 'type': 'method'},
+        'rpc.describe': {
+            'description': 'Service description for JSON-RPC 2.0',
+            'options': {},
+            'params': [],
+            'returns': {'type': 'Object'},
+            'type': 'method',
+        },
     }
