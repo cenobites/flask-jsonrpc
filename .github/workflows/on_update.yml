@@ -25,12 +25,12 @@ jobs:
           - windows-latest
         python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
     steps:
-      - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v6.4.1
+      - uses: actions/checkout@v5
+      - uses: astral-sh/setup-uv@v7.1.0
         with:
           enable-cache: true
           prune-cache: false
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
       - run: |
@@ -46,15 +46,15 @@ jobs:
           - ubuntu-latest
         python-version: ["3.13"]
     steps:
-      - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v6.4.1
+      - uses: actions/checkout@v5
+      - uses: astral-sh/setup-uv@v7.1.0
         with:
           enable-cache: true
           prune-cache: false
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
-      - uses: actions/cache@v4.2.3
+      - uses: actions/cache@v4.3.0
         with:
           path: ./.mypy_cache
           key: mypy|${{ hashFiles('pyproject.toml') }}
@@ -71,12 +71,12 @@ jobs:
           - ubuntu-latest
         python-version: ["3.13"]
     steps:
-      - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v6.4.1
+      - uses: actions/checkout@v5
+      - uses: astral-sh/setup-uv@v7.1.0
         with:
           enable-cache: true
           prune-cache: false
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
       - run: |
@@ -94,12 +94,12 @@ jobs:
           - windows-latest
         python-version: ["3.13"]
     steps:
-      - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v6.4.1
+      - uses: actions/checkout@v5
+      - uses: astral-sh/setup-uv@v7.1.0
         with:
           enable-cache: true
           prune-cache: false
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
       - run: |
@@ -131,7 +131,7 @@ jobs:
     steps:
       - uses: docker/setup-buildx-action@v3.11.1
       - uses: docker/setup-compose-action@v1.2.0
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - run: |
           bash -c "./bin/docker-compose-it.sh ${{ matrix.docker-target-build }} ${{ matrix.python-version }}"
 

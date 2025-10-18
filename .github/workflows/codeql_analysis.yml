@@ -27,16 +27,16 @@ jobs:
       contents: read
       security-events: write
     steps:
-      - uses: actions/checkout@v4
-      - uses: github/codeql-action/init@v3
+      - uses: actions/checkout@v5
+      - uses: github/codeql-action/init@v4
         with:
           languages: ${{ matrix.language }}
-      - uses: astral-sh/setup-uv@v6.4.1
+      - uses: astral-sh/setup-uv@v7.1.0
         if: ${{ matrix.language == 'python' }}
         with:
           enable-cache: true
           prune-cache: false
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         if: ${{ matrix.language == 'python' }}
         with:
           python-version: '3.13'
@@ -44,6 +44,6 @@ jobs:
         if: ${{ matrix.language == 'python' }}
         run: |
           uv build
-      - uses: github/codeql-action/analyze@v3
+      - uses: github/codeql-action/analyze@v4
         with:
           category: security-${{ matrix.language }}
