@@ -30,10 +30,10 @@ import typing as t
 from operator import getitem
 import itertools
 
-from .types import Types, Object
+from .types.types import Types, Object
 
 if t.TYPE_CHECKING:
-    from .types import JSONRPCNewType
+    from .types.types import JSONRPCNewType
 
 
 def urn(name: str, *args: t.Any) -> str:  # noqa: ANN401

@@ -26,15 +26,26 @@
 # POSSIBILITY OF SUCH DAMAGE.
 import pytest
 
-from flask_jsonrpc.settings import JSONRPCSettings
+from flask_jsonrpc.settings import DEFAULTS, JSONRPCSettings
 
 
-def test_settings_simple() -> None:
+def test_settings() -> None:
     settings = JSONRPCSettings({'setting': True})
+    assert hasattr(settings, 'setting')
     assert settings.setting is True
+
+    settings.attr1 = 'value1'
+    assert hasattr(settings, 'attr1')
+    assert settings.attr1 == 'value1'
 
 
 def test_settings_invalid_attr() -> None:
     settings = JSONRPCSettings({'setting': True})
     with pytest.raises(AttributeError, match="invalid setting: 'xxx'"):
         assert settings.xxx is None
+
+
+def test_initialization_with_default() -> None:
+    settings = JSONRPCSettings()
+    for attr, val in DEFAULTS.items():
+        assert getattr(settings, attr) == val

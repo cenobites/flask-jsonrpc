@@ -78,12 +78,12 @@ def handle_color_not_found_exc(exc: ColorNotFoundException) -> ColorError:
     return exc.color_error
 
 
-@jsonrpc.method('jsonrpc.createColor')
+@jsonrpc.method('objects.python_classes.createColor')
 def create_color(color: NewColor) -> Color:
     return Color(id=1, name=color.name, tag=color.tag)
 
 
-@jsonrpc.method('jsonrpc.createManyColor')
+@jsonrpc.method('objects.python_classes.createManyColor')
 def create_many_colors(colors: list[NewColor], color: t.Optional[NewColor] = None) -> list[Color]:
     new_color = [Color(id=i, name=pet.name, tag=pet.tag) for i, pet in enumerate(colors)]
     if color is not None:
@@ -91,12 +91,12 @@ def create_many_colors(colors: list[NewColor], color: t.Optional[NewColor] = Non
     return new_color
 
 
-@jsonrpc.method('jsonrpc.createManyFixColor')
+@jsonrpc.method('objects.python_classes.createManyFixColor')
 def create_many_fix_colors(colors: dict[str, NewColor]) -> list[Color]:
     return [Color(id=int(color_id), name=color.name, tag=color.tag) for color_id, color in colors.items()]
 
 
-@jsonrpc.method('jsonrpc.removeColor')
+@jsonrpc.method('objects.python_classes.removeColor')
 def remove_color(color: t.Optional[Color] = None) -> t.Optional[Color]:
     if color is not None and color.id > 10:
         raise ColorNotFoundException(

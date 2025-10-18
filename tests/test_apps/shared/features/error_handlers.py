@@ -45,11 +45,11 @@ def handle_my_exception(ex: MyException) -> dict[str, t.Any]:
     return {'message': 'It is a custom exception', 'code': '0001'}
 
 
-@jsonrpc.method('jsonrpc.failsWithCustomException')
+@jsonrpc.method('error_handlers.failsWithCustomException')
 def fails_with_custom_exception(_string: t.Optional[str] = None) -> t.NoReturn:
     raise MyException('example of fail with custom exception that will be handled')
 
 
-@jsonrpc.method('jsonrpc.failsWithCustomExceptionNotRegistered')
+@jsonrpc.method('error_handlers.failsWithCustomExceptionNotRegistered')
 def fails_with_custom_exception_not_registered(_string: t.Optional[str] = None) -> t.NoReturn:
     raise MyNotRegisteredException('example of fail with custom exception that will not be handled')

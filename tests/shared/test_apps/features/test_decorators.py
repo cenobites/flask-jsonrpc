@@ -31,12 +31,12 @@ if t.TYPE_CHECKING:
 
 
 def test_app_decorators(session: 'Session', api_url: str) -> None:
-    data = {'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.decorator', 'params': ['Python']}
+    data = {'id': 1, 'jsonrpc': '2.0', 'method': 'decorators.decorator', 'params': ['Python']}
     rv = session.post(f'{api_url}/decorators', json=data)
     assert rv.json() == {'id': 1, 'jsonrpc': '2.0', 'result': 'Hello Python from decorator, ;)'}
     assert rv.status_code == 200
 
-    data = {'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.decorator', 'params': 'Python'}
+    data = {'id': 1, 'jsonrpc': '2.0', 'method': 'decorators.decorator', 'params': 'Python'}
     rv = session.post(f'{api_url}/decorators', json=data)
     assert rv.json() == {
         'id': 1,
@@ -50,7 +50,7 @@ def test_app_decorators(session: 'Session', api_url: str) -> None:
     }
     assert rv.status_code == 400
 
-    data = {'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.decorator', 'params': [1]}
+    data = {'id': 1, 'jsonrpc': '2.0', 'method': 'decorators.decorator', 'params': [1]}
     rv = session.post(f'{api_url}/decorators', json=data)
     assert rv.json() == {
         'id': 1,
@@ -66,12 +66,12 @@ def test_app_decorators(session: 'Session', api_url: str) -> None:
 
 
 def test_app_decorators_wrapped(session: 'Session', api_url: str) -> None:
-    data = {'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.wrappedDecorator', 'params': ['Python']}
+    data = {'id': 1, 'jsonrpc': '2.0', 'method': 'decorators.wrappedDecorator', 'params': ['Python']}
     rv = session.post(f'{api_url}/decorators', json=data)
     assert rv.json() == {'id': 1, 'jsonrpc': '2.0', 'result': 'Hello Python from decorator, ;)'}
     assert rv.status_code == 200
 
-    data = {'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.wrappedDecorator', 'params': 'Python'}
+    data = {'id': 1, 'jsonrpc': '2.0', 'method': 'decorators.wrappedDecorator', 'params': 'Python'}
     rv = session.post(f'{api_url}/decorators', json=data)
     assert rv.json() == {
         'id': 1,
@@ -86,7 +86,59 @@ def test_app_decorators_wrapped(session: 'Session', api_url: str) -> None:
     assert rv.status_code == 400
 
     # XXX: Typeguard does not instrument wrapped functions
-    data = {'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.wrappedDecorator', 'params': [1]}
+    data = {'id': 1, 'jsonrpc': '2.0', 'method': 'decorators.wrappedDecorator', 'params': [1]}
     rv = session.post(f'{api_url}/decorators', json=data)
     assert rv.json() == {'id': 1, 'jsonrpc': '2.0', 'result': 'Hello 1 from decorator, ;)'}
     assert rv.status_code == 200
+
+
+def test_app_system_describe(session: 'Session', api_url: str) -> None:
+    rv = session.post(f'{api_url}/decorators', json={'id': 1, 'jsonrpc': '2.0', 'method': 'rpc.describe'})
+    assert rv.status_code == 200
+    data = rv.json()
+    assert data['id'] == 1
+    assert data['jsonrpc'] == '2.0'
+    assert data['result']['name'] == 'Flask-JSONRPC'
+    assert data['result']['version'] == '1.0.0'
+    assert data['result']['servers'] is not None
+    assert 'url' in data['result']['servers'][0]
+    assert data['result']['methods'] == {
+        'decorators.decorator': {
+            'name': 'decorators.decorator',
+            'notification': True,
+            'params': [{'name': 'string', 'type': 'String'}],
+            'returns': {'name': 'default', 'type': 'String'},
+            'type': 'method',
+            'validation': True,
+        },
+        'decorators.wrappedDecorator': {
+            'name': 'decorators.wrappedDecorator',
+            'notification': True,
+            'params': [{'name': 'string', 'type': 'String'}],
+            'returns': {'name': 'default', 'type': 'String'},
+            'type': 'method',
+            'validation': True,
+        },
+        'rpc.describe': {
+            'name': 'rpc.describe',
+            'summary': 'RPC Describe',
+            'description': 'Service description for JSON-RPC 2.0',
+            'notification': False,
+            'params': [],
+            'returns': {
+                'name': 'default',
+                'type': 'Object',
+                'properties': {
+                    'description': {'name': 'description', 'type': 'String'},
+                    'id': {'name': 'id', 'type': 'String'},
+                    'methods': {'name': 'methods', 'type': 'Null'},
+                    'name': {'name': 'name', 'type': 'String'},
+                    'servers': {'name': 'servers', 'type': 'Null'},
+                    'title': {'name': 'title', 'type': 'String'},
+                    'version': {'name': 'version', 'type': 'String'},
+                },
+            },
+            'type': 'method',
+            'validation': False,
+        },
+    }

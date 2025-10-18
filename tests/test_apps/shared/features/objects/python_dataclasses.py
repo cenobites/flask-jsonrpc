@@ -73,12 +73,12 @@ def handle_car_not_found_exc(exc: CarNotFoundException) -> CarError:
     return exc.car_error
 
 
-@jsonrpc.method('jsonrpc.createCar')
+@jsonrpc.method('objects.python_dataclasses.createCar')
 def create_car(car: NewCar) -> Car:
     return Car(id=1, name=car.name, tag=car.tag)
 
 
-@jsonrpc.method('jsonrpc.createManyCar')
+@jsonrpc.method('objects.python_dataclasses.createManyCar')
 def create_many_cars(cars: list[NewCar], car: t.Optional[NewCar] = None) -> list[Car]:
     new_cars = [Car(id=i, name=car.name, tag=car.tag) for i, car in enumerate(cars)]
     if car is not None:
@@ -86,12 +86,12 @@ def create_many_cars(cars: list[NewCar], car: t.Optional[NewCar] = None) -> list
     return new_cars
 
 
-@jsonrpc.method('jsonrpc.createManyFixCar')
+@jsonrpc.method('objects.python_dataclasses.createManyFixCar')
 def create_many_fix_cars(cars: dict[str, NewCar]) -> list[Car]:
     return [Car(id=int(car_id), name=car.name, tag=car.tag) for car_id, car in cars.items()]
 
 
-@jsonrpc.method('jsonrpc.removeCar')
+@jsonrpc.method('objects.python_dataclasses.removeCar')
 def remove_car(car: t.Optional[Car] = None) -> t.Optional[Car]:
     if car is not None and car.id > 10:
         raise CarNotFoundException(
