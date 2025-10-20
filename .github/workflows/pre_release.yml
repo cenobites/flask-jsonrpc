@@ -25,7 +25,7 @@ jobs:
         python-version: ["3.13"]
     steps:
       - uses: actions/checkout@v5
-      - uses: astral-sh/setup-uv@v7.1.0
+      - uses: astral-sh/setup-uv@v7.1.1
         with:
           enable-cache: true
           prune-cache: false
@@ -76,7 +76,7 @@ jobs:
         python-version: ["3.13"]
     steps:
       - uses: actions/checkout@v5
-      - uses: astral-sh/setup-uv@v7.1.0
+      - uses: astral-sh/setup-uv@v7.1.1
         with:
           enable-cache: true
           prune-cache: false
@@ -107,7 +107,7 @@ jobs:
         python-version: ["3.13"]
     steps:
       - uses: actions/checkout@v5
-      - uses: astral-sh/setup-uv@v7.1.0
+      - uses: astral-sh/setup-uv@v7.1.1
         with:
           enable-cache: true
           prune-cache: false
@@ -155,7 +155,7 @@ jobs:
             python-version: "3.10"
     steps:
       - uses: actions/checkout@v5
-      - uses: astral-sh/setup-uv@v7.1.0
+      - uses: astral-sh/setup-uv@v7.1.1
         with:
           enable-cache: true
           prune-cache: false
@@ -192,7 +192,7 @@ jobs:
         python-version: ["3.13"]
     steps:
       - uses: actions/checkout@v5
-      - uses: astral-sh/setup-uv@v7.1.0
+      - uses: astral-sh/setup-uv@v7.1.1
         with:
           enable-cache: true
           prune-cache: false
