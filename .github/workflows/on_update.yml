@@ -35,7 +35,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - run: |
           uv run --locked --group tests tox run -e py,py-async
-  
+
   typing:
     name: Type checker [${{ matrix.platform }} | ${{ matrix.python-version }}]
     runs-on: ${{ matrix.platform }}
@@ -114,7 +114,7 @@ jobs:
         platform:
           - ubuntu-latest
         python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
-        docker-target-build: ["app", "async", "mypyc"]
+        docker-target-build: ["app", "async"]
         exclude:
           - platform: ubuntu-latest
             python-version: "3.9"

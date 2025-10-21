@@ -61,27 +61,50 @@ def test_rpc_describe(client: 'FlaskClient') -> None:
     assert data['id'] == 1
     assert data['jsonrpc'] == '2.0'
     assert data['result']['name'] == 'Flask-JSONRPC'
-    assert data['result']['version'] == '2.0'
+    assert data['result']['version'] == '1.0.0'
     assert data['result']['servers'] is not None
     assert 'url' in data['result']['servers'][0]
     assert data['result']['methods'] == {
         'Article.getArticle': {
-            'options': {'notification': True, 'validate': True},
+            'name': 'Article.getArticle',
+            'notification': True,
             'params': [{'name': 'id', 'type': 'Number'}],
-            'returns': {'type': 'Object'},
+            'returns': {
+                'name': 'default',
+                'properties': {'id': {'name': 'id', 'type': 'Number'}, 'name': {'name': 'name', 'type': 'String'}},
+                'type': 'Object',
+            },
             'type': 'method',
+            'validation': True,
         },
         'Article.index': {
-            'options': {'notification': True, 'validate': True},
+            'name': 'Article.index',
+            'notification': True,
             'params': [],
-            'returns': {'type': 'String'},
+            'returns': {'name': 'default', 'type': 'String'},
             'type': 'method',
+            'validation': True,
         },
         'rpc.describe': {
+            'name': 'rpc.describe',
             'description': 'Service description for JSON-RPC 2.0',
-            'options': {},
+            'notification': False,
             'params': [],
-            'returns': {'type': 'Object'},
+            'returns': {
+                'name': 'default',
+                'properties': {
+                    'description': {'name': 'description', 'type': 'String'},
+                    'id': {'name': 'id', 'type': 'String'},
+                    'methods': {'name': 'methods', 'type': 'Null'},
+                    'name': {'name': 'name', 'type': 'String'},
+                    'servers': {'name': 'servers', 'type': 'Null'},
+                    'title': {'name': 'title', 'type': 'String'},
+                    'version': {'name': 'version', 'type': 'String'},
+                },
+                'type': 'Object',
+            },
+            'summary': 'RPC Describe',
             'type': 'method',
+            'validation': False,
         },
     }

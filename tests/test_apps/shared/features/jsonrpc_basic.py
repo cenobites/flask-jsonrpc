@@ -31,70 +31,70 @@ from flask_jsonrpc import JSONRPCBlueprint
 jsonrpc = JSONRPCBlueprint('jsonrpc_basic', __name__)
 
 
-@jsonrpc.method('jsonrpc.greeting')
+@jsonrpc.method('jsonrpc_basic.greeting')
 def greeting(name: str = 'Flask JSON-RPC') -> str:
     return f'Hello {name}'
 
 
-@jsonrpc.method('jsonrpc.echo')
+@jsonrpc.method('jsonrpc_basic.echo')
 def echo(string: str, _some: t.Any = None) -> str:  # noqa: ANN401
     return string
 
 
-@jsonrpc.method('jsonrpc.notify')
+@jsonrpc.method('jsonrpc_basic.notify')
 def notify(_string: t.Optional[str] = None) -> None:
     pass
 
 
-@jsonrpc.method('jsonrpc.not_allow_notify', notification=False)
+@jsonrpc.method('jsonrpc_basic.not_allow_notify', notification=False)
 def not_allow_notify(_string: str = 'None') -> str:
     return 'Not allow notify'
 
 
-@jsonrpc.method('jsonrpc.fails')
+@jsonrpc.method('jsonrpc_basic.fails')
 def fails(n: int) -> int:
     if n % 2 == 0:
         return n
     raise ValueError('number is odd')
 
 
-@jsonrpc.method('jsonrpc.strangeEcho')
+@jsonrpc.method('jsonrpc_basic.strangeEcho')
 def strange_echo(
     string: str, omg: dict[str, t.Any], wtf: list[str], nowai: int, yeswai: str = 'Default'
 ) -> list[t.Any]:
     return [string, omg, wtf, nowai, yeswai]
 
 
-@jsonrpc.method('jsonrpc.sum')
+@jsonrpc.method('jsonrpc_basic.sum')
 def sum_(a: float, b: float) -> float:
     return a + b
 
 
-@jsonrpc.method('jsonrpc.returnStatusCode')
+@jsonrpc.method('jsonrpc_basic.returnStatusCode')
 def return_status_code(s: str) -> tuple[str, int]:
     return f'Status Code {s}', 201
 
 
-@jsonrpc.method('jsonrpc.returnHeaders')
+@jsonrpc.method('jsonrpc_basic.returnHeaders')
 def return_headers(s: str) -> tuple[str, dict[str, t.Any]]:
     return f'Headers {s}', {'X-JSONRPC': '1'}
 
 
-@jsonrpc.method('jsonrpc.returnStatusCodeAndHeaders')
+@jsonrpc.method('jsonrpc_basic.returnStatusCodeAndHeaders')
 def return_status_code_and_headers(s: str) -> tuple[str, int, dict[str, t.Any]]:
     return f'Status Code and Headers {s}', 400, {'X-JSONRPC': '1'}
 
 
-@jsonrpc.method('jsonrpc.not_validate', validate=False)
+@jsonrpc.method('jsonrpc_basic.not_validate', validate=False)
 def not_validate(s='Oops!'):  # noqa: ANN001,ANN202,ANN201
     return f'Not validate: {s}'
 
 
-@jsonrpc.method('jsonrpc.mixin_not_validate', validate=False)
+@jsonrpc.method('jsonrpc_basic.mixin_not_validate', validate=False)
 def mixin_not_validate(s, t: int, u, v: str, x, z):  # noqa: ANN001,ANN202,ANN201
     return f'Not validate: {s} {t} {u} {v} {x} {z}'
 
 
-@jsonrpc.method('jsonrpc.noReturn')
+@jsonrpc.method('jsonrpc_basic.noReturn')
 def no_return(_string: t.Optional[str] = None) -> t.NoReturn:
     raise ValueError('no return')

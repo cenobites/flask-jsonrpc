@@ -36,22 +36,18 @@ DEFAULTS = {'DEFAULT_JSONRPC_METHOD': {'VALIDATE': True, 'NOTIFICATION': True}}
 
 class JSONRPCSettings:
     def __init__(self: Self, defaults: dict[str, t.Any] | None = None) -> None:
-        self.defaults = defaults or DEFAULTS
-        self.setup(self.defaults)
+        # XXX: https://mypyc.readthedocs.io/en/latest/differences_from_python.html#monkey-patching
+        for attr, val in (defaults or DEFAULTS).items():
+            setattr(JSONRPCSettings, attr, val)
 
-    def __getattr__(self: Self, attr: str) -> t.Any:  # noqa: ANN401
-        if attr not in self.defaults:
+    def __getattr__(self: Self, attr: str) -> t.Any:  # noqa: ANN401  pragma: no cover
+        val = getattr(JSONRPCSettings, attr, None)
+        if val is None:
             raise AttributeError(f'invalid setting: {attr!r}') from None
-
-        val = self.defaults[attr]
-
-        setattr(self, attr, val)
         return val
 
-    # XXX: https://mypyc.readthedocs.io/en/latest/differences_from_python.html#monkey-patching
-    def setup(self: Self, defaults: dict[str, t.Any]) -> None:
-        for attr, val in defaults.items():
-            setattr(JSONRPCSettings, attr, val)
+    def __setattr__(self: Self, attr: str, val: t.Any) -> None:  # noqa: ANN401
+        setattr(JSONRPCSettings, attr, val)
 
 
 settings = JSONRPCSettings(DEFAULTS)

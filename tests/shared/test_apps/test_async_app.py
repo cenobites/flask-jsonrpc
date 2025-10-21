@@ -37,25 +37,21 @@ pytest.importorskip('asgiref')
 
 
 def test_app_greeting(async_session: 'Session', api_url: str) -> None:
-    rv = async_session.post(api_url, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting'})
+    rv = async_session.post(api_url, json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.greeting'})
     assert rv.json() == {'id': 1, 'jsonrpc': '2.0', 'result': 'Hello Flask JSON-RPC'}
     assert rv.status_code == 200
 
-    rv = async_session.post(
-        api_url, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': ['Python']}
-    )
+    rv = async_session.post(api_url, json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.greeting', 'params': ['Python']})
     assert rv.json() == {'id': 1, 'jsonrpc': '2.0', 'result': 'Hello Python'}
     assert rv.status_code == 200
 
     rv = async_session.post(
-        api_url, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': {'name': 'Flask'}}
+        api_url, json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.greeting', 'params': {'name': 'Flask'}}
     )
     assert rv.json() == {'id': 1, 'jsonrpc': '2.0', 'result': 'Hello Flask'}
     assert rv.status_code == 200
 
-    rv = async_session.post(
-        api_url, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': {'name': 1}}
-    )
+    rv = async_session.post(api_url, json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.greeting', 'params': {'name': 1}})
     assert rv.json() == {
         'id': 1,
         'jsonrpc': '2.0',
@@ -68,11 +64,17 @@ def test_app_greeting(async_session: 'Session', api_url: str) -> None:
     }
     assert rv.status_code == 400
 
+    rv = async_session.post(
+        api_url, json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.greeting', 'params': ['αβγδε 中文 🚀']}
+    )
+    assert rv.json() == {'id': 1, 'jsonrpc': '2.0', 'result': 'Hello αβγδε 中文 🚀'}
+    assert rv.status_code == 200
+
 
 def test_app_greeting_with_different_content_types(async_session: 'Session', api_url: str) -> None:
     rv = async_session.post(
         api_url,
-        data=json.dumps({'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting'}),
+        data=json.dumps({'id': 1, 'jsonrpc': '2.0', 'method': 'app.greeting'}),
         headers={'Content-Type': 'application/json-rpc'},
     )
     assert rv.json() == {'id': 1, 'jsonrpc': '2.0', 'result': 'Hello Flask JSON-RPC'}
@@ -80,7 +82,7 @@ def test_app_greeting_with_different_content_types(async_session: 'Session', api
 
     rv = async_session.post(
         api_url,
-        data=json.dumps({'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': ['Python']}),
+        data=json.dumps({'id': 1, 'jsonrpc': '2.0', 'method': 'app.greeting', 'params': ['Python']}),
         headers={'Content-Type': 'application/jsonrequest'},
     )
     assert rv.json() == {'id': 1, 'jsonrpc': '2.0', 'result': 'Hello Python'}
@@ -88,7 +90,7 @@ def test_app_greeting_with_different_content_types(async_session: 'Session', api
 
     rv = async_session.post(
         api_url,
-        data=json.dumps({'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': {'name': 'Flask'}}),
+        data=json.dumps({'id': 1, 'jsonrpc': '2.0', 'method': 'app.greeting', 'params': {'name': 'Flask'}}),
         headers={'Content-Type': 'application/json'},
     )
     assert rv.json() == {'id': 1, 'jsonrpc': '2.0', 'result': 'Hello Flask'}
@@ -96,7 +98,7 @@ def test_app_greeting_with_different_content_types(async_session: 'Session', api
 
 
 def test_app_greeting_raise_parse_error(async_session: 'Session', api_url: str) -> None:
-    rv = async_session.post(api_url, data={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting'})
+    rv = async_session.post(api_url, data={'id': 1, 'jsonrpc': '2.0', 'method': 'app.greeting'})
     assert rv.json() == {
         'id': None,
         'jsonrpc': '2.0',
@@ -114,7 +116,7 @@ def test_app_greeting_raise_parse_error(async_session: 'Session', api_url: str) 
 
     rv = async_session.post(
         api_url,
-        data="{'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting'}",
+        data="{'id': 1, 'jsonrpc': '2.0', 'method': 'app.greeting'}",
         headers={'Content-Type': 'application/json'},
     )
     assert rv.json() == {
@@ -122,7 +124,7 @@ def test_app_greeting_raise_parse_error(async_session: 'Session', api_url: str) 
         'jsonrpc': '2.0',
         'error': {
             'code': -32700,
-            'data': {'message': "Invalid JSON: b\"{'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting'}\""},
+            'data': {'message': "Invalid JSON: b\"{'id': 1, 'jsonrpc': '2.0', 'method': 'app.greeting'}\""},
             'message': 'Parse error',
             'name': 'ParseError',
         },
@@ -132,7 +134,7 @@ def test_app_greeting_raise_parse_error(async_session: 'Session', api_url: str) 
     rv = async_session.post(
         api_url,
         data="""[
-            {'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': ['Flask'], 'id': '1'},
+            {'jsonrpc': '2.0', 'method': 'app.greeting', 'params': ['Flask'], 'id': '1'},
             {'jsonrpc': '2.0', 'method'
         ]""",
         headers={'Content-Type': 'application/json'},
@@ -144,7 +146,7 @@ def test_app_greeting_raise_parse_error(async_session: 'Session', api_url: str) 
             'code': -32700,
             'data': {
                 'message': "Invalid JSON: b\"[\\n            {'jsonrpc': "
-                "'2.0', 'method': 'jsonrpc.greeting', 'params': "
+                "'2.0', 'method': 'app.greeting', 'params': "
                 "['Flask'], 'id': '1'},\\n            "
                 "{'jsonrpc': '2.0', 'method'\\n        "
                 ']"'
@@ -172,7 +174,7 @@ def test_app_greeting_raise_invalid_request_error(async_session: 'Session', api_
 
 
 def test_app_greeting_raise_invalid_params_error(async_session: 'Session', api_url: str) -> None:
-    rv = async_session.post(api_url, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': 'Wrong'})
+    rv = async_session.post(api_url, json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.greeting', 'params': 'Wrong'})
     assert rv.json() == {
         'id': 1,
         'jsonrpc': '2.0',
@@ -185,7 +187,7 @@ def test_app_greeting_raise_invalid_params_error(async_session: 'Session', api_u
     }
     assert rv.status_code == 400
 
-    rv = async_session.post(api_url, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': [1]})
+    rv = async_session.post(api_url, json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.greeting', 'params': [1]})
     assert rv.json() == {
         'id': 1,
         'jsonrpc': '2.0',
@@ -198,9 +200,7 @@ def test_app_greeting_raise_invalid_params_error(async_session: 'Session', api_u
     }
     assert rv.status_code == 400
 
-    rv = async_session.post(
-        api_url, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': {'name': 2}}
-    )
+    rv = async_session.post(api_url, json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.greeting', 'params': {'name': 2}})
     assert rv.json() == {
         'id': 1,
         'jsonrpc': '2.0',
@@ -230,19 +230,17 @@ def test_app_greeting_raise_method_not_found_error(async_session: 'Session', api
 
 
 def test_app_echo(async_session: 'Session', api_url: str) -> None:
-    rv = async_session.post(api_url, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.echo', 'params': ['Python']})
+    rv = async_session.post(api_url, json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.echo', 'params': ['Python']})
     assert rv.json() == {'id': 1, 'jsonrpc': '2.0', 'result': 'Python'}
     assert rv.status_code == 200
 
     rv = async_session.post(
-        api_url, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.echo', 'params': {'string': 'Flask'}}
+        api_url, json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.echo', 'params': {'string': 'Flask'}}
     )
     assert rv.json() == {'id': 1, 'jsonrpc': '2.0', 'result': 'Flask'}
     assert rv.status_code == 200
 
-    rv = async_session.post(
-        api_url, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.echo', 'params': {'string': None}}
-    )
+    rv = async_session.post(api_url, json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.echo', 'params': {'string': None}})
     json_data = rv.json()
     assert json_data['id'] == 1
     assert json_data['jsonrpc'] == '2.0'
@@ -254,7 +252,7 @@ def test_app_echo(async_session: 'Session', api_url: str) -> None:
 
 
 def test_app_echo_raise_invalid_params_error(async_session: 'Session', api_url: str) -> None:
-    rv = async_session.post(api_url, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.echo', 'params': 'Wrong'})
+    rv = async_session.post(api_url, json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.echo', 'params': 'Wrong'})
     assert rv.json() == {
         'id': 1,
         'jsonrpc': '2.0',
@@ -267,7 +265,7 @@ def test_app_echo_raise_invalid_params_error(async_session: 'Session', api_url: 
     }
     assert rv.status_code == 400
 
-    rv = async_session.post(api_url, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.echo', 'params': [1]})
+    rv = async_session.post(api_url, json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.echo', 'params': [1]})
     assert rv.json() == {
         'id': 1,
         'jsonrpc': '2.0',
@@ -280,7 +278,7 @@ def test_app_echo_raise_invalid_params_error(async_session: 'Session', api_url: 
     }
     assert rv.status_code == 400
 
-    rv = async_session.post(api_url, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.echo', 'params': {'name': 2}})
+    rv = async_session.post(api_url, json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.echo', 'params': {'name': 2}})
     json_data = rv.json()
     assert json_data['id'] == 1
     assert json_data['jsonrpc'] == '2.0'
@@ -290,7 +288,7 @@ def test_app_echo_raise_invalid_params_error(async_session: 'Session', api_url: 
     assert json_data['error']['name'] == 'InvalidParamsError'
     assert rv.status_code == 400
 
-    rv = async_session.post(api_url, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.echo'})
+    rv = async_session.post(api_url, json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.echo'})
     json_data = rv.json()
     assert json_data['id'] == 1
     assert json_data['jsonrpc'] == '2.0'
@@ -302,21 +300,21 @@ def test_app_echo_raise_invalid_params_error(async_session: 'Session', api_url: 
 
 
 def test_app_notify(async_session: 'Session', api_url: str) -> None:
-    rv = async_session.post(api_url, json={'jsonrpc': '2.0', 'method': 'jsonrpc.notify'})
+    rv = async_session.post(api_url, json={'jsonrpc': '2.0', 'method': 'app.notify'})
     assert rv.text == ''
     assert rv.status_code == 204
 
-    rv = async_session.post(api_url, json={'jsonrpc': '2.0', 'method': 'jsonrpc.notify', 'params': ['Some string']})
+    rv = async_session.post(api_url, json={'jsonrpc': '2.0', 'method': 'app.notify', 'params': ['Some string']})
     assert rv.text == ''
     assert rv.status_code == 204
 
 
 def test_app_fails(async_session: 'Session', api_url: str) -> None:
-    rv = async_session.post(api_url, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.fails', 'params': [2]})
+    rv = async_session.post(api_url, json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.fails', 'params': [2]})
     assert rv.json() == {'id': 1, 'jsonrpc': '2.0', 'result': 2}
     assert rv.status_code == 200
 
-    rv = async_session.post(api_url, json={'id': '1', 'jsonrpc': '2.0', 'method': 'jsonrpc.fails', 'params': [1]})
+    rv = async_session.post(api_url, json={'id': '1', 'jsonrpc': '2.0', 'method': 'app.fails', 'params': [1]})
     assert rv.json() == {
         'id': '1',
         'jsonrpc': '2.0',
@@ -331,12 +329,12 @@ def test_app_fails(async_session: 'Session', api_url: str) -> None:
 
 
 def test_app_decorators(async_session: 'Session', api_url: str) -> None:
-    data = {'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.decorators', 'params': ['Python']}
+    data = {'id': 1, 'jsonrpc': '2.0', 'method': 'app.decorators', 'params': ['Python']}
     rv = async_session.post(api_url, json=data)
     assert rv.json() == {'id': 1, 'jsonrpc': '2.0', 'result': 'Hello Python from decorator, ;)'}
     assert rv.status_code == 200
 
-    data = {'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.decorators', 'params': 'Python'}
+    data = {'id': 1, 'jsonrpc': '2.0', 'method': 'app.decorators', 'params': 'Python'}
     rv = async_session.post(api_url, json=data)
     assert rv.json() == {
         'id': 1,
@@ -350,7 +348,7 @@ def test_app_decorators(async_session: 'Session', api_url: str) -> None:
     }
     assert rv.status_code == 400
 
-    data = {'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.decorators', 'params': [1]}
+    data = {'id': 1, 'jsonrpc': '2.0', 'method': 'app.decorators', 'params': [1]}
     rv = async_session.post(api_url, json=data)
     assert rv.json() == {
         'id': 1,
@@ -366,12 +364,12 @@ def test_app_decorators(async_session: 'Session', api_url: str) -> None:
 
 
 def test_app_decorators_wrapped(async_session: 'Session', api_url: str) -> None:
-    data = {'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.wrappedDecorators', 'params': ['Python']}
+    data = {'id': 1, 'jsonrpc': '2.0', 'method': 'app.wrappedDecorators', 'params': ['Python']}
     rv = async_session.post(api_url, json=data)
     assert rv.json() == {'id': 1, 'jsonrpc': '2.0', 'result': 'Hello Python from decorator, ;)'}
     assert rv.status_code == 200
 
-    data = {'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.wrappedDecorators', 'params': 'Python'}
+    data = {'id': 1, 'jsonrpc': '2.0', 'method': 'app.wrappedDecorators', 'params': 'Python'}
     rv = async_session.post(api_url, json=data)
     assert rv.json() == {
         'id': 1,
@@ -386,23 +384,23 @@ def test_app_decorators_wrapped(async_session: 'Session', api_url: str) -> None:
     assert rv.status_code == 400
 
     # XXX: Typeguard does not instrument wrapped functions
-    data = {'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.wrappedDecorators', 'params': [1]}
+    data = {'id': 1, 'jsonrpc': '2.0', 'method': 'app.wrappedDecorators', 'params': [1]}
     rv = async_session.post(api_url, json=data)
     assert rv.json() == {'id': 1, 'jsonrpc': '2.0', 'result': 'Hello 1 from decorator, ;)'}
     assert rv.status_code == 200
 
 
 def test_app_with_rcp_batch(async_session: 'Session', api_url: str) -> None:
-    rv = async_session.post(api_url, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting'})
+    rv = async_session.post(api_url, json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.greeting'})
     assert rv.json() == {'id': 1, 'jsonrpc': '2.0', 'result': 'Hello Flask JSON-RPC'}
     assert rv.status_code == 200
 
     rv = async_session.post(
         api_url,
         json=[
-            {'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': ['Python']},
-            {'id': 2, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': ['Flask']},
-            {'id': 3, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': ['JSON-RCP']},
+            {'id': 1, 'jsonrpc': '2.0', 'method': 'app.greeting', 'params': ['Python']},
+            {'id': 2, 'jsonrpc': '2.0', 'method': 'app.greeting', 'params': ['Flask']},
+            {'id': 3, 'jsonrpc': '2.0', 'method': 'app.greeting', 'params': ['JSON-RCP']},
         ],
     )
     assert rv.json() == [
@@ -415,10 +413,10 @@ def test_app_with_rcp_batch(async_session: 'Session', api_url: str) -> None:
     rv = async_session.post(
         api_url,
         json=[
-            {'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': ['Python']},
-            {'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': ['Flask']},
+            {'id': 1, 'jsonrpc': '2.0', 'method': 'app.greeting', 'params': ['Python']},
+            {'jsonrpc': '2.0', 'method': 'app.greeting', 'params': ['Flask']},
             {'id': 3, 'jsonrpc': '2.0', 'params': ['Flask']},
-            {'id': 4, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': ['JSON-RCP']},
+            {'id': 4, 'jsonrpc': '2.0', 'method': 'app.greeting', 'params': ['JSON-RCP']},
         ],
     )
     assert rv.json() == [
@@ -437,7 +435,7 @@ def test_app_with_rcp_batch(async_session: 'Session', api_url: str) -> None:
     ]
     assert rv.status_code == 200
 
-    rv = async_session.post(api_url, json={'id': 2, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting'})
+    rv = async_session.post(api_url, json={'id': 2, 'jsonrpc': '2.0', 'method': 'app.greeting'})
     assert rv.json() == {'id': 2, 'jsonrpc': '2.0', 'result': 'Hello Flask JSON-RPC'}
     assert rv.status_code == 200
 
@@ -448,64 +446,95 @@ def test_app_system_describe(async_session: 'Session', api_url: str) -> None:
     assert data['id'] == 1
     assert data['jsonrpc'] == '2.0'
     assert data['result']['name'] == 'Flask-JSONRPC'
-    assert data['result']['version'] == '2.0'
+    assert data['result']['version'] == '1.0.0'
     assert data['result']['servers'] is not None
     assert 'url' in data['result']['servers'][0]
     assert data['result']['methods'] == {
-        'jsonrpc.decorators': {
-            'options': {'notification': True, 'validate': True},
+        'app.decorators': {
+            'name': 'app.decorators',
+            'notification': True,
             'params': [{'name': 'string', 'type': 'String'}],
-            'returns': {'type': 'String'},
+            'returns': {'name': 'default', 'type': 'String'},
             'type': 'method',
+            'validation': True,
         },
-        'jsonrpc.echo': {
-            'options': {'notification': True, 'validate': True},
+        'app.echo': {
+            'name': 'app.echo',
+            'notification': True,
             'params': [{'name': 'string', 'type': 'String'}, {'name': '_some', 'type': 'Object'}],
-            'returns': {'type': 'String'},
+            'returns': {'name': 'default', 'type': 'String'},
             'type': 'method',
+            'validation': True,
         },
-        'jsonrpc.fails': {
-            'options': {'notification': True, 'validate': True},
+        'app.fails': {
+            'name': 'app.fails',
+            'notification': True,
             'params': [{'name': 'n', 'type': 'Number'}],
-            'returns': {'type': 'Number'},
+            'returns': {'name': 'default', 'type': 'Number'},
             'type': 'method',
+            'validation': True,
         },
-        'jsonrpc.failsWithCustomException': {
-            'options': {'notification': True, 'validate': True},
+        'app.failsWithCustomException': {
+            'name': 'app.failsWithCustomException',
+            'notification': True,
             'params': [{'name': '_string', 'type': 'String'}],
-            'returns': {'type': 'Null'},
+            'returns': {'name': 'default', 'type': 'Null'},
             'type': 'method',
+            'validation': True,
         },
-        'jsonrpc.failsWithCustomExceptionNotRegistered': {
-            'options': {'notification': True, 'validate': True},
+        'app.failsWithCustomExceptionNotRegistered': {
+            'name': 'app.failsWithCustomExceptionNotRegistered',
+            'notification': True,
             'params': [{'name': '_string', 'type': 'String'}],
-            'returns': {'type': 'Null'},
+            'returns': {'name': 'default', 'type': 'Null'},
             'type': 'method',
+            'validation': True,
         },
-        'jsonrpc.greeting': {
-            'options': {'notification': True, 'validate': True},
+        'app.greeting': {
+            'name': 'app.greeting',
+            'notification': True,
             'params': [{'name': 'name', 'type': 'String'}],
-            'returns': {'type': 'String'},
+            'returns': {'name': 'default', 'type': 'String'},
             'type': 'method',
+            'validation': True,
         },
-        'jsonrpc.notify': {
-            'options': {'notification': True, 'validate': True},
+        'app.notify': {
+            'name': 'app.notify',
+            'notification': True,
             'params': [{'name': '_string', 'type': 'String'}],
-            'returns': {'type': 'Null'},
+            'returns': {'name': 'default', 'type': 'Null'},
             'type': 'method',
+            'validation': True,
         },
-        'jsonrpc.wrappedDecorators': {
-            'options': {'notification': True, 'validate': True},
+        'app.wrappedDecorators': {
+            'name': 'app.wrappedDecorators',
+            'notification': True,
             'params': [{'name': 'string', 'type': 'String'}],
-            'returns': {'type': 'String'},
+            'returns': {'name': 'default', 'type': 'String'},
             'type': 'method',
+            'validation': True,
         },
         'rpc.describe': {
+            'name': 'rpc.describe',
             'description': 'Service description for JSON-RPC 2.0',
-            'options': {},
+            'notification': False,
             'params': [],
-            'returns': {'type': 'Object'},
+            'returns': {
+                'name': 'default',
+                'properties': {
+                    'description': {'name': 'description', 'type': 'String'},
+                    'id': {'name': 'id', 'type': 'String'},
+                    'methods': {'name': 'methods', 'type': 'Null'},
+                    'name': {'name': 'name', 'type': 'String'},
+                    'servers': {'name': 'servers', 'type': 'Null'},
+                    'title': {'name': 'title', 'type': 'String'},
+                    'version': {'name': 'version', 'type': 'String'},
+                },
+                'type': 'Object',
+            },
+            'summary': 'RPC Describe',
             'type': 'method',
+            'validation': False,
         },
     }
     assert rv.status_code == 200

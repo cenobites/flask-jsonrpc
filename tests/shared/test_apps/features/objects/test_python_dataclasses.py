@@ -36,7 +36,7 @@ def test_app_with_dataclass(session: 'Session', api_url: str) -> None:
         json={
             'id': 1,
             'jsonrpc': '2.0',
-            'method': 'jsonrpc.createCar',
+            'method': 'objects.python_dataclasses.createCar',
             'params': {'car': {'name': 'Fusca', 'tag': 'blue'}},
         },
     )
@@ -45,7 +45,12 @@ def test_app_with_dataclass(session: 'Session', api_url: str) -> None:
 
     rv = session.post(
         f'{api_url}/objects/python-dataclasses',
-        json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.createCar', 'params': {'car': {'name': 'Fusca'}}},
+        json={
+            'id': 1,
+            'jsonrpc': '2.0',
+            'method': 'objects.python_dataclasses.createCar',
+            'params': {'car': {'name': 'Fusca'}},
+        },
     )
     assert rv.status_code == 400
     data = rv.json()
@@ -61,7 +66,7 @@ def test_app_with_dataclass(session: 'Session', api_url: str) -> None:
         json={
             'id': 1,
             'jsonrpc': '2.0',
-            'method': 'jsonrpc.createManyCar',
+            'method': 'objects.python_dataclasses.createManyCar',
             'params': {'cars': [{'name': 'Fusca', 'tag': 'blue'}, {'name': 'Kombi', 'tag': 'yellow'}]},
         },
     )
@@ -77,7 +82,7 @@ def test_app_with_dataclass(session: 'Session', api_url: str) -> None:
         json={
             'id': 1,
             'jsonrpc': '2.0',
-            'method': 'jsonrpc.createManyCar',
+            'method': 'objects.python_dataclasses.createManyCar',
             'params': {'cars': [{'name': 'Fusca', 'tag': 'blue'}], 'car': {'name': 'Kombi', 'tag': 'yellow'}},
         },
     )
@@ -93,7 +98,7 @@ def test_app_with_dataclass(session: 'Session', api_url: str) -> None:
         json={
             'id': 1,
             'jsonrpc': '2.0',
-            'method': 'jsonrpc.createManyCar',
+            'method': 'objects.python_dataclasses.createManyCar',
             'params': [
                 [{'name': 'Fusca', 'tag': 'blue'}, {'name': 'Kombi', 'tag': 'yellow'}],
                 {'name': 'Gol', 'tag': 'white'},
@@ -116,7 +121,7 @@ def test_app_with_dataclass(session: 'Session', api_url: str) -> None:
         json={
             'id': 1,
             'jsonrpc': '2.0',
-            'method': 'jsonrpc.createManyFixCar',
+            'method': 'objects.python_dataclasses.createManyFixCar',
             'params': {'cars': {'1': {'name': 'Fusca', 'tag': 'blue'}}},
         },
     )
@@ -128,7 +133,7 @@ def test_app_with_dataclass(session: 'Session', api_url: str) -> None:
         json={
             'id': 1,
             'jsonrpc': '2.0',
-            'method': 'jsonrpc.removeCar',
+            'method': 'objects.python_dataclasses.removeCar',
             'params': {'car': {'id': 1, 'name': 'Fusca', 'tag': 'blue'}},
         },
     )
@@ -137,14 +142,14 @@ def test_app_with_dataclass(session: 'Session', api_url: str) -> None:
 
     rv = session.post(
         f'{api_url}/objects/python-dataclasses',
-        json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.removeCar', 'params': {'car': None}},
+        json={'id': 1, 'jsonrpc': '2.0', 'method': 'objects.python_dataclasses.removeCar', 'params': {'car': None}},
     )
     assert rv.status_code == 200
     assert rv.json() == {'id': 1, 'jsonrpc': '2.0', 'result': None}
 
     rv = session.post(
         f'{api_url}/objects/python-dataclasses',
-        json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.removeCar', 'params': []},
+        json={'id': 1, 'jsonrpc': '2.0', 'method': 'objects.python_dataclasses.removeCar', 'params': []},
     )
     assert rv.status_code == 200
     assert rv.json() == {'id': 1, 'jsonrpc': '2.0', 'result': None}
@@ -154,7 +159,7 @@ def test_app_with_dataclass(session: 'Session', api_url: str) -> None:
         json={
             'id': 1,
             'jsonrpc': '2.0',
-            'method': 'jsonrpc.removeCar',
+            'method': 'objects.python_dataclasses.removeCar',
             'params': {'car': {'id': 100, 'name': 'Fusca', 'tag': 'blue'}},
         },
     )
@@ -179,39 +184,81 @@ def test_app_system_describe(session: 'Session', api_url: str) -> None:
     assert data['id'] == 1
     assert data['jsonrpc'] == '2.0'
     assert data['result']['name'] == 'Flask-JSONRPC'
-    assert data['result']['version'] == '2.0'
+    assert data['result']['version'] == '1.0.0'
     assert data['result']['servers'] is not None
     assert 'url' in data['result']['servers'][0]
     assert data['result']['methods'] == {
-        'jsonrpc.createCar': {
-            'options': {'notification': True, 'validate': True},
-            'params': [{'name': 'car', 'type': 'Object'}],
-            'returns': {'type': 'Object'},
+        'objects.python_dataclasses.createCar': {
+            'name': 'objects.python_dataclasses.createCar',
+            'notification': True,
+            'params': [
+                {
+                    'name': 'car',
+                    'type': 'Object',
+                    'properties': {
+                        'name': {'name': 'name', 'type': 'String'},
+                        'tag': {'name': 'tag', 'type': 'String'},
+                    },
+                }
+            ],
+            'returns': {'name': 'default', 'properties': {'id': {'name': 'id', 'type': 'Number'}}, 'type': 'Object'},
             'type': 'method',
+            'validation': True,
         },
-        'jsonrpc.createManyCar': {
-            'options': {'notification': True, 'validate': True},
-            'params': [{'name': 'cars', 'type': 'Array'}, {'name': 'car', 'type': 'Object'}],
-            'returns': {'type': 'Array'},
+        'objects.python_dataclasses.createManyCar': {
+            'name': 'objects.python_dataclasses.createManyCar',
+            'notification': True,
+            'params': [
+                {'name': 'cars', 'type': 'Array'},
+                {
+                    'name': 'car',
+                    'properties': {
+                        'name': {'name': 'name', 'type': 'String'},
+                        'tag': {'name': 'tag', 'type': 'String'},
+                    },
+                    'type': 'Object',
+                },
+            ],
+            'returns': {'name': 'default', 'type': 'Array'},
             'type': 'method',
+            'validation': True,
         },
-        'jsonrpc.createManyFixCar': {
-            'options': {'notification': True, 'validate': True},
+        'objects.python_dataclasses.createManyFixCar': {
+            'name': 'objects.python_dataclasses.createManyFixCar',
+            'notification': True,
             'params': [{'name': 'cars', 'type': 'Object'}],
-            'returns': {'type': 'Array'},
+            'returns': {'name': 'default', 'type': 'Array'},
             'type': 'method',
+            'validation': True,
         },
-        'jsonrpc.removeCar': {
-            'options': {'notification': True, 'validate': True},
-            'params': [{'name': 'car', 'type': 'Object'}],
-            'returns': {'type': 'Object'},
+        'objects.python_dataclasses.removeCar': {
+            'name': 'objects.python_dataclasses.removeCar',
+            'notification': True,
+            'params': [{'name': 'car', 'properties': {'id': {'name': 'id', 'type': 'Number'}}, 'type': 'Object'}],
+            'returns': {'name': 'default', 'properties': {'id': {'name': 'id', 'type': 'Number'}}, 'type': 'Object'},
             'type': 'method',
+            'validation': True,
         },
         'rpc.describe': {
+            'name': 'rpc.describe',
+            'summary': 'RPC Describe',
             'description': 'Service description for JSON-RPC 2.0',
-            'options': {},
+            'notification': False,
             'params': [],
-            'returns': {'type': 'Object'},
+            'returns': {
+                'name': 'default',
+                'type': 'Object',
+                'properties': {
+                    'description': {'name': 'description', 'type': 'String'},
+                    'id': {'name': 'id', 'type': 'String'},
+                    'methods': {'name': 'methods', 'type': 'Null'},
+                    'name': {'name': 'name', 'type': 'String'},
+                    'servers': {'name': 'servers', 'type': 'Null'},
+                    'title': {'name': 'title', 'type': 'String'},
+                    'version': {'name': 'version', 'type': 'String'},
+                },
+            },
             'type': 'method',
+            'validation': False,
         },
     }

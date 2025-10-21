@@ -49,15 +49,17 @@ class JSONRPC(JSONRPCDecoratorMixin):
     def __init__(
         self: Self,
         app: Flask | None = None,
-        service_url: str = '/api',
+        path: str = '/api',
+        version: str = '1.0.0',
         jsonrpc_site: type[JSONRPCSite] = default_jsonrpc_site,
         jsonrpc_site_api: type[JSONRPCView] = default_jsonrpc_site_api,
         enable_web_browsable_api: bool = False,
     ) -> None:
         self.app = app
-        self.path = service_url
+        self.path = path
         self.base_url: str | None = None
-        self.jsonrpc_site = jsonrpc_site()
+        self.version = version
+        self.jsonrpc_site = jsonrpc_site(version=version)
         self.jsonrpc_site_api = jsonrpc_site_api
         self.jsonrpc_apps: set[JSONRPC | JSONRPCBlueprint] = set()
         self.jsonrpc_browse: JSONRPCBrowse | None = None

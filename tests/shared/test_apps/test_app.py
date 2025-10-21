@@ -33,21 +33,19 @@ if t.TYPE_CHECKING:
 
 
 def test_app_greeting(session: 'Session', api_url: str) -> None:
-    rv = session.post(api_url, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting'})
+    rv = session.post(api_url, json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.greeting'})
     assert rv.json() == {'id': 1, 'jsonrpc': '2.0', 'result': 'Hello Flask JSON-RPC'}
     assert rv.status_code == 200
 
-    rv = session.post(api_url, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': ['Python']})
+    rv = session.post(api_url, json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.greeting', 'params': ['Python']})
     assert rv.json() == {'id': 1, 'jsonrpc': '2.0', 'result': 'Hello Python'}
     assert rv.status_code == 200
 
-    rv = session.post(
-        api_url, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': {'name': 'Flask'}}
-    )
+    rv = session.post(api_url, json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.greeting', 'params': {'name': 'Flask'}})
     assert rv.json() == {'id': 1, 'jsonrpc': '2.0', 'result': 'Hello Flask'}
     assert rv.status_code == 200
 
-    rv = session.post(api_url, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': {'name': 1}})
+    rv = session.post(api_url, json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.greeting', 'params': {'name': 1}})
     assert rv.json() == {
         'id': 1,
         'jsonrpc': '2.0',
@@ -60,11 +58,15 @@ def test_app_greeting(session: 'Session', api_url: str) -> None:
     }
     assert rv.status_code == 400
 
+    rv = session.post(api_url, json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.greeting', 'params': ['αβγδε 中文 🚀']})
+    assert rv.json() == {'id': 1, 'jsonrpc': '2.0', 'result': 'Hello αβγδε 中文 🚀'}
+    assert rv.status_code == 200
+
 
 def test_app_greeting_with_different_content_types(session: 'Session', api_url: str) -> None:
     rv = session.post(
         api_url,
-        data=json.dumps({'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting'}),
+        data=json.dumps({'id': 1, 'jsonrpc': '2.0', 'method': 'app.greeting'}),
         headers={'Content-Type': 'application/json-rpc'},
     )
     assert rv.json() == {'id': 1, 'jsonrpc': '2.0', 'result': 'Hello Flask JSON-RPC'}
@@ -72,7 +74,7 @@ def test_app_greeting_with_different_content_types(session: 'Session', api_url: 
 
     rv = session.post(
         api_url,
-        data=json.dumps({'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': ['Python']}),
+        data=json.dumps({'id': 1, 'jsonrpc': '2.0', 'method': 'app.greeting', 'params': ['Python']}),
         headers={'Content-Type': 'application/jsonrequest'},
     )
     assert rv.json() == {'id': 1, 'jsonrpc': '2.0', 'result': 'Hello Python'}
@@ -80,7 +82,7 @@ def test_app_greeting_with_different_content_types(session: 'Session', api_url: 
 
     rv = session.post(
         api_url,
-        data=json.dumps({'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': {'name': 'Flask'}}),
+        data=json.dumps({'id': 1, 'jsonrpc': '2.0', 'method': 'app.greeting', 'params': {'name': 'Flask'}}),
         headers={'Content-Type': 'application/json'},
     )
     assert rv.json() == {'id': 1, 'jsonrpc': '2.0', 'result': 'Hello Flask'}
@@ -88,7 +90,7 @@ def test_app_greeting_with_different_content_types(session: 'Session', api_url: 
 
 
 def test_app_greeting_raise_parse_error(session: 'Session', api_url: str) -> None:
-    rv = session.post(api_url, data={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting'})
+    rv = session.post(api_url, data={'id': 1, 'jsonrpc': '2.0', 'method': 'app.greeting'})
     assert rv.json() == {
         'id': None,
         'jsonrpc': '2.0',
@@ -106,7 +108,7 @@ def test_app_greeting_raise_parse_error(session: 'Session', api_url: str) -> Non
 
     rv = session.post(
         api_url,
-        data="{'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting'}",
+        data="{'id': 1, 'jsonrpc': '2.0', 'method': 'app.greeting'}",
         headers={'Content-Type': 'application/json'},
     )
     assert rv.json() == {
@@ -114,7 +116,7 @@ def test_app_greeting_raise_parse_error(session: 'Session', api_url: str) -> Non
         'jsonrpc': '2.0',
         'error': {
             'code': -32700,
-            'data': {'message': "Invalid JSON: b\"{'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting'}\""},
+            'data': {'message': "Invalid JSON: b\"{'id': 1, 'jsonrpc': '2.0', 'method': 'app.greeting'}\""},
             'message': 'Parse error',
             'name': 'ParseError',
         },
@@ -124,7 +126,7 @@ def test_app_greeting_raise_parse_error(session: 'Session', api_url: str) -> Non
     rv = session.post(
         api_url,
         data="""[
-            {'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': ['Flask'], 'id': '1'},
+            {'jsonrpc': '2.0', 'method': 'app.greeting', 'params': ['Flask'], 'id': '1'},
             {'jsonrpc': '2.0', 'method'
         ]""",
         headers={'Content-Type': 'application/json'},
@@ -136,7 +138,7 @@ def test_app_greeting_raise_parse_error(session: 'Session', api_url: str) -> Non
             'code': -32700,
             'data': {
                 'message': "Invalid JSON: b\"[\\n            {'jsonrpc': "
-                "'2.0', 'method': 'jsonrpc.greeting', 'params': "
+                "'2.0', 'method': 'app.greeting', 'params': "
                 "['Flask'], 'id': '1'},\\n            "
                 "{'jsonrpc': '2.0', 'method'\\n        "
                 ']"'
@@ -164,7 +166,7 @@ def test_app_greeting_raise_invalid_request_error(session: 'Session', api_url: s
 
 
 def test_app_greeting_raise_invalid_params_error(session: 'Session', api_url: str) -> None:
-    rv = session.post(api_url, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': 'Wrong'})
+    rv = session.post(api_url, json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.greeting', 'params': 'Wrong'})
     assert rv.json() == {
         'id': 1,
         'jsonrpc': '2.0',
@@ -177,7 +179,7 @@ def test_app_greeting_raise_invalid_params_error(session: 'Session', api_url: st
     }
     assert rv.status_code == 400
 
-    rv = session.post(api_url, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': [1]})
+    rv = session.post(api_url, json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.greeting', 'params': [1]})
     assert rv.json() == {
         'id': 1,
         'jsonrpc': '2.0',
@@ -190,7 +192,7 @@ def test_app_greeting_raise_invalid_params_error(session: 'Session', api_url: st
     }
     assert rv.status_code == 400
 
-    rv = session.post(api_url, json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc.greeting', 'params': {'name': 2}})
+    rv = session.post(api_url, json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.greeting', 'params': {'name': 2}})
     assert rv.json() == {
         'id': 1,
         'jsonrpc': '2.0',
@@ -225,64 +227,95 @@ def test_app_system_describe(session: 'Session', api_url: str) -> None:
     assert data['id'] == 1
     assert data['jsonrpc'] == '2.0'
     assert data['result']['name'] == 'Flask-JSONRPC'
-    assert data['result']['version'] == '2.0'
+    assert data['result']['version'] == '1.0.0'
     assert data['result']['servers'] is not None
     assert 'url' in data['result']['servers'][0]
     assert data['result']['methods'] == {
-        'jsonrpc.decorators': {
-            'options': {'notification': True, 'validate': True},
+        'app.decorators': {
+            'name': 'app.decorators',
+            'notification': True,
             'params': [{'name': 'string', 'type': 'String'}],
-            'returns': {'type': 'String'},
+            'returns': {'name': 'default', 'type': 'String'},
             'type': 'method',
+            'validation': True,
         },
-        'jsonrpc.echo': {
-            'options': {'notification': True, 'validate': True},
+        'app.echo': {
+            'name': 'app.echo',
+            'notification': True,
             'params': [{'name': 'string', 'type': 'String'}, {'name': '_some', 'type': 'Object'}],
-            'returns': {'type': 'String'},
+            'returns': {'name': 'default', 'type': 'String'},
             'type': 'method',
+            'validation': True,
         },
-        'jsonrpc.fails': {
-            'options': {'notification': True, 'validate': True},
+        'app.fails': {
+            'name': 'app.fails',
+            'notification': True,
             'params': [{'name': 'n', 'type': 'Number'}],
-            'returns': {'type': 'Number'},
+            'returns': {'name': 'default', 'type': 'Number'},
             'type': 'method',
+            'validation': True,
         },
-        'jsonrpc.failsWithCustomException': {
-            'options': {'notification': True, 'validate': True},
+        'app.failsWithCustomException': {
+            'name': 'app.failsWithCustomException',
+            'notification': True,
             'params': [{'name': '_string', 'type': 'String'}],
-            'returns': {'type': 'Null'},
+            'returns': {'name': 'default', 'type': 'Null'},
             'type': 'method',
+            'validation': True,
         },
-        'jsonrpc.failsWithCustomExceptionNotRegistered': {
-            'options': {'notification': True, 'validate': True},
+        'app.failsWithCustomExceptionNotRegistered': {
+            'name': 'app.failsWithCustomExceptionNotRegistered',
+            'notification': True,
             'params': [{'name': '_string', 'type': 'String'}],
-            'returns': {'type': 'Null'},
+            'returns': {'name': 'default', 'type': 'Null'},
             'type': 'method',
+            'validation': True,
         },
-        'jsonrpc.greeting': {
-            'options': {'notification': True, 'validate': True},
+        'app.greeting': {
+            'name': 'app.greeting',
+            'notification': True,
             'params': [{'name': 'name', 'type': 'String'}],
-            'returns': {'type': 'String'},
+            'returns': {'name': 'default', 'type': 'String'},
             'type': 'method',
+            'validation': True,
         },
-        'jsonrpc.notify': {
-            'options': {'notification': True, 'validate': True},
+        'app.notify': {
+            'name': 'app.notify',
+            'notification': True,
             'params': [{'name': '_string', 'type': 'String'}],
-            'returns': {'type': 'Null'},
+            'returns': {'name': 'default', 'type': 'Null'},
             'type': 'method',
+            'validation': True,
         },
-        'jsonrpc.wrappedDecorators': {
-            'options': {'notification': True, 'validate': True},
+        'app.wrappedDecorators': {
+            'name': 'app.wrappedDecorators',
+            'notification': True,
             'params': [{'name': 'string', 'type': 'String'}],
-            'returns': {'type': 'String'},
+            'returns': {'name': 'default', 'type': 'String'},
             'type': 'method',
+            'validation': True,
         },
         'rpc.describe': {
             'description': 'Service description for JSON-RPC 2.0',
-            'options': {},
+            'name': 'rpc.describe',
+            'notification': False,
             'params': [],
-            'returns': {'type': 'Object'},
+            'returns': {
+                'name': 'default',
+                'properties': {
+                    'description': {'name': 'description', 'type': 'String'},
+                    'id': {'name': 'id', 'type': 'String'},
+                    'methods': {'name': 'methods', 'type': 'Null'},
+                    'name': {'name': 'name', 'type': 'String'},
+                    'servers': {'name': 'servers', 'type': 'Null'},
+                    'title': {'name': 'title', 'type': 'String'},
+                    'version': {'name': 'version', 'type': 'String'},
+                },
+                'type': 'Object',
+            },
+            'summary': 'RPC Describe',
             'type': 'method',
+            'validation': False,
         },
     }
     assert rv.status_code == 200

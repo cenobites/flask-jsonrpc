@@ -45,7 +45,8 @@ services:
       args:
         - DOCKER_BUILD_TARGET=app
     environment:
-      - FLASK_SERVER_NAME=app:5000
+      - FLASK_PREFERRED_URL_SCHEME=https
+      - FLASK_SERVER_NAME=app.flask-jsonrpc.cenobit.es
     user: ${UID:-0}:${GID:-0}
     command: >
       python -m app
@@ -100,7 +101,7 @@ services:
       - BROWSABLE_API_URL=https://async-app.flask-jsonrpc.cenobit.es/api/browse
     user: ${UID:-0}:${GID:-0}
     command: >
-      ./wait-for-it.sh async-app.flask-jsonrpc.cenobit.es:80 -t 600 -- py.test -n auto -vv --tb=short --junitxml=test-results/junit.xml
+      ./wait-for-it.sh async-app.flask-jsonrpc.cenobit.es:80 -t 600 -- py.test -vv --tb=short --junitxml=test-results/junit.xml
     volumes:
       - .pytest_cache/test-results/async-app:/app/test-results
       - .pytest_cache/screnshots/async-app:/app/.pytest_cache/screnshots
@@ -120,7 +121,8 @@ services:
       args:
         - DOCKER_BUILD_TARGET=app
     environment:
-      - FLASK_SERVER_NAME=async-app:5000
+      - FLASK_PREFERRED_URL_SCHEME=https
+      - FLASK_SERVER_NAME=async-app.flask-jsonrpc.cenobit.es
     user: ${UID:-0}:${GID:-0}
     command: >
       python -m async_app
@@ -191,7 +193,8 @@ services:
       args:
         - DOCKER_BUILD_TARGET=mypyc-app
     environment:
-      - FLASK_SERVER_NAME=mypyc-app:5000
+      - FLASK_PREFERRED_URL_SCHEME=https
+      - FLASK_SERVER_NAME=mypyc-app.flask-jsonrpc.cenobit.es
     user: ${UID:-0}:${GID:-0}
     command: >
       python -m app

@@ -27,6 +27,7 @@
 import uuid
 import typing as t
 import asyncio
+from unittest import mock
 
 from flask import Flask, json
 
@@ -206,7 +207,7 @@ def test_app_create_with_server_name() -> None:
 
 def test_app_create_without_register_app() -> None:
     app = Flask('test_app', instance_relative_config=True)
-    jsonrpc = JSONRPC(service_url='/api', enable_web_browsable_api=True)
+    jsonrpc = JSONRPC(path='/api', enable_web_browsable_api=True)
 
     @jsonrpc.method('app.fn2')
     async def fn1(s: str) -> str:
@@ -219,6 +220,15 @@ def test_app_create_without_register_app() -> None:
         rv = client.post('/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.fn2', 'params': [':)']})
         assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': 'Foo :)'}
         assert rv.status_code == 200
+
+
+def test_app_create_without_register_browse() -> None:
+    jsonrpc = JSONRPC(path='/api', enable_web_browsable_api=True)
+
+    with pytest.raises(
+        RuntimeError, match='you need to init the Browse app before register the Site, see JSONRPC.init_browse_app(...)'
+    ):
+        jsonrpc.register_browse(jsonrpc)
 
 
 def test_app_create_with_method_without_annotation() -> None:
@@ -277,7 +287,7 @@ def test_app_create_with_method_without_annotation_on_return() -> None:
     app = Flask('test_app', instance_relative_config=True)
     jsonrpc = JSONRPC(app, '/api', enable_web_browsable_api=True)
 
-    @jsonrpc.method('app.fn1')
+    @jsonrpc.method('app.fn1', validate=False)
     async def fn1(s: str):  # noqa: ANN202
         await asyncio.sleep(0)
         return f'Foo {s}'
@@ -294,17 +304,8 @@ def test_app_create_with_method_without_annotation_on_return() -> None:
 
     with app.test_client() as client:
         rv = client.post('/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.fn1', 'params': [':)']})
-        assert rv.json == {
-            'error': {
-                'code': -32602,
-                'data': {'message': 'return type of str must be a type; got None instead'},
-                'message': 'Invalid params',
-                'name': 'InvalidParamsError',
-            },
-            'id': 1,
-            'jsonrpc': '2.0',
-        }
-        assert rv.status_code == 400
+        assert rv.json == {'result': 'Foo :)', 'id': 1, 'jsonrpc': '2.0'}
+        assert rv.status_code == 200
 
         rv = client.post('/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.fn2', 'params': [':)']})
         assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': 'Bar :)'}
@@ -355,14 +356,14 @@ def test_app_create_with_wrong_return() -> None:
 
 def test_app_create_with_invalid_view_func() -> None:
     app = Flask('test_app', instance_relative_config=True)
-    jsonrpc = JSONRPC(app, service_url='/api', enable_web_browsable_api=True)
+    jsonrpc = JSONRPC(app, path='/api', enable_web_browsable_api=True)
 
     @jsonrpc.method('app.fn2')
     async def fn1(s: str) -> str:
         await asyncio.sleep(0)
         return f'Foo {s}'
 
-    with pytest.raises(ValueError, match='the view function must be either a function or a method'):
+    with pytest.raises(ValueError, match='the view function must be either a function or a staticmethod'):
         jsonrpc.register(fn1.__new__, name='invalid')
 
     with app.test_client() as client:
@@ -678,3 +679,67 @@ def test_app_create_with_rcp_batch() -> None:
         assert rv.headers.get('X-Header-3-c') == 'c3-replaced'
         assert rv.headers.get('X-Header-4-a') == 'a4'
         assert rv.headers.get('X-Header-4-b') == 'b4-replaced'
+
+
+def test_app_create_with_register_blueprint() -> None:
+    mock_jsonrpc_site = mock.MagicMock()
+    mock_jsonrpc_site_api = mock.MagicMock()
+    mock_as_view = mock.MagicMock()
+    mock_as_view.__name__ = 'view_func'
+    mock_jsonrpc_site_api.as_view.return_value = mock_as_view
+
+    mock_jsonrpc_blueprint = mock.MagicMock()
+    mock_jsonrpc_blueprint.get_jsonrpc_site.return_value = mock_jsonrpc_site
+    mock_jsonrpc_blueprint.get_jsonrpc_site_api.return_value = mock_jsonrpc_site_api
+
+    app = Flask('test_app', instance_relative_config=True)
+    jsonrpc = JSONRPC(app, '/api', enable_web_browsable_api=True)
+    jsonrpc.register_blueprint(app, mock_jsonrpc_blueprint, '/blue', enable_web_browsable_api=True)
+
+    @jsonrpc.method('app.index')
+    async def index() -> str:
+        await asyncio.sleep(0)
+        return 'Welcome to Flask JSON-RPC'
+
+    with app.test_client() as client:
+        rv = client.post('/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.index', 'params': []})
+        assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': 'Welcome to Flask JSON-RPC'}
+        assert rv.status_code == 200
+
+
+def test_app_create_with_register_browse() -> None:
+    mock_jsonrpc_site = mock.MagicMock()
+    mock_jsonrpc_site_api = mock.MagicMock()
+
+    mock_jsonrpc_blueprint = mock.MagicMock()
+    mock_jsonrpc_blueprint.get_jsonrpc_site.return_value = mock_jsonrpc_site
+    mock_jsonrpc_blueprint.get_jsonrpc_site_api.return_value = mock_jsonrpc_site_api
+
+    app = Flask('test_app', instance_relative_config=True)
+    jsonrpc = JSONRPC(app, '/api', enable_web_browsable_api=True)
+    jsonrpc.register_browse(mock_jsonrpc_blueprint)
+
+    @jsonrpc.method('app.index')
+    async def index() -> str:
+        await asyncio.sleep(0)
+        return 'Welcome to Flask JSON-RPC'
+
+    with app.test_client() as client:
+        rv = client.post('/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.index', 'params': []})
+        assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': 'Welcome to Flask JSON-RPC'}
+        assert rv.status_code == 200
+
+
+def test_app_create_with_register_browse_when_jsonrpc_browse_is_null_raises_exc() -> None:
+    mock_jsonrpc_site = mock.MagicMock()
+    mock_jsonrpc_site_api = mock.MagicMock()
+
+    mock_jsonrpc_blueprint = mock.MagicMock()
+    mock_jsonrpc_blueprint.get_jsonrpc_site.return_value = mock_jsonrpc_site
+    mock_jsonrpc_blueprint.get_jsonrpc_site_api.return_value = mock_jsonrpc_site_api
+
+    app = Flask('test_app', instance_relative_config=True)
+    jsonrpc = JSONRPC(app, '/api')
+
+    with pytest.raises(RuntimeError):
+        jsonrpc.register_browse(mock_jsonrpc_blueprint)

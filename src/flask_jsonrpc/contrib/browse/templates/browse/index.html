@@ -85,9 +85,9 @@
       <div id="viewer-entries-container" class="row">
         <div id="title-and-status-container" class="row title-and-status-container">
           <div class="title-and-status-holder">
-            <span id="chrome-title" class="chrome-title">{% raw %}<span ng-repeat="breadcrumb in breadcrumbs">{{breadcrumb}}<span ng-if="!$last"> &#x00bb; </span></span>{% endraw %}</span>
+            <span id="breadcrumb" class="breadcrumb-title">{% raw %}<span ng-repeat="breadcrumb in breadcrumbs">{{breadcrumb}}<span ng-if="!$last"> &#x00bb; </span></span>{% endraw %}</span>
           </div>
-          <div class="chrome-title-clear"></div>
+          <div class="breadcrumb-title-clear"></div>
         </div>
 
         <div ng-view></div>

@@ -25,6 +25,7 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 import os
+import json
 
 from playwright.sync_api import Page, expect
 
@@ -32,6 +33,32 @@ BROWSABLE_API_URL = os.environ['BROWSABLE_API_URL']
 
 
 def test_index(page: Page) -> None:
-    page.goto(BROWSABLE_API_URL)
+    page.goto(f'{BROWSABLE_API_URL}/')
     logo_link = page.locator('#logo-link')
     expect(logo_link).to_have_text('Web browsable API')
+
+    breadcrumb_element = page.locator('#breadcrumb')
+    expect(breadcrumb_element).to_contain_text('Dashboard')
+
+    method_signature_element = page.locator('.method-signature')
+    expect(method_signature_element).to_contain_text('Api.welcome()')
+
+    method_signature_description_element = page.locator('.method-signature-description')
+    expect(method_signature_description_element).to_contain_text('Welcome to web browsable API')
+
+    request_element = page.locator('.request-content')
+    expect(request_element).to_be_visible()
+    request_text = request_element.text_content()
+    request_data = json.loads(request_text or '{}')
+    assert 'id' in request_data
+    assert request_data['jsonrpc'] == '2.0'
+    assert request_data['method'] == 'Api.welcome'
+    assert request_data['params'] == []
+
+    response_element = page.locator('.response-content')
+    expect(response_element).to_be_visible()
+    response_text = response_element.text_content()
+    response_data = json.loads(response_text or '{}')
+    assert 'id' in response_data
+    assert response_data['jsonrpc'] == '2.0'
+    assert response_data['result'] == 'Welcome to Flask JSON-RPC'

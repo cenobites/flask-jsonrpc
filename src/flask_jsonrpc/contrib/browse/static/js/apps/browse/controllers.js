@@ -123,7 +123,7 @@
         $scope.module = module;
         $scope.$emit('App:displayToolbar', true);
         $scope.$emit('App:breadcrumb', module.name);
-        $scope.$emit('App:displayToolbarNotifyButton', module.options.notification);
+        $scope.$emit('App:displayToolbarNotifyButton', module.notification);
 
         var RPCCall = function(module) {
             var payload = RPC.payload(module);

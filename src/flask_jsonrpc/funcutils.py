@@ -30,14 +30,17 @@ from enum import Enum
 import typing as t
 from decimal import Decimal
 import inspect
+from collections import defaultdict
 import dataclasses
+from collections.abc import Set, Mapping, Sequence, Collection, MutableSet, MutableMapping, MutableSequence
 
 import typing_inspect
+from typing_extensions import Buffer  # pytype: disable=not-supported-yet
 
 from pydantic import ValidationError
 from pydantic.main import BaseModel, create_model
 
-from . import types as jsonrpc_types
+from .types import types as jsonrpc_types
 from .helpers import from_python_type
 
 
@@ -47,6 +50,11 @@ def loads(param_type: t.Any, param_value: t.Any) -> t.Any:  # noqa: ANN401, C901
 
     if param_type is t.Any:
         return param_value
+
+    origin_type = t.get_origin(param_type)
+    if origin_type is t.Annotated:
+        annotated_origin_type = getattr(param_type, '__origin__', type(None))
+        return loads(annotated_origin_type, param_value)
 
     # XXX: The only type of union that is supported is: typing.Union[T, None] or typing.Optional[T]
     if typing_inspect.is_union_type(param_type) or typing_inspect.is_optional_type(param_type):
@@ -67,9 +75,6 @@ def loads(param_type: t.Any, param_value: t.Any) -> t.Any:  # noqa: ANN401, C901
             if issubclass(param_type, Enum):
                 return param_type(param_value)
 
-            if issubclass(param_type, Decimal):
-                return param_type(param_value)
-
             if issubclass(param_type, BaseModel):
                 base_model = t.cast(type[BaseModel], param_type)  # type: ignore
                 model = create_model(base_model.__name__, __base__=base_model)
@@ -88,6 +93,13 @@ def loads(param_type: t.Any, param_value: t.Any) -> t.Any:  # noqa: ANN401, C901
             return param_type(**param_value)
         return param_value
 
+    if (
+        jsonrpc_types.Number.name == jsonrpc_type.name
+        and inspect.isclass(param_type)
+        and issubclass(param_type, Decimal)
+    ):
+        return param_type(str(param_value))
+
     if jsonrpc_types.Object.name == jsonrpc_type.name:
         loaded_dict = {}
         key_type, value_type = t.get_args(param_type)
@@ -95,15 +107,24 @@ def loads(param_type: t.Any, param_value: t.Any) -> t.Any:  # noqa: ANN401, C901
             loaded_key = loads(key_type, key)
             loaded_value = loads(value_type, value)
             loaded_dict[loaded_key] = loaded_value
-        return loaded_dict
+        dict_param_type_origin: t.Any = t.get_origin(param_type)
+        if dict_param_type_origin is defaultdict:
+            return defaultdict(None, loaded_dict)
+        if any(dict_param_type_origin is tp for tp in (Mapping, MutableMapping)):
+            return loaded_dict
+        return dict_param_type_origin(loaded_dict)
 
     if jsonrpc_types.Array.name == jsonrpc_type.name:
         loaded_list = []
         item_type = t.get_args(param_type)[0]
         for item in param_value:
             loaded_list.append(loads(item_type, item))
-        param_type_origin = t.get_origin(param_type)
-        return param_type_origin(loaded_list)
+        list_param_type_origin: t.Any = t.get_origin(param_type)
+        if any(list_param_type_origin is tp for tp in (Sequence, MutableSequence, Collection)):
+            return loaded_list
+        if any(list_param_type_origin is tp for tp in (Set, MutableSet)):
+            return set(loaded_list)
+        return list_param_type_origin(loaded_list)
 
     if typing_inspect.is_literal_type(param_type):
         return param_value
@@ -114,13 +135,18 @@ def loads(param_type: t.Any, param_value: t.Any) -> t.Any:  # noqa: ANN401, C901
     if issubclass(param_type, (bytes, bytearray)):
         return param_type(param_value.encode('utf-8'))
 
+    if issubclass(param_type, Buffer):  # pyright: ignore[reportGeneralTypeIssues]
+        return memoryview(param_value.encode('utf-8'))
+
     return param_value
 
 
 def bindfy(view_func: t.Callable[..., t.Any], params: dict[str, t.Any]) -> dict[str, t.Any]:  # noqa: ANN401
     binded_params = {}
     view_func_params = getattr(view_func, 'jsonrpc_method_params', {})
+    view_func_default_params = getattr(view_func, 'jsonrpc_method_default_params', {})
     for param_name, param_type in view_func_params.items():
         param_value = params.get(param_name)
-        binded_params[param_name] = loads(param_type, param_value)
+        param_default_value = view_func_default_params.get(param_name, None)
+        binded_params[param_name] = loads(param_type, param_value if param_value is not None else param_default_value)
     return binded_params

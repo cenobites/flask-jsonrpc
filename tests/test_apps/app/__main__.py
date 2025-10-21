@@ -28,5 +28,7 @@ import os
 
 from .app import create_app
 
-app = create_app({'SERVER_NAME': os.getenv('FLASK_SERVER_NAME')})
-app.run(host='0.0.0.0')
+app = create_app(
+    {'PREFERRED_URL_SCHEME': os.getenv('FLASK_PREFERRED_URL_SCHEME'), 'SERVER_NAME': os.getenv('FLASK_SERVER_NAME')}
+)
+app.run(host='0.0.0.0', debug=False)

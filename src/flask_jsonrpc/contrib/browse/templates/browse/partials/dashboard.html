@@ -1,16 +1,16 @@
 {% raw %}
 <div class="content-main">
-    <div class="page-header"><h1>Api.welcome()</h1></div>
-    <blockquote>Welcome to web browsable API</blockquote>
+    <div class="page-header method-signature"><h1>Api.welcome()</h1></div>
+    <blockquote class="method-signature-description">Welcome to web browsable API</blockquote>
     <p><b>Request:</b></p>
     <div class="request-info" style="clear: both" >
         <pre class="prettyprint"><b>{{ response.config.method }}</b> {{ response.config.url }}
-<span ng-bind-html="response.headers|json|prettyprint"></span></pre>
+<span ng-bind-html="response.headers.data|json|prettyprint" class="request-content"></span></pre>
     </div>
     <p><b>Response:</b></p>
     <div class="response-info">
         <pre class="prettyprint"><div class="meta nocode"><b>HTTP {{ response.statusCode }}</b></div>
-<span ng-bind-html="responseObject|json|prettyprint"></span></pre>
+<span ng-bind-html="responseObject|json|prettyprint" class="response-content"></span></pre>
     </div>
 </div>
 {% endraw %}

@@ -29,7 +29,7 @@ import typing as t
 from decimal import Decimal
 from dataclasses import asdict, dataclass
 
-from typing_extensions import Literal, LiteralString
+from typing_extensions import LiteralString
 
 from pydantic.main import BaseModel
 
@@ -74,22 +74,50 @@ class PydanticType(BaseModel):
     z: list[str]
 
 
-def test_loads_simple() -> None:
-    assert loads(str, None) is None
-    assert loads(t.Any, None) is None
-    assert loads(t.Any, 42) == 42
-    assert loads(t.Any, 'test') == 'test'
-    assert loads(str, 'string') == 'string'
-    assert loads(bytes, 'string') == b'string'
+def test_loads_bool() -> None:
+    assert loads(bool, True) is True
+    assert loads(bool, False) is False
+
+
+def test_loads_int() -> None:
     assert loads(int, 1) == 1
+    assert loads(int, 0) == 0
+    assert loads(int, -1) == -1
+
+
+def test_loads_float() -> None:
+    assert loads(float, 1.0) == 1.0
+    assert loads(float, 0.0) == 0.0
+    assert loads(float, -1.0) == -1.0
+
+
+def test_loads_str() -> None:
+    assert loads(str, 'string') == 'string'
+    assert loads(str, '') == ''
+
+
+def test_loads_bytes() -> None:
+    assert loads(bytes, 'bytes') == b'bytes'
+    assert loads(bytes, '') == b''
+
+
+def test_loads_memoryview() -> None:
+    assert loads(memoryview, 'bytes') == memoryview(b'bytes')
+    assert loads(memoryview, '') == memoryview(b'')
 
 
 def test_loads_none() -> None:
     assert loads(None, None) is None
-    assert loads(Literal[None], None) is None
+    assert loads(t.Literal[None], None) is None
 
 
-def test_loads_optinal() -> None:
+def test_loads_any() -> None:
+    assert loads(t.Any, 1) == 1
+    assert loads(t.Any, 'Lou') == 'Lou'
+    assert loads(t.Any, None) is None
+
+
+def test_loads_optional() -> None:
     assert loads(t.Optional[int], 1) == 1
     assert loads(t.Optional[int], None) is None
     assert loads(t.Optional[str], 'Lou') == 'Lou'
@@ -121,14 +149,65 @@ def test_loads_list() -> None:
     assert loads(list[list[int]], [[1, 2], [3, 4]]) == [[1, 2], [3, 4]]
 
 
+def test_loads_collection() -> None:
+    assert loads(t.Collection[int], [1, 2, 3, 4, 5]) == [1, 2, 3, 4, 5]
+    assert loads(t.Collection[t.Collection[int]], [[1, 2], [3, 4]]) == [[1, 2], [3, 4]]
+
+
+def test_loads_mutable_sequence() -> None:
+    assert loads(t.MutableSequence[int], [1, 2, 3, 4, 5]) == [1, 2, 3, 4, 5]
+    assert loads(t.MutableSequence[t.MutableSequence[int]], [[1, 2], [3, 4]]) == [[1, 2], [3, 4]]
+
+
+def test_loads_sequence() -> None:
+    assert loads(t.Sequence[int], [1, 2, 3, 4, 5]) == [1, 2, 3, 4, 5]
+    assert loads(t.Sequence[t.Sequence[int]], [[1, 2], [3, 4]]) == [[1, 2], [3, 4]]
+
+
+def test_loads_tuple() -> None:
+    assert loads(tuple[int, int, int], (1, 2, 3)) == (1, 2, 3)
+    assert loads(tuple[int, tuple[int, int]], (1, (2, 3))) == (1, (2, 3))
+
+
+def test_loads_set() -> None:
+    assert loads(set[int], {1, 2, 3, 4, 5}) == {1, 2, 3, 4, 5}
+
+
+def test_loads_mutable_set() -> None:
+    assert loads(t.MutableSet[int], {1, 2, 3, 4, 5}) == {1, 2, 3, 4, 5}
+
+
+def test_loads_frozenset() -> None:
+    assert loads(frozenset[int], {1, 2, 3, 4, 5}) == frozenset({1, 2, 3, 4, 5})
+    assert loads(frozenset[frozenset[int]], {frozenset({1, 2}), frozenset({3, 4})}) == {
+        frozenset({1, 2}),
+        frozenset({3, 4}),
+    }
+
+
 def test_loads_dict() -> None:
     assert loads(dict[str, int], {'a': 1, 'b': 2, 'c': 3}) == {'a': 1, 'b': 2, 'c': 3}
     assert loads(dict[str, dict[str, int]], {'outer': {'inner': 1}}) == {'outer': {'inner': 1}}
 
 
+def test_loads_defaultdict() -> None:
+    assert loads(t.DefaultDict[str, int], {'a': 1, 'b': 2, 'c': 3}) == {'a': 1, 'b': 2, 'c': 3}  # noqa: UP006
+    assert loads(t.DefaultDict[str, t.DefaultDict[str, int]], {'outer': {'inner': 1}}) == {'outer': {'inner': 1}}  # noqa: UP006
+
+
+def test_loads_mapping() -> None:
+    assert loads(t.Mapping[str, int], {'a': 1, 'b': 2, 'c': 3}) == {'a': 1, 'b': 2, 'c': 3}
+    assert loads(t.Mapping[str, t.Mapping[str, int]], {'outer': {'inner': 1}}) == {'outer': {'inner': 1}}
+
+
+def test_loads_mutable_mapping() -> None:
+    assert loads(t.MutableMapping[str, int], {'a': 1, 'b': 2, 'c': 3}) == {'a': 1, 'b': 2, 'c': 3}
+    assert loads(t.MutableMapping[str, t.MutableMapping[str, int]], {'outer': {'inner': 1}}) == {'outer': {'inner': 1}}
+
+
 def test_loads_literal() -> None:
-    assert loads(Literal[True], True)
-    assert loads(Literal['hello', 'world'], 'hello') == 'hello'
+    assert loads(t.Literal[True], True)
+    assert loads(t.Literal['hello', 'world'], 'hello') == 'hello'
     assert loads(LiteralString, 'hello') == 'hello'
 
 
@@ -192,6 +271,16 @@ def test_loads_complex_dict() -> None:
     with pytest.raises(TypeError) as excinfo:
         loads(DataClassType, {'invalid_key': 'value'})
     assert "__init__() got an unexpected keyword argument 'invalid_key'" in str(excinfo.value)
+
+
+def test_loads_annotated() -> None:
+    assert loads(t.Annotated[int, 'test'], 1) == 1
+    assert loads(t.Annotated[str, 'test'], 'test') == 'test'
+    assert loads(t.Annotated[bool, 'test'], True) is True
+    assert loads(t.Annotated[bool, 'test'], False) is False
+    assert loads(t.Annotated[bool, 'test'], 1) == 1
+    assert loads(t.Annotated[bool, 'test'], 'test') == 'test'
+    assert loads(t.Annotated[bool, 'test'], None) is None
 
 
 def test_bindfy() -> None:

@@ -51,6 +51,7 @@ from .exceptions import (
     InvalidRequestError,
     MethodNotFoundError,
 )
+from .types.types import AnnotatedMetadataTypeError, type_checker
 
 JSONRPC_VERSION_DEFAULT: str = '2.0'
 JSONRPC_DEFAULT_HTTP_HEADERS: dict[str, str] = {}
@@ -58,14 +59,14 @@ JSONRPC_DEFAULT_HTTP_STATUS_CODE: int = 200
 
 
 class JSONRPCSite:
-    def __init__(self: Self, path: str | None = None, base_url: str | None = None) -> None:
+    def __init__(self: Self, version: str, path: str | None = None, base_url: str | None = None) -> None:
         self.path = path
         self.base_url = base_url
         self.error_handlers: dict[type[Exception], t.Callable[[t.Any], t.Any]] = {}
         self.view_funcs: t.OrderedDict[str, t.Callable[..., t.Any]] = OrderedDict()
         self.uuid: UUID = uuid4()
         self.name: str = 'Flask-JSONRPC'
-        self.version: str = JSONRPC_VERSION_DEFAULT
+        self.version: str = version
         self.describe = JSONRPCServiceDescriptor(self).describe
 
     def _is_notification_request(self: Self, req_json: dict[str, t.Any]) -> bool:
@@ -152,13 +153,16 @@ class JSONRPCSite:
                     data={'message': f'Parameter structures are by-position (list) or by-name (dict): {params}'}
                 ) from None
 
+            if validate:
+                binded_params = type_checker(view_func, binded_params)
+
             sanitazed_params = {k: v for k, v in binded_params.items() if v is not None}
             resp_view = current_app.ensure_sync(view_func)(**sanitazed_params)
 
             # TODO: Enhance the checker to return the type
             view_fun_annotations = t.get_type_hints(view_func) if validate else {}
-            view_fun_return: t.Any | None = view_fun_annotations.pop('return', None)
-            if validate and resp_view is not None and view_fun_return is None:
+            view_fun_return: t.Any | None = view_fun_annotations.pop('return', type(None))
+            if validate and resp_view is not None and view_fun_return is type(None):
                 resp_view_qn = qualified_name(resp_view)
                 view_fun_return_qn = qualified_name(view_fun_return)
                 raise TypeError(
@@ -166,6 +170,16 @@ class JSONRPCSite:
                 ) from None
 
             return resp_view
+        except AnnotatedMetadataTypeError as e:
+            current_app.logger.exception('invalid annotated type checked for: %s', view_func.__name__)
+            raise InvalidParamsError(
+                data={
+                    'constraint': e.annotated.__class__.__name__,
+                    'param': e.name,
+                    'value': e.value,
+                    'message': e.message,
+                }
+            ) from e
         except (TypeError, TypeCheckError) as e:
             current_app.logger.exception('invalid type checked for: %s', getattr(view_func, '__name__', view_func))
             raise InvalidParamsError(data={'message': str(e)}) from e

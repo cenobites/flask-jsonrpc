@@ -163,7 +163,7 @@ USER ${USERNAME}
 WORKDIR ${APP_DIR}/run
 COPY --chown=${USERNAME}:${GROUPNAME} .docker/* tests/integration/*.py tests/integration/*.ini ${APP_DIR}/run/
 COPY --chown=${USERNAME}:${GROUPNAME} tests/integration/shared/*.py tests/shared/ ${APP_DIR}/run/shared/
-CMD ["bash", "-c", "./wait-for-it.sh ${SITE_DOMAIN}:${SITE_PORT} -t 600 -- py.test -n auto -vv --tb=short --junitxml=test-results/junit.xml"]
+CMD ["bash", "-c", "./wait-for-it.sh ${SITE_DOMAIN}:${SITE_PORT} -t 600 -- py.test -vv --tb=short --junitxml=test-results/junit.xml"]
 
 
 FROM baseimage
