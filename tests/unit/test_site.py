@@ -360,13 +360,13 @@ def test_site_with_batch_request() -> None:
 
 
 def test_site_with_batch_request_with_one_none_response() -> None:
-    def view_func(n: int) -> t.Optional[str]:
+    def view_func(n: int) -> str | None:
         if n > 5:
             return None
         return 'Hello world!'
 
     view_func.jsonrpc_method_params = {'n': int}
-    view_func.jsonrpc_method_return = t.Optional[str]
+    view_func.jsonrpc_method_return = str | None
 
     app = Flask('site')
     jsonrpc_site = JSONRPCSite(version='1.0.0', path='/path', base_url='/base')
@@ -392,11 +392,11 @@ def test_site_with_batch_request_with_one_none_response() -> None:
 
 
 def test_site_with_batch_request_notification() -> None:
-    def view_func(n: int) -> t.Optional[str]:
+    def view_func(n: int) -> str | None:
         return None
 
     view_func.jsonrpc_method_params = {'n': int}
-    view_func.jsonrpc_method_return = t.Optional[str]
+    view_func.jsonrpc_method_return = str | None
 
     app = Flask('site')
     jsonrpc_site = JSONRPCSite(version='1.0.0', path='/path', base_url='/base')

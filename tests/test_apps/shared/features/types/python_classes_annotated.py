@@ -168,7 +168,7 @@ def create_many_colors(
         tp.Nullable(False),
     ],
     color: t.Annotated[
-        t.Optional[NewColor],
+        NewColor | None,
         tp.Summary('Optional additional color'),
         tp.Description('An optional additional color to add to the list.'),
         tp.Required(False),
@@ -254,14 +254,14 @@ def create_many_fix_colors(
 )
 def remove_color(
     color: t.Annotated[
-        t.Optional[Color],
+        Color | None,
         tp.Summary('Color object to remove'),
         tp.Description('The color object to remove. Can be null to test null handling.'),
         tp.Required(False),
         tp.Nullable(True),
     ] = None,
 ) -> t.Annotated[
-    t.Optional[Color],
+    Color | None,
     tp.Summary('Removed color object'),
     tp.Description('The removed color object, or null if input was null.'),
     tp.Nullable(True),

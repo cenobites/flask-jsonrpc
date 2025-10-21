@@ -241,17 +241,7 @@ def test_app_decorators_display(
         (
             {'string': ''},
             {'jsonrpc': '2.0', 'method': 'app.decorators', 'params': {}},
-            {
-                'error': {
-                    'code': -32602,
-                    'data': {
-                        'message': "jsonrpc_decorator..decorator() missing 1 required positional argument: 'string'"
-                    },
-                    'message': 'Invalid params',
-                    'name': 'InvalidParamsError',
-                },
-                'jsonrpc': '2.0',
-            },
+            {'error': {'code': -32602, 'message': 'Invalid params', 'name': 'InvalidParamsError'}, 'jsonrpc': '2.0'},
         ),
     ],
 )
@@ -349,7 +339,7 @@ def test_app_fails_with_custom_exception_display(
             {
                 'error': {
                     'code': -32000,
-                    'data': {'message': 'example of fail with custom exception that will be handled'},
+                    'data': {'code': '0001', 'message': 'It is a custom exception'},
                     'message': 'Server error',
                     'name': 'ServerError',
                 },
@@ -362,7 +352,7 @@ def test_app_fails_with_custom_exception_display(
             {
                 'error': {
                     'code': -32000,
-                    'data': {'message': 'example of fail with custom exception that will be handled'},
+                    'data': {'code': '0001', 'message': 'It is a custom exception'},
                     'message': 'Server error',
                     'name': 'ServerError',
                 },
@@ -375,7 +365,7 @@ def test_app_fails_with_custom_exception_display(
             {
                 'error': {
                     'code': -32000,
-                    'data': {'message': 'example of fail with custom exception that will be handled'},
+                    'data': {'code': '0001', 'message': 'It is a custom exception'},
                     'message': 'Server error',
                     'name': 'ServerError',
                 },

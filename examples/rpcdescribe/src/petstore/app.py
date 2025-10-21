@@ -88,8 +88,8 @@ def handle_pet_not_found_exc(ex: PetNotFoundException) -> dict[str, str]:
     ],
 )
 def get_pets(
-    tags: t.Annotated[t.Optional[list[str]], tp.Summary('tags to filter by')] = None,
-    limit: t.Annotated[t.Optional[int], tp.Summary('maximum number of results to return'), tp.Minimum(1)] = 25,
+    tags: t.Annotated[list[str] | None, tp.Summary('tags to filter by')] = None,
+    limit: t.Annotated[int | None, tp.Summary('maximum number of results to return'), tp.Minimum(1)] = 25,
 ) -> t.Annotated[list[Pet], tp.Summary('pet response')]:
     pets = PETS
     if tags is not None:
@@ -139,7 +139,7 @@ def create_pet(
 )
 def get_pet_by_id(
     id: t.Annotated[int, tp.Summary('ID of pet to fetch'), tp.Minimum(1)],
-) -> t.Annotated[t.Optional[Pet], tp.Summary('pet response')]:
+) -> t.Annotated[Pet | None, tp.Summary('pet response')]:
     """Returns a user based on a single ID, if the user does not have
     access to the pet
     """

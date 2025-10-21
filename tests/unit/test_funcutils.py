@@ -37,7 +37,7 @@ import pytest
 
 from flask_jsonrpc.funcutils import loads, bindfy
 
-# Python 3.10+
+# Added in version 3.11.
 try:
     from typing import Self
 except ImportError:  # pragma: no cover
@@ -118,17 +118,24 @@ def test_loads_any() -> None:
 
 
 def test_loads_optional() -> None:
-    assert loads(t.Optional[int], 1) == 1
-    assert loads(t.Optional[int], None) is None
-    assert loads(t.Optional[str], 'Lou') == 'Lou'
+    assert loads(t.Optional[int], 1) == 1  # noqa: UP007,UP045
+    assert loads(t.Optional[int], None) is None  # noqa: UP007,UP045
+    assert loads(t.Optional[str], 'Lou') == 'Lou'  # noqa: UP007,UP045
+    assert loads(int | None, 1) == 1
+    assert loads(int | None, None) is None
+    assert loads(str | None, 'Lou') == 'Lou'
 
 
 def test_loads_union() -> None:
-    assert loads(t.Union[int, None], None) is None
-    assert loads(t.Union[int, None], 1) == 1
-    assert loads(t.Union[None, int], None) is None
-    assert loads(t.Union[None, int], 1) == 1
-    assert loads(t.Union[None, None], None) is None
+    assert loads(t.Union[int, None], None) is None  # noqa: UP007,UP045
+    assert loads(t.Union[int, None], 1) == 1  # noqa: UP007,UP045
+    assert loads(t.Union[None, int], None) is None  # noqa: UP007,UP045
+    assert loads(t.Union[None, int], 1) == 1  # noqa: UP007,UP045
+    assert loads(t.Union[None, None], None) is None  # noqa: UP007,UP045
+    assert loads(int | None, None) is None
+    assert loads(int | None, 1) == 1
+    assert loads(None | int, None) is None
+    assert loads(None | int, 1) == 1
 
 
 def test_loads_invalid_union_types() -> None:
@@ -136,12 +143,22 @@ def test_loads_invalid_union_types() -> None:
         TypeError,
         match='the only type of union that is supported is: typing.Union\\[T, None\\] or typing.Optional\\[T\\]',
     ):
-        loads(t.Union[int, str, None], 1)
+        loads(t.Union[int, str, None], 1)  # noqa: UP007,UP045
     with pytest.raises(
         TypeError,
         match='the only type of union that is supported is: typing.Union\\[T, None\\] or typing.Optional\\[T\\]',
     ):
-        loads(t.Union[int, str], 1)
+        loads(t.Union[int, str], 1)  # noqa: UP007,UP045
+    with pytest.raises(
+        TypeError,
+        match='the only type of union that is supported is: typing.Union\\[T, None\\] or typing.Optional\\[T\\]',
+    ):
+        loads(int | str | None, 1)
+    with pytest.raises(
+        TypeError,
+        match='the only type of union that is supported is: typing.Union\\[T, None\\] or typing.Optional\\[T\\]',
+    ):
+        loads(int | str, 1)
 
 
 def test_loads_list() -> None:

@@ -23,7 +23,7 @@ jobs:
           - ubuntu-latest
           - macos-latest
           - windows-latest
-        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
+        python-version: ["3.10", "3.11", "3.12", "3.13"]
     steps:
       - uses: actions/checkout@v5
       - uses: astral-sh/setup-uv@v7.1.1
@@ -113,12 +113,9 @@ jobs:
       matrix:
         platform:
           - ubuntu-latest
-        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
+        python-version: ["3.10", "3.11", "3.12", "3.13"]
         docker-target-build: ["app", "async"]
         exclude:
-          - platform: ubuntu-latest
-            python-version: "3.9"
-            docker-target-build: "mypyc"
           - platform: ubuntu-latest
             python-version: "3.10"
             docker-target-build: "mypyc"

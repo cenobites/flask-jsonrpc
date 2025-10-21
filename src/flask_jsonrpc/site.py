@@ -268,7 +268,7 @@ class JSONRPCSite:
                 rv, status_code, headers = resp_view
             # decide if a 2-tuple has status or headers
             elif len_resp_view == 2:
-                if isinstance(resp_view[1], (Headers, dict, tuple, list)):
+                if isinstance(resp_view[1], Headers | dict | tuple | list):
                     rv, headers, status_code = resp_view + (JSONRPC_DEFAULT_HTTP_STATUS_CODE,)
                 else:
                     rv, status_code, headers = resp_view + (JSONRPC_DEFAULT_HTTP_HEADERS,)

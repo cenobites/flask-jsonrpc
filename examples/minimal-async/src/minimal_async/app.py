@@ -92,7 +92,7 @@ async def args_validate(a1: int, a2: str, a3: bool, a4: list[t.Any], a5: dict[t.
 
 
 @jsonrpc.method('App.notify')
-async def notify(_string: t.Optional[str] = None) -> None:
+async def notify(_string: str | None = None) -> None:
     await asyncio.sleep(0)
 
 
@@ -103,13 +103,13 @@ async def not_notify(string: str) -> str:
 
 
 @jsonrpc.method('App.fails')
-async def fails(_string: t.Optional[str] = None) -> t.NoReturn:
+async def fails(_string: str | None = None) -> t.NoReturn:
     await asyncio.sleep(0)
     raise ValueError('example of fail')
 
 
 @jsonrpc.method('App.failsWithCustomException')
-async def fails_with_custom_exception(_string: t.Optional[str] = None) -> t.NoReturn:
+async def fails_with_custom_exception(_string: str | None = None) -> t.NoReturn:
     await asyncio.sleep(0)
     raise MyException('example of fail with custom exception that will be handled')
 

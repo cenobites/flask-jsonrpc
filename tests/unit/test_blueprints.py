@@ -32,7 +32,7 @@ import pytest
 
 from flask_jsonrpc import JSONRPC, JSONRPCBlueprint
 
-# Python 3.10+
+# Added in version 3.11.
 try:
     from typing import Self
 except ImportError:  # pragma: no cover

@@ -10,7 +10,7 @@ Some reasons you might want to use:
 
 * Simple, powerful, flexible, and pythonic API.
 * Support [JSON-RPC 2.0](https://www.jsonrpc.org/specification "JSON-RPC 2.0") version.
-* Support Python 3.9 or later.
+* Support Python 3.10 or later.
 * Experimental support to [Mypyc](https://mypyc.readthedocs.io/en/latest/introduction.html), it compiles Python modules to C extensions.
 * The web browsable API.
 * Run-time type checking functions defined with [PEP 484](https://www.python.org/dev/peps/pep-0484/ "PEP 484") argument (and return) type annotations.

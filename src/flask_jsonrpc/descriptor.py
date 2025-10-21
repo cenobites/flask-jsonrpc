@@ -253,7 +253,7 @@ class JSONRPCServiceDescriptor:
             id=f'urn:uuid:{self.jsonrpc_site.uuid}',
             version=self.jsonrpc_site.version,
             name=self.jsonrpc_site.name,
-            servers=[fjt.Server(url=self._service_server_url())],  # pytype: disable=missing-parameter
+            servers=[fjt.Server(url=self._service_server_url())],
             methods=self._service_methods_desc(),
         )
         # mypyc: pydantic optional value

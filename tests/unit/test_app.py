@@ -35,7 +35,7 @@ from werkzeug.datastructures import Headers
 
 from flask_jsonrpc import JSONRPC
 
-# Python 3.10+
+# Added in version 3.11.
 try:
     from typing import Self
 except ImportError:  # pragma: no cover

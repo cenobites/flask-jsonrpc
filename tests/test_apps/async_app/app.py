@@ -39,7 +39,7 @@ from shared.features.types.python_stds import jsonrpc as jsonrpc_types_python_st
 from shared.features.objects.python_classes import jsonrpc as jsonrpc_objects_python_classes_app
 from shared.features.objects.pydantic_models import jsonrpc as jsonrpc_objects_pydantic_models_app
 from shared.features.objects.python_dataclasses import jsonrpc as jsonrpc_objects_python_dataclasses_app
-from shared.features.types.python_stds_annotated import jsonrpc as jsonrpc_types_python_stds_annotated_app
+from shared.features.types.python_stds_annotated import jsonrpc as jsonrpc_types_python_annotated_stds_app
 from shared.features.types.python_classes_annotated import jsonrpc as jsonrpc_objects_python_classes_annotated_app
 from shared.features.types.pydantic_models_annotated import jsonrpc as jsonrpc_objects_pydantic_models_annotated_app
 from shared.features.types.python_dataclasses_annotated import (
@@ -79,7 +79,7 @@ class MyNotRegisteredException(Exception):
     pass
 
 
-def create_app(test_config: t.Optional[dict[str, t.Any]] = None) -> Flask:  # noqa: C901
+def create_app(test_config: dict[str, t.Any] | None = None) -> Flask:  # noqa: C901
     """Create and configure an instance of the Flask application."""
     flask_app = Flask('apptest', instance_relative_config=True)
     if test_config:
@@ -103,7 +103,7 @@ def create_app(test_config: t.Optional[dict[str, t.Any]] = None) -> Flask:  # no
     )
     jsonrpc.register_blueprint(
         flask_app,
-        jsonrpc_types_python_stds_annotated_app,
+        jsonrpc_types_python_annotated_stds_app,
         url_prefix='/types/python-stds-annotated',
         enable_web_browsable_api=True,
     )
@@ -166,7 +166,7 @@ def create_app(test_config: t.Optional[dict[str, t.Any]] = None) -> Flask:  # no
         return string
 
     @jsonrpc.method('app.notify')
-    async def notify(_string: t.Optional[str] = None) -> None:
+    async def notify(_string: str | None = None) -> None:
         await asyncio.sleep(0)
 
     @jsonrpc.method('app.fails')
@@ -189,12 +189,12 @@ def create_app(test_config: t.Optional[dict[str, t.Any]] = None) -> Flask:  # no
         return f'Hello {string}'
 
     @jsonrpc.method('app.failsWithCustomException')
-    async def fails_with_custom_exception(_string: t.Optional[str] = None) -> t.NoReturn:
+    async def fails_with_custom_exception(_string: str | None = None) -> t.NoReturn:
         await asyncio.sleep(0)
         raise MyException('example of fail with custom exception that will be handled')
 
     @jsonrpc.method('app.failsWithCustomExceptionNotRegistered')
-    async def fails_with_custom_exception_not_registered(_string: t.Optional[str] = None) -> t.NoReturn:
+    async def fails_with_custom_exception_not_registered(_string: str | None = None) -> t.NoReturn:
         await asyncio.sleep(0)
         raise MyNotRegisteredException('example of fail with custom exception that will not be handled')
 
