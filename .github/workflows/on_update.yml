@@ -6,8 +6,10 @@ concurrency:
 
 on:
   pull_request:
+    paths-ignore: ["docs/**", "README.md"]
   push:
-    branches: ["master", "release/**"]
+    branches: ["release/**"]
+    paths-ignore: ["docs/**", "README.md"]
 
 permissions:
   contents: read

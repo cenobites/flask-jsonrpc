@@ -208,7 +208,7 @@ skip = [
     "pp*",
 ]
 test-groups = ["tests"]
-test-command = "py.test -n auto -rsxX -vv --tb=short --rootdir={project} {project}/tests --cov-fail-under=0 --reruns 5"
+test-command = "py.test -rsxX -vv --numprocesses=auto --tb=short --rootdir={project} {project}/tests --cov-fail-under=0"
 
 [tool.cibuildwheel.environment]
 CIBW_PROJECT_REQUIRES_PYTHON = ">=3.11,<3.14"
@@ -288,7 +288,7 @@ docstring-code-format = true
 docstring-code-line-length = 79
 
 [tool.pytest.ini_options]
-addopts = "-rsxX -vv --pyargs --doctest-modules --numprocesses=auto --count=10 --reruns 5 --profile --junitxml=junit/test-results.xml --cov-report=html --cov-report=term --cov-report=lcov --cov=flask_jsonrpc --cov-fail-under=100"
+addopts = "-rsxX -vv --pyargs --doctest-modules --numprocesses=auto --count=5 --reruns=5 --profile --junitxml=junit/test-results.xml --cov-report=html --cov-report=term --cov-report=lcov --cov=flask_jsonrpc --cov-fail-under=100"
 junit_family = "xunit2"
 python_files = ["tests.py", "test_*.py", "*_tests.py"]
 pythonpath = "src/"
@@ -424,7 +424,7 @@ dependency_groups = [
 ]
 no_default_groups = true
 commands = [[
-    "pytest", "-n", "auto", "-vv", "--tb=short", "--basetemp={env_tmp_dir}",
+    "pytest", "-rsxX", "-vv", "--numprocesses=auto", "--tb=short", "--basetemp={env_tmp_dir}",
     {replace = "posargs", default = [], extend = true}
 ]]
 

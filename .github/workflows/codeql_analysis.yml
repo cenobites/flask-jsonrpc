@@ -5,12 +5,13 @@ concurrency:
   cancel-in-progress: true
 
 on:
-  push:
-    branches: ["master", "release/**"]
   pull_request:
-    branches: ["master", "release/**"]
+    paths-ignore: ["docs/**", "README.md"]
+  push:
+    branches: ["release/**"]
+    paths-ignore: ["docs/**", "README.md"]
   schedule:
-    - cron: '41 0 * * 2'
+    - cron: "41 0 * * 2"
 
 jobs:
   analyze-python:
