@@ -157,7 +157,7 @@ def create_many_pets(
         tp.Nullable(False),
     ],
     pet: t.Annotated[
-        t.Optional[NewPet],
+        NewPet | None,
         tp.Summary('Optional additional pet'),
         tp.Description('An optional additional pet to add to the list.'),
         tp.Required(False),
@@ -246,14 +246,14 @@ def create_many_fix_pets(
 )
 def remove_pet(
     pet: t.Annotated[
-        t.Optional[Pet],
+        Pet | None,
         tp.Summary('Optional pet to remove'),
         tp.Description('The Pet Pydantic model object to remove.'),
         tp.Required(False),
         tp.Nullable(True),
     ] = None,
 ) -> t.Annotated[
-    t.Optional[Pet],
+    Pet | None,
     tp.Summary('Removed pet Pydantic model'),
     tp.Description('The Pet Pydantic model object that was removed, or None if not provided.'),
 ]:

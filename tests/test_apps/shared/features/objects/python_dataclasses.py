@@ -24,7 +24,6 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-import typing as t
 from dataclasses import dataclass
 
 from flask_jsonrpc import JSONRPCBlueprint
@@ -79,7 +78,7 @@ def create_car(car: NewCar) -> Car:
 
 
 @jsonrpc.method('objects.python_dataclasses.createManyCar')
-def create_many_cars(cars: list[NewCar], car: t.Optional[NewCar] = None) -> list[Car]:
+def create_many_cars(cars: list[NewCar], car: NewCar | None = None) -> list[Car]:
     new_cars = [Car(id=i, name=car.name, tag=car.tag) for i, car in enumerate(cars)]
     if car is not None:
         return new_cars + [Car(id=len(cars), name=car.name, tag=car.tag)]
@@ -92,7 +91,7 @@ def create_many_fix_cars(cars: dict[str, NewCar]) -> list[Car]:
 
 
 @jsonrpc.method('objects.python_dataclasses.removeCar')
-def remove_car(car: t.Optional[Car] = None) -> t.Optional[Car]:
+def remove_car(car: Car | None = None) -> Car | None:
     if car is not None and car.id > 10:
         raise CarNotFoundException(
             'Car not found', CarError(car_id=car.id, reason='The car with an ID greater than 10 does not exist.')

@@ -614,14 +614,14 @@ def typeddict_type(
 )
 def optional(
     n: t.Annotated[
-        t.Optional[int],
+        int | None,
         tp.Summary('An optional integer'),
         tp.Description('This parameter should be an optional integer.'),
         tp.Example(name='n', value=None),
         tp.Nullable(True),
     ] = None,
 ) -> t.Annotated[
-    t.Optional[int],
+    int | None,
     tp.Summary('An optional integer'),
     tp.Description('This is the same optional value returned.'),
     tp.Example(name='result', value=None),
@@ -644,14 +644,14 @@ def optional(
 )
 def union(
     n: t.Annotated[
-        t.Union[int, None],
+        int | None,
         tp.Summary('A union of int or None'),
         tp.Description('This parameter should be a union of int or None.'),
         tp.Example(name='n', value=None),
         tp.Nullable(True),
     ] = None,
 ) -> t.Annotated[
-    t.Union[int, None],
+    int | None,
     tp.Summary('A union of int or None'),
     tp.Description('This is the same union value returned.'),
     tp.Example(name='result', value=None),
@@ -674,7 +674,7 @@ def union(
 )
 def union_with_two_types(
     n: t.Annotated[
-        t.Union[int, float],
+        int | float,
         tp.Summary('A union of int or float'),
         tp.Description('This parameter should be a union of int or float.'),
         tp.Example(name='n', value=42),
@@ -682,7 +682,7 @@ def union_with_two_types(
         tp.Nullable(False),
     ],
 ) -> t.Annotated[
-    t.Union[int, float],
+    int | float,
     tp.Summary('A union of int or float'),
     tp.Description('This is the same union value returned.'),
     tp.Example(name='result', value=42),

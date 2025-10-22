@@ -76,7 +76,7 @@ class MyNotRegisteredException(Exception):
     pass
 
 
-def create_app(test_config: t.Optional[dict[str, t.Any]] = None) -> Flask:  # noqa: C901
+def create_app(test_config: dict[str, t.Any] | None = None) -> Flask:  # noqa: C901
     """Create and configure an instance of the Flask application."""
     flask_app = Flask('apptest', instance_relative_config=True)
     if test_config:
@@ -146,6 +146,10 @@ def create_app(test_config: t.Optional[dict[str, t.Any]] = None) -> Flask:  # no
     def handle_value_error_exception(ex: ValueError) -> dict[str, t.Any]:
         return {'message': 'Generic global error handler does not work, :(', 'code': '0000'}
 
+    @jsonrpc.errorhandler(MyException)
+    def handle_my_exception(ex: MyException) -> dict[str, t.Any]:
+        return {'message': 'It is a custom exception', 'code': '0001'}
+
     @jsonrpc.method('app.greeting')
     def greeting(name: str = 'Flask JSON-RPC') -> str:
         return f'Hello {name}'
@@ -155,7 +159,7 @@ def create_app(test_config: t.Optional[dict[str, t.Any]] = None) -> Flask:  # no
         return string
 
     @jsonrpc.method('app.notify')
-    def notify(_string: t.Optional[str] = None) -> None:
+    def notify(_string: str | None = None) -> None:
         pass
 
     @jsonrpc.method('app.fails')
@@ -175,11 +179,11 @@ def create_app(test_config: t.Optional[dict[str, t.Any]] = None) -> Flask:  # no
         return f'Hello {string}'
 
     @jsonrpc.method('app.failsWithCustomException')
-    def fails_with_custom_exception(_string: t.Optional[str] = None) -> t.NoReturn:
+    def fails_with_custom_exception(_string: str | None = None) -> t.NoReturn:
         raise MyException('example of fail with custom exception that will be handled')
 
     @jsonrpc.method('app.failsWithCustomExceptionNotRegistered')
-    def fails_with_custom_exception_not_registered(_string: t.Optional[str] = None) -> t.NoReturn:
+    def fails_with_custom_exception_not_registered(_string: str | None = None) -> t.NoReturn:
         raise MyNotRegisteredException('example of fail with custom exception that will not be handled')
 
     @flask_app.route('/health')

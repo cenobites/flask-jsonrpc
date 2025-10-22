@@ -136,7 +136,7 @@ def test_descriptor_describe_with_method_annotated() -> None:
         age: int
 
     def view_func(
-        string: str, integer: int, floating: float, my_model: t.Optional[MyPydanticModel] = None
+        string: str, integer: int, floating: float, my_model: MyPydanticModel | None = None
     ) -> dict[str, t.Any]:
         return {
             'string': string,
@@ -149,7 +149,7 @@ def test_descriptor_describe_with_method_annotated() -> None:
         'string': str,
         'integer': int,
         'floating': float,
-        'my_model': t.Optional[MyPydanticModel],
+        'my_model': MyPydanticModel | None,
         'return': dict[str, t.Any],
     }
     setattr(view_func, 'jsonrpc_method_name', 'view_func')  # noqa: B010
@@ -320,7 +320,7 @@ def test_descriptor_describe_with_params_annotated() -> None:
         age: int
 
     def view_func(
-        string: str, integer: int, floating: float, my_model: t.Optional[MyPydanticModel] = None
+        string: str, integer: int, floating: float, my_model: MyPydanticModel | None = None
     ) -> dict[str, t.Any]:
         return {
             'string': string,
@@ -366,9 +366,7 @@ def test_descriptor_describe_with_params_annotated() -> None:
             tp.DecimalPlaces(2),
         ],
         'my_model': t.Annotated[
-            t.Optional[MyPydanticModel],
-            tp.Summary('my_model param summary'),
-            tp.Description('my_model param description'),
+            MyPydanticModel | None, tp.Summary('my_model param summary'), tp.Description('my_model param description')
         ],
         'return': t.Annotated[dict[str, t.Any], tp.Summary('return summary'), tp.Description('return description')],
     }

@@ -35,7 +35,7 @@ import dataclasses
 from collections.abc import Set, Mapping, Sequence, Collection, MutableSet, MutableMapping, MutableSequence
 
 import typing_inspect
-from typing_extensions import Buffer  # pytype: disable=not-supported-yet
+from typing_extensions import Buffer
 
 from pydantic import ValidationError
 from pydantic.main import BaseModel, create_model
@@ -132,7 +132,7 @@ def loads(param_type: t.Any, param_value: t.Any) -> t.Any:  # noqa: ANN401, C901
     if typing_inspect.is_final_type(param_type):
         return param_value
 
-    if issubclass(param_type, (bytes, bytearray)):
+    if issubclass(param_type, bytes | bytearray):
         return param_type(param_value.encode('utf-8'))
 
     if issubclass(param_type, Buffer):  # pyright: ignore[reportGeneralTypeIssues]

@@ -24,7 +24,6 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-import typing as t
 
 from flask_jsonrpc import JSONRPCBlueprint
 
@@ -84,7 +83,7 @@ def create_color(color: NewColor) -> Color:
 
 
 @jsonrpc.method('objects.python_classes.createManyColor')
-def create_many_colors(colors: list[NewColor], color: t.Optional[NewColor] = None) -> list[Color]:
+def create_many_colors(colors: list[NewColor], color: NewColor | None = None) -> list[Color]:
     new_color = [Color(id=i, name=pet.name, tag=pet.tag) for i, pet in enumerate(colors)]
     if color is not None:
         return new_color + [Color(id=len(colors), name=color.name, tag=color.tag)]
@@ -97,7 +96,7 @@ def create_many_fix_colors(colors: dict[str, NewColor]) -> list[Color]:
 
 
 @jsonrpc.method('objects.python_classes.removeColor')
-def remove_color(color: t.Optional[Color] = None) -> t.Optional[Color]:
+def remove_color(color: Color | None = None) -> Color | None:
     if color is not None and color.id > 10:
         raise ColorNotFoundException(
             'Color not found',

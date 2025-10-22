@@ -26,16 +26,12 @@
 # POSSIBILITY OF SUCH DAMAGE.
 from __future__ import annotations
 
-import sys
 import typing as t
 from dataclasses import dataclass
 
 import typing_extensions
 
-if sys.version_info < (3, 10):
-    SLOTS = {}
-else:  # pragma: no cover
-    SLOTS = {'slots': True}
+SLOTS = {'slots': True}
 
 JSONRPC_Method_T = t.TypeVar('JSONRPC_Method_T')
 

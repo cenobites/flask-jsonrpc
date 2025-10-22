@@ -84,7 +84,7 @@ def args_validate(a1: int, a2: str, a3: bool, a4: list[t.Any], a5: dict[t.Any, t
 
 
 @jsonrpc.method('App.notify')
-def notify(_string: t.Optional[str] = None) -> None:
+def notify(_string: str | None = None) -> None:
     pass
 
 
@@ -94,12 +94,12 @@ def not_notify(string: str) -> str:
 
 
 @jsonrpc.method('App.fails')
-def fails(_string: t.Optional[str] = None) -> t.NoReturn:
+def fails(_string: str | None = None) -> t.NoReturn:
     raise ValueError('example of fail')
 
 
 @jsonrpc.method('App.failsWithCustomException')
-def fails_with_custom_exception(_string: t.Optional[str] = None) -> t.NoReturn:
+def fails_with_custom_exception(_string: str | None = None) -> t.NoReturn:
     raise MyException('example of fail with custom exception that will be handled')
 
 

@@ -34,7 +34,7 @@ from pathlib import PurePath
 from collections import deque
 import dataclasses
 
-from typing_extensions import Buffer  # pytype: disable=not-supported-yet
+from typing_extensions import Buffer
 
 from flask import typing as ft, jsonify as _jsonify
 
@@ -42,7 +42,7 @@ from pydantic.main import BaseModel
 
 
 def serializable(obj: t.Any) -> t.Any:  # noqa: ANN401, C901
-    if isinstance(obj, (bytes, bytearray)):
+    if isinstance(obj, bytes | bytearray):
         return obj.decode('utf-8')
     if isinstance(obj, Buffer):
         return bytes(obj).decode('utf-8')
@@ -57,7 +57,7 @@ def serializable(obj: t.Any) -> t.Any:  # noqa: ANN401, C901
             encoded_value = serializable(value)
             encoded_dict[encoded_key] = encoded_value
         return encoded_dict
-    if isinstance(obj, (list, set, frozenset, GeneratorType, tuple, deque)):
+    if isinstance(obj, list | set | frozenset | GeneratorType | tuple | deque):
         encoded_list = []
         for item in obj:
             encoded_list.append(serializable(item))

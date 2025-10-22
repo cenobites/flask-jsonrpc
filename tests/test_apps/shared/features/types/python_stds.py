@@ -189,17 +189,17 @@ def typeddict_type(user: UserTypedDict) -> UserTypedDict:
 
 
 @jsonrpc.method('types.python_stds.optional')
-def optional(n: t.Optional[int] = None) -> t.Optional[int]:
+def optional(n: int | None = None) -> int | None:
     return n
 
 
 @jsonrpc.method('types.python_stds.unionWithTwoTypes')
-def union_with_two_types(n: t.Union[int, float]) -> t.Union[int, float]:
+def union_with_two_types(n: int | float) -> int | float:
     return n
 
 
 @jsonrpc.method('types.python_stds.unionWithTwoTypesAndNone')
-def union_with_two_types_and_none(n: t.Union[int, float, None] = None) -> t.Union[int, float, None]:
+def union_with_two_types_and_none(n: int | float | None = None) -> int | float | None:
     return n
 
 

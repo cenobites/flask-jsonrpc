@@ -129,15 +129,15 @@ def test_jsonrpc_register_view_function_without_params_and_return() -> None:
 
 
 def test_jsonrpc_register_view_function_with_default_params() -> None:
-    def view_func(name: str = 'World', person: t.Optional[str] = None) -> str:
+    def view_func(name: str = 'World', person: str | None = None) -> str:
         return f'Hello {name}, {person or "Anonymous"}!'
 
     jsonrpc_app = JSONRPCApp()
     view_func_wrapped = jsonrpc_app.method('view_func')(view_func)
     assert view_func_wrapped.jsonrpc_method_name == 'view_func'
-    assert view_func_wrapped.jsonrpc_method_sig == {'return': str, 'name': str, 'person': t.Optional[str]}
+    assert view_func_wrapped.jsonrpc_method_sig == {'return': str, 'name': str, 'person': str | None}
     assert view_func_wrapped.jsonrpc_method_return is str
-    assert view_func_wrapped.jsonrpc_method_params == {'name': str, 'person': t.Optional[str]}
+    assert view_func_wrapped.jsonrpc_method_params == {'name': str, 'person': str | None}
     assert view_func_wrapped.jsonrpc_validate is True
     assert view_func_wrapped.jsonrpc_notification is True
     assert view_func_wrapped.jsonrpc_options == {'notification': True, 'validate': True}
@@ -160,7 +160,7 @@ def test_jsonrpc_register_view_function_with_none_params_and_returns() -> None:
 
 def test_jsonrpc_register_view_function_annotated() -> None:
     def view_func(
-        name: t.Annotated[str, 'metadata'], person: t.Annotated[t.Optional[str], 'metadata'] = None
+        name: t.Annotated[str, 'metadata'], person: t.Annotated[str | None, 'metadata'] = None
     ) -> t.Annotated[str, 'metadata']:
         return f'Hello {name}, {person or "Anonymous"}!'
 
@@ -169,13 +169,13 @@ def test_jsonrpc_register_view_function_annotated() -> None:
     assert view_func_wrapped.jsonrpc_method_name == 'view_func'
     assert view_func_wrapped.jsonrpc_method_sig == {
         'name': t.Annotated[str, 'metadata'],
-        'person': t.Annotated[t.Optional[str], 'metadata'],
+        'person': t.Annotated[str | None, 'metadata'],
         'return': t.Annotated[str, 'metadata'],
     }
     assert view_func_wrapped.jsonrpc_method_return is t.Annotated[str, 'metadata']
     assert view_func_wrapped.jsonrpc_method_params == {
         'name': t.Annotated[str, 'metadata'],
-        'person': t.Annotated[t.Optional[str], 'metadata'],
+        'person': t.Annotated[str | None, 'metadata'],
     }
     assert view_func_wrapped.jsonrpc_method_annotations == t.Annotated[JSONRPC_Method_T, Summary(summary='summary')]
     assert view_func_wrapped.jsonrpc_validate is True

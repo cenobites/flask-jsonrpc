@@ -57,7 +57,7 @@ class HTTPAdapter(RequestsHTTPAdapter):
 
 
 class FlaskClientAdapter(BaseAdapter):
-    def __init__(self: Self, app: 'Flask', path: str = '/', base_url: t.Optional[str] = None) -> None:
+    def __init__(self: Self, app: 'Flask', path: str = '/', base_url: str | None = None) -> None:
         self.app = app
         self.path = path
         self.base_url = base_url

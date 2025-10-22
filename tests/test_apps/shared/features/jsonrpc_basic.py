@@ -42,7 +42,7 @@ def echo(string: str, _some: t.Any = None) -> str:  # noqa: ANN401
 
 
 @jsonrpc.method('jsonrpc_basic.notify')
-def notify(_string: t.Optional[str] = None) -> None:
+def notify(_string: str | None = None) -> None:
     pass
 
 
@@ -96,5 +96,5 @@ def mixin_not_validate(s, t: int, u, v: str, x, z):  # noqa: ANN001,ANN202,ANN20
 
 
 @jsonrpc.method('jsonrpc_basic.noReturn')
-def no_return(_string: t.Optional[str] = None) -> t.NoReturn:
+def no_return(_string: str | None = None) -> t.NoReturn:
     raise ValueError('no return')

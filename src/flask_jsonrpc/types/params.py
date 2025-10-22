@@ -27,7 +27,6 @@
 from __future__ import annotations
 
 import re
-import sys
 import math
 import typing as t
 from decimal import Decimal
@@ -40,10 +39,7 @@ from typing_extensions import Self
 
 from ..utils import trait
 
-if sys.version_info < (3, 10):
-    SLOTS = {}
-else:  # pragma: no cover
-    SLOTS = {'slots': True}
+SLOTS = {'slots': True}
 EMPTY_VALUES: tuple[t.Any, ...] = (None, '', [], (), {})
 
 

@@ -109,9 +109,12 @@ def test_from_python_type_with_pure_class() -> None:
         attr2: int
 
     assert str(from_python_type(ClassTest)) == 'Object'
-    assert str(from_python_type(t.Union[ClassTest, None])) == 'Object'
-    assert str(from_python_type(t.Optional[ClassTest])) == 'Object'
-    assert str(from_python_type(t.Optional[ClassTest], default=None)) == 'None'
+    assert str(from_python_type(t.Union[ClassTest, None])) == 'Object'  # noqa: UP007,UP045
+    assert str(from_python_type(t.Optional[ClassTest])) == 'Object'  # noqa: UP007,UP045
+    assert str(from_python_type(t.Optional[ClassTest], default=None)) == 'None'  # noqa: UP007,UP045
+
+    assert str(from_python_type(ClassTest | None)) == 'Object'
+    assert str(from_python_type(ClassTest | None, default=None)) == 'None'
 
 
 def test_from_python_type_with_dataclass() -> None:

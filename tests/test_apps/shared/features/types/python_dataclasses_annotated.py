@@ -163,7 +163,7 @@ def create_many_cars(
         tp.Nullable(False),
     ],
     car: t.Annotated[
-        t.Optional[NewCar],
+        NewCar | None,
         tp.Summary('Optional additional car'),
         tp.Description('An optional additional car to add to the list.'),
         tp.Required(False),
@@ -244,16 +244,14 @@ def create_many_fix_cars(
 )
 def remove_car(
     car: t.Annotated[
-        t.Optional[Car],
+        Car | None,
         tp.Summary('Optional removed car'),
         tp.Description('An optional removed car to add to the list.'),
         tp.Required(False),
         tp.Nullable(True),
     ] = None,
 ) -> t.Annotated[
-    t.Optional[Car],
-    tp.Summary('Removed car dataclass object'),
-    tp.Description('The Car dataclass object that was removed.'),
+    Car | None, tp.Summary('Removed car dataclass object'), tp.Description('The Car dataclass object that was removed.')
 ]:
     if car is not None and car.id > 10:
         raise CarNotFoundException(

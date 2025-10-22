@@ -24,7 +24,6 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-import typing as t
 
 from pydantic.main import BaseModel
 
@@ -79,7 +78,7 @@ def create_pet(pet: NewPet) -> Pet:
 
 
 @jsonrpc.method('objects.pydantic_models.createManyPet')
-def create_many_pets(pets: list[NewPet], pet: t.Optional[NewPet] = None) -> list[Pet]:
+def create_many_pets(pets: list[NewPet], pet: NewPet | None = None) -> list[Pet]:
     new_pets = [Pet(id=i, name=pet.name, tag=pet.tag) for i, pet in enumerate(pets)]
     if pet is not None:
         return new_pets + [Pet(id=len(pets), name=pet.name, tag=pet.tag)]
@@ -92,7 +91,7 @@ def create_many_fix_pets(pets: dict[str, NewPet]) -> list[Pet]:
 
 
 @jsonrpc.method('objects.pydantic_models.removePet')
-def remove_pet(pet: t.Optional[Pet] = None) -> t.Optional[Pet]:
+def remove_pet(pet: Pet | None = None) -> Pet | None:
     if pet is not None and pet.id > 10:
         raise PetNotFoundException(
             'Pet not found', PetError(pet_id=pet.id, reason='The pet with an ID greater than 10 does not exist.')

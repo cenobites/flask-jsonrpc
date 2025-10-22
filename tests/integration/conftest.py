@@ -120,6 +120,12 @@ def jsonrpc_call(page_session: t.Callable[..., Page]) -> t.Generator[t.Callable[
         response_data = json.loads(response_text or '{}')
         assert 'id' in response_data, f"Expected 'id' in response data, got {response_data}"
         for name, value in response_expected.items():
+            if name == 'error':
+                for err_name, err_value in value.items():
+                    assert response_data[name][err_name] == err_value, (
+                        f'Expected {err_name} to be {err_value}, got {response_data[name][err_name]}'
+                    )
+                continue
             assert response_data[name] == value, f'Expected {name} to be {value}, got {response_data[name]}'
 
         return page

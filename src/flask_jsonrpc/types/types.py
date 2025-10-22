@@ -41,7 +41,7 @@ from collections.abc import Set, Mapping, Sequence, Collection, MutableSet, Muta
 import typing_inspect
 
 # Added in version 3.11.
-from typing_extensions import Self, Buffer  # pytype: disable=not-supported-yet
+from typing_extensions import Self, Buffer
 
 from pydantic.main import BaseModel
 from pydantic.fields import FieldInfo
@@ -57,10 +57,7 @@ else:  # pragma: no cover
     from enum import StrEnum
 
 
-if sys.version_info < (3, 10):
-    SLOTS = {}
-else:  # pragma: no cover
-    SLOTS = {'slots': True}
+SLOTS = {'slots': True}
 
 
 @dataclasses.dataclass(frozen=True, **SLOTS)
@@ -131,7 +128,7 @@ def to_dict(obj: t.Any, *, level: int = 0, max_level: int = 5) -> t.Any:  # noqa
             proped_dict[key] = to_dict(value, level=level, max_level=max_level)
         return proped_dict
 
-    if isinstance(obj, (list, set, frozenset, GeneratorType, tuple, deque)):
+    if isinstance(obj, list | set | frozenset | GeneratorType | tuple | deque):
         proped_list = []
         for item in obj:
             proped_list.append(to_dict(item, level=level, max_level=max_level))

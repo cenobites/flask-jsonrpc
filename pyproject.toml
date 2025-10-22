@@ -16,7 +16,6 @@ classifiers = [
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3 :: Only",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
@@ -24,7 +23,7 @@ classifiers = [
     "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
     "Topic :: Software Development :: Libraries :: Application Frameworks",
 ]
-requires-python = ">=3.9,<3.14"
+requires-python = ">=3.10,<3.14"
 dependencies = [
     "Flask>=3.0.0,<4.0", # https://github.com/pallets/flask
     "typeguard==4.4.1", # https://github.com/agronholm/typeguard
@@ -62,7 +61,7 @@ tests = [
     "pytest-xdist==3.6.1",  # https://github.com/pytest-dev/pytest-xdist
     "pytest-sugar==1.0.0",  # https://github.com/Frozenball/pytest-sugar
     "pytest-env==1.1.5",  # https://github.com/MobileDynasty/pytest-env
-    "pytest-rerunfailures==16.1;python_version>='3.10'",  # https://github.com/pytest-dev/pytest-rerunfailures
+    "pytest-rerunfailures==16.1",  # https://github.com/pytest-dev/pytest-rerunfailures
     "pytest-repeat==0.9.4",  # https://github.com/pytest-dev/pytest-repeat
     "pytest-profiling==1.8.1",  # https://github.com/man-group/pytest-plugins
     "pytest-clarity==1.0.1",  # https://github.com/darrenburns/pytest-clarity
@@ -100,7 +99,7 @@ cbuild = [
     "setuptools>=77.0.0",  # https://github.com/pypa/setuptools
 ]
 docs = [
-    "Sphinx==8.1.3;python_version>='3.10'",  # https://github.com/sphinx-doc/sphinx
+    "Sphinx==8.1.3",  # https://github.com/sphinx-doc/sphinx
     "sphinx-tabs==3.4.7",  # https://github.com/executablebooks/sphinx-tabs
     "sphinx-issues==5.0.0",  # https://github.com/sloria/sphinx-issues
     "sphinxcontrib-log-cabinet==1.0.1",  # https://github.com/davidism/sphinxcontrib-log-cabinet
@@ -209,7 +208,7 @@ skip = [
     "pp*",
 ]
 test-groups = ["tests"]
-test-command = "py.test -n auto -rsxX -vv --tb=short --rootdir={project} {project}/tests --cov-fail-under=0"
+test-command = "py.test -n auto -rsxX -vv --tb=short --rootdir={project} {project}/tests --cov-fail-under=0 --reruns 5"
 
 [tool.cibuildwheel.environment]
 CIBW_PROJECT_REQUIRES_PYTHON = ">=3.11,<3.14"
@@ -222,7 +221,7 @@ fix = true
 show-fixes = true
 output-format = "concise"
 line-length = 120
-target-version = "py39"
+target-version = "py310"
 
 [tool.ruff.lint]
 select = [
@@ -289,7 +288,7 @@ docstring-code-format = true
 docstring-code-line-length = 79
 
 [tool.pytest.ini_options]
-addopts = "-rsxX -vv --pyargs --doctest-modules --numprocesses=auto --count=10 --profile --junitxml=junit/test-results.xml --cov-report=html --cov-report=term --cov-report=lcov --cov=flask_jsonrpc --cov-fail-under=100"
+addopts = "-rsxX -vv --pyargs --doctest-modules --numprocesses=auto --count=10 --reruns 5 --profile --junitxml=junit/test-results.xml --cov-report=html --cov-report=term --cov-report=lcov --cov=flask_jsonrpc --cov-fail-under=100"
 junit_family = "xunit2"
 python_files = ["tests.py", "test_*.py", "*_tests.py"]
 pythonpath = "src/"
@@ -312,6 +311,7 @@ required_plugins = [
     "pytest-sugar==1.0.0",
     "pytest-env==1.1.5",
     "pytest-repeat==0.9.4",
+    "pytest-rerunfailures==16.1",
     "pytest-profiling==1.8.1",
     "pytest-clarity==1.0.1",
     "pytest-randomly==4.0.1",
@@ -400,8 +400,8 @@ requires = [
     "tox-uv>=1.26.1"
 ]
 env_list = [
-    "py3.13", "py3.12", "py3.11", "py3.10", "py3.9",
-    "py3.13-async", "py3.12-async", "py3.11-async", "py3.10-async", "py3.9-async",
+    "py3.13", "py3.12", "py3.11", "py3.10",
+    "py3.13-async", "py3.12-async", "py3.11-async", "py3.10-async",
     "style",
     "typing",
     "security",

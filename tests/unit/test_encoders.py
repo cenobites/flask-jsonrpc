@@ -38,7 +38,7 @@ import pytest
 
 from flask_jsonrpc.encoders import jsonify, serializable
 
-# Python 3.10+
+# Added in version 3.11.
 try:
     from typing import Self
 except ImportError:  # pragma: no cover

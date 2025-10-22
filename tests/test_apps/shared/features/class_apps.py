@@ -47,11 +47,11 @@ class App:
         return string
 
     @staticmethod
-    def notify(_string: t.Optional[str] = None) -> None:
+    def notify(_string: str | None = None) -> None:
         pass
 
     @staticmethod
-    def not_allow_notify(_string: t.Optional[str] = None) -> str:
+    def not_allow_notify(_string: str | None = None) -> str:
         return 'Now allow notify'
 
     @staticmethod

@@ -25,7 +25,6 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 import random
-import typing as t
 from dataclasses import dataclass
 
 # Added in version 3.11.
@@ -138,7 +137,7 @@ def handle_pet_not_found_exc(ex: PetNotFoundException) -> dict[str, str]:
     ),
 )
 @jsonrpc.method('Petstore.get_pets')
-def get_pets(tags: t.Optional[list[str]] = None, limit: t.Optional[int] = None) -> list[Pet]:
+def get_pets(tags: list[str] | None = None, limit: int | None = None) -> list[Pet]:
     pets = PETS
     if tags is not None:
         pets = [pet for pet in pets if pet.tag in tags]
@@ -182,7 +181,7 @@ def create_pet(new_pet: NewPet) -> Pet:
     ),
 )
 @jsonrpc.method('Petstore.get_pet_by_id')
-def get_pet_by_id(id: int) -> t.Optional[Pet]:
+def get_pet_by_id(id: int) -> Pet | None:
     pet = [pet for pet in PETS if pet.id == id]
     return None if len(pet) == 0 else pet[0]
 
