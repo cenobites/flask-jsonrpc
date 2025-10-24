@@ -43,6 +43,7 @@ except ImportError:  # pragma: no cover
     from typing_extensions import Self
 
 pytest.importorskip('asgiref')
+pytestmark = pytest.mark.parallel_threads(1)
 
 
 class CustomException(Exception):

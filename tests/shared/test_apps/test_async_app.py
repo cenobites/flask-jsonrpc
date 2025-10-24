@@ -24,9 +24,8 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
+import json
 import typing as t
-
-from flask import json
 
 import pytest
 
@@ -34,6 +33,7 @@ if t.TYPE_CHECKING:
     from requests import Session
 
 pytest.importorskip('asgiref')
+pytestmark = pytest.mark.parallel_threads(1)
 
 
 def test_app_greeting(async_session: 'Session', api_url: str) -> None:

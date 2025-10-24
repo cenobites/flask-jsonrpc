@@ -9,7 +9,7 @@
           'headers': {
             'content-type': 'application/json',
             'content-length': '113',
-            'server': 'Werkzeug/3.0.6 Python/3.13.0',
+            'server': 'Werkzeug/3.0.6 Python/3.14.0',
             'date': 'Fri, 15 Nov 2013 20:15:18 GMT',
             'data': {
               'jsonrpc': '2.0',

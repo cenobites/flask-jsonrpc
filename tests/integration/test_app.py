@@ -26,9 +26,8 @@
 # POSSIBILITY OF SUCH DAMAGE.
 # pylint: disable=duplicate-code,too-many-public-methods
 import os
+import json
 import typing as t
-
-from flask import json
 
 from requests import Session
 
