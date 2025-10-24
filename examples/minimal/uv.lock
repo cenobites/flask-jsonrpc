@@ -247,7 +247,7 @@ async = [
 
 [[package]]
 name = "flask-jsonrpc"
-version = "4.0.0a8"
+version = "4.0.0a10"
 source = { editable = "../../" }
 dependencies = [
     { name = "annotated-types" },
@@ -295,7 +295,7 @@ docs = [
     { name = "sphinxcontrib-log-cabinet", specifier = "==1.0.1" },
 ]
 integration-tests = [
-    { name = "coverage", specifier = "~=7.6.4" },
+    { name = "coverage", extras = ["toml"], specifier = "==7.11" },
     { name = "playwright", specifier = "==1.54.0" },
     { name = "pytest", specifier = "==8.3.3" },
     { name = "pytest-clarity", specifier = "==1.0.1" },
@@ -306,9 +306,10 @@ integration-tests = [
     { name = "pytest-randomly", specifier = "==4.0.1" },
     { name = "pytest-repeat", specifier = "==0.9.4" },
     { name = "pytest-rerunfailures", specifier = "==16.1" },
+    { name = "pytest-run-parallel", specifier = "==0.7.1" },
     { name = "pytest-sugar", specifier = "==1.0.0" },
     { name = "pytest-xdist", specifier = "==3.6.1" },
-    { name = "requests", specifier = "==2.32.3" },
+    { name = "requests", specifier = "==2.32.5" },
     { name = "typeguard", specifier = "==4.4.1" },
 ]
 pre-commit = [
@@ -321,7 +322,7 @@ security = [
 ]
 style = [{ name = "ruff", specifier = "==0.7.1" }]
 tests = [
-    { name = "coverage", specifier = "~=7.6.4" },
+    { name = "coverage", extras = ["toml"], specifier = "==7.11" },
     { name = "pytest", specifier = "==8.3.3" },
     { name = "pytest-clarity", specifier = "==1.0.1" },
     { name = "pytest-cov", specifier = "==6.0.0" },
@@ -330,14 +331,15 @@ tests = [
     { name = "pytest-randomly", specifier = "==4.0.1" },
     { name = "pytest-repeat", specifier = "==0.9.4" },
     { name = "pytest-rerunfailures", specifier = "==16.1" },
+    { name = "pytest-run-parallel", specifier = "==0.7.1" },
     { name = "pytest-sugar", specifier = "==1.0.0" },
     { name = "pytest-xdist", specifier = "==3.6.1" },
-    { name = "requests", specifier = "==2.32.3" },
+    { name = "requests", specifier = "==2.32.5" },
     { name = "typeguard", specifier = "==4.4.1" },
 ]
 typing = [
     { name = "mypy", marker = "python_full_version >= '3.11'", specifier = "==1.18.2" },
-    { name = "pyright", marker = "python_full_version >= '3.11'", specifier = "==1.1.406" },
+    { name = "pyright", marker = "python_full_version >= '3.11'", specifier = "==1.1.407" },
     { name = "typeguard", specifier = "==4.4.1" },
     { name = "types-setuptools", specifier = "==75.2.0.20241025" },
 ]
@@ -811,7 +813,7 @@ wheels = [
 
 [[package]]
 name = "tox"
-version = "4.31.0"
+version = "4.32.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "cachetools" },
@@ -826,9 +828,9 @@ dependencies = [
     { name = "typing-extensions", marker = "python_full_version < '3.11'" },
     { name = "virtualenv" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/be/b9/1750ebb6e8e2d198a17822b7b851dea33e61dcc9c25f55a3e3636f67389a/tox-4.31.0.tar.gz", hash = "sha256:266381ffef35615ec0d40ae4969a9e43b506017597c0413d6545a603cc8c7561", size = 203294, upload-time = "2025-10-09T18:53:53.619Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/59/bf/0e4dbd42724cbae25959f0e34c95d0c730df03ab03f54d52accd9abfc614/tox-4.32.0.tar.gz", hash = "sha256:1ad476b5f4d3679455b89a992849ffc3367560bbc7e9495ee8a3963542e7c8ff", size = 203330, upload-time = "2025-10-24T18:03:38.132Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/3e/84/1691aae773dccff72c866ad19af7adb12d4fb8b439c8bfb36ffc429c8c27/tox-4.31.0-py3-none-any.whl", hash = "sha256:328f392e6567e46cb0f9b625679456744dde940287dd1b39117627dc4b21d5da", size = 175917, upload-time = "2025-10-09T18:53:51.494Z" },
+    { url = "https://files.pythonhosted.org/packages/fc/cc/e09c0d663a004945f82beecd4f147053567910479314e8d01ba71e5d5dea/tox-4.32.0-py3-none-any.whl", hash = "sha256:451e81dc02ba8d1ed20efd52ee409641ae4b5d5830e008af10fe8823ef1bd551", size = 175905, upload-time = "2025-10-24T18:03:36.337Z" },
 ]
 
 [[package]]

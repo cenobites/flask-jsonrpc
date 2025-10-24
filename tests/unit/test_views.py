@@ -29,6 +29,8 @@ import logging
 
 from flask import Flask
 
+import pytest
+
 from flask_jsonrpc.views import JSONRPCView
 from flask_jsonrpc.exceptions import JSONRPCError
 
@@ -37,6 +39,8 @@ try:
     from typing import Self
 except ImportError:  # pragma: no cover
     from typing_extensions import Self
+
+pytestmark = pytest.mark.parallel_threads(1)
 
 
 def test_jsonrpc_view_simple() -> None:
