@@ -30,7 +30,7 @@ test-cov-unit:
 		if [ $${ALLOW_ASYNC} -eq 0 ] && [[ $${TEST_FILE} == *"async"* ]]; then \
 			continue; \
 		fi; \
-        pytest --cov-reset --cov=$${PY_MODULE} $${TEST_FILE} -vv; \
+        pytest --count 1 -n 0 --cov-reset --cov=$${PY_MODULE} $${TEST_FILE} -vv; \
         if [ $$? -ne 0 ]; then \
             REPORT+=" + Unit Tests $${TEST_FILE} for $${PY_MODULE} failed (pytest --cov-reset --cov-report=html --cov=$${PY_MODULE} $${TEST_FILE} -vv)\n"; \
 		else \

@@ -28,6 +28,7 @@ from __future__ import annotations
 
 import typing as t
 from inspect import Parameter, _empty, signature, isfunction
+import logging
 import functools
 from collections import OrderedDict
 
@@ -37,6 +38,7 @@ import typing_inspect
 from typing_extensions import Self
 
 from typeguard import typechecked
+from werkzeug.utils import cached_property
 
 from .settings import settings
 from .types.methods import MethodAnnotated
@@ -128,6 +130,11 @@ class JSONRPCDecoratorMixin:
             functools.update_wrapper(fn_wrapper, fn_wrapped)
             fn_wrapped = fn_wrapper
         return fn_wrapper
+
+    @cached_property
+    def logger(self: Self) -> logging.Logger:
+        logger = logging.getLogger('flask_jsonrpc')
+        return logger
 
     def get_jsonrpc_site(self: Self) -> JSONRPCSite:
         raise NotImplementedError('.get_jsonrpc_site must be overridden') from None

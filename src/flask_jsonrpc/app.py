@@ -27,12 +27,14 @@
 from __future__ import annotations
 
 import typing as t
+import logging
 from urllib.parse import urlsplit
 
 # Added in version 3.11.
 from typing_extensions import Self
 
 from flask import Flask
+from flask.logging import has_level_handler
 
 from .globals import default_jsonrpc_site, default_jsonrpc_site_api
 from .helpers import urn
@@ -81,6 +83,13 @@ class JSONRPC(JSONRPCDecoratorMixin):
         app_root = app.config['APPLICATION_ROOT']
         url_scheme = app.config['PREFERRED_URL_SCHEME']
         url = urlsplit(self.path)
+
+        if self.logger.level == logging.NOTSET:
+            self.logger.setLevel(app.logger.level)
+
+        if not has_level_handler(self.logger):
+            for handler in app.logger.handlers:
+                self.logger.addHandler(handler)
 
         self.path = f'{app_root.rstrip("/")}{url.path}'
         self.base_url = (

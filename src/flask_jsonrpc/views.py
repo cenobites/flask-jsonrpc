@@ -31,7 +31,7 @@ import typing as t
 # Added in version 3.11.
 from typing_extensions import Self
 
-from flask import typing as ft, current_app, make_response
+from flask import typing as ft, make_response
 from flask.views import MethodView
 
 from .site import JSONRPC_VERSION_DEFAULT, JSONRPC_DEFAULT_HTTP_HEADERS
@@ -53,6 +53,6 @@ class JSONRPCView(MethodView):
                 return make_response('', status_code, headers)
             return make_response(jsonify(response), status_code, headers)
         except JSONRPCError as e:
-            current_app.logger.exception('jsonrpc error')
+            self.jsonrpc_site.logger.info('jsonrpc error', exc_info=e)
             response = {'id': None, 'jsonrpc': JSONRPC_VERSION_DEFAULT, 'error': e.jsonrpc_format}
             return make_response(jsonify(response), e.status_code, JSONRPC_DEFAULT_HTTP_HEADERS)

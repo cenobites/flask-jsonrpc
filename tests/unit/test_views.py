@@ -25,6 +25,7 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 import typing as t
+import logging
 
 from flask import Flask
 
@@ -40,6 +41,9 @@ except ImportError:  # pragma: no cover
 
 def test_jsonrpc_view_simple() -> None:
     class MockJSONRPCSite:
+        def __init__(self: Self) -> None:
+            self.logger = logging.getLogger('mock_jsonrpc_site')
+
         def dispatch_request(self: Self) -> tuple[t.Any, int, dict[str, t.Any]]:
             return {'id': 1, 'jsonrpc': '2.0', 'result': 'Hello world!'}, 200, {}
 
@@ -54,6 +58,9 @@ def test_jsonrpc_view_simple() -> None:
 
 def test_jsonrpc_view_with_response_status_code_204() -> None:
     class MockJSONRPCSite:
+        def __init__(self: Self) -> None:
+            self.logger = logging.getLogger('mock_jsonrpc_site')
+
         def dispatch_request(self: Self) -> tuple[t.Any, int, dict[str, t.Any]]:
             return '', 204, {}
 
@@ -68,6 +75,9 @@ def test_jsonrpc_view_with_response_status_code_204() -> None:
 
 def test_jsonrpc_view_with_invalid_request() -> None:
     class MockJSONRPCSite:
+        def __init__(self: Self) -> None:
+            self.logger = logging.getLogger('mock_jsonrpc_site')
+
         def dispatch_request(self: Self) -> tuple[t.Any, int, dict[str, t.Any]]:
             raise JSONRPCError(
                 message='Invalid request', code=1001, data={'message': 'Invalid request'}, status_code=500
