@@ -1,6 +1,6 @@
 [project]
 name = "Flask-JSONRPC"
-version = "4.0.0a8"
+version = "4.0.0a10"
 description = "Adds JSONRPC support to Flask."
 readme = {file = "README.md", content-type = "text/markdown"}
 license = {file = "LICENSE.txt"}
@@ -20,10 +20,11 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
     "Topic :: Software Development :: Libraries :: Application Frameworks",
 ]
-requires-python = ">=3.10,<3.14"
+requires-python = ">=3.10"
 dependencies = [
     "Flask>=3.0.0,<4.0", # https://github.com/pallets/flask
     "typeguard==4.4.1", # https://github.com/agronholm/typeguard
@@ -66,9 +67,10 @@ tests = [
     "pytest-profiling==1.8.1",  # https://github.com/man-group/pytest-plugins
     "pytest-clarity==1.0.1",  # https://github.com/darrenburns/pytest-clarity
     "pytest-randomly==4.0.1",  # https://github.com/pytest-dev/pytest-randomly
+    "pytest-run-parallel==0.7.1",  # https://github.com/Quansight-Labs/pytest-run-parallel
     "typeguard==4.4.1",  # https://github.com/agronholm/typeguard
-    "coverage~=7.6.4",  # https://github.com/nedbat/coveragepy
-    "requests==2.32.3",  # https://github.com/psf/requests
+    "coverage[toml]==7.11",  # https://github.com/nedbat/coveragepy
+    "requests==2.32.5",  # https://github.com/psf/requests
 ]
 integration-tests = [
     {include-group = "tests"},
@@ -82,7 +84,7 @@ typing = [
     "mypy==1.18.2;python_version>='3.11'",  # https://github.com/python/mypy
     "types_setuptools==75.2.0.20241025",  # https://github.com/python/typeshed
     "typeguard==4.4.1",  # https://github.com/agronholm/typeguard
-    "pyright==1.1.406;python_version>='3.11'",  # https://github.com/microsoft/pyright
+    "pyright==1.1.407;python_version>='3.11'",  # https://github.com/microsoft/pyright
 ]
 security = [
     "bandit;python_version>='3.11'", # https://github.com/PyCQA/bandit
@@ -211,7 +213,7 @@ test-groups = ["tests"]
 test-command = "py.test -rsxX -vv --numprocesses=auto --tb=short --rootdir={project} {project}/tests --cov-fail-under=0"
 
 [tool.cibuildwheel.environment]
-CIBW_PROJECT_REQUIRES_PYTHON = ">=3.11,<3.14"
+CIBW_PROJECT_REQUIRES_PYTHON = ">=3.11"
 SETUPTOOLS_BUILD_ENABLE_MYPYC = "1"
 HATCH_BUILD_HOOK_ENABLE_MYPYC = "0"
 
@@ -288,7 +290,7 @@ docstring-code-format = true
 docstring-code-line-length = 79
 
 [tool.pytest.ini_options]
-addopts = "-rsxX -vv --pyargs --doctest-modules --numprocesses=auto --count=5 --reruns=5 --profile --junitxml=junit/test-results.xml --cov-report=html --cov-report=term --cov-report=lcov --cov=flask_jsonrpc --cov-fail-under=100"
+addopts = "-rsxX -vv --pyargs --doctest-modules --numprocesses=auto --count=5 --reruns=5 --parallel-threads=10 --iterations=10 --junitxml=junit/test-results.xml --cov-report=html --cov-report=term --cov-report=lcov --cov=flask_jsonrpc --cov-fail-under=100"
 junit_family = "xunit2"
 python_files = ["tests.py", "test_*.py", "*_tests.py"]
 pythonpath = "src/"
@@ -305,6 +307,12 @@ norecursedirs = [
     "tests/test_apps",
     "tests/integration",
 ]
+thread_unsafe_functions = [
+    "tests.unit.test_views.*",
+    "unit.test_views.*",
+    "test_views.*",
+    "flask_jsonrpc.views.*",
+]
 required_plugins = [
     "pytest-cov==6.0.0",
     "pytest-xdist==3.6.1",
@@ -312,9 +320,9 @@ required_plugins = [
     "pytest-env==1.1.5",
     "pytest-repeat==0.9.4",
     "pytest-rerunfailures==16.1",
-    "pytest-profiling==1.8.1",
     "pytest-clarity==1.0.1",
     "pytest-randomly==4.0.1",
+    "pytest-run-parallel==0.7.1",
 ]
 
 [tool.coverage.run]
@@ -360,7 +368,7 @@ exclude_lines = [
 [tool.mypy]
 plugins = ["pydantic.mypy"]
 files = ["src/flask_jsonrpc"]
-python_version = "3.13"
+python_version = "3.14"
 pretty = true
 strict = true
 show_error_codes = true
@@ -390,7 +398,7 @@ init_typed = true
 warn_required_dynamic_aliases = true
 
 [tool.pyright]
-pythonVersion = "3.13"
+pythonVersion = "3.14"
 include = ["src/flask_jsonrpc"]
 typeCheckingMode = "basic"
 
@@ -400,8 +408,8 @@ requires = [
     "tox-uv>=1.26.1"
 ]
 env_list = [
-    "py3.13", "py3.12", "py3.11", "py3.10",
-    "py3.13-async", "py3.12-async", "py3.11-async", "py3.10-async",
+    "py3.14", "py3.14t", "py3.13", "py3.12", "py3.11", "py3.10",
+    "py3.14-async", "py3.14t-async", "py3.13-async", "py3.12-async", "py3.11-async", "py3.10-async",
     "style",
     "typing",
     "security",
@@ -430,7 +438,7 @@ commands = [[
 
 [tool.tox.env.style]
 runner = "uv-venv-lock-runner"
-base_python = ["3.13"]
+base_python = ["3.14"]
 dependency_groups = [
     "pre-commit"
 ]
@@ -441,7 +449,7 @@ commands = [[
 
 [tool.tox.env.typing]
 runner = "uv-venv-lock-runner"
-base_python = ["3.13"]
+base_python = ["3.14"]
 dependency_groups = [
     "typing"
 ]
@@ -453,7 +461,7 @@ commands = [
 
 [tool.tox.env.security]
 runner = "uv-venv-lock-runner"
-base_python = ["3.13"]
+base_python = ["3.14"]
 dependency_groups = [
     "security"
 ]
@@ -465,7 +473,7 @@ commands = [
 
 [tool.tox.env.docs]
 runner = "uv-venv-lock-runner"
-base_python = ["3.13"]
+base_python = ["3.14"]
 dependency_groups = [
     "docs"
 ]
@@ -475,7 +483,7 @@ commands = [[
 ]]
 
 [tool.tox.env.update-requirements]
-base_python = ["3.13"]
+base_python = ["3.14"]
 dependency_groups = []
 no_default_groups = true
 skip_install = true
