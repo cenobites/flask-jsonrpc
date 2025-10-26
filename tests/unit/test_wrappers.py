@@ -25,6 +25,7 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 import typing as t
+import logging
 from functools import wraps
 
 import pytest
@@ -57,6 +58,14 @@ class JSONRPCApp(JSONRPCDecoratorMixin):
 
     def get_jsonrpc_site_api(self: Self) -> type[JSONRPCView]:
         raise NotImplementedError('.get_jsonrpc_site_api must be overridden') from None
+
+
+def test_logger() -> None:
+    jsonrpc_app = JSONRPCApp()
+    logger = jsonrpc_app.logger
+    assert logger.name == 'flask_jsonrpc'
+    assert logger.level == logging.NOTSET
+    assert logger.handlers == []
 
 
 def test_jsonrpc_register_view_function_simple() -> None:

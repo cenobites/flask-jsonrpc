@@ -28,14 +28,17 @@ from __future__ import annotations
 
 from uuid import UUID, uuid4
 import typing as t
+import logging
 from collections import OrderedDict
 
 # Added in version 3.11.
 from typing_extensions import Self
 
 from flask import json, request, current_app
+from flask.logging import has_level_handler
 
 from typeguard import TypeCheckError
+from werkzeug.utils import cached_property
 from typeguard._utils import qualified_name
 from werkzeug.datastructures import Headers
 
@@ -98,6 +101,13 @@ class JSONRPCSite:
             mt.startswith('application/') and mt.endswith('+json')
         )
 
+    @cached_property
+    def logger(self: Self) -> logging.Logger:
+        logger = logging.getLogger('flask_jsonrpc')
+        if not has_level_handler(logger):
+            logger.addHandler(logging.NullHandler())
+        return logger
+
     def set_path(self: Self, path: str) -> None:
         self.path = path
 
@@ -126,7 +136,7 @@ class JSONRPCSite:
 
     def validate_request(self: Self) -> bool:
         if not self.is_json:
-            current_app.logger.error('invalid mimetype')
+            self.logger.info('invalid mimetype')
             return False
         return True
 
@@ -134,7 +144,7 @@ class JSONRPCSite:
         try:
             return json.loads(request_data)
         except ValueError as e:
-            current_app.logger.exception('invalid json: %s', request_data)
+            self.logger.info('invalid json: %s', request_data, exc_info=e)
             raise ParseError(data={'message': f'Invalid JSON: {request_data!r}'}) from e
 
     def handle_view_func(self: Self, view_func: t.Callable[..., t.Any], params: t.Any) -> t.Any:  # noqa: ANN401
@@ -171,7 +181,7 @@ class JSONRPCSite:
 
             return resp_view
         except AnnotatedMetadataTypeError as e:
-            current_app.logger.exception('invalid annotated type checked for: %s', view_func.__name__)
+            self.logger.info('invalid annotated type checked for: %s', view_func.__name__, exc_info=e)
             raise InvalidParamsError(
                 data={
                     'constraint': e.annotated.__class__.__name__,
@@ -181,7 +191,7 @@ class JSONRPCSite:
                 }
             ) from e
         except (TypeError, TypeCheckError) as e:
-            current_app.logger.exception('invalid type checked for: %s', getattr(view_func, '__name__', view_func))
+            self.logger.info('invalid type checked for: %s', getattr(view_func, '__name__', view_func), exc_info=e)
             raise InvalidParamsError(data={'message': str(e)}) from e
 
     def dispatch(
@@ -214,14 +224,14 @@ class JSONRPCSite:
             return self.dispatch(req_json)
         except Exception as e:
             if isinstance(e, JSONRPCError):  # mypyc: https://docs.python.org/3/glossary.html#term-EAFP
-                current_app.logger.exception('jsonrpc error')
+                self.logger.info('jsonrpc error', exc_info=e)
                 response = {
                     'id': get(req_json, 'id'),
                     'jsonrpc': get(req_json, 'jsonrpc', JSONRPC_VERSION_DEFAULT),
                     'error': e.jsonrpc_format,
                 }
                 return response, e.status_code, JSONRPC_DEFAULT_HTTP_HEADERS
-            current_app.logger.exception('unexpected error')
+            self.logger.info('unexpected error', exc_info=e)
             error_handler = self._find_error_handler(e)
             jsonrpc_error_data = (
                 current_app.ensure_sync(error_handler)(e) if error_handler is not None else {'message': str(e)}
