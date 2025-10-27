@@ -4,6 +4,10 @@ updates:
     directory: /
     schedule:
       interval: weekly
+    groups:
+      github-actions:
+        patterns:
+          - '*'
 
   - package-ecosystem: uv
     directories:
@@ -11,3 +15,7 @@ updates:
       - /examples/**/
     schedule:
       interval: daily
+    groups:
+      python-dependencies:
+        patterns:
+          - '*'
