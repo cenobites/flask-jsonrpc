@@ -18,11 +18,11 @@ dev = [
     "tox-uv>=1.26.1"
 ]
 tests = [
-    "pytest==8.3.3",
-    "pytest-cov==6.0.0",
-    "pytest-xdist==3.6.1",
-    "pytest-sugar==1.0.0",
-    "pytest-env==1.1.5"
+    "pytest==8.4.2",
+    "pytest-cov==7.0.0",
+    "pytest-xdist==3.8.0",
+    "pytest-sugar==1.1.1",
+    "pytest-env==1.2.0"
 ]
 
 [build-system]
