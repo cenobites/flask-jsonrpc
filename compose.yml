@@ -15,7 +15,7 @@ services:
       dockerfile: Dockerfile
       target: integration-tests
       args:
-        - PYTHON_DOCKER_IMAGE_TAG=3.13-slim
+        - PYTHON_DOCKER_IMAGE_TAG=3.14-slim
         - DOCKER_BUILD_TARGET=integration-tests
     environment:
       - CI=1
@@ -89,7 +89,7 @@ services:
       dockerfile: Dockerfile
       target: integration-tests
       args:
-        - PYTHON_DOCKER_IMAGE_TAG=3.13-slim
+        - PYTHON_DOCKER_IMAGE_TAG=3.14-slim
         - DOCKER_BUILD_TARGET=integration-tests
     environment:
       - CI=1
@@ -165,7 +165,7 @@ services:
       dockerfile: Dockerfile
       target: integration-tests
       args:
-        - PYTHON_DOCKER_IMAGE_TAG=3.13-slim
+        - PYTHON_DOCKER_IMAGE_TAG=3.14-slim
         - DOCKER_BUILD_TARGET=integration-tests
     environment:
       - CI=1

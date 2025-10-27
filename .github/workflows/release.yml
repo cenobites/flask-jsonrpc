@@ -19,7 +19,7 @@ jobs:
       matrix:
         platform:
           - ubuntu-latest
-        python-version: ["3.13"]
+        python-version: ["3.14"]
     steps:
       - uses: actions/checkout@v5
       - uses: astral-sh/setup-uv@v7.1.2
@@ -29,6 +29,7 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
+          allow-prereleases: true
       - run: |
           uv build --out-dir dist-${{ matrix.platform }}-${{ matrix.python-version }}
       - run: |
@@ -52,7 +53,7 @@ jobs:
           - macos-latest  # apple silicon
           - windows-latest
           # - windows-11-arm
-        python-version: ["3.10", "3.11", "3.12", "3.13"]
+        python-version: ["3.10", "3.11", "3.12", "3.13", "3.14", "3.14t"]
         exclude:
           - platform: windows-11-arm
             python-version: "3.10"
@@ -65,6 +66,7 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
+          allow-prereleases: true
       - name: Prepare build
         run: |
           uv venv --clear
@@ -92,7 +94,7 @@ jobs:
       matrix:
         platform:
           - ubuntu-latest
-        python-version: ["3.13"]
+        python-version: ["3.14"]
     steps:
       - uses: actions/checkout@v5
       - uses: astral-sh/setup-uv@v7.1.2
@@ -102,6 +104,7 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
+          allow-prereleases: true
       - uses: actions/download-artifact@v6
         with:
           name: release-build-${{ matrix.platform }}-${{ matrix.python-version }}

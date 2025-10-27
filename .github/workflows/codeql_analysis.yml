@@ -40,7 +40,7 @@ jobs:
       - uses: actions/setup-python@v6
         if: ${{ matrix.language == 'python' }}
         with:
-          python-version: '3.13'
+          python-version: '3.14'
       - name: Build Python project
         if: ${{ matrix.language == 'python' }}
         run: |

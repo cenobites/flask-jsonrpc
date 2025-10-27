@@ -29,6 +29,7 @@ import os
 import sys
 import typing as t
 
+from flask.globals import app_ctx as _app_ctx
 from flask.testing import EnvironBuilder
 
 import pytest
@@ -139,13 +140,31 @@ def async_app(test_apps: 't.Generator[MonkeyPatch]') -> 't.Generator[Flask]':
     yield flask_app
 
 
+@pytest.fixture(autouse=True)
+def leak_detector() -> t.Generator[None, None, None]:
+    """Fails if any app contexts are still pushed when a test ends. Pops all
+    contexts so subsequent tests are not affected.
+    """
+
+    yield None
+
+    leaks = []
+    while _app_ctx:
+        leaks.append(_app_ctx._get_current_object())
+        _app_ctx.pop()
+
+    assert not leaks, f'Leaked {len(leaks)} app context(s): {leaks!r}'
+
+
 @pytest.fixture(scope='function')
 def session(app: 'Flask') -> t.Generator[requests.Session, None, None]:
     """A test client for the app."""
     session = requests.Session()
     session.verify = False
     session.mount('http://', FlaskClientAdapter(app=app))
+
     yield session
+
     session.close()
 
 
@@ -155,5 +174,7 @@ def async_session(async_app: 'Flask') -> t.Generator[requests.Session, None, Non
     session = requests.Session()
     session.verify = False
     session.mount('http://', FlaskClientAdapter(app=async_app))
+
     yield session
+
     session.close()

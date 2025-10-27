@@ -29,6 +29,7 @@ import typing as t
 import asyncio
 import logging
 from unittest import mock
+from threading import Lock
 
 from flask import Flask, json
 from flask.logging import default_handler
@@ -45,6 +46,8 @@ except ImportError:  # pragma: no cover
     from typing_extensions import Self
 
 pytest.importorskip('asgiref')
+pytestmark = pytest.mark.parallel_threads(1)
+logger_lock = Lock()
 
 
 @pytest.fixture(autouse=True)
@@ -208,32 +211,33 @@ def test_app_create_with_default_logger() -> None:
 
 
 def test_app_create_with_custom_logger() -> None:
-    logger_handler = logging.StreamHandler()
-    logger = logging.getLogger('flask_jsonrpc')
-    _ = [logger.removeHandler(handler) for handler in logger.handlers]
-    logger.addHandler(logger_handler)
-    logger.setLevel(logging.DEBUG)
+    with logger_lock:
+        logger_handler = logging.StreamHandler()
+        logger = logging.getLogger('flask_jsonrpc')
+        logger.handlers = []
+        logger.addHandler(logger_handler)
+        logger.setLevel(logging.DEBUG)
 
-    app = Flask('test_app', instance_relative_config=True)
-    jsonrpc = JSONRPC(app, '/api', enable_web_browsable_api=True)
+        app = Flask('test_app', instance_relative_config=True)
+        jsonrpc = JSONRPC(app, '/api', enable_web_browsable_api=True)
 
-    @jsonrpc.method('app.index')
-    async def index() -> str:
-        await asyncio.sleep(0)
-        return 'Welcome to Flask JSON-RPC'
+        @jsonrpc.method('app.index')
+        async def index() -> str:
+            await asyncio.sleep(0)
+            return 'Welcome to Flask JSON-RPC'
 
-    with app.test_client() as client:
-        rv = client.post('/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.index', 'params': []})
-        assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': 'Welcome to Flask JSON-RPC'}
-        assert rv.status_code == 200
+        with app.test_client() as client:
+            rv = client.post('/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.index', 'params': []})
+            assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': 'Welcome to Flask JSON-RPC'}
+            assert rv.status_code == 200
 
-    assert app.logger.name == 'test_app'
-    assert app.logger.level == logging.NOTSET
-    assert app.logger.handlers == [default_handler]
+        assert app.logger.name == 'test_app'
+        assert app.logger.level == logging.NOTSET
+        assert app.logger.handlers == [default_handler]
 
-    assert jsonrpc.logger.name == 'flask_jsonrpc'
-    assert jsonrpc.logger.level == logging.DEBUG
-    assert jsonrpc.logger.handlers == [logger_handler]
+        assert jsonrpc.logger.name == 'flask_jsonrpc'
+        assert jsonrpc.logger.level == logging.DEBUG
+        assert jsonrpc.logger.handlers == [logger_handler]
 
 
 def test_app_create_using_error_handler() -> None:
