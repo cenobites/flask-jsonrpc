@@ -10,9 +10,9 @@ updates:
           - '*'
 
   - package-ecosystem: pip
-    directories: 
-      - /pyproject.toml
-      - /examples/**/pyproject.toml
+    directories:
+      - /
+      - /examples/**/
     schedule:
       interval: daily
     groups:
