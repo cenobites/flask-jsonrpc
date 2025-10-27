@@ -25,7 +25,7 @@ jobs:
           - ubuntu-latest
           - macos-latest
           - windows-latest
-        python-version: ["3.10", "3.11", "3.12", "3.13"]
+        python-version: ["3.10", "3.11", "3.12", "3.13", "3.14", "3.14t"]
     steps:
       - uses: actions/checkout@v5
       - uses: astral-sh/setup-uv@v7.1.1
@@ -35,6 +35,7 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
+          allow-prereleases: true
       - run: |
           uv run --locked --group tests tox run -e py,py-async
 
@@ -46,7 +47,7 @@ jobs:
       matrix:
         platform:
           - ubuntu-latest
-        python-version: ["3.13"]
+        python-version: ["3.14"]
     steps:
       - uses: actions/checkout@v5
       - uses: astral-sh/setup-uv@v7.1.1
@@ -56,6 +57,7 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
+          allow-prereleases: true
       - uses: actions/cache@v4.3.0
         with:
           path: ./.mypy_cache
@@ -71,7 +73,7 @@ jobs:
       matrix:
         platform:
           - ubuntu-latest
-        python-version: ["3.13"]
+        python-version: ["3.14"]
     steps:
       - uses: actions/checkout@v5
       - uses: astral-sh/setup-uv@v7.1.1
@@ -81,6 +83,7 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
+          allow-prereleases: true
       - run: |
           uv run --locked --group security tox run -e security
 
@@ -94,7 +97,7 @@ jobs:
           - ubuntu-latest
           - macos-latest
           - windows-latest
-        python-version: ["3.13"]
+        python-version: ["3.14"]
     steps:
       - uses: actions/checkout@v5
       - uses: astral-sh/setup-uv@v7.1.1
@@ -104,6 +107,7 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
+          allow-prereleases: true
       - run: |
           find examples/ -name "tox.ini" -print0 | xargs -0 -I {} -P 1 uv run --locked tox run -e py,py-async -c {}
 
@@ -115,7 +119,7 @@ jobs:
       matrix:
         platform:
           - ubuntu-latest
-        python-version: ["3.10", "3.11", "3.12", "3.13"]
+        python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
         docker-target-build: ["app", "async"]
         exclude:
           - platform: ubuntu-latest

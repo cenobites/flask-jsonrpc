@@ -36,6 +36,7 @@ if t.TYPE_CHECKING:
 
 
 pytest.importorskip('asgiref')
+pytestmark = pytest.mark.parallel_threads(1)
 
 
 def test_index(client: 'FlaskClient') -> None:

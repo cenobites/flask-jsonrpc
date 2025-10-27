@@ -52,8 +52,8 @@ requires = [
     "tox-uv>=1.26.1"
 ]
 env_list = [
-    "py3.13", "py3.12", "py3.11", "py3.10",
-    "py3.13-async", "py3.12-async", "py3.11-async", "py3.10-async",
+    "py3.14", "py3.14t", "py3.13", "py3.12", "py3.11", "py3.10",
+    "py3.14-async", "py3.14t-async", "py3.13-async", "py3.12-async", "py3.11-async", "py3.10-async",
 ]
 skip_missing_interpreters = true
 

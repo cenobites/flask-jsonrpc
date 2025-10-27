@@ -27,6 +27,7 @@
 import typing as t
 import logging
 from unittest import mock
+from threading import Lock
 
 from flask import Flask
 from flask.logging import default_handler
@@ -37,6 +38,8 @@ from werkzeug.datastructures import Headers
 from flask_jsonrpc.site import JSONRPCSite
 from flask_jsonrpc.types import AnnotatedMetadataTypeError
 from flask_jsonrpc.exceptions import ParseError, InvalidRequestError
+
+logger_lock = Lock()
 
 
 @pytest.fixture(autouse=True)
@@ -94,96 +97,100 @@ def test_site_with_default_logger() -> None:
     def view_func() -> str:
         return 'Hello world!'
 
-    app = Flask('site')
-    jsonrpc_site = JSONRPCSite(version='1.0.0', path='/path', base_url='/base')
-    jsonrpc_site.register('app.view_func', view_func=view_func)
+    with logger_lock:
+        app = Flask('site')
+        jsonrpc_site = JSONRPCSite(version='1.0.0', path='/path', base_url='/base')
+        jsonrpc_site.register('app.view_func', view_func=view_func)
 
-    assert app.logger.name == 'site'
-    assert app.logger.level == logging.NOTSET
-    assert app.logger.handlers == [default_handler]
+        assert app.logger.name == 'site'
+        assert app.logger.level == logging.NOTSET
+        assert app.logger.handlers == [default_handler]
 
-    assert jsonrpc_site.path == '/path'
-    assert jsonrpc_site.base_url == '/base'
-    assert jsonrpc_site.logger.name == 'flask_jsonrpc'
-    assert jsonrpc_site.logger.level == logging.NOTSET
-    assert len(jsonrpc_site.logger.handlers) == 1
-    assert isinstance(jsonrpc_site.logger.handlers[0], logging.NullHandler)
+        assert jsonrpc_site.path == '/path'
+        assert jsonrpc_site.base_url == '/base'
+        assert jsonrpc_site.logger.name == 'flask_jsonrpc'
+        assert jsonrpc_site.logger.level == logging.NOTSET
+        assert len(jsonrpc_site.logger.handlers) == 1
+        assert isinstance(jsonrpc_site.logger.handlers[0], logging.NullHandler)
 
-    with app.test_request_context(
-        '/base/path', method='POST', json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.view_func', 'params': []}
-    ):
-        rv, status_code, headers = jsonrpc_site.dispatch_request()
-        assert rv == {'id': 1, 'jsonrpc': '2.0', 'result': 'Hello world!'}
-        assert status_code == 200
-        assert headers == {}
+        with app.test_request_context(
+            '/base/path', method='POST', json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.view_func', 'params': []}
+        ):
+            rv, status_code, headers = jsonrpc_site.dispatch_request()
+            assert rv == {'id': 1, 'jsonrpc': '2.0', 'result': 'Hello world!'}
+            assert status_code == 200
+            assert headers == {}
 
 
 def test_site_with_custom_logger() -> None:
-    logger_handler = logging.StreamHandler()
-    logger = logging.getLogger('custom_logger')
-    _ = [logger.removeHandler(handler) for handler in logger.handlers]
-    logger.addHandler(logger_handler)
-    logger.setLevel(logging.DEBUG)
+    with logger_lock:
+        logger_handler = logging.StreamHandler()
+        logger = logging.getLogger('custom_logger')
+        logger.handlers = []
+        logger.addHandler(logger_handler)
+        logger.setLevel(logging.DEBUG)
 
-    def view_func() -> str:
-        logger.debug('Inside view_func')
-        return 'Hello world!'
+        def view_func() -> str:
+            logger.debug('Inside view_func')
+            return 'Hello world!'
 
-    app = Flask('site')
-    jsonrpc_site = JSONRPCSite(version='1.0.0', path='/path', base_url='/base')
-    jsonrpc_site.logger = logger
-    jsonrpc_site.register('app.view_func', view_func=view_func)
+        app = Flask('site')
+        jsonrpc_site = JSONRPCSite(version='1.0.0', path='/path', base_url='/base')
+        jsonrpc_site.logger = logger
+        jsonrpc_site.register('app.view_func', view_func=view_func)
 
-    assert app.logger.name == 'site'
-    assert app.logger.level == logging.NOTSET
-    assert app.logger.handlers == [default_handler]
+        assert app.logger.name == 'site'
+        assert app.logger.level == logging.NOTSET
+        assert app.logger.handlers == [default_handler]
 
-    assert jsonrpc_site.path == '/path'
-    assert jsonrpc_site.base_url == '/base'
-    assert jsonrpc_site.logger.name == 'custom_logger'
-    assert jsonrpc_site.logger.level == logging.DEBUG
-    assert jsonrpc_site.logger.handlers == [logger_handler]
+        assert jsonrpc_site.path == '/path'
+        assert jsonrpc_site.base_url == '/base'
+        assert jsonrpc_site.logger.name == 'custom_logger'
+        assert jsonrpc_site.logger.level == logging.DEBUG
+        assert jsonrpc_site.logger.handlers == [logger_handler]
 
-    with app.test_request_context(
-        '/base/path', method='POST', json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.view_func', 'params': []}
-    ):
-        rv, status_code, headers = jsonrpc_site.dispatch_request()
-        assert rv == {'id': 1, 'jsonrpc': '2.0', 'result': 'Hello world!'}
-        assert status_code == 200
-        assert headers == {}
+        with app.test_request_context(
+            '/base/path', method='POST', json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.view_func', 'params': []}
+        ):
+            rv, status_code, headers = jsonrpc_site.dispatch_request()
+            assert rv == {'id': 1, 'jsonrpc': '2.0', 'result': 'Hello world!'}
+            assert status_code == 200
+            assert headers == {}
 
 
 def test_site_with_custom_logger_with_null_handler() -> None:
-    logger = logging.getLogger('flask_jsonrpc')
-    _ = [logger.removeHandler(handler) for handler in logger.handlers]
-    logger.addHandler(logging.NullHandler())
-    logger.setLevel(logging.INFO)
+    with logger_lock:
+        logger = logging.getLogger('flask_jsonrpc')
+        logger.handlers = []
+        logger.addHandler(logging.NullHandler())
+        logger.setLevel(logging.INFO)
 
-    def view_func() -> str:
-        return 'Hello world!'
+        def view_func() -> str:
+            logger.debug('Inside view_func')
+            return 'Hello world!'
 
-    app = Flask('site')
-    jsonrpc_site = JSONRPCSite(version='1.0.0', path='/path', base_url='/base')
-    jsonrpc_site.register('app.view_func', view_func=view_func)
+        app = Flask('site')
+        jsonrpc_site = JSONRPCSite(version='1.0.0', path='/path', base_url='/base')
+        jsonrpc_site.register('app.view_func', view_func=view_func)
 
-    assert app.logger.name == 'site'
-    assert app.logger.level == logging.NOTSET
-    assert app.logger.handlers == [default_handler]
+        assert app.logger.name == 'site'
+        assert app.logger.level == logging.NOTSET
+        assert app.logger.handlers == [default_handler]
 
-    assert jsonrpc_site.path == '/path'
-    assert jsonrpc_site.base_url == '/base'
-    assert jsonrpc_site.logger.name == 'flask_jsonrpc'
-    assert jsonrpc_site.logger.level == logging.INFO
-    assert len(jsonrpc_site.logger.handlers) == 1
-    assert isinstance(jsonrpc_site.logger.handlers[0], logging.NullHandler)
+        assert jsonrpc_site.path == '/path'
+        assert jsonrpc_site.base_url == '/base'
+        assert jsonrpc_site.logger.name == 'flask_jsonrpc'
+        assert jsonrpc_site.logger.level == logging.INFO
+        assert len(jsonrpc_site.logger.handlers) == 1
+        assert isinstance(jsonrpc_site.logger.handlers[0], logging.NullHandler)
 
-    with app.test_request_context(
-        '/base/path', method='POST', json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.view_func', 'params': []}
-    ):
-        rv, status_code, headers = jsonrpc_site.dispatch_request()
-        assert rv == {'id': 1, 'jsonrpc': '2.0', 'result': 'Hello world!'}
-        assert status_code == 200
-        assert headers == {}
+        with app.test_request_context(
+            '/base/path', method='POST', json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.view_func', 'params': []}
+        ):
+            rv, status_code, headers = jsonrpc_site.dispatch_request()
+            assert rv == {'id': 1, 'jsonrpc': '2.0', 'result': 'Hello world!'}
+            assert status_code == 200
+            assert headers == {}
 
 
 def test_site_with_view_func_to_not_be_validated() -> None:
