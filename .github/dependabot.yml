@@ -9,6 +9,17 @@ updates:
         patterns:
           - '*'
 
+  - package-ecosystem: pip
+    directories:
+      - /
+      - /examples/**/
+    schedule:
+      interval: daily
+    groups:
+      python-dependencies:
+        patterns:
+          - '*'
+
   - package-ecosystem: uv
     directories:
       - /
