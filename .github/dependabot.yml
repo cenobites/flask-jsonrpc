@@ -16,7 +16,7 @@ updates:
     schedule:
       interval: daily
     groups:
-      python-dependencies:
+      python-requirements:
         patterns:
           - '*'
 
