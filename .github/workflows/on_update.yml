@@ -2,7 +2,7 @@ name: On update
 
 concurrency:
   group: development
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 on:
   pull_request:
