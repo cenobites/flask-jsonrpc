@@ -105,10 +105,10 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           allow-prereleases: true
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v6
         with:
           name: release-build-${{ matrix.platform }}-${{ matrix.python-version }}
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v6
         with:
           path: release-cibw-wheels
           pattern: release-cibw-wheels-*

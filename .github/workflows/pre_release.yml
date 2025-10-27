@@ -55,7 +55,7 @@ jobs:
           - ubuntu-latest
         python-version: ["3.14"]
     steps:
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v6
         with:
           name: test-n-coverage-report
       - uses: coverallsapp/github-action@v2
@@ -202,10 +202,10 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           allow-prereleases: true
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v6
         with:
           name: pre-release-build-${{ matrix.platform }}-${{ matrix.python-version }}
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v6
         with:
           path: pre-release-cibw-wheels
           pattern: pre-release-cibw-wheels-*
