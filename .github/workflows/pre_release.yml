@@ -25,7 +25,7 @@ jobs:
         python-version: ["3.14"]
     steps:
       - uses: actions/checkout@v5
-      - uses: astral-sh/setup-uv@v7.1.1
+      - uses: astral-sh/setup-uv@v7.1.2
         with:
           enable-cache: true
           prune-cache: false
@@ -35,7 +35,7 @@ jobs:
           allow-prereleases: true
       - run: |
           uv run --locked --group tests py.test
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: test-n-coverage-report
           path: |
@@ -55,7 +55,7 @@ jobs:
           - ubuntu-latest
         python-version: ["3.14"]
     steps:
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v6
         with:
           name: test-n-coverage-report
       - uses: coverallsapp/github-action@v2
@@ -77,7 +77,7 @@ jobs:
         python-version: ["3.14"]
     steps:
       - uses: actions/checkout@v5
-      - uses: astral-sh/setup-uv@v7.1.1
+      - uses: astral-sh/setup-uv@v7.1.2
         with:
           enable-cache: true
           prune-cache: false
@@ -90,7 +90,7 @@ jobs:
           uv build --out-dir dist-${{ matrix.platform }}-${{ matrix.python-version }}
       - run: |
           tar -cvf dist-${{ matrix.platform }}-${{ matrix.python-version }}.tar dist-${{ matrix.platform }}-${{ matrix.python-version }}
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: pre-release-build-${{ matrix.platform }}-${{ matrix.python-version }}
           path: |
@@ -109,7 +109,7 @@ jobs:
         python-version: ["3.14"]
     steps:
       - uses: actions/checkout@v5
-      - uses: astral-sh/setup-uv@v7.1.1
+      - uses: astral-sh/setup-uv@v7.1.2
         with:
           enable-cache: true
           prune-cache: false
@@ -130,7 +130,7 @@ jobs:
           # uv build --wheel --out-dir mypyc-dist-${{ matrix.platform }}-${{ matrix.python-version }}
       - run: |
           tar -cvf mypyc-dist-${{ matrix.platform }}-${{ matrix.python-version }}.tar mypyc-dist-${{ matrix.platform }}-${{ matrix.python-version }}
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: pre-release-cbuild-${{ matrix.platform }}-${{ matrix.python-version }}
           path: |
@@ -156,7 +156,7 @@ jobs:
             python-version: "3.10"
     steps:
       - uses: actions/checkout@v5
-      - uses: astral-sh/setup-uv@v7.1.1
+      - uses: astral-sh/setup-uv@v7.1.2
         with:
           enable-cache: true
           prune-cache: false
@@ -173,7 +173,7 @@ jobs:
         with:
           package-dir: .
           output-dir: wheelhouse
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: pre-release-cibw-wheels-${{ matrix.platform }}-${{ matrix.python-version }}
           path: ./wheelhouse/*.whl
@@ -194,7 +194,7 @@ jobs:
         python-version: ["3.14"]
     steps:
       - uses: actions/checkout@v5
-      - uses: astral-sh/setup-uv@v7.1.1
+      - uses: astral-sh/setup-uv@v7.1.2
         with:
           enable-cache: true
           prune-cache: false
@@ -202,10 +202,10 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           allow-prereleases: true
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v6
         with:
           name: pre-release-build-${{ matrix.platform }}-${{ matrix.python-version }}
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v6
         with:
           path: pre-release-cibw-wheels
           pattern: pre-release-cibw-wheels-*
