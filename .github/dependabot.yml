@@ -4,19 +4,10 @@ updates:
     directory: /
     schedule:
       interval: weekly
-    groups:
-      github-actions:
-        patterns:
-          - '*'
 
-  - package-ecosystem: pip
-    directories: 
-      - /pyproject.toml
-      - /examples/**/pyproject.toml
+  - package-ecosystem: uv
+    directories:
+      - /
+      - /examples/**/
     schedule:
       interval: daily
-    groups:
-      python-requirements:
-        patterns:
-          - '*'
-

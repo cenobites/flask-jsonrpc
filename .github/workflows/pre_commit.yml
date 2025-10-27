@@ -2,7 +2,7 @@ name: Pre commit
 
 concurrency:
   group: pre-commit
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 on:
   pull_request:
