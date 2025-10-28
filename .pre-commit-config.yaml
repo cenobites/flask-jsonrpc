@@ -2,7 +2,7 @@ exclude: '.git|.tox|.venv|.vscode|__pycache__|.ruff_cache|.pytest_cache|.eggs|.m
 default_stages: [pre-commit]
 fail_fast: true
 default_language_version:
-  python: python3.13
+  python: python3.14
 ci:
   autoupdate_schedule: weekly
 repos:
