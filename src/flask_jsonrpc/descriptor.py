@@ -275,7 +275,7 @@ class JSONRPCServiceDescriptor:
         fn_annotations = {'return': t.Annotated[fjt.ServiceDescribe, None]}
         setattr(describe, 'jsonrpc_method_name', JSONRPC_DESCRIBE_METHOD_NAME)  # noqa: B010
         setattr(describe, 'jsonrpc_method_sig', fn_annotations.copy())  # noqa: B010
-        setattr(describe, 'jsonrpc_method_return', fn_annotations.pop('return', type(None)))  # noqa: B010
+        setattr(describe, 'jsonrpc_method_return', fn_annotations.pop('return'))  # noqa: B010
         setattr(describe, 'jsonrpc_method_params', fn_annotations)  # noqa: B010
         setattr(describe, 'jsonrpc_method_annotations', typing_annotations)  # noqa: B010
         setattr(describe, 'jsonrpc_validate', False)  # noqa: B010

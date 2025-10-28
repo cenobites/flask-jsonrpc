@@ -1,6 +1,6 @@
 [project]
 name = "Flask-JSONRPC"
-version = "4.0.0a10"
+version = "4.0.0a11"
 description = "Adds JSONRPC support to Flask."
 readme = {file = "README.md", content-type = "text/markdown"}
 license = {file = "LICENSE.txt"}
@@ -21,6 +21,7 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: 3.14",
+    "Programming Language :: Python :: Free Threading :: 1 - Unstable",
     "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
     "Topic :: Software Development :: Libraries :: Application Frameworks",
 ]
@@ -32,7 +33,7 @@ dependencies = [
     "typing-inspect==0.9.0", # https://github.com/ilevkivskyi/typing_inspect
     "pydantic>=1.7.4,!=1.8,!=1.8.1,!=2.0.0,!=2.0.1,!=2.1.0,<3.0.0", # https://github.com/pydantic/pydantic
     "eval-type-backport==0.2.2", # https://github.com/alexmojaki/eval_type_backport
-    "annotated-types==0.7.0",  # https://github.com/annotated-types/annotated-types
+    "annotated-types==0.7.0", # https://github.com/annotated-types/annotated-types
 ]
 
 [project.optional-dependencies]
@@ -48,64 +49,64 @@ Website = "https://flask-jsonrpc.readthedocs.io/"
 
 [dependency-groups]
 dev = [
-    "ipdb",  # https://github.com/gotcha/ipdb
-    "tox<4.33",  # https://github.com/tox-dev/tox
-    "tox-uv",  # https://github.com/tox-dev/tox-uv
+    "ipdb", # https://github.com/gotcha/ipdb
+    "tox<4.30", # https://github.com/tox-dev/tox
+    "tox-uv", # https://github.com/tox-dev/tox-uv
 ]
 pre-commit = [
     "pre-commit",
     "pre-commit-uv",
 ]
 tests = [
-    "pytest==8.4.2",  # https://github.com/pytest-dev/pytest
-    "pytest-cov==7.0.0",  # https://github.com/pytest-dev/pytest-cov
-    "pytest-xdist==3.8.0",  # https://github.com/pytest-dev/pytest-xdist
-    "pytest-sugar==1.1.1",  # https://github.com/Frozenball/pytest-sugar
-    "pytest-env==1.2.0",  # https://github.com/MobileDynasty/pytest-env
-    "pytest-rerunfailures==16.1",  # https://github.com/pytest-dev/pytest-rerunfailures
-    "pytest-repeat==0.9.4",  # https://github.com/pytest-dev/pytest-repeat
-    "pytest-profiling==1.8.1",  # https://github.com/man-group/pytest-plugins
-    "pytest-clarity==1.0.1",  # https://github.com/darrenburns/pytest-clarity
-    "pytest-randomly==4.0.1",  # https://github.com/pytest-dev/pytest-randomly
-    "pytest-run-parallel==0.7.1",  # https://github.com/Quansight-Labs/pytest-run-parallel
-    "typeguard==4.4.4",  # https://github.com/agronholm/typeguard
-    "coverage[toml]==7.11",  # https://github.com/nedbat/coveragepy
-    "requests==2.32.5",  # https://github.com/psf/requests
+    "pytest==8.4.2", # https://github.com/pytest-dev/pytest
+    "pytest-cov==7.0.0", # https://github.com/pytest-dev/pytest-cov
+    "pytest-xdist==3.8.0", # https://github.com/pytest-dev/pytest-xdist
+    "pytest-sugar==1.1.1", # https://github.com/Frozenball/pytest-sugar
+    "pytest-env==1.2.0", # https://github.com/MobileDynasty/pytest-env
+    "pytest-rerunfailures==16.1", # https://github.com/pytest-dev/pytest-rerunfailures
+    "pytest-repeat==0.9.4", # https://github.com/pytest-dev/pytest-repeat
+    "pytest-profiling==1.8.1", # https://github.com/man-group/pytest-plugins
+    "pytest-clarity==1.0.1", # https://github.com/darrenburns/pytest-clarity
+    "pytest-randomly==4.0.1", # https://github.com/pytest-dev/pytest-randomly
+    "pytest-random-order==1.2.0", # https://github.com/pytest-dev/pytest-random-order
+    "pytest-run-parallel==0.7.1", # https://github.com/Quansight-Labs/pytest-run-parallel
+    "typeguard==4.4.4", # https://github.com/agronholm/typeguard
+    "coverage[toml]==7.11", # https://github.com/nedbat/coveragepy
+    "requests==2.32.5", # https://github.com/psf/requests
 ]
 integration-tests = [
     {include-group = "tests"},
-    "pytest-playwright==0.7.1",  # https://github.com/microsoft/playwright-python
-    "playwright==1.55.0",  # https://github.com/microsoft/playwright-python
+    "pytest-playwright==0.7.1", # https://github.com/microsoft/playwright-python
+    "playwright==1.55.0", # https://github.com/microsoft/playwright-python
 ]
 style = [
-    "ruff==0.14.2",  # https://github.com/astral-sh/ruff
+    "ruff==0.14.2", # https://github.com/astral-sh/ruff
 ]
 typing = [
-    "mypy==1.18.2;python_version>='3.11'",  # https://github.com/python/mypy
-    "types_setuptools==80.9.0.20250822",  # https://github.com/python/typeshed
-    "typeguard==4.4.4",  # https://github.com/agronholm/typeguard
-    "pyright==1.1.407;python_version>='3.11'",  # https://github.com/microsoft/pyright
+    "mypy==1.18.2;python_version>='3.11'", # https://github.com/python/mypy
+    "types_setuptools==80.9.0.20250822", # https://github.com/python/typeshed
+    "typeguard==4.4.4", # https://github.com/agronholm/typeguard
+    "pyright==1.1.407;python_version>='3.11'", # https://github.com/microsoft/pyright
 ]
 security = [
     "bandit;python_version>='3.11'", # https://github.com/PyCQA/bandit
-    "safety;python_version>='3.11'",  # https://github.com/pyupio/safety
 ]
 build = [
-    "hatch==1.15.1",  # https://github.com/pypa/hatch
+    "hatch==1.15.1", # https://github.com/pypa/hatch
 ]
 cbuild = [
-    "cibuildwheel==3.2.0;python_version>='3.11'",  # https://github.com/pypa/cibuildwheel
-    "hatch-mypyc==0.16.0",  # https://github.com/ofek/hatch-mypyc
-    "mypy[mypyc]==1.18.2",  # https://github.com/python/mypy
-    "mypy-extensions==1.1.0",  # https://github.com/python/mypy_extensions
-    "setuptools>=77.0.0",  # https://github.com/pypa/setuptools
+    "cibuildwheel==3.2.0;python_version>='3.11'", # https://github.com/pypa/cibuildwheel
+    "hatch-mypyc==0.16.0", # https://github.com/ofek/hatch-mypyc
+    "mypy[mypyc]==1.18.2", # https://github.com/python/mypy
+    "mypy-extensions==1.1.0", # https://github.com/python/mypy_extensions
+    "setuptools>=77.0.0", # https://github.com/pypa/setuptools
 ]
 docs = [
-    "Sphinx==8.1.3",  # https://github.com/sphinx-doc/sphinx
-    "sphinx-tabs==3.4.7",  # https://github.com/executablebooks/sphinx-tabs
-    "sphinx-issues==5.0.1",  # https://github.com/sloria/sphinx-issues
-    "sphinxcontrib-log-cabinet==1.0.1",  # https://github.com/davidism/sphinxcontrib-log-cabinet
-    "Pallets-Sphinx-Themes==2.3.0",  # https://github.com/pallets/pallets-sphinx-themes
+    "Sphinx==8.1.3", # https://github.com/sphinx-doc/sphinx
+    "sphinx-tabs==3.4.7", # https://github.com/executablebooks/sphinx-tabs
+    "sphinx-issues==5.0.1", # https://github.com/sloria/sphinx-issues
+    "sphinxcontrib-log-cabinet==1.0.1", # https://github.com/davidism/sphinxcontrib-log-cabinet
+    "Pallets-Sphinx-Themes==2.3.0", # https://github.com/pallets/pallets-sphinx-themes
 ]
 
 # Uncomment the following to use setuptools as the build backend for Mypyc builds.
@@ -164,7 +165,7 @@ dependencies = [
     "hatch-mypyc==0.16.0"
 ]
 mypy-args = [
-    "--config-file=pyproject.toml.bak",  # hatch-mypyc issue #37
+    "--config-file=pyproject.toml.bak", # hatch-mypyc issue #37
     "--install-types",
     "--non-interactive",
     "--strict",
@@ -290,7 +291,7 @@ docstring-code-format = true
 docstring-code-line-length = 79
 
 [tool.pytest.ini_options]
-addopts = "-rsxX -vv --pyargs --doctest-modules --numprocesses=auto --count=5 --reruns=5 --parallel-threads=10 --iterations=10 --junitxml=junit/test-results.xml --cov-report=html --cov-report=term --cov-report=lcov --cov=flask_jsonrpc --cov-fail-under=100"
+addopts = "-rsxX -vv --pyargs --doctest-modules --showlocals --strict-markers --random-order --numprocesses=auto --count=5 --reruns=5 --parallel-threads=10 --iterations=10 --junitxml=junit/test-results.xml --cov-report=html --cov-report=term --cov-report=lcov --cov=flask_jsonrpc --cov-fail-under=100"
 junit_family = "xunit2"
 python_files = ["tests.py", "test_*.py", "*_tests.py"]
 pythonpath = "src/"
@@ -307,12 +308,6 @@ norecursedirs = [
     "tests/test_apps",
     "tests/integration",
 ]
-thread_unsafe_functions = [
-    "tests.unit.test_views.*",
-    "unit.test_views.*",
-    "test_views.*",
-    "flask_jsonrpc.views.*",
-]
 required_plugins = [
     "pytest-cov==7.0.0",
     "pytest-xdist==3.8.0",
@@ -322,6 +317,7 @@ required_plugins = [
     "pytest-rerunfailures==16.1",
     "pytest-clarity==1.0.1",
     "pytest-randomly==4.0.1",
+    "pytest-random-order==1.2.0",
     "pytest-run-parallel==0.7.1",
 ]
 
@@ -404,7 +400,7 @@ typeCheckingMode = "basic"
 
 [tool.tox]
 requires = [
-    "tox<4.33",  # tox-dev issue: #3602
+    "tox<4.30", # tox-dev issue: #3602
     "tox-uv>=1.26.1"
 ]
 env_list = [
@@ -467,7 +463,6 @@ dependency_groups = [
 ]
 no_default_groups = true
 commands = [
-    # ["safety", "scan"],
     ["bandit", "-r", "src/"],
 ]
 
