@@ -41,6 +41,8 @@ def urn(name: str, *args: t.Any) -> str:  # noqa: ANN401
 
     >>> urn('python')
     'urn:python'
+    >>> urn('python.flask')
+    'urn:python:flask'
     >>> urn('python', 'Flask', 'JsonRPC')
     'urn:python:flask:jsonrpc'
     >>> urn('python', '/api/browse')
@@ -56,8 +58,8 @@ def urn(name: str, *args: t.Any) -> str:  # noqa: ANN401
     """
     if not name:
         raise ValueError('name is required') from None
-    splitted_args = [arg.replace(':', '/').split('/') for arg in args]
-    values = ['urn', name] + [st for st in list(itertools.chain(*splitted_args)) if st != '']
+    splitted_params = [arg.replace('.', '/').replace(':', '/').split('/') for arg in [name] + list(args)]
+    values = ['urn'] + [st for st in list(itertools.chain(*splitted_params)) if st != '']
     return ':'.join(values).lower()
 
 
