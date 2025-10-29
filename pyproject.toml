@@ -54,8 +54,8 @@ dev = [
     "tox-uv", # https://github.com/tox-dev/tox-uv
 ]
 pre-commit = [
-    "pre-commit",
-    "pre-commit-uv",
+    "pre-commit", # https://github.com/pre-commit/pre-commit
+    "pre-commit-uv", # https://github.com/tox-dev/pre-commit-uv
 ]
 tests = [
     "pytest==8.4.2", # https://github.com/pytest-dev/pytest
