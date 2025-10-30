@@ -50,7 +50,7 @@ Website = "https://flask-jsonrpc.readthedocs.io/"
 [dependency-groups]
 dev = [
     "ipdb", # https://github.com/gotcha/ipdb
-    "tox<4.30", # https://github.com/tox-dev/tox
+    "tox<4.33", # https://github.com/tox-dev/tox
     "tox-uv", # https://github.com/tox-dev/tox-uv
 ]
 pre-commit = [
@@ -400,7 +400,7 @@ typeCheckingMode = "basic"
 
 [tool.tox]
 requires = [
-    "tox<4.30", # tox-dev issue: #3602
+    "tox<4.33", # tox-dev issue: #3602
     "tox-uv>=1.26.1"
 ]
 env_list = [
