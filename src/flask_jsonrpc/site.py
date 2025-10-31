@@ -166,8 +166,7 @@ class JSONRPCSite:
             if validate:
                 binded_params = type_checker(view_func, binded_params)
 
-            sanitazed_params = {k: v for k, v in binded_params.items() if v is not None}
-            resp_view = current_app.ensure_sync(view_func)(**sanitazed_params)
+            resp_view = current_app.ensure_sync(view_func)(**binded_params)
 
             # TODO: Enhance the checker to return the type
             view_fun_annotations = t.get_type_hints(view_func) if validate else {}

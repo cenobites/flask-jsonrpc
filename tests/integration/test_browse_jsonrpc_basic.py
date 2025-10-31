@@ -70,7 +70,7 @@ def test_jsonrpc_basic_echo_display(
             {
                 'error': {
                     'code': -32602,
-                    'data': {'message': "echo() missing 1 required positional argument: 'string'"},
+                    'data': {'message': 'argument "string" (None) is not an instance of str'},
                     'message': 'Invalid params',
                     'name': 'InvalidParamsError',
                 },
@@ -489,12 +489,7 @@ def test_jsonrpc_basic_strange_echo_display(
             {
                 'error': {
                     'code': -32602,
-                    'data': {
-                        'message': (
-                            'strange_echo() missing 4 required positional'
-                            " arguments: 'string', 'omg', 'wtf', and 'nowai'"
-                        )
-                    },
+                    'data': {'message': ('argument "string" (None) is not an instance of str')},
                     'message': 'Invalid params',
                     'name': 'InvalidParamsError',
                 },
