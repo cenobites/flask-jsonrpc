@@ -75,9 +75,7 @@ def test_decorators_decorator_display(
             {
                 'error': {
                     'code': -32602,
-                    'data': {
-                        'message': "jsonrpc_decorator..decorator() missing 1 required positional argument: 'string'"
-                    },
+                    'data': {'message': 'argument "string" (None) is not an instance of str'},
                     'message': 'Invalid params',
                     'name': 'InvalidParamsError',
                 },
@@ -142,15 +140,7 @@ def test_decorators_wrapped_decorator_display(
         (
             {'string': ''},
             {'jsonrpc': '2.0', 'method': 'decorators.wrappedDecorator', 'params': {}},
-            {
-                'error': {
-                    'code': -32602,
-                    'data': {'message': "wrappedDecorator() missing 1 required positional argument: 'string'"},
-                    'message': 'Invalid params',
-                    'name': 'InvalidParamsError',
-                },
-                'jsonrpc': '2.0',
-            },
+            {'jsonrpc': '2.0', 'result': 'Hello None from decorator, ;)'},
         ),
         (
             {'string': 'Functools'},

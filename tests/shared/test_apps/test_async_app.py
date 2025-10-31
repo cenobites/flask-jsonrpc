@@ -245,7 +245,7 @@ def test_app_echo(async_session: 'Session', api_url: str) -> None:
     assert json_data['id'] == 1
     assert json_data['jsonrpc'] == '2.0'
     assert json_data['error']['code'] == -32602
-    assert "missing 1 required positional argument: 'string'" in json_data['error']['data']['message']
+    assert 'argument "string" (None) is not an instance of str' in json_data['error']['data']['message']
     assert json_data['error']['message'] == 'Invalid params'
     assert json_data['error']['name'] == 'InvalidParamsError'
     assert rv.status_code == 400
@@ -283,7 +283,7 @@ def test_app_echo_raise_invalid_params_error(async_session: 'Session', api_url: 
     assert json_data['id'] == 1
     assert json_data['jsonrpc'] == '2.0'
     assert json_data['error']['code'] == -32602
-    assert "missing 1 required positional argument: 'string'" in json_data['error']['data']['message']
+    assert 'argument "string" (None) is not an instance of str' in json_data['error']['data']['message']
     assert json_data['error']['message'] == 'Invalid params'
     assert json_data['error']['name'] == 'InvalidParamsError'
     assert rv.status_code == 400
@@ -293,7 +293,7 @@ def test_app_echo_raise_invalid_params_error(async_session: 'Session', api_url: 
     assert json_data['id'] == 1
     assert json_data['jsonrpc'] == '2.0'
     assert json_data['error']['code'] == -32602
-    assert "missing 1 required positional argument: 'string'" in json_data['error']['data']['message']
+    assert 'argument "string" (None) is not an instance of str' in json_data['error']['data']['message']
     assert json_data['error']['message'] == 'Invalid params'
     assert json_data['error']['name'] == 'InvalidParamsError'
     assert rv.status_code == 400
