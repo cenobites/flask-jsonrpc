@@ -68,7 +68,7 @@ def test_app_echo_display(
             {
                 'error': {
                     'code': -32602,
-                    'data': {'message': "create_app..echo() missing 1 required positional argument: 'string'"},
+                    'data': {'message': 'argument "string" (None) is not an instance of str'},
                     'message': 'Invalid params',
                     'name': 'InvalidParamsError',
                 },
@@ -291,17 +291,7 @@ def test_app_wrapped_decorators_display(
         (
             {'string': ''},
             {'jsonrpc': '2.0', 'method': 'app.wrappedDecorators', 'params': {}},
-            {
-                'error': {
-                    'code': -32602,
-                    'data': {
-                        'message': "create_app..wrapped_decorators() missing 1 required positional argument: 'string'"
-                    },
-                    'message': 'Invalid params',
-                    'name': 'InvalidParamsError',
-                },
-                'jsonrpc': '2.0',
-            },
+            {'jsonrpc': '2.0', 'result': 'Hello None from decorator, ;)'},
         ),
     ],
 )

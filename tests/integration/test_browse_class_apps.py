@@ -213,7 +213,7 @@ def test_class_apps_echo_display(
             {
                 'error': {
                     'code': -32602,
-                    'data': {'message': "App.echo() missing 1 required positional argument: 'string'"},
+                    'data': {'message': 'argument "string" (None) is not an instance of str'},
                     'message': 'Invalid params',
                     'name': 'InvalidParamsError',
                 },

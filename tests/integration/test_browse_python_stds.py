@@ -125,7 +125,7 @@ def test_types_python_stds_str_type_display(
             {
                 'error': {
                     'code': -32602,
-                    'data': {'message': "str_type() missing 1 required positional argument: 'st'"},
+                    'data': {'message': 'argument "st" (None) is not an instance of str'},
                     'message': 'Invalid params',
                     'name': 'InvalidParamsError',
                 },
@@ -469,7 +469,7 @@ def test_types_python_bytes_type_display(
             {
                 'error': {
                     'code': -32602,
-                    'data': {'message': "bytes_type() missing 1 required positional argument: 'b'"},
+                    'data': {'message': 'argument "b" (None) is not bytes-like'},
                     'message': 'Invalid params',
                     'name': 'InvalidParamsError',
                 },
@@ -545,7 +545,7 @@ def test_types_python_bytearray_type_display(
             {
                 'error': {
                     'code': -32602,
-                    'data': {'message': "bytearray_type() missing 1 required positional argument: 'b'"},
+                    'data': {'message': 'argument "b" (None) is not an instance of bytearray'},
                     'message': 'Invalid params',
                     'name': 'InvalidParamsError',
                 },
@@ -626,6 +626,22 @@ def test_types_python_int_enum_type_display(
             {'e': 3},
             {'jsonrpc': '2.0', 'method': 'types.python_stds.intEnumType', 'params': {'e': 3}},
             {'jsonrpc': '2.0', 'result': 3},
+        ),
+        (
+            {'e': ''},
+            {'jsonrpc': '2.0', 'method': 'types.python_stds.intEnumType', 'params': {}},
+            {
+                'error': {
+                    'code': -32602,
+                    'data': {
+                        'message': 'argument "e" (None) is not an instance of '
+                        'shared.features.types.python_stds.ColorIntEnum'
+                    },
+                    'message': 'Invalid params',
+                    'name': 'InvalidParamsError',
+                },
+                'jsonrpc': '2.0',
+            },
         ),
     ],
 )

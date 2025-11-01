@@ -98,3 +98,8 @@ def mixin_not_validate(s, t: int, u, v: str, x, z):  # noqa: ANN001,ANN202,ANN20
 @jsonrpc.method('jsonrpc_basic.noReturn')
 def no_return(_string: str | None = None) -> t.NoReturn:
     raise ValueError('no return')
+
+
+@jsonrpc.method('jsonrpc_basic.optionalParamWithoutDefaultValue')
+def optional_param_without_default_value(string: str | None) -> str | None:
+    return string
