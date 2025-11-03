@@ -53,7 +53,7 @@ def test_app_echo(session: 'Session', api_url: str) -> None:
     assert json_data['id'] == 1
     assert json_data['jsonrpc'] == '2.0'
     assert json_data['error']['code'] == -32602
-    assert "missing 1 required positional argument: 'string'" in json_data['error']['data']['message']
+    assert 'argument "string" (None) is not an instance of str' in json_data['error']['data']['message']
     assert json_data['error']['message'] == 'Invalid params'
     assert json_data['error']['name'] == 'InvalidParamsError'
     assert rv.status_code == 400
@@ -98,7 +98,7 @@ def test_app_echo_raise_invalid_params_error(session: 'Session', api_url: str) -
     assert json_data['id'] == 1
     assert json_data['jsonrpc'] == '2.0'
     assert json_data['error']['code'] == -32602
-    assert "missing 1 required positional argument: 'string'" in json_data['error']['data']['message']
+    assert 'argument "string" (None) is not an instance of str' in json_data['error']['data']['message']
     assert json_data['error']['message'] == 'Invalid params'
     assert json_data['error']['name'] == 'InvalidParamsError'
     assert rv.status_code == 400
@@ -108,7 +108,7 @@ def test_app_echo_raise_invalid_params_error(session: 'Session', api_url: str) -
     assert json_data['id'] == 1
     assert json_data['jsonrpc'] == '2.0'
     assert json_data['error']['code'] == -32602
-    assert "missing 1 required positional argument: 'string'" in json_data['error']['data']['message']
+    assert 'argument "string" (None) is not an instance of str' in json_data['error']['data']['message']
     assert json_data['error']['message'] == 'Invalid params'
     assert json_data['error']['name'] == 'InvalidParamsError'
     assert rv.status_code == 400
@@ -223,7 +223,7 @@ def test_app_sum(session: 'Session', api_url: str) -> None:
     assert json_data['id'] == 1
     assert json_data['jsonrpc'] == '2.0'
     assert json_data['error']['code'] == -32602
-    assert "missing 2 required positional arguments: 'a' and 'b'" in json_data['error']['data']['message']
+    assert 'argument "a" (None) is neither float or int' in json_data['error']['data']['message']
     assert json_data['error']['message'] == 'Invalid params'
     assert json_data['error']['name'] == 'InvalidParamsError'
     assert rv.status_code == 400
@@ -390,6 +390,14 @@ def test_app_system_describe(session: 'Session', api_url: str) -> None:
             'type': 'method',
             'validation': True,
         },
+        'jsonrpc_basic.optionalParamWithoutDefaultValue': {
+            'name': 'jsonrpc_basic.optionalParamWithoutDefaultValue',
+            'notification': True,
+            'params': [{'name': 'string', 'type': 'String'}],
+            'returns': {'name': 'default', 'type': 'String'},
+            'type': 'method',
+            'validation': True,
+        },
         'jsonrpc_basic.returnHeaders': {
             'name': 'jsonrpc_basic.returnHeaders',
             'notification': True,
@@ -459,3 +467,48 @@ def test_app_system_describe(session: 'Session', api_url: str) -> None:
             'validation': False,
         },
     }
+
+
+def test_app_optional_param_without_default_value(session: 'Session', api_url: str) -> None:
+    rv = session.post(
+        f'{api_url}/jsonrpc-basic',
+        json={
+            'id': 1,
+            'jsonrpc': '2.0',
+            'method': 'jsonrpc_basic.optionalParamWithoutDefaultValue',
+            'params': ['Python'],
+        },
+    )
+    assert rv.json() == {'id': 1, 'jsonrpc': '2.0', 'result': 'Python'}
+    assert rv.status_code == 200
+
+    rv = session.post(
+        f'{api_url}/jsonrpc-basic',
+        json={
+            'id': 1,
+            'jsonrpc': '2.0',
+            'method': 'jsonrpc_basic.optionalParamWithoutDefaultValue',
+            'params': {'string': 'Flask'},
+        },
+    )
+    assert rv.json() == {'id': 1, 'jsonrpc': '2.0', 'result': 'Flask'}
+    assert rv.status_code == 200
+
+    rv = session.post(
+        f'{api_url}/jsonrpc-basic',
+        json={
+            'id': 1,
+            'jsonrpc': '2.0',
+            'method': 'jsonrpc_basic.optionalParamWithoutDefaultValue',
+            'params': {'string': None},
+        },
+    )
+    assert rv.json() == {'id': 1, 'jsonrpc': '2.0', 'result': None}
+    assert rv.status_code == 200
+
+    rv = session.post(
+        f'{api_url}/jsonrpc-basic',
+        json={'id': 1, 'jsonrpc': '2.0', 'method': 'jsonrpc_basic.optionalParamWithoutDefaultValue', 'params': {}},
+    )
+    assert rv.json() == {'id': 1, 'jsonrpc': '2.0', 'result': None}
+    assert rv.status_code == 200

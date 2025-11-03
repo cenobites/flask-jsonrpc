@@ -36,13 +36,13 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           allow-prereleases: true
-      - run: |
-          RUN_PARALLEL=("3.14" "3.14t")
-          if [[ "${RUN_PARALLEL[@]}" =~ "${{ matrix.python-version }}" ]]; then
-            uv run --locked --group tests tox run -e py,py-async
-          else
-            uv run --locked --group tests tox run -e py,py-async -- --parallel-threads=0 --iterations=0
-          fi
+      - name: Run tests in parallel
+        if: ${{ matrix.python-version == '3.14' || matrix.python-version == '3.14t' }}
+        run: |
+          uv run --locked --group tests tox run -e py,py-async
+      - name: Run tests in serial
+        run: |
+          uv run --locked --group tests tox run -e py,py-async -- --parallel-threads=0 --iterations=0
 
   typing:
     name: Type checker [${{ matrix.platform }} | ${{ matrix.python-version }}]
