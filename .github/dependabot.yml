@@ -9,23 +9,14 @@ updates:
         patterns:
           - '*'
 
-  - package-ecosystem: pip
-    directories:
-      - /
-      - /examples/**/
-    schedule:
-      interval: daily
-    groups:
-      python-requirements:
-        patterns:
-          - '*'
-
   - package-ecosystem: uv
     directories:
       - /
       - /examples/**/
     schedule:
       interval: daily
+    ignore:
+      - dependency-name: "tox"
     groups:
       python-dependencies:
         patterns:
