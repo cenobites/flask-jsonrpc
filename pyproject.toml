@@ -50,7 +50,7 @@ Website = "https://flask-jsonrpc.readthedocs.io/"
 [dependency-groups]
 dev = [
     "ipdb", # https://github.com/gotcha/ipdb
-    "tox<4.30", # https://github.com/tox-dev/tox
+    "tox<4.33", # https://github.com/tox-dev/tox
     "tox-uv", # https://github.com/tox-dev/tox-uv
 ]
 pre-commit = [
@@ -80,7 +80,7 @@ integration-tests = [
     "playwright==1.55.0", # https://github.com/microsoft/playwright-python
 ]
 style = [
-    "ruff==0.14.2", # https://github.com/astral-sh/ruff
+    "ruff==0.14.3", # https://github.com/astral-sh/ruff
 ]
 typing = [
     "mypy==1.18.2;python_version>='3.11'", # https://github.com/python/mypy
