@@ -71,7 +71,7 @@ tests = [
     "pytest-random-order==1.2.0", # https://github.com/pytest-dev/pytest-random-order
     "pytest-run-parallel==0.7.1", # https://github.com/Quansight-Labs/pytest-run-parallel
     "typeguard==4.4.4", # https://github.com/agronholm/typeguard
-    "coverage[toml]==7.11", # https://github.com/nedbat/coveragepy
+    "coverage[toml]==7.11.3", # https://github.com/nedbat/coveragepy
     "requests==2.32.5", # https://github.com/psf/requests
 ]
 integration-tests = [
@@ -80,7 +80,7 @@ integration-tests = [
     "playwright==1.55.0", # https://github.com/microsoft/playwright-python
 ]
 style = [
-    "ruff==0.14.3", # https://github.com/astral-sh/ruff
+    "ruff==0.14.4", # https://github.com/astral-sh/ruff
 ]
 typing = [
     "mypy==1.18.2;python_version>='3.11'", # https://github.com/python/mypy
