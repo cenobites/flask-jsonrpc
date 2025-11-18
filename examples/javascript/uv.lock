@@ -186,11 +186,11 @@ wheels = [
 
 [[package]]
 name = "eval-type-backport"
-version = "0.2.2"
+version = "0.3.0"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/30/ea/8b0ac4469d4c347c6a385ff09dc3c048c2d021696664e26c7ee6791631b5/eval_type_backport-0.2.2.tar.gz", hash = "sha256:f0576b4cf01ebb5bd358d02314d31846af5e07678387486e2c798af0e7d849c1", size = 9079, upload-time = "2024-12-21T20:09:46.005Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/51/23/079e39571d6dd8d90d7a369ecb55ad766efb6bae4e77389629e14458c280/eval_type_backport-0.3.0.tar.gz", hash = "sha256:1638210401e184ff17f877e9a2fa076b60b5838790f4532a21761cc2be67aea1", size = 9272, upload-time = "2025-11-13T20:56:50.845Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/ce/31/55cd413eaccd39125368be33c46de24a1f639f2e12349b0361b4678f3915/eval_type_backport-0.2.2-py3-none-any.whl", hash = "sha256:cb6ad7c393517f476f96d456d0412ea80f0a8cf96f6892834cd9340149111b0a", size = 5830, upload-time = "2024-12-21T20:09:44.175Z" },
+    { url = "https://files.pythonhosted.org/packages/19/d8/2a1c638d9e0aa7e269269a1a1bf423ddd94267f1a01bbe3ad03432b67dd4/eval_type_backport-0.3.0-py3-none-any.whl", hash = "sha256:975a10a0fe333c8b6260d7fdb637698c9a16c3a9e3b6eb943fee6a6f67a37fe8", size = 6061, upload-time = "2025-11-13T20:56:49.499Z" },
 ]
 
 [[package]]
@@ -262,7 +262,7 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "annotated-types", specifier = "==0.7.0" },
-    { name = "eval-type-backport", specifier = "==0.2.2" },
+    { name = "eval-type-backport", specifier = "==0.3.0" },
     { name = "flask", specifier = ">=3.0.0,<4.0" },
     { name = "flask", extras = ["async"], marker = "extra == 'async'", specifier = ">=3.0.0,<4.0" },
     { name = "flask", extras = ["dotenv"], marker = "extra == 'dotenv'", specifier = ">=3.0.0,<4.0" },
@@ -295,7 +295,7 @@ docs = [
     { name = "sphinxcontrib-log-cabinet", specifier = "==1.0.1" },
 ]
 integration-tests = [
-    { name = "coverage", extras = ["toml"], specifier = "==7.11" },
+    { name = "coverage", extras = ["toml"], specifier = "==7.11.3" },
     { name = "playwright", specifier = "==1.55.0" },
     { name = "pytest", specifier = "==8.4.2" },
     { name = "pytest-clarity", specifier = "==1.0.1" },
@@ -318,9 +318,9 @@ pre-commit = [
     { name = "pre-commit-uv" },
 ]
 security = [{ name = "bandit", marker = "python_full_version >= '3.11'" }]
-style = [{ name = "ruff", specifier = "==0.14.2" }]
+style = [{ name = "ruff", specifier = "==0.14.5" }]
 tests = [
-    { name = "coverage", extras = ["toml"], specifier = "==7.11" },
+    { name = "coverage", extras = ["toml"], specifier = "==7.11.3" },
     { name = "pytest", specifier = "==8.4.2" },
     { name = "pytest-clarity", specifier = "==1.0.1" },
     { name = "pytest-cov", specifier = "==7.0.0" },
@@ -382,7 +382,7 @@ dev = [
     { name = "tox-uv", specifier = ">=1.26.1" },
 ]
 tests = [
-    { name = "pytest", specifier = "==8.4.2" },
+    { name = "pytest", specifier = "==9.0.1" },
     { name = "pytest-cov", specifier = "==7.0.0" },
     { name = "pytest-env", specifier = "==1.2.0" },
     { name = "pytest-sugar", specifier = "==1.1.1" },
@@ -693,7 +693,7 @@ wheels = [
 
 [[package]]
 name = "pytest"
-version = "8.4.2"
+version = "9.0.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "colorama", marker = "sys_platform == 'win32'" },
@@ -704,9 +704,9 @@ dependencies = [
     { name = "pygments" },
     { name = "tomli", marker = "python_full_version < '3.11'" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/a3/5c/00a0e072241553e1a7496d638deababa67c5058571567b92a7eaa258397c/pytest-8.4.2.tar.gz", hash = "sha256:86c0d0b93306b961d58d62a4db4879f27fe25513d4b969df351abdddb3c30e01", size = 1519618, upload-time = "2025-09-04T14:34:22.711Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/07/56/f013048ac4bc4c1d9be45afd4ab209ea62822fb1598f40687e6bf45dcea4/pytest-9.0.1.tar.gz", hash = "sha256:3e9c069ea73583e255c3b21cf46b8d3c56f6e3a1a8f6da94ccb0fcf57b9d73c8", size = 1564125, upload-time = "2025-11-12T13:05:09.333Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/a8/a4/20da314d277121d6534b3a980b29035dcd51e6744bd79075a6ce8fa4eb8d/pytest-8.4.2-py3-none-any.whl", hash = "sha256:872f880de3fc3a5bdc88a11b39c9710c3497a547cfa9320bc3c5e62fbf272e79", size = 365750, upload-time = "2025-09-04T14:34:20.226Z" },
+    { url = "https://files.pythonhosted.org/packages/0b/8b/6300fb80f858cda1c51ffa17075df5d846757081d11ab4aa35cef9e6258b/pytest-9.0.1-py3-none-any.whl", hash = "sha256:67be0030d194df2dfa7b556f2e56fb3c3315bd5c8822c6951162b92b32ce7dad", size = 373668, upload-time = "2025-11-12T13:05:07.379Z" },
 ]
 
 [[package]]
