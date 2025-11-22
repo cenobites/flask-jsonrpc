@@ -68,7 +68,7 @@ class JSONRPCError(Exception):
         status_code: int | None = None,
     ) -> None:
         """Setup the Exception and overwrite the default message"""
-        super().__init__()
+        super().__init__(message)
         self.message = message or self.message
         self.code = code or self.code
         self.data = data or self.data
