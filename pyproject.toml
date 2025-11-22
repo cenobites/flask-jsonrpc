@@ -451,7 +451,7 @@ dependency_groups = [
 ]
 no_default_groups = true
 commands = [
-    ["mypy", "--install-types", "--non-interactive", "src/"],
+    ["mypy", "--install-types", "--non-interactive", "run.py", "src/"],
     ["pyright"],
 ]
 

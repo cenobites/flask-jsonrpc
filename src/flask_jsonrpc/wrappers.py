@@ -41,7 +41,7 @@ from typeguard import typechecked
 from werkzeug.utils import cached_property
 
 from .settings import settings
-from .types.methods import MethodAnnotated
+from .types.methods import MethodAnnotatedType
 
 if t.TYPE_CHECKING:
     from .site import JSONRPCSite
@@ -146,7 +146,7 @@ class JSONRPCDecoratorMixin:
         self: Self,
         view_func: t.Callable[..., t.Any],
         name: str | None = None,
-        annotation: type[MethodAnnotated] | None = None,
+        annotation: MethodAnnotatedType | None = None,
         **options: dict[str, t.Any],
     ) -> t.Callable[..., t.Any]:
         fn = self._get_function(view_func)
@@ -168,10 +168,7 @@ class JSONRPCDecoratorMixin:
         return view_func_wrapped
 
     def method(
-        self: Self,
-        name: str | None = None,
-        annotation: type[MethodAnnotated] | None = None,
-        **options: dict[str, t.Any],
+        self: Self, name: str | None = None, annotation: MethodAnnotatedType | None = None, **options: dict[str, t.Any]
     ) -> t.Callable[..., t.Any]:
         validate = options.get('validate', settings.DEFAULT_JSONRPC_METHOD['VALIDATE'])
 

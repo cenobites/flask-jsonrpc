@@ -158,10 +158,10 @@ class JSONRPCServiceDescriptor:
         methods: t.OrderedDict[str, fjt.Method] = OrderedDict()
         for name, view_func in self.jsonrpc_site.view_funcs.items():
             method_name = getattr(view_func, 'jsonrpc_method_name', name)
-            method_annotation: t.Any | type[types_methods.MethodAnnotated] = getattr(
+            method_annotation: t.Any | types_methods.MethodAnnotatedType = getattr(
                 view_func,
                 'jsonrpc_method_annotations',
-                types_methods.MethodAnnotated[None],  # type: ignore[misc]
+                types_methods.MethodAnnotated[None],  # type: ignore
             )
             method_metadata = getattr(method_annotation, '__metadata__', ())
             method_options = getattr(view_func, 'jsonrpc_options', {})
@@ -266,7 +266,7 @@ class JSONRPCServiceDescriptor:
 
         describe.__doc__ = 'Service description for JSON-RPC 2.0'
 
-        typing_annotations: type[types_methods.MethodAnnotated] = types_methods.MethodAnnotated[  # type: ignore[misc]
+        typing_annotations: types_methods.MethodAnnotatedType = types_methods.MethodAnnotated[
             types_methods.Summary('RPC Describe'),
             types_methods.Description('Service description for JSON-RPC 2.0'),
             types_methods.Validate(False),
