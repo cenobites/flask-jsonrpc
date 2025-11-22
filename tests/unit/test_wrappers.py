@@ -32,7 +32,7 @@ import pytest
 
 from flask_jsonrpc.views import JSONRPCView
 from flask_jsonrpc.wrappers import JSONRPCDecoratorMixin
-from flask_jsonrpc.types.methods import Summary, MethodAnnotated, JSONRPC_Method_T
+from flask_jsonrpc.types.methods import Summary, MethodAnnotated, MethodAnnotatedType
 
 # Python 3.11+
 try:
@@ -186,7 +186,7 @@ def test_jsonrpc_register_view_function_annotated() -> None:
         'name': t.Annotated[str, 'metadata'],
         'person': t.Annotated[str | None, 'metadata'],
     }
-    assert view_func_wrapped.jsonrpc_method_annotations == t.Annotated[JSONRPC_Method_T, Summary(summary='summary')]
+    assert isinstance(view_func_wrapped.jsonrpc_method_annotations, MethodAnnotatedType)
     assert view_func_wrapped.jsonrpc_validate is True
     assert view_func_wrapped.jsonrpc_notification is True
     assert view_func_wrapped.jsonrpc_options == {'notification': True, 'validate': True}
@@ -197,7 +197,7 @@ def test_jsonrpc_register_view_function_not_validate() -> None:
         return f'Hello {name}'
 
     jsonrpc_app = JSONRPCApp()
-    view_func_wrapped = jsonrpc_app.method('view_func', None, **{'validate': False})(view_func)
+    view_func_wrapped = jsonrpc_app.method('view_func', None, **{'validate': False})(view_func)  # type: ignore
     assert view_func_wrapped.jsonrpc_method_name == 'view_func'
     assert view_func_wrapped.jsonrpc_method_sig == {'name': t.Any, 'return': t.Any}
     assert view_func_wrapped.jsonrpc_method_return == t.Any

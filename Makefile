@@ -1,4 +1,4 @@
-.PHONY: all clean style typing test test-cov-unit test-examples test-release release env uv-lock
+.PHONY: all clean style typing test test-dev test-cov-unit test-examples test-release release env uv-lock
 
 VIRTUALENV_EXISTS := $(shell [ -d .venv ] && echo 1 || echo 0)
 
@@ -15,11 +15,14 @@ style:
 	@uv run ruff format .
 
 typing:
-	@uv run mypy --install-types --non-interactive src/
+	@uv run mypy --install-types --non-interactive run.py src/
 	@uv run pyright
 
 test: clean
 	@uv run tox run
+
+test-dev:
+	@pytest --numprocesses=0 --count=1 --reruns=0 --parallel-threads=0 --iterations=0 --random-order-seed=1 -x
 
 test-cov-unit:
 	@REPORT="\nUnit Tests:\n"; \

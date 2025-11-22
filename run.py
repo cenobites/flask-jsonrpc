@@ -25,9 +25,13 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
+import typing as t
+
 from flask import Flask
 
 from flask_jsonrpc import JSONRPC
+import flask_jsonrpc.types.params as tp
+import flask_jsonrpc.types.methods as tm
 
 # Flask application
 app = Flask('application')
@@ -36,8 +40,24 @@ app = Flask('application')
 jsonrpc = JSONRPC(app, '/api', enable_web_browsable_api=True)
 
 
-@jsonrpc.method('App.index')
-def index() -> str:
+@jsonrpc.method(
+    'App.index',
+    tm.MethodAnnotated[
+        tm.Summary('Welcome method'),
+        tm.Description('Returns a welcome message for the Flask JSON-RPC application.'),
+        tm.Tag(name='General', description='General purpose methods'),
+        tm.Example(
+            name='default',
+            summary='Default example',
+            description='Returns a welcome message',
+            params=[],
+            returns=tm.ExampleField(name='default', value='Welcome to Flask JSON-RPC'),
+        ),
+    ],
+)
+def index() -> t.Annotated[
+    str, tp.Summary('Welcome method'), tp.Description('A welcome message for the Flask JSON-RPC application.')
+]:
     return 'Welcome to Flask JSON-RPC'
 
 

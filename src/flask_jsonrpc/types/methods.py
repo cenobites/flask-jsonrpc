@@ -27,13 +27,21 @@
 from __future__ import annotations
 
 import typing as t
+import operator
 from dataclasses import dataclass
 
-import typing_extensions
+# Added in version 3.11.
+from typing_extensions import Self, Unpack, TypeVarTuple
 
 SLOTS = {'slots': True}
 
 JSONRPC_Method_T = t.TypeVar('JSONRPC_Method_T')
+JSONRPC_Method_Metadata_T = t.TypeVar('JSONRPC_Method_Metadata_T', bound='BaseMethodAnnotatedMetadata')
+JSONRPC_Method_Metadata_Ts = TypeVarTuple('JSONRPC_Method_Metadata_Ts')
+
+
+class BaseMethodAnnotatedOrigin:
+    pass
 
 
 class BaseMethodAnnotatedMetadata:
@@ -97,17 +105,50 @@ class Example(BaseMethodAnnotatedMetadata):
     returns: ExampleField | None = None
 
 
-class MethodAnnotated:
-    __slots__ = ()
+class _MethodAnnotated(t.Generic[JSONRPC_Method_T, Unpack[JSONRPC_Method_Metadata_Ts]]):
+    pass
 
-    def __new__(cls: type[MethodAnnotated], *args: t.Any, **kwargs: t.Any) -> MethodAnnotated:  # noqa: ANN401
-        raise TypeError('type MethodAnnotated cannot be instantiated')
 
-    @t._tp_cache  # type: ignore
-    def __class_getitem__(cls: type[MethodAnnotated], params: t.Any, /) -> t.Any:  # noqa: ANN401
+class _MethodAnnotatedAlias(t._GenericAlias, _root=True):  # type: ignore
+    def __init__(
+        self: Self, origin: type[BaseMethodAnnotatedOrigin], metadata: tuple[BaseMethodAnnotatedMetadata, ...]
+    ) -> None:
+        if isinstance(origin, _MethodAnnotatedAlias):
+            metadata = origin.__metadata__ + metadata  # type: ignore[attr-defined]
+            origin = origin.__origin__  # type: ignore[attr-defined]
+        super().__init__(origin, origin)
+        self.__metadata__ = metadata
+        self.origin = origin
+        self.metadata = metadata
+
+    def __repr__(self: Self) -> str:
+        return (
+            f'flask_jsonrpc.types.methods._MethodAnnotated[{t._type_repr(self.__origin__)}, '
+            f'{", ".join(repr(a) for a in self.__metadata__)}]'
+        )
+
+    def __reduce__(self: Self) -> tuple[t.Any, ...]:
+        return operator.getitem, (_MethodAnnotated, (self.__origin__, *self.__metadata__))
+
+    def __eq__(self: Self, other: object) -> bool:  # noqa: ANN204
+        if not isinstance(other, _MethodAnnotatedAlias):
+            return NotImplemented
+        if self.__origin__ != other.__origin__:
+            return False
+        return self.__metadata__ == other.__metadata__
+
+    def __hash__(self: Self) -> int:
+        return hash((self.__origin__, self.__metadata__))
+
+
+class _MethodAnnotatedProxy:
+    def __getitem__(
+        self: Self, params: BaseMethodAnnotatedMetadata | tuple[BaseMethodAnnotatedMetadata, ...]
+    ) -> _MethodAnnotatedAlias:
         if not isinstance(params, tuple):
             params = (params,)
-        return typing_extensions._AnnotatedAlias(JSONRPC_Method_T, params)
+        return _MethodAnnotatedAlias(BaseMethodAnnotatedOrigin, params)
 
-    def __init_subclass__(cls: type[MethodAnnotated], /, *args: t.Any, **kwargs: t.Any) -> None:  # noqa: ANN401
-        raise TypeError(f'cannot subclass {getattr(cls, "__module__", cls)}.MethodAnnotated')
+
+MethodAnnotated = _MethodAnnotatedProxy()
+MethodAnnotatedType = _MethodAnnotatedAlias
