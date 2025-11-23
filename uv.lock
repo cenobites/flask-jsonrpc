@@ -623,7 +623,7 @@ dotenv = [
 
 [[package]]
 name = "flask-jsonrpc"
-version = "4.0.0a11"
+version = "4.0.0a12"
 source = { editable = "." }
 dependencies = [
     { name = "annotated-types" },
