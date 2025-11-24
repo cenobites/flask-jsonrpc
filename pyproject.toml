@@ -76,11 +76,11 @@ tests = [
 ]
 integration-tests = [
     {include-group = "tests"},
-    "pytest-playwright==0.7.1", # https://github.com/microsoft/playwright-python
+    "pytest-playwright==0.7.2", # https://github.com/microsoft/playwright-python
     "playwright==1.55.0", # https://github.com/microsoft/playwright-python
 ]
 style = [
-    "ruff==0.14.5", # https://github.com/astral-sh/ruff
+    "ruff==0.14.6", # https://github.com/astral-sh/ruff
 ]
 typing = [
     "mypy==1.18.2;python_version>='3.11'", # https://github.com/python/mypy
