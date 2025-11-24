@@ -33,6 +33,10 @@ class MyException(Exception):
     pass
 
 
+class MyExceptionWithCustomStatusCode(Exception):
+    status_code = 409
+
+
 class MyNotRegisteredException(Exception):
     pass
 
@@ -45,9 +49,19 @@ def handle_my_exception(ex: MyException) -> dict[str, t.Any]:
     return {'message': 'It is a custom exception', 'code': '0001'}
 
 
+@jsonrpc.errorhandler(MyExceptionWithCustomStatusCode)
+def handle_my_exception_with_custom_status_code(ex: MyExceptionWithCustomStatusCode) -> tuple[dict[str, t.Any], int]:
+    return {'message': 'It is a custom exception with status code', 'code': '0001'}, ex.status_code
+
+
 @jsonrpc.method('error_handlers.failsWithCustomException')
 def fails_with_custom_exception(_string: str | None = None) -> t.NoReturn:
     raise MyException('example of fail with custom exception that will be handled')
+
+
+@jsonrpc.method('error_handlers.failsWithCustomExceptionWithStatusCode')
+def fails_with_custom_exception_with_status_code(_string: str | None = None) -> t.NoReturn:
+    raise MyExceptionWithCustomStatusCode('example of fail with custom exception with status code that will be handled')
 
 
 @jsonrpc.method('error_handlers.failsWithCustomExceptionNotRegistered')

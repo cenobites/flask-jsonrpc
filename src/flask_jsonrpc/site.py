@@ -214,6 +214,34 @@ class JSONRPCSite:
         resp_view = self.handle_view_func(view_func, params)
         return self.make_response(req_json, resp_view)
 
+    def handle_exception(
+        self: Self, req_json: dict[str, t.Any], exc: Exception
+    ) -> tuple[t.Any, int, Headers | dict[str, str] | tuple[str] | list[tuple[str]]]:
+        self.logger.info('unexpected error', exc_info=exc)
+        jsonrpc_error = ServerError(data={'message': str(exc)}, original_exception=exc)
+        jsonrpc_error_headers: Headers | dict[str, str] | tuple[str] | list[tuple[str]] = JSONRPC_DEFAULT_HTTP_HEADERS
+        error_handler = self._find_error_handler(exc)
+
+        # If no specific error handler found, use the generic ServerError handler if available
+        if error_handler is None:
+            exc = jsonrpc_error
+            error_handler = self.error_handlers.get(ServerError)
+
+        if error_handler is not None:
+            resp_view = current_app.ensure_sync(error_handler)(exc)
+            rv, status_code, headers = self.unpack_tuple_returns(
+                resp_view, default_status_code=jsonrpc_error.status_code
+            )
+            jsonrpc_error.data = rv
+            jsonrpc_error.status_code = status_code
+            jsonrpc_error_headers = headers
+        response = {
+            'id': get(req_json, 'id'),
+            'jsonrpc': get(req_json, 'jsonrpc', JSONRPC_VERSION_DEFAULT),
+            'error': jsonrpc_error.jsonrpc_format,
+        }
+        return response, jsonrpc_error.status_code, jsonrpc_error_headers
+
     def handle_dispatch_except(
         self: Self, req_json: dict[str, t.Any]
     ) -> tuple[t.Any, int, Headers | dict[str, str] | tuple[str] | list[tuple[str]]]:
@@ -230,18 +258,7 @@ class JSONRPCSite:
                     'error': e.jsonrpc_format,
                 }
                 return response, e.status_code, JSONRPC_DEFAULT_HTTP_HEADERS
-            self.logger.info('unexpected error', exc_info=e)
-            error_handler = self._find_error_handler(e)
-            jsonrpc_error_data = (
-                current_app.ensure_sync(error_handler)(e) if error_handler is not None else {'message': str(e)}
-            )
-            jsonrpc_error = ServerError(data=jsonrpc_error_data)
-            response = {
-                'id': get(req_json, 'id'),
-                'jsonrpc': get(req_json, 'jsonrpc', JSONRPC_VERSION_DEFAULT),
-                'error': jsonrpc_error.jsonrpc_format,
-            }
-            return response, jsonrpc_error.status_code, JSONRPC_DEFAULT_HTTP_HEADERS
+            return self.handle_exception(req_json, e)
 
     def batch_dispatch(
         self: Self, reqs_json: list[dict[str, t.Any]]
@@ -267,6 +284,8 @@ class JSONRPCSite:
     def unpack_tuple_returns(
         self: Self,
         resp_view: t.Any,  # noqa: ANN401
+        default_status_code: int = JSONRPC_DEFAULT_HTTP_STATUS_CODE,
+        default_headers: Headers | dict[str, str] | tuple[str] | list[tuple[str]] = JSONRPC_DEFAULT_HTTP_HEADERS,
     ) -> tuple[t.Any, int, Headers | dict[str, str] | tuple[str] | list[tuple[str]]]:
         # https://github.com/pallets/flask/blob/d091bb00c0358e9f30006a064f3dbb671b99aeae/src/flask/app.py#L1981
         if isinstance(resp_view, tuple):
@@ -278,9 +297,9 @@ class JSONRPCSite:
             # decide if a 2-tuple has status or headers
             elif len_resp_view == 2:
                 if isinstance(resp_view[1], Headers | dict | tuple | list):
-                    rv, headers, status_code = resp_view + (JSONRPC_DEFAULT_HTTP_STATUS_CODE,)
+                    rv, headers, status_code = resp_view + (default_status_code,)
                 else:
-                    rv, status_code, headers = resp_view + (JSONRPC_DEFAULT_HTTP_HEADERS,)
+                    rv, status_code, headers = resp_view + (default_headers,)
             # other sized tuples are not allowed
             else:
                 raise TypeError(
@@ -290,7 +309,7 @@ class JSONRPCSite:
                 ) from None
             return rv, status_code, headers
 
-        return resp_view, JSONRPC_DEFAULT_HTTP_STATUS_CODE, JSONRPC_DEFAULT_HTTP_HEADERS
+        return resp_view, default_status_code, default_headers
 
     def make_response(
         self: Self,

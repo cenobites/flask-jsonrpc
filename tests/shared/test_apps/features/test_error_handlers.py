@@ -46,6 +46,29 @@ def test_fails_with_custom_exception(session: 'Session', api_url: str) -> None:
     assert rv.status_code == 500
 
 
+def test_fails_with_custom_exception_with_status_code(session: 'Session', api_url: str) -> None:
+    rv = session.post(
+        f'{api_url}/error-handlers',
+        json={
+            'id': 1,
+            'jsonrpc': '2.0',
+            'method': 'error_handlers.failsWithCustomExceptionWithStatusCode',
+            'params': ['Python'],
+        },
+    )
+    assert rv.json() == {
+        'id': 1,
+        'jsonrpc': '2.0',
+        'error': {
+            'code': -32000,
+            'data': {'message': 'It is a custom exception with status code', 'code': '0001'},
+            'message': 'Server error',
+            'name': 'ServerError',
+        },
+    }
+    assert rv.status_code == 409
+
+
 def test_fails_with_custom_exception_not_registered(session: 'Session', api_url: str) -> None:
     data = {
         'id': 1,
@@ -88,6 +111,14 @@ def test_app_system_describe(session: 'Session', api_url: str) -> None:
         },
         'error_handlers.failsWithCustomExceptionNotRegistered': {
             'name': 'error_handlers.failsWithCustomExceptionNotRegistered',
+            'notification': True,
+            'params': [{'name': '_string', 'type': 'String'}],
+            'returns': {'name': 'default', 'type': 'Null'},
+            'type': 'method',
+            'validation': True,
+        },
+        'error_handlers.failsWithCustomExceptionWithStatusCode': {
+            'name': 'error_handlers.failsWithCustomExceptionWithStatusCode',
             'notification': True,
             'params': [{'name': '_string', 'type': 'String'}],
             'returns': {'name': 'default', 'type': 'Null'},
