@@ -132,6 +132,21 @@ def test_fails_with_custom_exception(client: 'FlaskClient') -> None:
     assert rv.status_code == 500
 
 
+def test_fails_with_custom_exception_with_status_code(client: 'FlaskClient') -> None:
+    rv = client.post('/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'App.failsWithCustomExceptionWithStatusCode'})
+    assert rv.json == {
+        'id': 1,
+        'jsonrpc': '2.0',
+        'error': {
+            'code': -32000,
+            'data': {'message': 'It is a custom exception with status code', 'code': '0001'},
+            'message': 'Server error',
+            'name': 'ServerError',
+        },
+    }
+    assert rv.status_code == 409
+
+
 def test_sum(client: 'FlaskClient') -> None:
     rv = client.post('/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'App.sum', 'params': [1, 1]})
     assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': 2}
@@ -225,6 +240,14 @@ def test_rpc_describe(client: 'FlaskClient') -> None:
         },
         'App.failsWithCustomException': {
             'name': 'App.failsWithCustomException',
+            'notification': True,
+            'params': [{'name': '_string', 'type': 'String'}],
+            'returns': {'name': 'default', 'type': 'Null'},
+            'type': 'method',
+            'validation': True,
+        },
+        'App.failsWithCustomExceptionWithStatusCode': {
+            'name': 'App.failsWithCustomExceptionWithStatusCode',
             'notification': True,
             'params': [{'name': '_string', 'type': 'String'}],
             'returns': {'name': 'default', 'type': 'Null'},

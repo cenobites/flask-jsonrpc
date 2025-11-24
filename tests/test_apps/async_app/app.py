@@ -75,6 +75,10 @@ class MyException(Exception):
     pass
 
 
+class MyExceptionWithCustomStatusCode(Exception):
+    status_code = 409
+
+
 class MyNotRegisteredException(Exception):
     pass
 
@@ -155,6 +159,13 @@ def create_app(test_config: dict[str, t.Any] | None = None) -> Flask:  # noqa: C
         await asyncio.sleep(0)
         return {'message': 'It is a custom exception', 'code': '0001'}
 
+    @jsonrpc.errorhandler(MyExceptionWithCustomStatusCode)
+    async def handle_my_exception_with_custom_status_code(
+        ex: MyExceptionWithCustomStatusCode,
+    ) -> tuple[dict[str, t.Any], int]:
+        await asyncio.sleep(0)
+        return {'message': 'It is a custom exception with status code', 'code': '0001'}, ex.status_code
+
     @jsonrpc.method('app.greeting')
     async def greeting(name: str = 'Flask JSON-RPC') -> str:
         await asyncio.sleep(0)
@@ -192,6 +203,13 @@ def create_app(test_config: dict[str, t.Any] | None = None) -> Flask:  # noqa: C
     async def fails_with_custom_exception(_string: str | None = None) -> t.NoReturn:
         await asyncio.sleep(0)
         raise MyException('example of fail with custom exception that will be handled')
+
+    @jsonrpc.method('app.failsWithCustomExceptionWithStatusCode')
+    async def fails_with_custom_exception_with_status_code(_string: str | None = None) -> t.NoReturn:
+        await asyncio.sleep(0)
+        raise MyExceptionWithCustomStatusCode(
+            'example of fail with custom exception with status code that will be handled'
+        )
 
     @jsonrpc.method('app.failsWithCustomExceptionNotRegistered')
     async def fails_with_custom_exception_not_registered(_string: str | None = None) -> t.NoReturn:

@@ -37,7 +37,7 @@ from werkzeug.datastructures import Headers
 
 from flask_jsonrpc.site import JSONRPCSite
 from flask_jsonrpc.types import AnnotatedMetadataTypeError
-from flask_jsonrpc.exceptions import ParseError, InvalidRequestError
+from flask_jsonrpc.exceptions import ParseError, ServerError, InvalidRequestError
 
 logger_lock = Lock()
 
@@ -590,6 +590,39 @@ def test_site_register_error_handler() -> None:
         assert headers == {}
 
 
+def test_site_register_error_handler_check_original_exception() -> None:
+    def view_func() -> str:
+        raise ValueError('some error')
+
+    def server_error_handler(ex: ServerError) -> str:
+        original_exception = getattr(ex, 'original_exception', None)
+        if isinstance(original_exception, ValueError):
+            return f'Value Error is the original exception: {original_exception}'
+        return f'Server Error: {ex}'
+
+    app = Flask('site')
+    jsonrpc_site = JSONRPCSite(version='1.0.0', path='/path', base_url='/base')
+    jsonrpc_site.register('app.view_func', view_func=view_func)
+    jsonrpc_site.register_error_handler(ServerError, server_error_handler)
+
+    with app.test_request_context(
+        '/base/path', method='POST', json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.view_func', 'params': []}
+    ):
+        rv, status_code, headers = jsonrpc_site.dispatch_request()
+        assert rv == {
+            'id': 1,
+            'jsonrpc': '2.0',
+            'error': {
+                'code': -32000,
+                'data': 'Value Error is the original exception: some error',
+                'message': 'Server error',
+                'name': 'ServerError',
+            },
+        }
+        assert status_code == 500
+        assert headers == {}
+
+
 def test_site_register_error_handler_without_a_handler() -> None:
     def view_func() -> str:
         raise ValueError('some error')
@@ -616,7 +649,7 @@ def test_site_register_error_handler_without_a_handler() -> None:
         assert headers == {}
 
 
-def test_site_register_error_handler_rasing_an_except_not_registered() -> None:
+def test_site_register_error_handler_raising_an_except_not_registered() -> None:
     class MyException(Exception):
         pass
 
@@ -647,6 +680,72 @@ def test_site_register_error_handler_rasing_an_except_not_registered() -> None:
         }
         assert status_code == 500
         assert headers == {}
+
+
+def test_site_register_error_handler_with_custom_status_code() -> None:
+    class MyException(Exception):
+        pass
+
+    def view_func() -> str:
+        raise MyException('some type error')
+
+    def my_exception_handler(ex: MyException) -> tuple[str, int]:
+        return f'Error: {ex}', 409
+
+    app = Flask('site')
+    jsonrpc_site = JSONRPCSite(version='1.0.0', path='/path', base_url='/base')
+    jsonrpc_site.register('app.view_func', view_func=view_func)
+    jsonrpc_site.register_error_handler(MyException, my_exception_handler)
+
+    with app.test_request_context(
+        '/base/path', method='POST', json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.view_func', 'params': []}
+    ):
+        rv, status_code, headers = jsonrpc_site.dispatch_request()
+        assert rv == {
+            'id': 1,
+            'jsonrpc': '2.0',
+            'error': {
+                'code': -32000,
+                'data': 'Error: some type error',
+                'message': 'Server error',
+                'name': 'ServerError',
+            },
+        }
+        assert status_code == 409
+        assert headers == {}
+
+
+def test_site_register_error_handler_with_custom_status_code_and_headers() -> None:
+    class MyException(Exception):
+        pass
+
+    def view_func() -> str:
+        raise MyException('some type error')
+
+    def my_exception_handler(ex: MyException) -> tuple[str, int, dict[str, t.Any]]:
+        return f'Error: {ex}', 409, {'X-Custom-Header': 'CustomValue'}
+
+    app = Flask('site')
+    jsonrpc_site = JSONRPCSite(version='1.0.0', path='/path', base_url='/base')
+    jsonrpc_site.register('app.view_func', view_func=view_func)
+    jsonrpc_site.register_error_handler(MyException, my_exception_handler)
+
+    with app.test_request_context(
+        '/base/path', method='POST', json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.view_func', 'params': []}
+    ):
+        rv, status_code, headers = jsonrpc_site.dispatch_request()
+        assert rv == {
+            'id': 1,
+            'jsonrpc': '2.0',
+            'error': {
+                'code': -32000,
+                'data': 'Error: some type error',
+                'message': 'Server error',
+                'name': 'ServerError',
+            },
+        }
+        assert status_code == 409
+        assert headers == {'X-Custom-Header': 'CustomValue'}
 
 
 def test_site_with_view_func_params_annotated() -> None:

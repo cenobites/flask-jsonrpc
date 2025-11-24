@@ -177,5 +177,10 @@ class ServerError(JSONRPCError):
         code: int | None = -32000,
         data: t.Any | None = None,  # noqa: ANN401
         status_code: int | None = 500,
+        original_exception: BaseException | None = None,
     ) -> None:
+        # The original exception that caused this 500 error. Can be
+        # used by frameworks to provide context when handling
+        # unexpected errors.
+        self.original_exception = original_exception
         super().__init__(message, code, data, status_code)
