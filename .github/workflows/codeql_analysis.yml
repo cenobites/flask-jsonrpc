@@ -28,11 +28,11 @@ jobs:
       contents: read
       security-events: write
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: github/codeql-action/init@v4
         with:
           languages: ${{ matrix.language }}
-      - uses: astral-sh/setup-uv@v7.1.2
+      - uses: astral-sh/setup-uv@v7.1.4
         if: ${{ matrix.language == 'python' }}
         with:
           enable-cache: true
