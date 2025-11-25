@@ -1,6 +1,6 @@
 [project]
 name = "Flask-JSONRPC"
-version = "4.0.0a12"
+version = "4.0.0a13"
 description = "Adds JSONRPC support to Flask."
 readme = {file = "README.md", content-type = "text/markdown"}
 license = {file = "LICENSE.txt"}

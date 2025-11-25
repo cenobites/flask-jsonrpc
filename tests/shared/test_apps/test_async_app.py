@@ -483,7 +483,7 @@ def test_app_system_describe(async_session: 'Session', api_url: str) -> None:
             'validation': True,
         },
         'app.failsWithCustomExceptionWithStatusCode': {
-            'name': 'App.failsWithCustomExceptionWithStatusCode',
+            'name': 'app.failsWithCustomExceptionWithStatusCode',
             'notification': True,
             'params': [{'name': '_string', 'type': 'String'}],
             'returns': {'name': 'default', 'type': 'Null'},
