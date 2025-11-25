@@ -58,7 +58,7 @@ pre-commit = [
     "pre-commit-uv", # https://github.com/tox-dev/pre-commit-uv
 ]
 tests = [
-    "pytest==8.4.2", # https://github.com/pytest-dev/pytest
+    "pytest==9.0.1", # https://github.com/pytest-dev/pytest
     "pytest-cov==7.0.0", # https://github.com/pytest-dev/pytest-cov
     "pytest-xdist==3.8.0", # https://github.com/pytest-dev/pytest-xdist
     "pytest-sugar==1.1.1", # https://github.com/Frozenball/pytest-sugar
@@ -69,7 +69,7 @@ tests = [
     "pytest-clarity==1.0.1", # https://github.com/darrenburns/pytest-clarity
     "pytest-randomly==4.0.1", # https://github.com/pytest-dev/pytest-randomly
     "pytest-random-order==1.2.0", # https://github.com/pytest-dev/pytest-random-order
-    "pytest-run-parallel==0.7.1", # https://github.com/Quansight-Labs/pytest-run-parallel
+    "pytest-run-parallel==0.8.0", # https://github.com/Quansight-Labs/pytest-run-parallel
     "typeguard==4.4.4", # https://github.com/agronholm/typeguard
     "coverage[toml]==7.12.0", # https://github.com/nedbat/coveragepy
     "requests==2.32.5", # https://github.com/psf/requests

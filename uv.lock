@@ -757,7 +757,7 @@ docs = [
 integration-tests = [
     { name = "coverage", extras = ["toml"], specifier = "==7.12.0" },
     { name = "playwright", specifier = "==1.55.0" },
-    { name = "pytest", specifier = "==8.4.2" },
+    { name = "pytest", specifier = "==9.0.1" },
     { name = "pytest-clarity", specifier = "==1.0.1" },
     { name = "pytest-cov", specifier = "==7.0.0" },
     { name = "pytest-env", specifier = "==1.2.0" },
@@ -767,7 +767,7 @@ integration-tests = [
     { name = "pytest-randomly", specifier = "==4.0.1" },
     { name = "pytest-repeat", specifier = "==0.9.4" },
     { name = "pytest-rerunfailures", specifier = "==16.1" },
-    { name = "pytest-run-parallel", specifier = "==0.7.1" },
+    { name = "pytest-run-parallel", specifier = "==0.8.0" },
     { name = "pytest-sugar", specifier = "==1.1.1" },
     { name = "pytest-xdist", specifier = "==3.8.0" },
     { name = "requests", specifier = "==2.32.5" },
@@ -781,7 +781,7 @@ security = [{ name = "bandit", marker = "python_full_version >= '3.11'" }]
 style = [{ name = "ruff", specifier = "==0.14.6" }]
 tests = [
     { name = "coverage", extras = ["toml"], specifier = "==7.12.0" },
-    { name = "pytest", specifier = "==8.4.2" },
+    { name = "pytest", specifier = "==9.0.1" },
     { name = "pytest-clarity", specifier = "==1.0.1" },
     { name = "pytest-cov", specifier = "==7.0.0" },
     { name = "pytest-env", specifier = "==1.2.0" },
@@ -790,7 +790,7 @@ tests = [
     { name = "pytest-randomly", specifier = "==4.0.1" },
     { name = "pytest-repeat", specifier = "==0.9.4" },
     { name = "pytest-rerunfailures", specifier = "==16.1" },
-    { name = "pytest-run-parallel", specifier = "==0.7.1" },
+    { name = "pytest-run-parallel", specifier = "==0.8.0" },
     { name = "pytest-sugar", specifier = "==1.1.1" },
     { name = "pytest-xdist", specifier = "==3.8.0" },
     { name = "requests", specifier = "==2.32.5" },
@@ -1787,7 +1787,7 @@ wheels = [
 
 [[package]]
 name = "pytest"
-version = "8.4.2"
+version = "9.0.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "colorama", marker = "sys_platform == 'win32'" },
@@ -1798,9 +1798,9 @@ dependencies = [
     { name = "pygments" },
     { name = "tomli", marker = "python_full_version < '3.11'" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/a3/5c/00a0e072241553e1a7496d638deababa67c5058571567b92a7eaa258397c/pytest-8.4.2.tar.gz", hash = "sha256:86c0d0b93306b961d58d62a4db4879f27fe25513d4b969df351abdddb3c30e01", size = 1519618, upload-time = "2025-09-04T14:34:22.711Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/07/56/f013048ac4bc4c1d9be45afd4ab209ea62822fb1598f40687e6bf45dcea4/pytest-9.0.1.tar.gz", hash = "sha256:3e9c069ea73583e255c3b21cf46b8d3c56f6e3a1a8f6da94ccb0fcf57b9d73c8", size = 1564125, upload-time = "2025-11-12T13:05:09.333Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/a8/a4/20da314d277121d6534b3a980b29035dcd51e6744bd79075a6ce8fa4eb8d/pytest-8.4.2-py3-none-any.whl", hash = "sha256:872f880de3fc3a5bdc88a11b39c9710c3497a547cfa9320bc3c5e62fbf272e79", size = 365750, upload-time = "2025-09-04T14:34:20.226Z" },
+    { url = "https://files.pythonhosted.org/packages/0b/8b/6300fb80f858cda1c51ffa17075df5d846757081d11ab4aa35cef9e6258b/pytest-9.0.1-py3-none-any.whl", hash = "sha256:67be0030d194df2dfa7b556f2e56fb3c3315bd5c8822c6951162b92b32ce7dad", size = 373668, upload-time = "2025-11-12T13:05:07.379Z" },
 ]
 
 [[package]]
@@ -1934,14 +1934,14 @@ wheels = [
 
 [[package]]
 name = "pytest-run-parallel"
-version = "0.7.1"
+version = "0.8.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "pytest" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/83/d8/51206a0a30fa19607552625160deeeb29503e0fc7fc43bf229026084057d/pytest_run_parallel-0.7.1.tar.gz", hash = "sha256:ba53069f6c16147d6f5c275f5123947d1d0c31bd6ba57efc27e845a79afbe79e", size = 65445, upload-time = "2025-10-23T12:49:19.327Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/35/5b/cd25c223bf17928cb649ae0afce94e14b28b9cb760164bcd9bfb5a640a3d/pytest_run_parallel-0.8.0.tar.gz", hash = "sha256:51aea7c89040b12fe1a1aca0f5e1739f7866fb273d873c8b4e4de12fef043fe2", size = 65688, upload-time = "2025-11-24T19:48:16.247Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/64/30/14493dd5282439661a09649685f04e45434c750f7301a1bb5f6e1e2d5308/pytest_run_parallel-0.7.1-py3-none-any.whl", hash = "sha256:91cf4b1760a4f1f93b5e707bb715909858c803debc2d46e4991f2805b0538292", size = 19107, upload-time = "2025-10-23T12:49:17.992Z" },
+    { url = "https://files.pythonhosted.org/packages/84/50/b99eaaf7b75afeb3c5592813505430105a592c5642da3c28befe1fe45605/pytest_run_parallel-0.8.0-py3-none-any.whl", hash = "sha256:461b4f089223e2df9d9d360bdce3c338c9f89f453514c6cbd9cafe6a19a6ba71", size = 18977, upload-time = "2025-11-24T19:48:14.901Z" },
 ]
 
 [[package]]
