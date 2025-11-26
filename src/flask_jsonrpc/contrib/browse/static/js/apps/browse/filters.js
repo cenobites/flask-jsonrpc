@@ -11,6 +11,16 @@
                     return $sce.trustAsHtml(input);
                 }
             };
+        }])
+        .filter('markdown', ['Marked', '$sce', function(Marked, $sce) {
+            return function(input) {
+                try {
+                    return $sce.trustAsHtml(Marked.toHtml(input));
+                } catch (e) {
+                    console.error('Error in markdown filter:', input, e);
+                    return $sce.trustAsHtml(input);
+                }
+            };
         }]);
 
 })(window.App);
