@@ -1,7 +1,7 @@
 {% raw %}
 <div class="content-main">
     <div class="page-header method-signature"><h1>Api.welcome()</h1></div>
-    <blockquote class="method-signature-description">Welcome to web browsable API</blockquote>
+    <blockquote class="method-signature-description" ng-bind-html="'Welcome to web browsable API'|markdown"></blockquote>
     <p><b>Request:</b></p>
     <div class="request-info" style="clear: both" >
         <pre class="prettyprint"><b>{{ response.config.method }}</b> {{ response.config.url }}

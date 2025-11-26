@@ -44,7 +44,7 @@ jsonrpc = JSONRPC(app, '/api', enable_web_browsable_api=True)
     'App.index',
     tm.MethodAnnotated[
         tm.Summary('Welcome method'),
-        tm.Description('Returns a welcome message for the Flask JSON-RPC application.'),
+        tm.Description('Returns a welcome message for the **Flask JSON-RPC** application.'),
         tm.Tag(name='General', description='General purpose methods'),
         tm.Example(
             name='default',

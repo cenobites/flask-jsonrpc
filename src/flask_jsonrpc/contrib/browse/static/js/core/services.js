@@ -73,6 +73,18 @@
                     return HandlebarsTemplateCache[templateName](context);
                 }
             };
+        }])
+        .factory('Marked', [function() {
+            return {
+                toHtml: function(markdownText) {
+                    try {
+                        return marked.parse(markdownText || '');
+                    } catch (e) {
+                        console.error('Error in Marked service:', markdownText, e);
+                        return markdownText;
+                    }
+                }
+            };
         }]);
 
 })(window.App);
