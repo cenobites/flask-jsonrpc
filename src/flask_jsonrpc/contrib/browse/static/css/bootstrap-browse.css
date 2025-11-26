@@ -450,3 +450,7 @@ body {
 	height: 500px;
 	border: 0;
 }
+
+.CodeMirror {
+  height: 400px;
+}

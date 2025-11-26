@@ -70,7 +70,7 @@ RUN set -eux \
     elif [ "$DOCKER_BUILD_TARGET" = "app" ]; then \
         uv sync --locked --no-dev --no-default-groups --extra async; \
     elif [ "$DOCKER_BUILD_TARGET" = "unit-tests" ]; then \
-        uv sync --locked --no-dev --no-install-project --no-default-groups --group tests --extra async; \
+        uv sync --locked --no-dev --no-install-project --no-default-groups --group ci-tests --extra async; \
     elif [ "$DOCKER_BUILD_TARGET" = "integration-tests" ]; then \
         uv sync --locked --no-dev --no-install-project --no-default-groups --group integration-tests --extra async; \
     fi;

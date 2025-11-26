@@ -34,7 +34,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
           allow-prereleases: true
       - run: |
-          uv run --locked --group tests py.test
+          uv run --locked --group ci-tests py.test --random-order --count=5 --reruns=5
       - uses: actions/upload-artifact@v5
         with:
           name: test-n-coverage-report

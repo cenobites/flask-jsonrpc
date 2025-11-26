@@ -22,6 +22,7 @@
   <link href="{{ url_for('urn:browse.static', filename='css/fonts.css') }}" rel="stylesheet"/>
   <link rel="stylesheet" type="text/css" href="{{ url_for('urn:browse.static', filename='css/prettify.css') }}"/>
   <link rel="stylesheet" type="text/css" href="{{ url_for('urn:browse.static', filename='css/loading-bar.min.css') }}"/>
+  <link rel="stylesheet" type="text/css" href="{{ url_for('urn:browse.static', filename='css/codemirror.min.css') }}"/>
   {% block include_style %}{% endblock %}
   {% endblock %}
 
@@ -71,6 +72,8 @@
   <script type="text/javascript" src="{{ url_for('urn:browse.static', filename='js/libs/handlebars-v4.7.7.min.js') }}"></script>
   <script type="text/javascript" src="{{ url_for('urn:browse.static', filename='js/libs/prettify-min.js') }}"></script>
   <script type="text/javascript" src="{{ url_for('urn:browse.static', filename='js/libs/marked.min.js') }}"></script>
+  <script type="text/javascript" src="{{ url_for('urn:browse.static', filename='js/libs/codemirror.min.js') }}"></script>
+  <script type="text/javascript" src="{{ url_for('urn:browse.static', filename='js/libs/codemirror-javascript.min.js') }}"></script>
   <script type="text/javascript" src="{{ url_for('urn:browse.static', filename='js/core/directives.js') }}"></script>
   <script type="text/javascript" src="{{ url_for('urn:browse.static', filename='js/core/filters.js') }}"></script>
   <script type="text/javascript" src="{{ url_for('urn:browse.static', filename='js/core/services.js') }}"></script>
