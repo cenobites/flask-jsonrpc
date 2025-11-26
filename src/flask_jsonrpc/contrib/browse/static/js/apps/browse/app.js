@@ -42,13 +42,16 @@
     };
 
 	App.ready = function(E) {
-		//
+		// Bind adjust on load, resize, scroll
         $(window).bind('load resize scroll', function(env) {
             App.adjust();
         });
 
         // JSON highlighting
         prettyPrint();
+
+        // Initial adjust
+        App.adjust();
 	};
 
 	root.App = App;
