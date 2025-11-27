@@ -34,7 +34,7 @@ if t.TYPE_CHECKING:
 
 
 def test_index_v1(client: 'FlaskClient') -> None:
-    rv = client.post('/api/v1', json={'id': 1, 'jsonrpc': '2.0', 'method': 'App.index'})
+    rv = client.post('/api/v1', json={'id': 1, 'jsonrpc': '2.0', 'method': 'App1.index'})
     assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': 'Welcome to Flask JSON-RPC Version API 1'}
     assert rv.status_code == 200
 
@@ -42,7 +42,7 @@ def test_index_v1(client: 'FlaskClient') -> None:
 def test_index_v2(client: 'FlaskClient') -> None:
     rv = client.post(
         '/api/v2',
-        json={'id': 1, 'jsonrpc': '2.0', 'method': 'App.index'},
+        json={'id': 1, 'jsonrpc': '2.0', 'method': 'App2.index'},
         headers={'X-Username': 'username', 'X-Password': 'secret'},
     )
     assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': 'Welcome to Flask JSON-RPC Version API 2'}
@@ -53,7 +53,7 @@ def test_index_v2_with_invalid_auth(client: 'FlaskClient') -> None:
     with pytest.raises(UnauthorizedError):
         client.post(
             '/api/v2',
-            json={'id': 1, 'jsonrpc': '2.0', 'method': 'App.index'},
+            json={'id': 1, 'jsonrpc': '2.0', 'method': 'App2.index'},
             headers={'X-Username': 'username', 'X-Password': 'invalid'},
         )
 
@@ -68,8 +68,8 @@ def test_rpc_describe_v1(client: 'FlaskClient') -> None:
     assert data['result']['servers'] is not None
     assert 'url' in data['result']['servers'][0]
     assert data['result']['methods'] == {
-        'App.index': {
-            'name': 'App.index',
+        'App1.index': {
+            'name': 'App1.index',
             'notification': True,
             'params': [],
             'returns': {'name': 'default', 'type': 'String'},
@@ -115,8 +115,8 @@ def test_rpc_describe_v2(client: 'FlaskClient') -> None:
     assert data['result']['servers'] is not None
     assert 'url' in data['result']['servers'][0]
     assert data['result']['methods'] == {
-        'App.index': {
-            'name': 'App.index',
+        'App2.index': {
+            'name': 'App2.index',
             'notification': True,
             'params': [],
             'returns': {'name': 'default', 'type': 'String'},

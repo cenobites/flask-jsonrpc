@@ -32,6 +32,7 @@ from typing_extensions import Self
 from flask import Flask, request
 
 from flask_jsonrpc import JSONRPC, JSONRPCView
+from flask_jsonrpc.contrib.browse import JSONRPCBrowse
 
 if t.TYPE_CHECKING:
     from flask.typing import ResponseReturnValue
@@ -57,12 +58,16 @@ app = Flask('multiplesite')
 jsonrpc_v1 = JSONRPC(app, '/api/v1', enable_web_browsable_api=True)
 jsonrpc_v2 = JSONRPC(app, '/api/v2', enable_web_browsable_api=True, jsonrpc_site_api=AuthorizationView)
 
+browse = JSONRPCBrowse(app, url_prefix='/api/browse')
+browse.register_jsonrpc_site(jsonrpc_v1.get_jsonrpc_site())
+browse.register_jsonrpc_site(jsonrpc_v2.get_jsonrpc_site())
 
-@jsonrpc_v1.method('App.index')
+
+@jsonrpc_v1.method('App1.index')
 def index_v1() -> str:
     return 'Welcome to Flask JSON-RPC Version API 1'
 
 
-@jsonrpc_v2.method('App.index')
+@jsonrpc_v2.method('App2.index')
 def index_v2() -> str:
     return 'Welcome to Flask JSON-RPC Version API 2'
