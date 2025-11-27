@@ -1,6 +1,6 @@
 [project]
 name = "Flask-JSONRPC"
-version = "4.0.0a13"
+version = "4.0.0a15"
 description = "Adds JSONRPC support to Flask."
 readme = {file = "README.md", content-type = "text/markdown"}
 license = {file = "LICENSE.txt"}
@@ -63,19 +63,24 @@ tests = [
     "pytest-xdist==3.8.0", # https://github.com/pytest-dev/pytest-xdist
     "pytest-sugar==1.1.1", # https://github.com/Frozenball/pytest-sugar
     "pytest-env==1.2.0", # https://github.com/MobileDynasty/pytest-env
-    "pytest-rerunfailures==16.1", # https://github.com/pytest-dev/pytest-rerunfailures
-    "pytest-repeat==0.9.4", # https://github.com/pytest-dev/pytest-repeat
-    "pytest-profiling==1.8.1", # https://github.com/man-group/pytest-plugins
     "pytest-clarity==1.0.1", # https://github.com/darrenburns/pytest-clarity
-    "pytest-randomly==4.0.1", # https://github.com/pytest-dev/pytest-randomly
-    "pytest-random-order==1.2.0", # https://github.com/pytest-dev/pytest-random-order
-    "pytest-run-parallel==0.7.1", # https://github.com/Quansight-Labs/pytest-run-parallel
     "typeguard==4.4.4", # https://github.com/agronholm/typeguard
     "coverage[toml]==7.12.0", # https://github.com/nedbat/coveragepy
     "requests==2.32.5", # https://github.com/psf/requests
 ]
-integration-tests = [
+ci-tests = [
     {include-group = "tests"},
+    "pytest-repeat==0.9.4", # https://github.com/pytest-dev/pytest-repeat
+    "pytest-rerunfailures==16.1", # https://github.com/pytest-dev/pytest-rerunfailures
+    "pytest-randomly==4.0.1", # https://github.com/pytest-dev/pytest-randomly
+    "pytest-random-order==1.2.0", # https://github.com/pytest-dev/pytest-random-order
+]
+parallel-tests = [
+    {include-group = "ci-tests"},
+    "pytest-run-parallel==0.7.1", # https://github.com/Quansight-Labs/pytest-run-parallel
+]
+integration-tests = [
+    {include-group = "ci-tests"},
     "pytest-playwright==0.7.2", # https://github.com/microsoft/playwright-python
     "playwright==1.55.0", # https://github.com/microsoft/playwright-python
 ]
@@ -210,8 +215,8 @@ skip = [
     "*-win32",
     "pp*",
 ]
-test-groups = ["tests"]
-test-command = "py.test -rsxX -vv --numprocesses=auto --tb=short --rootdir={project} {project}/tests --cov-fail-under=0"
+test-groups = ["ci-tests"]
+test-command = "py.test -rsxX -vv --numprocesses=auto --tb=short --rootdir={project} {project}/tests --cov-fail-under=0 --random-order --count=5 --reruns=5 --exitfirst"
 
 [tool.cibuildwheel.environment]
 CIBW_PROJECT_REQUIRES_PYTHON = ">=3.11"
@@ -291,7 +296,7 @@ docstring-code-format = true
 docstring-code-line-length = 79
 
 [tool.pytest.ini_options]
-addopts = "-rsxX -vv --pyargs --doctest-modules --showlocals --strict-markers --random-order --numprocesses=auto --count=5 --reruns=5 --parallel-threads=10 --iterations=10 --junitxml=junit/test-results.xml --cov-report=html --cov-report=term --cov-report=lcov --cov=flask_jsonrpc --cov-fail-under=100"
+addopts = "-rsxX -vv --pyargs --doctest-modules --showlocals --strict-markers --numprocesses=auto --junitxml=junit/test-results.xml --cov-report=html --cov-report=term --cov-report=lcov --cov=flask_jsonrpc --cov-fail-under=100"
 junit_family = "xunit2"
 python_files = ["tests.py", "test_*.py", "*_tests.py"]
 pythonpath = "src/"
@@ -308,17 +313,15 @@ norecursedirs = [
     "tests/test_apps",
     "tests/integration",
 ]
+markers = [
+    "parallel_threads: mark test to run in parallel threads",
+]
 required_plugins = [
     "pytest-cov==7.0.0",
     "pytest-xdist==3.8.0",
     "pytest-sugar==1.1.1",
     "pytest-env==1.2.0",
-    "pytest-repeat==0.9.4",
-    "pytest-rerunfailures==16.1",
     "pytest-clarity==1.0.1",
-    "pytest-randomly==4.0.1",
-    "pytest-random-order==1.2.0",
-    "pytest-run-parallel==0.7.1",
 ]
 
 [tool.coverage.run]
@@ -406,6 +409,7 @@ requires = [
 env_list = [
     "py3.14", "py3.14t", "py3.13", "py3.12", "py3.11", "py3.10",
     "py3.14-async", "py3.14t-async", "py3.13-async", "py3.12-async", "py3.11-async", "py3.10-async",
+    "paralleltests",
     "style",
     "typing",
     "security",
@@ -424,11 +428,26 @@ deps = [
     "async: .[async]",
 ]
 dependency_groups = [
-    "tests",
+    "ci-tests",
 ]
 no_default_groups = true
 commands = [[
     "pytest", "-rsxX", "-vv", "--numprocesses=auto", "--tb=short", "--basetemp={env_tmp_dir}",
+    "--random-order", "--count=5", "--reruns=5", "--exitfirst",
+    {replace = "posargs", default = [], extend = true}
+]]
+
+[tool.tox.env.paralleltests]
+runner = "uv-venv-lock-runner"
+base_python = ["3.14t"]
+extras = ["async"]
+dependency_groups = [
+    "parallel-tests",
+]
+no_default_groups = true
+commands = [[
+    "pytest", "-rsxX", "-vv", "--numprocesses=auto", "--tb=short", "--basetemp={env_tmp_dir}",
+    "--random-order", "--count=5", "--reruns=5", "--parallel-threads=10", "--iterations=10", "--exitfirst",
     {replace = "posargs", default = [], extend = true}
 ]]
 

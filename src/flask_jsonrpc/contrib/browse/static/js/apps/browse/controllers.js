@@ -9,6 +9,38 @@
         return [name];
     };
 
+    var moduleDescribeToJSON = function(module, RPCParamParser) {
+        var params = module.params.map(function(param) {
+            return [param.name, RPCParamParser.getValue(param, true)];
+        });
+
+        return JSON.stringify(Object.fromEntries(
+            new Map(params),
+        ), null, 2);
+    };
+
+    var JSONToModuleDescribe = function(jsonInput, module) {
+        var inputObj = {};
+        try {
+            inputObj = JSON.parse(jsonInput);
+        } catch (e) {
+            console.error('Failed to parse JSON input:', jsonInput);
+            return module;
+        }
+
+        for (var i = 0; i < module.params.length; i++) {
+            var param = module.params[i];
+            if (param.name in inputObj) {
+                if (param.type === 'Object' || param.type === 'Array') {
+                    param.value = JSON.stringify(inputObj[param.name]);
+                    continue;
+                }
+                param.value = inputObj[param.name];
+            }
+        }
+        return module;
+    };
+
     App.controller('ApplicationCtrl', ['$scope', '$location', '$timeout',
                                        'responseExample', 'responseObjectExample', 'PendingRequests',
                                        function($scope, $location, $timeout,
@@ -88,8 +120,8 @@
     }]);
 
     App.controller('ViewerContainerCtrl', ['$scope', '$location', function($scope, $location) {
-        $scope.resend = function() {
-            $scope.$broadcast('RPC:resend');
+        $scope.rerun = function() {
+            $scope.$broadcast('RPC:rerun');
         };
 
         $scope.changeParameters = function() {
@@ -101,11 +133,26 @@
         };
     }]);
 
-    App.controller('ModuleDialogCtrl', ['$scope', '$modalInstance', 'module', function($scope, $modalInstance, module) {
+    App.controller('ModuleDialogCtrl', ['$scope', '$modalInstance', 'RPCParamParser', 'module', 'options', function($scope, $modalInstance, RPCParamParser, module, options) {
         $scope.module = module;
+        $scope.options = options;
+        $scope.rawInput = moduleDescribeToJSON(module, RPCParamParser);
+
+        $scope.handleRawInputChange = function(newValue, oldValue) {
+            if (newValue !== oldValue) {
+                $scope.module = JSONToModuleDescribe(newValue, $scope.module);
+            }
+        }
+
+        $scope.onInputModeChange = function() {
+            if ($scope.options.inputMode === 'raw') {
+                $scope.rawInput = moduleDescribeToJSON($scope.module, RPCParamParser);
+            }
+        };
 
         $scope.ok = function() {
-            $modalInstance.close(module);
+            $modalInstance.close($scope.module);
+            $scope.onInputModeChange();
         };
 
         $scope.hitEnter = function(evt) {
@@ -119,7 +166,7 @@
         };
     }]);
 
-    App.controller('ResponseObjectCtrl', ['$scope', '$window', '$modal', 'RPC', 'module', function($scope, $window, $modal, RPC, module) {
+    App.controller('ResponseObjectCtrl', ['$scope', '$window', '$modal', 'RPC', 'RPCParamParser', 'module', function($scope, $window, $modal, RPC, RPCParamParser, module) {
         $scope.module = module;
         $scope.$emit('App:displayToolbar', true);
         $scope.$emit('App:breadcrumb', module.name);
@@ -151,8 +198,16 @@
                 templateUrl: 'module_dialog.html',
                 controller: 'ModuleDialogCtrl',
                 resolve: {
+                    RPCParamParser: function() {
+                        return RPCParamParser;
+                    },
                     module: function() {
                         return $scope.module;
+                    },
+                    options: function() {
+                        return {
+                            inputMode: $scope.inputMode || 'formData',
+                        };
                     }
                 }
             }).result.then(function(module) { // ok
@@ -162,7 +217,7 @@
             });
         };
 
-        $scope.$on('RPC:resend', function(event) {
+        $scope.$on('RPC:rerun', function(event) {
             return RPCCall($scope.module);
         });
 

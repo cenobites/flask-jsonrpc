@@ -25,8 +25,17 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 import os
+from logging.config import dictConfig
 
 from .app import create_app
+
+dictConfig(
+    {
+        'version': 1,
+        'handlers': {'wsgi': {'class': 'logging.NullHandler'}},
+        'root': {'level': 'ERROR', 'handlers': ['wsgi']},
+    }
+)
 
 app = create_app(
     {'PREFERRED_URL_SCHEME': os.getenv('FLASK_PREFERRED_URL_SCHEME'), 'SERVER_NAME': os.getenv('FLASK_SERVER_NAME')}

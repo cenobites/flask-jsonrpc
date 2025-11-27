@@ -104,7 +104,7 @@ def jsonrpc_call(page_session: t.Callable[..., Page]) -> t.Generator[t.Callable[
         page = page_session(jsonrpc_method)
         for name, value in test_input.items():
             page.fill(f'input[name="{name}"]', value if isinstance(value, str) else json.dumps(value))
-        page.click("button:has-text('Save')")
+        page.get_by_role('button', name='Run', exact=True).click()
 
         request_element = page.locator('.request-content')
         expect(request_element).to_be_visible()
