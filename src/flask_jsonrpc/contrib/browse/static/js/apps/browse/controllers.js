@@ -1,6 +1,18 @@
 (function(App) {
     'use strict';
 
+    var routeIs = function(route, $location) {
+        if (Object.prototype.toString.call(route) === '[object Array]') {
+            for (var i = 0; i < route.length; i++) {
+                if ('/'+route[i] === $location.path()) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        return ('/'+route === $location.path());
+    };
+
     var breadcrumbs = function(name) {
         if (name.indexOf('.') !== -1) {
             var names = name.split('.');
@@ -78,15 +90,7 @@
         };
 
         $scope.routeIs = function(route) {
-            if (Object.prototype.toString.call(route) === '[object Array]') {
-                for (var i = 0; i < route.length; i++) {
-                    if ('/'+route[i] === $location.path()) {
-                        return true;
-                    }
-                }
-                return false;
-            }
-            return ('/'+route === $location.path());
+            return routeIs(route, $location);
         };
     }]);
 
@@ -103,6 +107,10 @@
                 $scope.$emit('App:displayContentLoaded', false);
             }, 750);
         });
+
+        $scope.routeIs = function(route) {
+            return routeIs(route, $location);
+        };
 
         $scope.goToDashboard = function() {
             $scope.$emit('App:displayToolbar', false);

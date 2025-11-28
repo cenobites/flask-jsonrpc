@@ -34,7 +34,7 @@ from typing_extensions import Self
 
 from flask import Blueprint, request, render_template
 
-from flask_jsonrpc.helpers import urn
+from flask_jsonrpc.helpers import Node, urn
 from flask_jsonrpc.encoders import jsonify, serializable
 
 if t.TYPE_CHECKING:
@@ -42,6 +42,28 @@ if t.TYPE_CHECKING:
 
     from flask_jsonrpc.site import JSONRPCSite
     from flask_jsonrpc.typing import Method
+
+
+def build_package_tree(service_methods: dict[str, Method]) -> dict[str, t.Any]:
+    package_tree = Node(name=None)
+    for package, service_method in service_methods.items():
+        default_package_name = package.split('.')[0]
+        tags = service_method.tags or [default_package_name]
+        nodes = [Node(name=tag) for tag in tags]
+        nodes[-1].insert_item(serializable(service_method))
+        current_node = package_tree
+        for node in nodes:
+            child = current_node.find_child(t.cast(str, node.name))
+            if child is not None:
+                current_node = child
+                if len(node.items) > 0:
+                    child.insert_item(node.items[0])
+                continue
+            current_node.add_child(node)
+            current_node = node
+    package_tree.clean()
+    package_tree.sort()
+    return package_tree.to_dict() if package_tree.children else {}
 
 
 class JSONRPCBrowse:
@@ -64,6 +86,7 @@ class JSONRPCBrowse:
         browse.add_url_rule('/', view_func=self.vf_index)
         browse.add_url_rule('/packages.json', view_func=self.vf_json_packages)
         browse.add_url_rule('/<method_name>.json', view_func=self.vf_json_method)
+        browse.add_url_rule('/partials/menu_tree.html', view_func=self.vf_partials_menu_tree)
         browse.add_url_rule('/partials/dashboard.html', view_func=self.vf_partials_dashboard)
         browse.add_url_rule('/partials/response_object.html', view_func=self.vf_partials_response_object)
 
@@ -84,24 +107,23 @@ class JSONRPCBrowse:
         return render_template('browse/index.html', url_prefix=url_prefix, server_urls=server_urls)
 
     def vf_json_packages(self: Self) -> ft.ResponseReturnValue:
-        service_methods = self._service_methods_desc()
-        packages = sorted(service_methods.keys())
-        packages_tree: dict[str, list[dict[str, t.Any]]] = {}
-        for package in packages:
-            # The rpc. prefix is a reserved method prefix for JSON-RPC 2.0 specification system extensions.
-            if package.startswith('rpc.'):
-                continue
-            package_name = package.split('.')[0]
-            packages_tree.setdefault(package_name, []).append(
-                {'name': package, **serializable(service_methods[package])}
-            )
-        return jsonify(packages_tree)
+        service_methods = {
+            name: method
+            for name, method in self._service_methods_desc().items()
+            # The rpc. prefix is a reserved method prefix for JSON-RPC 2.0
+            # specification system extensions.
+            if not name.startswith('rpc.')
+        }
+        return jsonify(build_package_tree(service_methods))
 
     def vf_json_method(self: Self, method_name: str) -> ft.ResponseReturnValue:
         service_procedures = self._service_methods_desc()
         if method_name not in service_procedures:
             return jsonify({'message': 'Not found'}), 404
         return jsonify({'name': method_name, **serializable(service_procedures[method_name])})
+
+    def vf_partials_menu_tree(self: Self) -> str:
+        return render_template('browse/partials/menu_tree.html')
 
     def vf_partials_dashboard(self: Self) -> str:
         return render_template('browse/partials/dashboard.html')

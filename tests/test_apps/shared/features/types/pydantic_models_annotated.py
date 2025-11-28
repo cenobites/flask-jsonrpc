@@ -65,7 +65,7 @@ class PetNotFoundException(PetException):
         self.pet_error = pet_error
 
 
-jsonrpc = JSONRPCBlueprint('objects__pydantic_models', __name__)
+jsonrpc = JSONRPCBlueprint('types__pydantic_models_annotated', __name__)
 
 
 def handle_pet_not_found_exc(exc: PetNotFoundException) -> PetError:
@@ -80,7 +80,7 @@ jsonrpc.register_error_handler(PetNotFoundException, handle_pet_not_found_exc)
     annotation=tm.MethodAnnotated[
         tm.Summary('Create a pet'),
         tm.Description('This method creates a pet Pydantic model object from a NewPet object.'),
-        tm.Tag('pydantic'),
+        tm.Tag('types'),
         tm.Example(
             name='Example of creating a pet',
             summary='Create a pet from NewPet model',
@@ -119,7 +119,7 @@ def create_pet(
         tm.Description(
             'This method creates multiple pet Pydantic model objects from a list and an optional single pet.'
         ),
-        tm.Tag('pydantic'),
+        tm.Tag('types'),
         tm.Example(
             name='Example of creating many pets',
             summary='Create multiple pets with optional extra pet',
@@ -181,7 +181,7 @@ def create_many_pets(
         tm.Description(
             'This method creates pet Pydantic model objects from a dictionary of pet IDs to NewPet objects.'
         ),
-        tm.Tag('pydantic'),
+        tm.Tag('types'),
         tm.Example(
             name='Example of creating many pets from dictionary',
             summary='Create pets from dict mapping',
@@ -224,7 +224,7 @@ def create_many_fix_pets(
     annotation=tm.MethodAnnotated[
         tm.Summary('Remove a pet'),
         tm.Description('This method removes a pet Pydantic model and can raise exceptions for certain conditions.'),
-        tm.Tag('pydantic'),
+        tm.Tag('types'),
         tm.Example(
             name='Example of removing a pet',
             summary='Remove a pet with error handling',

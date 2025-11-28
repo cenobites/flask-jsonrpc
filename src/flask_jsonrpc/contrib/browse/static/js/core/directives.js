@@ -15,7 +15,7 @@
                  }
              };
         }])
-        .directive('codemirror', [function() {
+        .directive('codeMirror', [function() {
             return {
                 restrict: 'E',
                 require: 'ngModel',
@@ -38,7 +38,7 @@
                             scope.$apply(function () {
                                 try {
                                     JSON.parse(editor.getValue());
-                                    if (attrs.onChange) {
+                                    if (scope.onChange) {
                                         scope.onChange({newValue: editor.getValue(), oldValue: scope.ngModel});
                                     }
                                 } catch (e) {

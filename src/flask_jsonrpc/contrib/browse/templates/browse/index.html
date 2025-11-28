@@ -40,16 +40,7 @@
         <ul class="nav nav-tabs nav-stacked">
           <li><a href="#/" ng-click="goToDashboard()" ng-class="{active:routeIs('/')}"><i class="icon icon-home"></i> Dashboard</a></li>
           {% raw %}
-          <li class="dropdown" ng-repeat="(packageName, modules) in packages">
-            <a data-toggle="collapse" data-target="#{{packageName}}"><i class="icon icon-folder-open"></i> {{packageName}}</a>
-            <div id="{{packageName}}" class="accordion-body collapse" ng-class="{in:$first}">
-              <ul class="dropdown-submenu">
-                <li ng-repeat="module in modules">
-                  <a ng-click="showResponseObject(module)" ng-class="{active:routeIs(module.name)}" class="disableable" data-placement="bottom" data-toggle="tooltip" tooltip="{{showTooltip(module)}}"><i class="icon icon-caret-right"></i> {{module.name}}</a>
-                </li>
-              </ul>
-            </div>
-          </li>
+          <menu-tree node="packages" on-click="showResponseObject(item)"></menu-tree>
           {% endraw %}
         </ul><!--/nav-stacked menu-->
       <div id="scrollable-sections-top-shadow"></div>

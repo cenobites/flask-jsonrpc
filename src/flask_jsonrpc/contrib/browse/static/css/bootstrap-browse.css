@@ -210,8 +210,14 @@ body {
 }
 
 /* stacked menu */
+.package-name {
+  text-transform: capitalize;
+}
 .dropdown ul {
     margin-left: 0;
+}
+.dropdown ul.menu-tree {
+    margin-left: 10px;
 }
 .dropdown ul li {
     list-style: none;
@@ -228,6 +234,9 @@ body {
 .dropdown-submenu a:hover {
     background: #EEE;
     text-decoration: none;
+}
+.dropdown-submenu .active {
+  color: #DD4B39;
 }
 
 .box-subscribe {

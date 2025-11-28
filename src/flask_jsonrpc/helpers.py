@@ -29,11 +29,51 @@ from __future__ import annotations
 import typing as t
 from operator import getitem
 import itertools
+from dataclasses import field, asdict, dataclass
+
+# Added in version 3.11.
+from typing_extensions import Self
 
 from .types.types import Types, Object
 
 if t.TYPE_CHECKING:
     from .types.types import JSONRPCNewType
+
+
+@dataclass
+class Node:
+    name: str | None
+    items: list[dict[str, t.Any]] = field(default_factory=list)
+    children: list[Node] = field(default_factory=list)
+
+    def find_child(self: Self, name: str) -> Node | None:
+        for child in self.children:
+            if child.name == name:
+                return child
+        return None
+
+    def add_child(self: Self, node: Node) -> None:
+        self.children.append(node)
+
+    def insert_item(self: Self, val: dict[str, t.Any]) -> None:
+        self.items.append(val)
+
+    def clean(self: Self) -> None:
+        for child in self.children:
+            child.clean()
+        self.children = [child for child in self.children if child.items or child.children]
+
+    def sort(self: Self) -> None:
+        def sort_by_name(n: Node) -> str:
+            return n.name or ''
+
+        self.children.sort(key=sort_by_name)
+        self.items.sort(key=lambda i: i.get('name', ''))
+        for child in self.children:
+            child.sort()
+
+    def to_dict(self: Self) -> dict[str, t.Any]:
+        return asdict(self)
 
 
 def urn(name: str, *args: t.Any) -> str:  # noqa: ANN401

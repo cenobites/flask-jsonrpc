@@ -35,7 +35,7 @@ from flask_jsonrpc import JSONRPCBlueprint
 import flask_jsonrpc.types.params as tp
 import flask_jsonrpc.types.methods as tm
 
-jsonrpc = JSONRPCBlueprint('types__python_annotated', __name__)
+jsonrpc = JSONRPCBlueprint('types__python_stds_annotated', __name__)
 
 
 class ColorIntEnum(IntEnum):

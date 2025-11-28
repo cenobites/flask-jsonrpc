@@ -67,7 +67,7 @@ class CarNotFoundException(CarException):
         self.car_error = car_error
 
 
-jsonrpc = JSONRPCBlueprint('objects__python_dataclasses', __name__)
+jsonrpc = JSONRPCBlueprint('types__python_dataclasses_annoated', __name__)
 
 
 @jsonrpc.errorhandler(CarNotFoundException)
@@ -81,7 +81,7 @@ def handle_car_not_found_exc(exc: CarNotFoundException) -> CarError:
         tm.Summary('Create a new car'),
         tm.Description('This method creates a new car dataclass object with an auto-generated ID.'),
         tm.Tag(
-            name='dataclasses',
+            name='types',
             summary='Python dataclasses related methods',
             description='Methods that demonstrate Python dataclass objects in JSON-RPC.',
         ),
@@ -125,7 +125,7 @@ def create_car(
     annotation=tm.MethodAnnotated[
         tm.Summary('Create many cars'),
         tm.Description('This method creates multiple car dataclass objects from a list and an optional single car.'),
-        tm.Tag('dataclasses'),
+        tm.Tag('types'),
         tm.Example(
             name='Example of creating many cars',
             summary='Create multiple cars with optional extra car',
@@ -185,7 +185,7 @@ def create_many_cars(
     annotation=tm.MethodAnnotated[
         tm.Summary('Create many fixed cars'),
         tm.Description('This method creates exactly 4 car dataclass objects with specific names and tags.'),
-        tm.Tag('dataclasses'),
+        tm.Tag('types'),
         tm.Example(
             name='Example of creating many fixed cars',
             summary='Create 4 predefined cars',
@@ -225,7 +225,7 @@ def create_many_fix_cars(
     annotation=tm.MethodAnnotated[
         tm.Summary('Remove a car by ID'),
         tm.Description('This method removes a car dataclass by its ID and can optionally be forced.'),
-        tm.Tag('dataclasses'),
+        tm.Tag('types'),
         tm.Example(
             name='Example of removing a car',
             summary='Remove a car by ID',
