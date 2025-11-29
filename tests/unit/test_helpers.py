@@ -31,7 +31,116 @@ from pydantic.main import BaseModel
 
 import pytest
 
-from flask_jsonrpc.helpers import get, urn, from_python_type
+from flask_jsonrpc.helpers import Node, get, urn, from_python_type
+
+
+def test_basic_tree() -> None:
+    root = Node(name='root')
+    child1 = Node(name='child1')
+    child2 = Node(name='child2')
+    grandchild1 = Node(name='grandchild1')
+
+    root.add_child(child2)
+    root.add_child(child1)
+    child1.add_child(grandchild1)
+
+    assert root.find_child('root') is None
+    assert root.find_child('child1') == child1
+    assert root.find_child('child2') == child2
+    assert root.find_child('grandchild1') is None
+    assert child1.find_child('grandchild1') == grandchild1
+    assert root.find_child('nonexistent') is None
+
+    assert root.to_dict() == {
+        'name': 'root',
+        'items': [],
+        'children': [
+            {'name': 'child2', 'items': [], 'children': []},
+            {'name': 'child1', 'items': [], 'children': [{'name': 'grandchild1', 'items': [], 'children': []}]},
+        ],
+    }
+
+    root.sort()
+    assert root.to_dict() == {
+        'name': 'root',
+        'items': [],
+        'children': [
+            {'name': 'child1', 'items': [], 'children': [{'name': 'grandchild1', 'items': [], 'children': []}]},
+            {'name': 'child2', 'items': [], 'children': []},
+        ],
+    }
+
+    root.add_child(Node(name=''))
+    root.add_child(Node(name='child0'))
+    assert root.to_dict() == {
+        'name': 'root',
+        'items': [],
+        'children': [
+            {'name': 'child1', 'items': [], 'children': [{'name': 'grandchild1', 'items': [], 'children': []}]},
+            {'name': 'child2', 'items': [], 'children': []},
+            {'name': '', 'items': [], 'children': []},
+            {'name': 'child0', 'items': [], 'children': []},
+        ],
+    }
+
+    root.clean()
+    assert root.to_dict() == {'name': 'root', 'items': [], 'children': []}
+
+    root.add_child(child1)
+    child1.insert_item({'key': 'value'})
+    root.clean()
+    assert root.to_dict() == {
+        'name': 'root',
+        'items': [],
+        'children': [{'name': 'child1', 'items': [{'key': 'value'}], 'children': []}],
+    }
+
+
+def test_complex_tree() -> None:
+    root = Node(name=None)
+    node_a = Node(name='A')
+    node_a.insert_item({'a1': 'example_value'})
+    node_a.insert_item({'a2': 123})
+    node_b = Node(name='B')
+    node_b.insert_item({'b1': True})
+    node_c = Node(name='C')
+    node_c.insert_item({'c1': [1, 2, 3]})
+    node_c.insert_item({'c2': {'nested_key': 'nested_value'}})
+    node_d = Node(name='D')
+    node_d.insert_item({'d1': 3.14})
+    node_e = Node(name='E')
+    node_e.insert_item({'e1': None})
+    node_e.insert_item({'e2': 'value_e2'})
+    node_e.insert_item({'e3': 42})
+
+    root.add_child(node_b)
+    root.add_child(node_a)
+    node_a.add_child(node_d)
+    node_a.add_child(node_c)
+    node_c.add_child(node_e)
+
+    root.sort()
+    assert root.to_dict() == {
+        'name': None,
+        'items': [],
+        'children': [
+            {
+                'name': 'A',
+                'items': [{'a1': 'example_value'}, {'a2': 123}],
+                'children': [
+                    {
+                        'name': 'C',
+                        'items': [{'c1': [1, 2, 3]}, {'c2': {'nested_key': 'nested_value'}}],
+                        'children': [
+                            {'name': 'E', 'items': [{'e1': None}, {'e2': 'value_e2'}, {'e3': 42}], 'children': []}
+                        ],
+                    },
+                    {'name': 'D', 'items': [{'d1': 3.14}], 'children': []},
+                ],
+            },
+            {'name': 'B', 'items': [{'b1': True}], 'children': []},
+        ],
+    }
 
 
 def test_urn_valid_name() -> None:
@@ -72,7 +181,7 @@ def test_urn_valid_name_with_special_characters() -> None:
 
 def test_urn_invalid_name() -> None:
     with pytest.raises(ValueError, match='name is required'):
-        urn(None)
+        urn(None)  # pyright: ignore[reportArgumentType]
     with pytest.raises(ValueError, match='name is required'):
         urn('')
 

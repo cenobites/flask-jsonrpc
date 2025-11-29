@@ -28,7 +28,8 @@
 from flask import Flask
 
 from flask_jsonrpc import JSONRPC, JSONRPCBlueprint
-from flask_jsonrpc.contrib.browse import JSONRPCBrowse
+from flask_jsonrpc.typing import Field, Method
+from flask_jsonrpc.contrib.browse import JSONRPCBrowse, build_package_tree
 
 
 def test_browse_create() -> None:
@@ -109,49 +110,58 @@ def test_browse_create() -> None:
 
         rv = client.get('/api/browse/packages.json')
         assert rv.json == {
-            'app': [
+            'children': [
                 {
-                    'name': 'app.fn1',
-                    'type': 'method',
-                    'notification': True,
-                    'validation': False,
-                    'params': [{'name': 's', 'type': 'Object'}],
-                    'returns': {'name': 'default', 'type': 'Object'},
-                    'description': 'Function app.fn1',
-                },
-                {
-                    'name': 'app.fn2',
-                    'type': 'method',
-                    'notification': True,
-                    'validation': True,
-                    'params': [{'name': 's', 'type': 'String'}],
-                    'returns': {'name': 'default', 'type': 'String'},
-                },
-                {
-                    'name': 'app.fn3',
-                    'type': 'method',
-                    'notification': False,
-                    'validation': True,
-                    'params': [{'name': 's', 'type': 'String'}],
-                    'returns': {'name': 'default', 'type': 'String'},
-                },
-                {
-                    'name': 'app.fn4',
-                    'type': 'method',
-                    'notification': True,
-                    'validation': False,
-                    'params': [
-                        {'name': 's', 'type': 'Object'},
-                        {'name': 't', 'type': 'Number'},
-                        {'name': 'u', 'type': 'Object'},
-                        {'name': 'v', 'type': 'String'},
-                        {'name': 'x', 'type': 'Object'},
-                        {'name': 'z', 'type': 'Object'},
+                    'children': [],
+                    'items': [
+                        {
+                            'description': 'Function app.fn1',
+                            'name': 'app.fn1',
+                            'notification': True,
+                            'params': [{'name': 's', 'type': 'Object'}],
+                            'returns': {'name': 'default', 'type': 'Object'},
+                            'type': 'method',
+                            'validation': False,
+                        },
+                        {
+                            'name': 'app.fn2',
+                            'notification': True,
+                            'params': [{'name': 's', 'type': 'String'}],
+                            'returns': {'name': 'default', 'type': 'String'},
+                            'type': 'method',
+                            'validation': True,
+                        },
+                        {
+                            'name': 'app.fn3',
+                            'notification': False,
+                            'params': [{'name': 's', 'type': 'String'}],
+                            'returns': {'name': 'default', 'type': 'String'},
+                            'type': 'method',
+                            'validation': True,
+                        },
+                        {
+                            'name': 'app.fn4',
+                            'notification': True,
+                            'params': [
+                                {'name': 's', 'type': 'Object'},
+                                {'name': 't', 'type': 'Number'},
+                                {'name': 'u', 'type': 'Object'},
+                                {'name': 'v', 'type': 'String'},
+                                {'name': 'x', 'type': 'Object'},
+                                {'name': 'z', 'type': 'Object'},
+                            ],
+                            'returns': {'name': 'default', 'type': 'Object'},
+                            'type': 'method',
+                            'validation': False,
+                        },
                     ],
-                    'returns': {'name': 'default', 'type': 'Object'},
-                },
-            ]
+                    'name': 'app',
+                }
+            ],
+            'items': [],
+            'name': None,
         }
+
         assert rv.status_code == 200
 
         rv = client.get('/api/browse/app.fn2.json')
@@ -168,6 +178,10 @@ def test_browse_create() -> None:
         rv = client.get('/api/browse/app.not_found.json')
         assert rv.status_code == 404
 
+        rv = client.get('/api/browse/partials/menu_tree.html')
+        assert b'menu-tree' in rv.data
+        assert rv.status_code == 200
+
         rv = client.get('/api/browse/partials/dashboard.html')
         assert b'Welcome to web browsable API' in rv.data
         assert rv.status_code == 200
@@ -181,7 +195,7 @@ def test_browse_create() -> None:
         assert rv.status_code == 200
 
 
-def test_jsonrpc_browse() -> None:
+def test_jsonrpc_browse_empty() -> None:
     app = Flask('test_browse', instance_relative_config=True)
     jsonrpc_browse = JSONRPCBrowse()
     jsonrpc_browse.init_app(app)
@@ -189,7 +203,6 @@ def test_jsonrpc_browse() -> None:
     with app.test_client() as client:
         rv = client.get('/api/browse/packages.json')
         assert rv.json == {}
-
         rv = client.get('/api/browse/App.index.json')
         assert rv.status_code == 404
 
@@ -215,16 +228,24 @@ def test_browse_create_without_register_app() -> None:
     with app.test_client() as client:
         rv = client.get('/api/browse/packages.json')
         assert rv.json == {
-            'app': [
+            'children': [
                 {
-                    'name': 'app.fn2',
-                    'type': 'method',
-                    'notification': True,
-                    'validation': True,
-                    'params': [{'name': 's', 'type': 'String'}],
-                    'returns': {'name': 'default', 'type': 'String'},
+                    'children': [],
+                    'items': [
+                        {
+                            'name': 'app.fn2',
+                            'notification': True,
+                            'params': [{'name': 's', 'type': 'String'}],
+                            'returns': {'name': 'default', 'type': 'String'},
+                            'type': 'method',
+                            'validation': True,
+                        }
+                    ],
+                    'name': 'app',
                 }
-            ]
+            ],
+            'items': [],
+            'name': None,
         }
         assert rv.status_code == 200
 
@@ -262,24 +283,32 @@ def test_browse_create_multiple_jsonrpc_versions() -> None:
     with app.test_client() as client:
         rv = client.get('/api/v1/browse/packages.json')
         assert rv.json == {
-            'app': [
+            'children': [
                 {
-                    'name': 'app.fn2',
-                    'type': 'method',
-                    'notification': True,
-                    'validation': True,
-                    'params': [{'name': 's', 'type': 'String'}],
-                    'returns': {'name': 'default', 'type': 'String'},
-                },
-                {
-                    'name': 'app.fn3',
-                    'type': 'method',
-                    'notification': True,
-                    'validation': True,
-                    'params': [{'name': 's', 'type': 'String'}],
-                    'returns': {'name': 'default', 'type': 'String'},
-                },
-            ]
+                    'children': [],
+                    'items': [
+                        {
+                            'name': 'app.fn2',
+                            'notification': True,
+                            'params': [{'name': 's', 'type': 'String'}],
+                            'returns': {'name': 'default', 'type': 'String'},
+                            'type': 'method',
+                            'validation': True,
+                        },
+                        {
+                            'name': 'app.fn3',
+                            'notification': True,
+                            'params': [{'name': 's', 'type': 'String'}],
+                            'returns': {'name': 'default', 'type': 'String'},
+                            'type': 'method',
+                            'validation': True,
+                        },
+                    ],
+                    'name': 'app',
+                }
+            ],
+            'items': [],
+            'name': None,
         }
         assert rv.status_code == 200
 
@@ -309,24 +338,32 @@ def test_browse_create_multiple_jsonrpc_versions() -> None:
 
         rv = client.get('/api/v2/browse/packages.json')
         assert rv.json == {
-            'app': [
+            'children': [
                 {
-                    'name': 'app.fn1',
-                    'type': 'method',
-                    'notification': True,
-                    'validation': True,
-                    'params': [{'name': 's', 'type': 'String'}],
-                    'returns': {'name': 'default', 'type': 'String'},
-                },
-                {
-                    'name': 'app.fn2',
-                    'type': 'method',
-                    'notification': True,
-                    'validation': True,
-                    'params': [{'name': 's', 'type': 'String'}],
-                    'returns': {'name': 'default', 'type': 'String'},
-                },
-            ]
+                    'children': [],
+                    'items': [
+                        {
+                            'name': 'app.fn1',
+                            'notification': True,
+                            'params': [{'name': 's', 'type': 'String'}],
+                            'returns': {'name': 'default', 'type': 'String'},
+                            'type': 'method',
+                            'validation': True,
+                        },
+                        {
+                            'name': 'app.fn2',
+                            'notification': True,
+                            'params': [{'name': 's', 'type': 'String'}],
+                            'returns': {'name': 'default', 'type': 'String'},
+                            'type': 'method',
+                            'validation': True,
+                        },
+                    ],
+                    'name': 'app',
+                }
+            ],
+            'items': [],
+            'name': None,
         }
         assert rv.status_code == 200
 
@@ -392,42 +429,54 @@ def test_browse_create_modular_apps() -> None:
     with app.test_client() as client:
         rv = client.get('/api/browse/packages.json')
         assert rv.json == {
-            'blue1': [
+            'children': [
                 {
-                    'name': 'blue1.fn2',
-                    'type': 'method',
-                    'notification': True,
-                    'validation': True,
-                    'params': [{'name': 's', 'type': 'String'}],
-                    'returns': {'name': 'default', 'type': 'String'},
-                }
+                    'children': [],
+                    'items': [
+                        {
+                            'name': 'blue1.fn2',
+                            'notification': True,
+                            'params': [{'name': 's', 'type': 'String'}],
+                            'returns': {'name': 'default', 'type': 'String'},
+                            'type': 'method',
+                            'validation': True,
+                        }
+                    ],
+                    'name': 'blue1',
+                },
+                {
+                    'children': [],
+                    'items': [
+                        {
+                            'name': 'blue2.fn1',
+                            'notification': True,
+                            'params': [{'name': 's', 'type': 'String'}],
+                            'returns': {'name': 'default', 'type': 'String'},
+                            'type': 'method',
+                            'validation': True,
+                        },
+                        {
+                            'name': 'blue2.fn2',
+                            'notification': True,
+                            'params': [{'name': 's', 'type': 'String'}],
+                            'returns': {'name': 'default', 'type': 'String'},
+                            'type': 'method',
+                            'validation': True,
+                        },
+                        {
+                            'name': 'blue2.not_notify',
+                            'notification': False,
+                            'params': [{'name': 's', 'type': 'String'}],
+                            'returns': {'name': 'default', 'type': 'String'},
+                            'type': 'method',
+                            'validation': True,
+                        },
+                    ],
+                    'name': 'blue2',
+                },
             ],
-            'blue2': [
-                {
-                    'name': 'blue2.fn1',
-                    'type': 'method',
-                    'notification': True,
-                    'validation': True,
-                    'params': [{'name': 's', 'type': 'String'}],
-                    'returns': {'name': 'default', 'type': 'String'},
-                },
-                {
-                    'name': 'blue2.fn2',
-                    'type': 'method',
-                    'notification': True,
-                    'validation': True,
-                    'params': [{'name': 's', 'type': 'String'}],
-                    'returns': {'name': 'default', 'type': 'String'},
-                },
-                {
-                    'name': 'blue2.not_notify',
-                    'type': 'method',
-                    'notification': False,
-                    'validation': True,
-                    'params': [{'name': 's', 'type': 'String'}],
-                    'returns': {'name': 'default', 'type': 'String'},
-                },
-            ],
+            'items': [],
+            'name': None,
         }
         assert rv.status_code == 200
 
@@ -475,3 +524,209 @@ def test_browse_create_modular_apps() -> None:
 
         rv = client.get('/api/browse/blue3.fn3.json')
         assert rv.status_code == 404
+
+
+def test_build_package_tree() -> None:
+    service_methods = {
+        'app.fn1': Method(
+            name='app.fn1',
+            tags=['tag1', 'tag2'],
+            params=[Field(name='s', type='Object')],
+            returns=Field(name='default', type='Object'),
+            type='method',
+        ),
+        'app.fn2': Method(
+            name='app.fn2',
+            tags=['tag1'],
+            params=[Field(name='s', type='Object')],
+            returns=Field(name='default', type='Object'),
+            type='method',
+        ),
+        'app.fn3': Method(
+            name='app.fn3',
+            tags=['tag1', 'tag3'],
+            params=[Field(name='s', type='Object')],
+            returns=Field(name='default', type='Object'),
+            type='method',
+        ),
+        'app.fn4': Method(
+            name='app.fn4',
+            tags=['tag2'],
+            params=[Field(name='s', type='Object')],
+            returns=Field(name='default', type='Object'),
+            type='method',
+        ),
+        'app.fn5': Method(
+            name='app.fn5',
+            tags=['tag3'],
+            params=[Field(name='s', type='Object')],
+            returns=Field(name='default', type='Object'),
+            type='method',
+        ),
+        'app.default1': Method(
+            name='app.default1',
+            params=[Field(name='s', type='Object')],
+            returns=Field(name='default', type='Object'),
+            type='method',
+        ),
+        'app.fn6': Method(
+            name='app.fn6',
+            tags=['tag3'],
+            params=[Field(name='s', type='Object')],
+            returns=Field(name='default', type='Object'),
+            type='method',
+        ),
+        'app.fn7': Method(
+            name='app.fn7',
+            tags=['tag3'],
+            params=[Field(name='s', type='Object')],
+            returns=Field(name='default', type='Object'),
+            type='method',
+        ),
+        'app.default2': Method(
+            name='app.default2',
+            params=[Field(name='s', type='Object')],
+            returns=Field(name='default', type='Object'),
+            type='method',
+        ),
+        'app.fnX': Method(
+            name='app.fnX',
+            tags=['tag1', 'tag3'],
+            params=[Field(name='s', type='Object')],
+            returns=Field(name='default', type='Object'),
+            type='method',
+        ),
+    }
+
+    package_tree = build_package_tree(service_methods)
+    assert package_tree == {
+        'children': [
+            {
+                'children': [],
+                'items': [
+                    {
+                        'name': 'app.default1',
+                        'notification': True,
+                        'params': [{'name': 's', 'type': 'Object'}],
+                        'returns': {'name': 'default', 'type': 'Object'},
+                        'type': 'method',
+                        'validation': True,
+                    },
+                    {
+                        'name': 'app.default2',
+                        'notification': True,
+                        'params': [{'name': 's', 'type': 'Object'}],
+                        'returns': {'name': 'default', 'type': 'Object'},
+                        'type': 'method',
+                        'validation': True,
+                    },
+                ],
+                'name': 'app',
+            },
+            {
+                'children': [
+                    {
+                        'children': [],
+                        'items': [
+                            {
+                                'name': 'app.fn1',
+                                'notification': True,
+                                'params': [{'name': 's', 'type': 'Object'}],
+                                'returns': {'name': 'default', 'type': 'Object'},
+                                'tags': ['tag1', 'tag2'],
+                                'type': 'method',
+                                'validation': True,
+                            }
+                        ],
+                        'name': 'tag2',
+                    },
+                    {
+                        'children': [],
+                        'items': [
+                            {
+                                'name': 'app.fn3',
+                                'notification': True,
+                                'params': [{'name': 's', 'type': 'Object'}],
+                                'returns': {'name': 'default', 'type': 'Object'},
+                                'tags': ['tag1', 'tag3'],
+                                'type': 'method',
+                                'validation': True,
+                            },
+                            {
+                                'name': 'app.fnX',
+                                'notification': True,
+                                'params': [{'name': 's', 'type': 'Object'}],
+                                'returns': {'name': 'default', 'type': 'Object'},
+                                'tags': ['tag1', 'tag3'],
+                                'type': 'method',
+                                'validation': True,
+                            },
+                        ],
+                        'name': 'tag3',
+                    },
+                ],
+                'items': [
+                    {
+                        'name': 'app.fn2',
+                        'notification': True,
+                        'params': [{'name': 's', 'type': 'Object'}],
+                        'returns': {'name': 'default', 'type': 'Object'},
+                        'tags': ['tag1'],
+                        'type': 'method',
+                        'validation': True,
+                    }
+                ],
+                'name': 'tag1',
+            },
+            {
+                'children': [],
+                'items': [
+                    {
+                        'name': 'app.fn4',
+                        'notification': True,
+                        'params': [{'name': 's', 'type': 'Object'}],
+                        'returns': {'name': 'default', 'type': 'Object'},
+                        'tags': ['tag2'],
+                        'type': 'method',
+                        'validation': True,
+                    }
+                ],
+                'name': 'tag2',
+            },
+            {
+                'children': [],
+                'items': [
+                    {
+                        'name': 'app.fn5',
+                        'notification': True,
+                        'params': [{'name': 's', 'type': 'Object'}],
+                        'returns': {'name': 'default', 'type': 'Object'},
+                        'tags': ['tag3'],
+                        'type': 'method',
+                        'validation': True,
+                    },
+                    {
+                        'name': 'app.fn6',
+                        'notification': True,
+                        'params': [{'name': 's', 'type': 'Object'}],
+                        'returns': {'name': 'default', 'type': 'Object'},
+                        'tags': ['tag3'],
+                        'type': 'method',
+                        'validation': True,
+                    },
+                    {
+                        'name': 'app.fn7',
+                        'notification': True,
+                        'params': [{'name': 's', 'type': 'Object'}],
+                        'returns': {'name': 'default', 'type': 'Object'},
+                        'tags': ['tag3'],
+                        'type': 'method',
+                        'validation': True,
+                    },
+                ],
+                'name': 'tag3',
+            },
+        ],
+        'items': [],
+        'name': None,
+    }

@@ -72,7 +72,7 @@ class ColorNotFoundException(ColorException):
         self.color_error = color_error
 
 
-jsonrpc = JSONRPCBlueprint('objects__python_classes', __name__)
+jsonrpc = JSONRPCBlueprint('types__python_classes_annotated', __name__)
 
 
 @jsonrpc.errorhandler(ColorNotFoundException)
@@ -86,7 +86,7 @@ def handle_color_not_found_exc(exc: ColorNotFoundException) -> ColorError:
         tm.Summary('Create a new color'),
         tm.Description('This method creates a new color object with an auto-generated ID.'),
         tm.Tag(
-            name='classes',
+            name='types',
             summary='Python classes related methods',
             description='Methods that demonstrate Python class objects in JSON-RPC.',
         ),
@@ -130,7 +130,7 @@ def create_color(
     annotation=tm.MethodAnnotated[
         tm.Summary('Create many colors'),
         tm.Description('This method creates multiple color objects from a list and an optional single color.'),
-        tm.Tag('classes'),
+        tm.Tag('types'),
         tm.Example(
             name='Example of creating many colors',
             summary='Create multiple colors with optional extra color',
@@ -190,7 +190,7 @@ def create_many_colors(
     annotation=tm.MethodAnnotated[
         tm.Summary('Create many colors from dictionary'),
         tm.Description('This method creates multiple color objects from a dictionary where keys are color IDs.'),
-        tm.Tag('classes'),
+        tm.Tag('types'),
         tm.Example(
             name='Example of creating colors from dictionary',
             summary='Create colors with predefined IDs',
@@ -231,7 +231,7 @@ def create_many_fix_colors(
     annotation=tm.MethodAnnotated[
         tm.Summary('Remove a color'),
         tm.Description('This method removes a color object. Throws an exception if color ID is greater than 10.'),
-        tm.Tag('classes'),
+        tm.Tag('types'),
         tm.Error(code=-32001, message='Color not found', status_code=404),
         tm.Example(
             name='Example of removing a color',

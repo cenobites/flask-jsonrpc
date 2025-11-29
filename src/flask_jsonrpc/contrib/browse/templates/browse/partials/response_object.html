@@ -14,7 +14,7 @@
         </p>
         <ng-form name="nameDialog" novalidate role="form">
           <div ng-if="options.inputMode === 'raw'">
-            <codemirror ng-model="rawInput" on-change="handleRawInputChange(newValue, oldValue)"></codemirror>
+            <code-mirror ng-model="rawInput" on-change="handleRawInputChange(newValue, oldValue)"></code-mirror>
           </div>
           <div ng-if="options.inputMode === 'formData'">
             <div class="form-group input-group-lg">

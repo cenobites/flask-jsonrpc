@@ -34,7 +34,7 @@ from typing_extensions import Buffer, TypedDict
 
 from flask_jsonrpc import JSONRPCBlueprint
 
-jsonrpc = JSONRPCBlueprint('types__python_types', __name__)
+jsonrpc = JSONRPCBlueprint('types__python_stds', __name__)
 
 
 class ColorIntEnum(IntEnum):
