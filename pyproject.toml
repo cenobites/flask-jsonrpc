@@ -97,7 +97,7 @@ security = [
     "bandit;python_version>='3.11'", # https://github.com/PyCQA/bandit
 ]
 build = [
-    "hatch==1.16.0", # https://github.com/pypa/hatch
+    "hatch==1.16.1", # https://github.com/pypa/hatch
 ]
 cbuild = [
     "cibuildwheel==3.2.0;python_version>='3.11'", # https://github.com/pypa/cibuildwheel
