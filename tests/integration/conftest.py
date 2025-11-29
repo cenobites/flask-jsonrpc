@@ -102,8 +102,12 @@ def jsonrpc_call(page_session: t.Callable[..., Page]) -> t.Generator[t.Callable[
         response_expected: dict[str, t.Any],
     ) -> Page:
         page = page_session(jsonrpc_method)
+        page.wait_for_selector('input[type=text], textarea')
+        fields = page.locator('input[type=text]')
+        for i in range(fields.count()):
+            fields.nth(i).fill('', force=True)
         for name, value in test_input.items():
-            page.fill(f'input[name="{name}"]', value if isinstance(value, str) else json.dumps(value))
+            page.fill(f'input[name="{name}"]', value if isinstance(value, str) else json.dumps(value), force=True)
         page.get_by_role('button', name='Run', exact=True).click()
 
         request_element = page.locator('.request-content')

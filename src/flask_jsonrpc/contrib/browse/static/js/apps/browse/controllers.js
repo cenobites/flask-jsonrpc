@@ -21,6 +21,30 @@
         return [name];
     };
 
+    var getDefaultParamValues = function(module) {
+        if (!module.examples) {
+            return {};
+        }
+        var defaultExample = module.examples.filter(function(example) {
+            return example.name.toLocaleLowerCase() === 'default';
+        });
+        var params = defaultExample.length ? defaultExample[0].params : module.examples[0].params;
+        if (!params) {
+            return {};
+        }
+        return params.reduce(function(acc, param) {
+            var modParam = module.params.filter(function(p) {
+                return p.name === param.name;
+            });
+            if (modParam.length && (modParam[0].type === 'Object' || modParam[0].type === 'Array')) {
+                acc[param.name] = JSON.stringify(param.value);
+                return acc
+            }
+            acc[param.name] = param.value;
+            return acc;
+        }, {});
+    };
+
     var moduleDescribeToJSON = function(module, RPCParamParser) {
         var params = module.params.map(function(param) {
             return [param.name, RPCParamParser.getValue(param, true)];
@@ -144,7 +168,17 @@
     App.controller('ModuleDialogCtrl', ['$scope', '$modalInstance', 'RPCParamParser', 'module', 'options', function($scope, $modalInstance, RPCParamParser, module, options) {
         $scope.module = module;
         $scope.options = options;
+        $scope.defaultParamValues = getDefaultParamValues(module);
         $scope.rawInput = moduleDescribeToJSON(module, RPCParamParser);
+
+        // Initialize parameter values with defaults if not set
+        if (options.defaultValues) {
+            $scope.module.params.forEach(function(param) {
+                if (param.value === undefined || param.value === null) {
+                    param.value = $scope.defaultParamValues[param.name];
+                }
+            });
+        }
 
         $scope.handleRawInputChange = function(newValue, oldValue) {
             if (newValue !== oldValue) {
@@ -201,7 +235,7 @@
                 $scope.$emit('App:displayContentLoaded', false);
             });
         },
-        RPCCallModal = function(module) {
+        RPCCallModal = function(module, options = {}) {
             $modal.open({
                 templateUrl: 'module_dialog.html',
                 controller: 'ModuleDialogCtrl',
@@ -210,12 +244,13 @@
                         return RPCParamParser;
                     },
                     module: function() {
-                        return $scope.module;
+                        return module;
                     },
                     options: function() {
-                        return {
+                        return {...{
+                            defaultValues: true,
                             inputMode: $scope.inputMode || 'formData',
-                        };
+                        }, ...options};
                     }
                 }
             }).result.then(function(module) { // ok
@@ -230,7 +265,7 @@
         });
 
         $scope.$on('RPC:changeParameters', function(event) {
-            return RPCCallModal($scope.module);
+            return RPCCallModal($scope.module, {defaultValues: false});
         });
 
         $scope.$on('RPC:notify', function(event) {
