@@ -40,7 +40,7 @@
         <ul class="nav nav-tabs nav-stacked">
           <li><a href="#/" ng-click="goToDashboard()" ng-class="{active:routeIs('/')}"><i class="icon icon-home"></i> Dashboard</a></li>
           {% raw %}
-          <menu-tree node="packages" on-click="showResponseObject(item)"></menu-tree>
+          <menu-tree node="packages" on-click="goToModule(item)"></menu-tree>
           {% endraw %}
         </ul><!--/nav-stacked menu-->
       <div id="scrollable-sections-top-shadow"></div>
@@ -57,7 +57,10 @@
                 <span style="color: #777777;">A look at what's new in your web browsable API</span>
 
                 <ul class="list-inline pull-right sparkline-box" ng-show="showToolbar">
-                  <li>
+                  <li ng-show="showToolbarPlayButton">
+                    <h4 class="blue"><button ng-click="play()" class="btn btn-blue">Play</button></h4>
+                  </li>
+                  <li ng-show="showToolbarRerunButton">
                     <h4 class="blue"><button ng-click="rerun()" class="btn btn-blue">Rerun</button></h4>
                   </li>
                   <li>

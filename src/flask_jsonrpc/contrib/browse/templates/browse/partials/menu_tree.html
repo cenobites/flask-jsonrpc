@@ -5,7 +5,7 @@
         <div id="{{child.name}}-{{$id}}" class="accordion-body collapse" ng-class="{in:$first}">
             <ul class="dropdown-submenu" ng-if="child.items && child.items.length > 0">
                 <li ng-repeat="item in child.items">
-                    <a ng-click="select(item)" ng-class="{active:routeIs(item.name)}" class="disableable" data-placement="bottom" data-toggle="tooltip" tooltip="{{showTooltip(item)}}"><i class="icon icon-caret-right"></i> {{item.name}}</a>
+                    <a ng-click="select(item)" ng-class="{active:routeIs(item.name)}" class="disableable" data-placement="bottom"><i class="icon icon-caret-right"></i> {{item.name}}</a>
                 </li>
             </ul>
             <span ng-if="child.children && child.children.length > 0" ng-init="node = child" ng-include="urlPrefix + '/partials/menu_tree.html'"></span>

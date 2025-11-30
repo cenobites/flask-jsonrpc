@@ -1,0 +1,62 @@
+{% raw %}
+<div class="field-doc" ng-class="'field-level-' + (level || 0)">
+    <div class="field-header">
+        <strong>{{field.name}}</strong>
+        <span class="field-type badge badge-default">{{field.type}}</span>
+        <span class="badge badge-danger" ng-if="field.required">Required</span>
+        <span class="badge badge-warning" ng-if="field.deprecated">Deprecated</span>
+        <span class="badge badge-info" ng-if="field.nullable">Nullable</span>
+    </div>
+
+    <div class="field-details">
+        <p ng-if="field.summary" class="field-summary">{{field.summary}}</p>
+        <div ng-if="field.description" class="field-description" ng-bind-html="field.description|markdown"></div>
+
+        <div ng-if="hasConstraints(field)" class="field-constraints">
+            <h5>Constraints:</h5>
+            <ul class="list-unstyled">
+                <li ng-if="field.minimum !== null && field.minimum !== undefined">
+                    <code>minimum:</code> {{field.minimum}}
+                </li>
+                <li ng-if="field.maximum !== null && field.maximum !== undefined">
+                    <code>maximum:</code> {{field.maximum}}
+                </li>
+                <li ng-if="field.multiple_of !== null && field.multiple_of !== undefined">
+                    <code>multiple_of:</code> {{field.multiple_of}}
+                </li>
+                <li ng-if="field.min_length !== null && field.min_length !== undefined">
+                    <code>min_length:</code> {{field.min_length}}
+                </li>
+                <li ng-if="field.max_length !== null && field.max_length !== undefined">
+                    <code>max_length:</code> {{field.max_length}}
+                </li>
+                <li ng-if="field.pattern">
+                    <code>pattern:</code> <code>{{field.pattern}}</code>
+                </li>
+                <li ng-if="field.max_digits !== null && field.max_digits !== undefined">
+                    <code>max_digits:</code> {{field.max_digits}}
+                </li>
+                <li ng-if="field.decimal_places !== null && field.decimal_places !== undefined">
+                    <code>decimal_places:</code> {{field.decimal_places}}
+                </li>
+            </ul>
+        </div>
+
+        <div ng-if="field.examples && field.examples.length" class="field-examples">
+            <h5>Examples:</h5>
+            <ul>
+                <li ng-repeat="example in field.examples">
+                    <code>{{example | json}}</code>
+                </li>
+            </ul>
+        </div>
+
+        <div ng-if="field.properties && field.properties.length" class="field-properties">
+            <h5>Properties:</h5>
+            <div ng-repeat="property in field.properties" class="nested-property">
+                <span ng-init="field = property; level = (level || 0) + 1" ng-include="urlPrefix + '/partials/field_describe.html'"></span>
+            </div>
+        </div>
+    </div>
+</div>
+{% endraw %}

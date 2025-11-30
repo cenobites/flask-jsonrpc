@@ -5,27 +5,26 @@
         'ui.bootstrap', 'chieffancypants.loadingBar',
 		'core.service', 'core.directive', 'core.filter',
 		'browse.service', 'browse.directive', 'browse.filter'
-		]).
-		config(['$routeProvider', 'urlPrefix', function($routeProvider, urlPrefix) {
-	    	$routeProvider
-	    		.when('/', {
-	    			reloadOnSearch: false,
-	    			templateUrl: urlPrefix + '/partials/dashboard.html',
-                    controller: 'ApplicationCtrl'
-	    		})
-                .when('/:method', {
-                    controller: 'ResponseObjectCtrl',
-                    templateUrl: urlPrefix + '/partials/response_object.html',
-                    resolve: {
-                        module: ['$route', 'Api', function($route, Api) {
-                            return Api.method({service: $route.current.params.method}).$promise;
-                        }]
-                    }
-                })
-	    		.otherwise({
-	    			redirectTo: urlPrefix
-	    		});
-		}]);
+	]).config(['$routeProvider', 'urlPrefix', function($routeProvider, urlPrefix) {
+        $routeProvider
+            .when('/', {
+                reloadOnSearch: false,
+                templateUrl: urlPrefix + '/partials/dashboard.html',
+                controller: 'ApplicationCtrl'
+            })
+            .when('/:method', {
+                controller: 'ResponseObjectCtrl',
+                templateUrl: urlPrefix + '/partials/response_object.html',
+                resolve: {
+                    module: ['$route', 'Api', function($route, Api) {
+                        return Api.method({service: $route.current.params.method}).$promise;
+                    }]
+                }
+            })
+            .otherwise({
+                redirectTo: urlPrefix
+            });
+    }]);
 
 	App.adjust = function() {
         var viewPortHeight = $(window).outerHeight(true),

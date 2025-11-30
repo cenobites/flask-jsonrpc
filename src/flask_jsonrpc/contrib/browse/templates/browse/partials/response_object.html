@@ -7,8 +7,8 @@
         <h4 class="modal-title"><span class="glyphicon glyphicon-star"></span> {{module.name}}(<span ng-repeat="param in module.params">{{param.name}}: {{param.type}}<span ng-if="!$last">, </span></span>) -> {{module.returns.type}}</h4>
       </div>
       <div class="modal-body">
-        <b>Description:</b> <span ng-if="!module.description">None</span><span class="method-description" ng-bind-html="module.description|markdown"></span>
-        <p>
+        <span ng-if="module.description"><b>Description:</b> <span class="method-description" ng-bind-html="module.description|markdown"></span></span>
+        <p ng-if="module.params.length > 0">
           <input type="radio" ng-model="options.inputMode" ng-change="onInputModeChange()" id="inputModeFormData" value="formData"> <label for="inputModeFormData">form-data</label>
           <input type="radio" ng-model="options.inputMode" ng-change="onInputModeChange()" id="inputModeRaw" value="raw"> <label for="inputModeRaw">raw</label>
         </p>
@@ -41,19 +41,106 @@
 
 {% raw %}
 <div class="content-main">
-    <div class="page-header method-signature"><h1>{{module.name}}(<span ng-repeat="param in module.params">{{param.name}}: {{param.type}}<span ng-if="!$last">, </span></span>) -> {{module.returns.type}}</h1></div>
-    <blockquote class="method-signature-description" ng-bind-html="module.description|markdown"></blockquote>
-    <span >
-      <p><b>Request:</b></p>
-      <div class="request-info" style="clear: both">
+  <div class="method-documentation">
+    <div class="method-header">
+      <h1 class="method-title">
+        {{module.name}}
+        <span class="badge" ng-if="module.deprecated">DEPRECATED</span>
+      </h1>
+
+      <div class="method-signature">
+        <code>
+          {{module.name}}(<span ng-repeat="param in module.params">{{param.name}}<span ng-if="param.required" class="required">*</span>: {{param.type}}<span ng-if="!$last">, </span></span>) -> {{module.returns.type}}
+        </code>
+      </div>
+    </div>
+
+    <div class="method-tags" ng-if="module.tags && module.tags.length">
+      <span class="label label-info" ng-repeat="tag in module.tags">{{tag}}</span>
+    </div>
+
+    <div class="method-info">
+      <div ng-if="module.summary" class="method-summary">
+        <h3 ng-bind-html="module.summary|markdown"></h3>
+      </div>
+
+      <div ng-if="module.description" class="method-description">
+        <div ng-bind-html="module.description|markdown"></div>
+      </div>
+    </div>
+
+    <div class="method-behavior">
+      <h3>Behavior</h3>
+      <ul class="list-unstyled">
+        <li><i class="icon" ng-class="module.validation ? 'icon-check text-success' : 'icon-ban-circle text-danger'"></i> Validation: {{module.validation ? 'Enabled' : 'Disabled'}}</li>
+        <li><i class="icon" ng-class="module.notification ? 'icon-check text-success' : 'icon-ban-circle text-danger'"></i> Supports Notifications: {{module.notification ? 'Yes' : 'No'}}</li>
+      </ul>
+    </div>
+
+    <div class="method-parameters" ng-if="module.params && module.params.length">
+      <h3>Parameters</h3>
+      <div ng-repeat="param in module.params" class="parameter-item">
+        <field-describe field="param"></field-describe>
+      </div>
+    </div>
+
+    <div class="method-returns">
+      <h3>Returns</h3>
+      <field-describe field="module.returns"></field-describe>
+    </div>
+
+    <div class="method-examples" ng-if="module.examples && module.examples.length">
+      <h3>Examples</h3>
+      <div ng-repeat="example in module.examples" class="example-item">
+        <example-describe example="example"></example-describe>
+      </div>
+    </div>
+
+    <div class="method-errors" ng-if="module.errors && module.errors.length">
+      <h3>Possible Errors</h3>
+      <table class="table table-bordered">
+        <thead>
+          <tr>
+            <th>Code</th>
+            <th>Message</th>
+            <th>HTTP Status</th>
+            <th>Data</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr ng-repeat="error in module.errors">
+            <td><code>{{error.code}}</code></td>
+            <td>{{error.message}}</td>
+            <td>{{error.status_code}}</td>
+            <td><code>{{error.data | json}}</code></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div ng-show="showRequestResponsePanel()" class="request-response-panel-opened"></div>
+  </div>
+
+  <div ng-show="showRequestResponsePanel()" class="request-response-panel">
+    <div class="request-response-header">
+      <h3 class="request-response-title">Request & Response</h3>
+      <button class="request-response-close" ng-click="closeRequestResponsePanel()" title="Close">&times;</button>
+    </div>
+    <div class="request-response-body">
+      <div class="request-response-section">
+        <div class="request-response-section-title"><b>Request:</b></div>
+        <div class="request-response-content">
           <pre class="prettyprint"><b>{{ response.config.method }}</b> {{ response.config.url }}
 <span ng-bind-html="requestObject|json|prettyprint" class="request-content"></span></pre>
+        </div>
       </div>
-      <p><b>Response:</b></p>
-      <div class="response-info">
+      <div class="request-response-section">
+        <div class="request-response-section-title"><b>Response:</b></div>
+        <div class="request-response-content">
           <pre class="prettyprint"><div class="meta nocode"><b>HTTP {{ response.statusCode }}{{ response.status }}</b>
 <span ng-bind-html="responseObject|json|prettyprint" class="response-content"></span></div></pre>
+        </div>
       </div>
-  </span>
+    </div>
+  </div>
 </div>
 {% endraw %}

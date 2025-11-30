@@ -69,24 +69,21 @@ def page_session(page: Page) -> t.Generator[t.Callable[..., Page], None, None]:
 @pytest.fixture(autouse=True, scope='function')
 def jsonrpc_page_info(page_session: t.Callable[..., Page]) -> t.Generator[t.Callable[..., Page], None, None]:
     def page_info(
-        jsonrpc_method: str,
-        breadcrumb: str,
-        method_description: str,
-        method_signature: str,
-        method_signature_description: str,
+        jsonrpc_method: str, breadcrumb: str, method_title: str, method_signature: str, method_description: str
     ) -> Page:
         page = page_session(jsonrpc_method)
         breadcrumb_element = page.locator('#breadcrumb')
         expect(breadcrumb_element).to_contain_text(breadcrumb)
 
-        method_description_element = page.locator('.method-description')
-        expect(method_description_element).to_contain_text(method_description)
+        method_title_element = page.locator('.method-title')
+        expect(method_title_element).to_contain_text(method_title)
 
         method_signature_element = page.locator('.method-signature')
         expect(method_signature_element).to_contain_text(method_signature)
 
-        method_signature_description_element = page.locator('.method-signature-description')
-        expect(method_signature_description_element).to_contain_text(method_signature_description)
+        if method_description:
+            method_description_element = page.locator('.method-description')
+            expect(method_description_element).to_contain_text(method_description)
 
         return page
 
@@ -102,6 +99,7 @@ def jsonrpc_call(page_session: t.Callable[..., Page]) -> t.Generator[t.Callable[
         response_expected: dict[str, t.Any],
     ) -> Page:
         page = page_session(jsonrpc_method)
+        page.get_by_role('button', name='Play', exact=True).click()
         page.wait_for_selector('input[type=text], textarea')
         fields = page.locator('input[type=text]')
         for i in range(fields.count()):

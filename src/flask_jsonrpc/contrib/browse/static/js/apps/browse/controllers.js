@@ -84,6 +84,8 @@
         $scope.showFakeIntro = true;
         $scope.showContentLoaded = true;
         $scope.showToolbar = false;
+        $scope.showToolbarPlayButton = true;
+        $scope.showToolbarRerunButton = false;
         $scope.showToolbarNotifyButton = true;
         $scope.breadcrumbs = breadcrumbs('Dashboard');
         $scope.response = responseExample;
@@ -109,6 +111,16 @@
             $scope.showToolbarNotifyButton = display;
         });
 
+        $scope.$on('App:route:changed', function(event, route) {
+            $scope.showToolbarPlayButton = true;
+            $scope.showToolbarRerunButton = false;
+        });
+
+        $scope.$on('RPC:called', function(event, responseObject) {
+            $scope.showToolbarPlayButton = false;
+            $scope.showToolbarRerunButton = true;
+        });
+
         $scope.showSpinner = function() {
             return PendingRequests.isPending();
         };
@@ -118,10 +130,8 @@
         };
     }]);
 
-    App.controller('MenuCtrl', ['$scope', '$location', '$timeout',
-                                'Handlebars', 'Api',
-                                function($scope, $location, $timeout,
-                                         Handlebars, Api) {
+    App.controller('MenuCtrl', ['$scope', '$location', '$timeout', 'Handlebars', 'Api',
+                                function($scope, $location, $timeout, Handlebars, Api) {
         $scope.$emit('App:displayFakeIntro', true);
         $scope.$emit('App:displayContentLoaded', true);
         Api.packages(function(packages) {
@@ -146,12 +156,17 @@
             return Handlebars.template('menu-module-tooltip', module);
         };
 
-        $scope.showResponseObject = function(module) {
+        $scope.goToModule = function(module) {
+            $scope.$emit('App:route:changed', module.name);
             return $location.path(module.name);
         };
     }]);
 
-    App.controller('ViewerContainerCtrl', ['$scope', '$location', function($scope, $location) {
+    App.controller('ViewerContainerCtrl', ['$scope', function($scope) {
+        $scope.play = function() {
+            $scope.$broadcast('RPC:play');
+        };
+
         $scope.rerun = function() {
             $scope.$broadcast('RPC:rerun');
         };
@@ -165,7 +180,8 @@
         };
     }]);
 
-    App.controller('ModuleDialogCtrl', ['$scope', '$modalInstance', 'RPCParamParser', 'module', 'options', function($scope, $modalInstance, RPCParamParser, module, options) {
+    App.controller('ModuleDialogCtrl', ['$scope', '$modalInstance', 'RPCParamParser', 'module', 'options',
+                                        function($scope, $modalInstance, RPCParamParser, module, options) {
         $scope.module = module;
         $scope.options = options;
         $scope.defaultParamValues = getDefaultParamValues(module);
@@ -208,8 +224,12 @@
         };
     }]);
 
-    App.controller('ResponseObjectCtrl', ['$scope', '$window', '$modal', 'RPC', 'RPCParamParser', 'module', function($scope, $window, $modal, RPC, RPCParamParser, module) {
+    App.controller('ResponseObjectCtrl', ['$scope', '$window', '$modal', 'RPC', 'RPCParamParser', 'module',
+                                          function($scope, $window, $modal, RPC, RPCParamParser, module) {
         $scope.module = module;
+        $scope.requestObject = undefined;
+        $scope.response = undefined;
+        $scope.responseObject = undefined;
         $scope.$emit('App:displayToolbar', true);
         $scope.$emit('App:breadcrumb', module.name);
         $scope.$emit('App:displayToolbarNotifyButton', module.notification);
@@ -226,6 +246,7 @@
                 $scope.response = {status: status, headers: headersPretty, config: config};
                 $scope.responseObject = responseObject;
                 $scope.$emit('App:displayContentLoaded', false);
+                $scope.$emit('RPC:called', responseObject);
             }).error(function(responseObject, status, headers, config) { // error
                 var headersPretty = headers();
                 headersPretty.data = config.data;
@@ -233,6 +254,7 @@
                 $scope.response = {statusCode: status, headers: headersPretty, config: config};
                 $scope.responseObject = responseObject;
                 $scope.$emit('App:displayContentLoaded', false);
+                $scope.$emit('RPC:called', responseObject);
             });
         },
         RPCCallModal = function(module, options = {}) {
@@ -260,6 +282,20 @@
             });
         };
 
+        $scope.showRequestResponsePanel = function() {
+            return $scope.requestObject !== undefined && $scope.response !== undefined && $scope.responseObject !== undefined;
+        };
+
+        $scope.closeRequestResponsePanel = function() {
+            $scope.requestObject = undefined;
+            $scope.response = undefined;
+            $scope.responseObject = undefined;
+        };
+
+        $scope.$on('RPC:play', function(event) {
+            return RPCCallModal($scope.module);
+        });
+
         $scope.$on('RPC:rerun', function(event) {
             return RPCCall($scope.module);
         });
@@ -273,12 +309,6 @@
             m.notify = true;
             return RPCCall(m);
         });
-
-        if (!module.params || !module.params.length) {
-            return RPCCall(module);
-        }
-
-        return RPCCallModal(module);
     }]);
 
 })(window.App);

@@ -31,12 +31,12 @@ from playwright.sync_api import Page
 
 
 @pytest.mark.parametrize(
-    'breadcrumb,method_description,method_signature,method_signature_description',
+    'breadcrumb,method_title,method_signature,method_description',
     [
         (
             'types » types.python_dataclasses_annotated.createCar',
-            '',
-            'types.python_dataclasses_annotated.createCar(car: Object) -> Object',
+            'types.python_dataclasses_annotated.createCar',
+            'types.python_dataclasses_annotated.createCar(car*: Object) -> Object',
             '',
         )
     ],
@@ -44,16 +44,12 @@ from playwright.sync_api import Page
 def test_types_python_dataclasses_create_car_display(
     jsonrpc_page_info: t.Callable[..., Page],
     breadcrumb: str,
-    method_description: str,
+    method_title: str,
     method_signature: str,
-    method_signature_description: str,
+    method_description: str,
 ) -> None:
     jsonrpc_page_info(
-        'types.python_dataclasses_annotated.createCar',
-        breadcrumb,
-        method_description,
-        method_signature,
-        method_signature_description,
+        'types.python_dataclasses_annotated.createCar', breadcrumb, method_title, method_signature, method_description
     )
 
 
@@ -129,12 +125,12 @@ def test_types_python_dataclasses_create_car_form(
 
 
 @pytest.mark.parametrize(
-    'breadcrumb,method_description,method_signature,method_signature_description',
+    'breadcrumb,method_title,method_signature,method_description',
     [
         (
             'types » types.python_dataclasses_annotated.createManyCar',
-            '',
-            'types.python_dataclasses_annotated.createManyCar(cars: Array, car: Object) -> Array',
+            'types.python_dataclasses_annotated.createManyCar',
+            'types.python_dataclasses_annotated.createManyCar(cars*: Array, car: Object) -> Array',
             '',
         )
     ],
@@ -142,16 +138,16 @@ def test_types_python_dataclasses_create_car_form(
 def test_types_python_dataclasses_create_many_car_display(
     jsonrpc_page_info: t.Callable[..., Page],
     breadcrumb: str,
-    method_description: str,
+    method_title: str,
     method_signature: str,
-    method_signature_description: str,
+    method_description: str,
 ) -> None:
     jsonrpc_page_info(
         'types.python_dataclasses_annotated.createManyCar',
         breadcrumb,
-        method_description,
+        method_title,
         method_signature,
-        method_signature_description,
+        method_description,
     )
 
 
@@ -271,12 +267,12 @@ def test_types_python_dataclasses_create_many_car_form(
 
 
 @pytest.mark.parametrize(
-    'breadcrumb,method_description,method_signature,method_signature_description',
+    'breadcrumb,method_title,method_signature,method_description',
     [
         (
             'types » types.python_dataclasses_annotated.createManyFixCar',
-            '',
-            'types.python_dataclasses_annotated.createManyFixCar(cars: Object) -> Array',
+            'types.python_dataclasses_annotated.createManyFixCar',
+            'types.python_dataclasses_annotated.createManyFixCar(cars*: Object) -> Array',
             '',
         )
     ],
@@ -284,16 +280,16 @@ def test_types_python_dataclasses_create_many_car_form(
 def test_types_python_dataclasses_create_many_fix_car_display(
     jsonrpc_page_info: t.Callable[..., Page],
     breadcrumb: str,
-    method_description: str,
+    method_title: str,
     method_signature: str,
-    method_signature_description: str,
+    method_description: str,
 ) -> None:
     jsonrpc_page_info(
         'types.python_dataclasses_annotated.createManyFixCar',
         breadcrumb,
-        method_description,
+        method_title,
         method_signature,
-        method_signature_description,
+        method_description,
     )
 
 
@@ -403,11 +399,11 @@ def test_types_python_dataclasses_create_many_fix_car_form(
 
 
 @pytest.mark.parametrize(
-    'breadcrumb,method_description,method_signature,method_signature_description',
+    'breadcrumb,method_title,method_signature,method_description',
     [
         (
             'types » types.python_dataclasses_annotated.removeCar',
-            '',
+            'types.python_dataclasses_annotated.removeCar',
             'types.python_dataclasses_annotated.removeCar(car: Object) -> Object',
             '',
         )
@@ -416,16 +412,12 @@ def test_types_python_dataclasses_create_many_fix_car_form(
 def test_types_python_dataclasses_remove_car_display(
     jsonrpc_page_info: t.Callable[..., Page],
     breadcrumb: str,
-    method_description: str,
+    method_title: str,
     method_signature: str,
-    method_signature_description: str,
+    method_description: str,
 ) -> None:
     jsonrpc_page_info(
-        'types.python_dataclasses_annotated.removeCar',
-        breadcrumb,
-        method_description,
-        method_signature,
-        method_signature_description,
+        'types.python_dataclasses_annotated.removeCar', breadcrumb, method_title, method_signature, method_description
     )
 
 

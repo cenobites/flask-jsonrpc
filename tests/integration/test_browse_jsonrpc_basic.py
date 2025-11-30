@@ -31,19 +31,24 @@ from playwright.sync_api import Page
 
 
 @pytest.mark.parametrize(
-    'breadcrumb,method_description,method_signature,method_signature_description',
-    [('jsonrpc_basic » jsonrpc_basic.echo', '', 'jsonrpc_basic.echo(string: String, _some: Object) -> String', '')],
+    'breadcrumb,method_title,method_signature,method_description',
+    [
+        (
+            'jsonrpc_basic » jsonrpc_basic.echo',
+            'jsonrpc_basic.echo',
+            'jsonrpc_basic.echo(string: String, _some: Object) -> String',
+            '',
+        )
+    ],
 )
 def test_jsonrpc_basic_echo_display(
     jsonrpc_page_info: t.Callable[..., Page],
     breadcrumb: str,
-    method_description: str,
+    method_title: str,
     method_signature: str,
-    method_signature_description: str,
+    method_description: str,
 ) -> None:
-    jsonrpc_page_info(
-        'jsonrpc_basic.echo', breadcrumb, method_description, method_signature, method_signature_description
-    )
+    jsonrpc_page_info('jsonrpc_basic.echo', breadcrumb, method_title, method_signature, method_description)
 
 
 @pytest.mark.parametrize(
@@ -103,19 +108,24 @@ def test_jsonrpc_basic_echo_form(
 
 
 @pytest.mark.parametrize(
-    'breadcrumb,method_description,method_signature,method_signature_description',
-    [('jsonrpc_basic » jsonrpc_basic.greeting', '', 'jsonrpc_basic.greeting(name: String) -> String', '')],
+    'breadcrumb,method_title,method_signature,method_description',
+    [
+        (
+            'jsonrpc_basic » jsonrpc_basic.greeting',
+            'jsonrpc_basic.greeting',
+            'jsonrpc_basic.greeting(name: String) -> String',
+            '',
+        )
+    ],
 )
 def test_jsonrpc_basic_greeting_display(
     jsonrpc_page_info: t.Callable[..., Page],
     breadcrumb: str,
-    method_description: str,
+    method_title: str,
     method_signature: str,
-    method_signature_description: str,
+    method_description: str,
 ) -> None:
-    jsonrpc_page_info(
-        'jsonrpc_basic.greeting', breadcrumb, method_description, method_signature, method_signature_description
-    )
+    jsonrpc_page_info('jsonrpc_basic.greeting', breadcrumb, method_title, method_signature, method_description)
 
 
 @pytest.mark.parametrize(
@@ -163,19 +173,24 @@ def test_jsonrpc_basic_greeting_form(
 
 
 @pytest.mark.parametrize(
-    'breadcrumb,method_description,method_signature,method_signature_description',
-    [('jsonrpc_basic » jsonrpc_basic.notify', '', 'jsonrpc_basic.notify(_string: String) -> Null', '')],
+    'breadcrumb,method_title,method_signature,method_description',
+    [
+        (
+            'jsonrpc_basic » jsonrpc_basic.notify',
+            'jsonrpc_basic.notify',
+            'jsonrpc_basic.notify(_string: String) -> Null',
+            '',
+        )
+    ],
 )
 def test_jsonrpc_basic_notify_display(
     jsonrpc_page_info: t.Callable[..., Page],
     breadcrumb: str,
-    method_description: str,
+    method_title: str,
     method_signature: str,
-    method_signature_description: str,
+    method_description: str,
 ) -> None:
-    jsonrpc_page_info(
-        'jsonrpc_basic.notify', breadcrumb, method_description, method_signature, method_signature_description
-    )
+    jsonrpc_page_info('jsonrpc_basic.notify', breadcrumb, method_title, method_signature, method_description)
 
 
 @pytest.mark.parametrize(
@@ -218,11 +233,11 @@ def test_jsonrpc_basic_notify_form(
 
 
 @pytest.mark.parametrize(
-    'breadcrumb,method_description,method_signature,method_signature_description',
+    'breadcrumb,method_title,method_signature,method_description',
     [
         (
             'jsonrpc_basic » jsonrpc_basic.not_allow_notify',
-            '',
+            'jsonrpc_basic.not_allow_notify',
             'jsonrpc_basic.not_allow_notify(_string: String) -> String',
             '',
         )
@@ -231,13 +246,11 @@ def test_jsonrpc_basic_notify_form(
 def test_jsonrpc_basic_not_allow_notify_display(
     jsonrpc_page_info: t.Callable[..., Page],
     breadcrumb: str,
-    method_description: str,
+    method_title: str,
     method_signature: str,
-    method_signature_description: str,
+    method_description: str,
 ) -> None:
-    jsonrpc_page_info(
-        'jsonrpc_basic.not_allow_notify', breadcrumb, method_description, method_signature, method_signature_description
-    )
+    jsonrpc_page_info('jsonrpc_basic.not_allow_notify', breadcrumb, method_title, method_signature, method_description)
 
 
 @pytest.mark.parametrize(
@@ -289,19 +302,17 @@ def test_jsonrpc_basic_not_allow_notify_form(
 
 
 @pytest.mark.parametrize(
-    'breadcrumb,method_description,method_signature,method_signature_description',
-    [('jsonrpc_basic » jsonrpc_basic.fails', '', 'jsonrpc_basic.fails(n: Number) -> Number', '')],
+    'breadcrumb,method_title,method_signature,method_description',
+    [('jsonrpc_basic » jsonrpc_basic.fails', 'jsonrpc_basic.fails', 'jsonrpc_basic.fails(n: Number) -> Number', '')],
 )
 def test_jsonrpc_basic_fails_display(
     jsonrpc_page_info: t.Callable[..., Page],
     breadcrumb: str,
-    method_description: str,
+    method_title: str,
     method_signature: str,
-    method_signature_description: str,
+    method_description: str,
 ) -> None:
-    jsonrpc_page_info(
-        'jsonrpc_basic.fails', breadcrumb, method_description, method_signature, method_signature_description
-    )
+    jsonrpc_page_info('jsonrpc_basic.fails', breadcrumb, method_title, method_signature, method_description)
 
 
 @pytest.mark.parametrize(
@@ -365,19 +376,24 @@ def test_jsonrpc_basic_fails_form(
 
 
 @pytest.mark.parametrize(
-    'breadcrumb,method_description,method_signature,method_signature_description',
-    [('jsonrpc_basic » jsonrpc_basic.sum', '', 'jsonrpc_basic.sum(a: Number, b: Number) -> Number', '')],
+    'breadcrumb,method_title,method_signature,method_description',
+    [
+        (
+            'jsonrpc_basic » jsonrpc_basic.sum',
+            'jsonrpc_basic.sum',
+            'jsonrpc_basic.sum(a: Number, b: Number) -> Number',
+            '',
+        )
+    ],
 )
 def test_jsonrpc_basic_sum_display(
     jsonrpc_page_info: t.Callable[..., Page],
     breadcrumb: str,
-    method_description: str,
+    method_title: str,
     method_signature: str,
-    method_signature_description: str,
+    method_description: str,
 ) -> None:
-    jsonrpc_page_info(
-        'jsonrpc_basic.sum', breadcrumb, method_description, method_signature, method_signature_description
-    )
+    jsonrpc_page_info('jsonrpc_basic.sum', breadcrumb, method_title, method_signature, method_description)
 
 
 @pytest.mark.parametrize(
@@ -425,11 +441,11 @@ def test_jsonrpc_basic_sum_form(
 
 
 @pytest.mark.parametrize(
-    'breadcrumb,method_description,method_signature,method_signature_description',
+    'breadcrumb,method_title,method_signature,method_description',
     [
         (
             'jsonrpc_basic » jsonrpc_basic.strangeEcho',
-            '',
+            'jsonrpc_basic.strangeEcho',
             (
                 'jsonrpc_basic.strangeEcho(string: String, omg: Object, wtf: Array, '
                 'nowai: Number, yeswai: String) -> Array'
@@ -441,13 +457,11 @@ def test_jsonrpc_basic_sum_form(
 def test_jsonrpc_basic_strange_echo_display(
     jsonrpc_page_info: t.Callable[..., Page],
     breadcrumb: str,
-    method_description: str,
+    method_title: str,
     method_signature: str,
-    method_signature_description: str,
+    method_description: str,
 ) -> None:
-    jsonrpc_page_info(
-        'jsonrpc_basic.strangeEcho', breadcrumb, method_description, method_signature, method_signature_description
-    )
+    jsonrpc_page_info('jsonrpc_basic.strangeEcho', breadcrumb, method_title, method_signature, method_description)
 
 
 @pytest.mark.parametrize(
@@ -556,19 +570,24 @@ def test_jsonrpc_basic_strange_echo_form(
 
 
 @pytest.mark.parametrize(
-    'breadcrumb,method_description,method_signature,method_signature_description',
-    [('jsonrpc_basic » jsonrpc_basic.noReturn', '', 'jsonrpc_basic.noReturn(_string: String) -> Null', '')],
+    'breadcrumb,method_title,method_signature,method_description',
+    [
+        (
+            'jsonrpc_basic » jsonrpc_basic.noReturn',
+            'jsonrpc_basic.noReturn',
+            'jsonrpc_basic.noReturn(_string: String) -> Null',
+            '',
+        )
+    ],
 )
 def test_jsonrpc_basic_no_return_display(
     jsonrpc_page_info: t.Callable[..., Page],
     breadcrumb: str,
-    method_description: str,
+    method_title: str,
     method_signature: str,
-    method_signature_description: str,
+    method_description: str,
 ) -> None:
-    jsonrpc_page_info(
-        'jsonrpc_basic.noReturn', breadcrumb, method_description, method_signature, method_signature_description
-    )
+    jsonrpc_page_info('jsonrpc_basic.noReturn', breadcrumb, method_title, method_signature, method_description)
 
 
 @pytest.mark.parametrize(

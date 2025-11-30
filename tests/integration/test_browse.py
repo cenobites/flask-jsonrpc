@@ -40,10 +40,16 @@ def test_index(page: Page) -> None:
     breadcrumb_element = page.locator('#breadcrumb')
     expect(breadcrumb_element).to_contain_text('Dashboard')
 
-    method_signature_element = page.locator('.method-signature')
-    expect(method_signature_element).to_contain_text('Api.welcome()')
+    method_signature_title_element = page.locator('.method-title')
+    expect(method_signature_title_element).to_contain_text('Api.welcome')
 
-    method_signature_description_element = page.locator('.method-signature-description')
+    method_signature_element = page.locator('.method-signature')
+    expect(method_signature_element).to_contain_text('Api.welcome() -> String')
+
+    method_signature_summary_element = page.locator('.method-summary')
+    expect(method_signature_summary_element).to_contain_text('Welcome Flask JSON-RPC')
+
+    method_signature_description_element = page.locator('.method-description')
     expect(method_signature_description_element).to_contain_text('Welcome to web browsable API')
 
     request_element = page.locator('.request-content')
