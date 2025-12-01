@@ -186,6 +186,10 @@ def test_browse_create() -> None:
         assert b'Welcome to web browsable API' in rv.data
         assert rv.status_code == 200
 
+        rv = client.get('/api/browse/partials/field_describe.html')
+        assert b'field-doc' in rv.data
+        assert rv.status_code == 200
+
         rv = client.get('/api/browse/partials/response_object.html')
         assert b'module_dialog.html' in rv.data
         assert rv.status_code == 200

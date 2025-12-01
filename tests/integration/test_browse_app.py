@@ -31,17 +31,17 @@ from playwright.sync_api import Page
 
 
 @pytest.mark.parametrize(
-    'breadcrumb,method_description,method_signature,method_signature_description',
-    [('app » app.echo', '', 'app.echo(string: String, _some: Object) -> String', '')],
+    'breadcrumb,method_title,method_signature,method_description',
+    [('app » app.echo', 'app.echo', 'app.echo(string: String, _some: Object) -> String', '')],
 )
 def test_app_echo_display(
     jsonrpc_page_info: t.Callable[..., Page],
     breadcrumb: str,
-    method_description: str,
+    method_title: str,
     method_signature: str,
-    method_signature_description: str,
+    method_description: str,
 ) -> None:
-    jsonrpc_page_info('app.echo', breadcrumb, method_description, method_signature, method_signature_description)
+    jsonrpc_page_info('app.echo', breadcrumb, method_title, method_signature, method_description)
 
 
 @pytest.mark.parametrize(
@@ -97,17 +97,17 @@ def test_app_echo_form(
 
 
 @pytest.mark.parametrize(
-    'breadcrumb,method_description,method_signature,method_signature_description',
-    [('app » app.notify', '', 'app.notify(_string: String) -> Null', '')],
+    'breadcrumb,method_title,method_signature,method_description',
+    [('app » app.notify', 'app.notify', 'app.notify(_string: String) -> Null', '')],
 )
 def test_app_notify_display(
     jsonrpc_page_info: t.Callable[..., Page],
     breadcrumb: str,
-    method_description: str,
+    method_title: str,
     method_signature: str,
-    method_signature_description: str,
+    method_description: str,
 ) -> None:
-    jsonrpc_page_info('app.notify', breadcrumb, method_description, method_signature, method_signature_description)
+    jsonrpc_page_info('app.notify', breadcrumb, method_title, method_signature, method_description)
 
 
 @pytest.mark.parametrize(
@@ -137,17 +137,17 @@ def test_app_notify_form(
 
 
 @pytest.mark.parametrize(
-    'breadcrumb,method_description,method_signature,method_signature_description',
-    [('app » app.fails', '', 'app.fails(n: Number) -> Number', '')],
+    'breadcrumb,method_title,method_signature,method_description',
+    [('app » app.fails', 'app.fails', 'app.fails(n: Number) -> Number', '')],
 )
 def test_app_fails_display(
     jsonrpc_page_info: t.Callable[..., Page],
     breadcrumb: str,
-    method_description: str,
+    method_title: str,
     method_signature: str,
-    method_signature_description: str,
+    method_description: str,
 ) -> None:
-    jsonrpc_page_info('app.fails', breadcrumb, method_description, method_signature, method_signature_description)
+    jsonrpc_page_info('app.fails', breadcrumb, method_title, method_signature, method_description)
 
 
 @pytest.mark.parametrize(
@@ -207,17 +207,17 @@ def test_app_fails_form(
 
 
 @pytest.mark.parametrize(
-    'breadcrumb,method_description,method_signature,method_signature_description',
-    [('app » app.decorators', '', 'app.decorators(string: String) -> String', '')],
+    'breadcrumb,method_title,method_signature,method_description',
+    [('app » app.decorators', 'app.decorators', 'app.decorators(string: String) -> String', '')],
 )
 def test_app_decorators_display(
     jsonrpc_page_info: t.Callable[..., Page],
     breadcrumb: str,
-    method_description: str,
+    method_title: str,
     method_signature: str,
-    method_signature_description: str,
+    method_description: str,
 ) -> None:
-    jsonrpc_page_info('app.decorators', breadcrumb, method_description, method_signature, method_signature_description)
+    jsonrpc_page_info('app.decorators', breadcrumb, method_title, method_signature, method_description)
 
 
 @pytest.mark.parametrize(
@@ -255,19 +255,17 @@ def test_app_decorators_form(
 
 
 @pytest.mark.parametrize(
-    'breadcrumb,method_description,method_signature,method_signature_description',
-    [('app » app.wrappedDecorators', '', 'app.wrappedDecorators(string: String) -> String', '')],
+    'breadcrumb,method_title,method_signature,method_description',
+    [('app » app.wrappedDecorators', 'app.wrappedDecorators', 'app.wrappedDecorators(string: String) -> String', '')],
 )
 def test_app_wrapped_decorators_display(
     jsonrpc_page_info: t.Callable[..., Page],
     breadcrumb: str,
-    method_description: str,
+    method_title: str,
     method_signature: str,
-    method_signature_description: str,
+    method_description: str,
 ) -> None:
-    jsonrpc_page_info(
-        'app.wrappedDecorators', breadcrumb, method_description, method_signature, method_signature_description
-    )
+    jsonrpc_page_info('app.wrappedDecorators', breadcrumb, method_title, method_signature, method_description)
 
 
 @pytest.mark.parametrize(
@@ -305,19 +303,24 @@ def test_app_wrapped_decorators_form(
 
 
 @pytest.mark.parametrize(
-    'breadcrumb,method_description,method_signature,method_signature_description',
-    [('app » app.failsWithCustomException', '', 'app.failsWithCustomException(_string: String) -> Null', '')],
+    'breadcrumb,method_title,method_signature,method_description',
+    [
+        (
+            'app » app.failsWithCustomException',
+            'app.failsWithCustomException',
+            'app.failsWithCustomException(_string: String) -> Null',
+            '',
+        )
+    ],
 )
 def test_app_fails_with_custom_exception_display(
     jsonrpc_page_info: t.Callable[..., Page],
     breadcrumb: str,
-    method_description: str,
+    method_title: str,
     method_signature: str,
-    method_signature_description: str,
+    method_description: str,
 ) -> None:
-    jsonrpc_page_info(
-        'app.failsWithCustomException', breadcrumb, method_description, method_signature, method_signature_description
-    )
+    jsonrpc_page_info('app.failsWithCustomException', breadcrumb, method_title, method_signature, method_description)
 
 
 @pytest.mark.parametrize(
@@ -374,11 +377,11 @@ def test_app_fails_with_custom_exception_form(
 
 
 @pytest.mark.parametrize(
-    'breadcrumb,method_description,method_signature,method_signature_description',
+    'breadcrumb,method_title,method_signature,method_description',
     [
         (
             'app » app.failsWithCustomExceptionNotRegistered',
-            '',
+            'app.failsWithCustomExceptionNotRegistered',
             'app.failsWithCustomExceptionNotRegistered(_string: String) -> Null',
             '',
         )
@@ -387,16 +390,12 @@ def test_app_fails_with_custom_exception_form(
 def test_app_fails_with_custom_exception_not_registered_display(
     jsonrpc_page_info: t.Callable[..., Page],
     breadcrumb: str,
-    method_description: str,
+    method_title: str,
     method_signature: str,
-    method_signature_description: str,
+    method_description: str,
 ) -> None:
     jsonrpc_page_info(
-        'app.failsWithCustomExceptionNotRegistered',
-        breadcrumb,
-        method_description,
-        method_signature,
-        method_signature_description,
+        'app.failsWithCustomExceptionNotRegistered', breadcrumb, method_title, method_signature, method_description
     )
 
 

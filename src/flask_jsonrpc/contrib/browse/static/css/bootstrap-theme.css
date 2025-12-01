@@ -4346,6 +4346,7 @@ body.modal-open {
   margin-right: auto;
   width: auto;
   padding: 10px;
+  width: 750px !important;
   z-index: 1050; }
 
 

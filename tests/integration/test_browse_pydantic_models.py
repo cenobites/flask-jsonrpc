@@ -31,11 +31,11 @@ from playwright.sync_api import Page
 
 
 @pytest.mark.parametrize(
-    'breadcrumb,method_description,method_signature,method_signature_description',
+    'breadcrumb,method_title,method_signature,method_description',
     [
         (
             'objects » objects.pydantic_models.createPet',
-            '',
+            'objects.pydantic_models.createPet',
             'objects.pydantic_models.createPet(pet: Object) -> Object',
             '',
         )
@@ -44,16 +44,12 @@ from playwright.sync_api import Page
 def test_objects_pydantic_models_create_pet_display(
     jsonrpc_page_info: t.Callable[..., Page],
     breadcrumb: str,
-    method_description: str,
+    method_title: str,
     method_signature: str,
-    method_signature_description: str,
+    method_description: str,
 ) -> None:
     jsonrpc_page_info(
-        'objects.pydantic_models.createPet',
-        breadcrumb,
-        method_description,
-        method_signature,
-        method_signature_description,
+        'objects.pydantic_models.createPet', breadcrumb, method_title, method_signature, method_description
     )
 
 
@@ -129,11 +125,11 @@ def test_objects_pydantic_models_create_pet_form(
 
 
 @pytest.mark.parametrize(
-    'breadcrumb,method_description,method_signature,method_signature_description',
+    'breadcrumb,method_title,method_signature,method_description',
     [
         (
             'objects » objects.pydantic_models.createManyPet',
-            '',
+            'objects.pydantic_models.createManyPet',
             'objects.pydantic_models.createManyPet(pets: Array, pet: Object) -> Array',
             '',
         )
@@ -142,16 +138,12 @@ def test_objects_pydantic_models_create_pet_form(
 def test_objects_pydantic_models_create_many_pet_display(
     jsonrpc_page_info: t.Callable[..., Page],
     breadcrumb: str,
-    method_description: str,
+    method_title: str,
     method_signature: str,
-    method_signature_description: str,
+    method_description: str,
 ) -> None:
     jsonrpc_page_info(
-        'objects.pydantic_models.createManyPet',
-        breadcrumb,
-        method_description,
-        method_signature,
-        method_signature_description,
+        'objects.pydantic_models.createManyPet', breadcrumb, method_title, method_signature, method_description
     )
 
 
@@ -257,11 +249,11 @@ def test_objects_pydantic_models_create_many_pet_form(
 
 
 @pytest.mark.parametrize(
-    'breadcrumb,method_description,method_signature,method_signature_description',
+    'breadcrumb,method_title,method_signature,method_description',
     [
         (
             'objects » objects.pydantic_models.createManyFixPet',
-            '',
+            'objects.pydantic_models.createManyFixPet',
             'objects.pydantic_models.createManyFixPet(pets: Object) -> Array',
             '',
         )
@@ -270,16 +262,12 @@ def test_objects_pydantic_models_create_many_pet_form(
 def test_objects_pydantic_models_create_many_fix_pet_display(
     jsonrpc_page_info: t.Callable[..., Page],
     breadcrumb: str,
-    method_description: str,
+    method_title: str,
     method_signature: str,
-    method_signature_description: str,
+    method_description: str,
 ) -> None:
     jsonrpc_page_info(
-        'objects.pydantic_models.createManyFixPet',
-        breadcrumb,
-        method_description,
-        method_signature,
-        method_signature_description,
+        'objects.pydantic_models.createManyFixPet', breadcrumb, method_title, method_signature, method_description
     )
 
 
@@ -373,11 +361,11 @@ def test_objects_pydantic_models_create_many_fix_pet_form(
 
 
 @pytest.mark.parametrize(
-    'breadcrumb,method_description,method_signature,method_signature_description',
+    'breadcrumb,method_title,method_signature,method_description',
     [
         (
             'objects » objects.pydantic_models.removePet',
-            '',
+            'objects.pydantic_models.removePet',
             'objects.pydantic_models.removePet(pet: Object) -> Object',
             '',
         )
@@ -386,16 +374,12 @@ def test_objects_pydantic_models_create_many_fix_pet_form(
 def test_objects_pydantic_models_remove_pet_display(
     jsonrpc_page_info: t.Callable[..., Page],
     breadcrumb: str,
-    method_description: str,
+    method_title: str,
     method_signature: str,
-    method_signature_description: str,
+    method_description: str,
 ) -> None:
     jsonrpc_page_info(
-        'objects.pydantic_models.removePet',
-        breadcrumb,
-        method_description,
-        method_signature,
-        method_signature_description,
+        'objects.pydantic_models.removePet', breadcrumb, method_title, method_signature, method_description
     )
 
 

@@ -31,12 +31,12 @@ from playwright.sync_api import Page
 
 
 @pytest.mark.parametrize(
-    'breadcrumb,method_description,method_signature,method_signature_description',
+    'breadcrumb,method_title,method_signature,method_description',
     [
         (
             'types » types.python_stds_annotated.boolType',
-            '',
-            'types.python_stds_annotated.boolType(yes: Boolean) -> Boolean',
+            'types.python_stds_annotated.boolType',
+            'types.python_stds_annotated.boolType(yes*: Boolean) -> Boolean',
             '',
         )
     ],
@@ -44,16 +44,12 @@ from playwright.sync_api import Page
 def test_types_python_stds_bool_type_display(
     jsonrpc_page_info: t.Callable[..., Page],
     breadcrumb: str,
-    method_description: str,
+    method_title: str,
     method_signature: str,
-    method_signature_description: str,
+    method_description: str,
 ) -> None:
     jsonrpc_page_info(
-        'types.python_stds_annotated.boolType',
-        breadcrumb,
-        method_description,
-        method_signature,
-        method_signature_description,
+        'types.python_stds_annotated.boolType', breadcrumb, method_title, method_signature, method_description
     )
 
 
@@ -82,12 +78,12 @@ def test_types_python_stds_bool_type_form(
 
 
 @pytest.mark.parametrize(
-    'breadcrumb,method_description,method_signature,method_signature_description',
+    'breadcrumb,method_title,method_signature,method_description',
     [
         (
             'types » types.python_stds_annotated.strType',
-            '',
-            'types.python_stds_annotated.strType(st: String) -> String',
+            'types.python_stds_annotated.strType',
+            'types.python_stds_annotated.strType(st*: String) -> String',
             '',
         )
     ],
@@ -95,16 +91,12 @@ def test_types_python_stds_bool_type_form(
 def test_types_python_stds_str_type_display(
     jsonrpc_page_info: t.Callable[..., Page],
     breadcrumb: str,
-    method_description: str,
+    method_title: str,
     method_signature: str,
-    method_signature_description: str,
+    method_description: str,
 ) -> None:
     jsonrpc_page_info(
-        'types.python_stds_annotated.strType',
-        breadcrumb,
-        method_description,
-        method_signature,
-        method_signature_description,
+        'types.python_stds_annotated.strType', breadcrumb, method_title, method_signature, method_description
     )
 
 
@@ -179,12 +171,12 @@ def test_types_python_stds_str_type_form(
 
 
 @pytest.mark.parametrize(
-    'breadcrumb,method_description,method_signature,method_signature_description',
+    'breadcrumb,method_title,method_signature,method_description',
     [
         (
             'types » types.python_stds_annotated.intType',
-            '',
-            'types.python_stds_annotated.intType(n: Number) -> Number',
+            'types.python_stds_annotated.intType',
+            'types.python_stds_annotated.intType(n*: Number) -> Number',
             '',
         )
     ],
@@ -192,16 +184,12 @@ def test_types_python_stds_str_type_form(
 def test_types_python_stds_int_type_display(
     jsonrpc_page_info: t.Callable[..., Page],
     breadcrumb: str,
-    method_description: str,
+    method_title: str,
     method_signature: str,
-    method_signature_description: str,
+    method_description: str,
 ) -> None:
     jsonrpc_page_info(
-        'types.python_stds_annotated.intType',
-        breadcrumb,
-        method_description,
-        method_signature,
-        method_signature_description,
+        'types.python_stds_annotated.intType', breadcrumb, method_title, method_signature, method_description
     )
 
 
@@ -278,12 +266,12 @@ def test_types_python_stds_int_type_form(
 
 
 @pytest.mark.parametrize(
-    'breadcrumb,method_description,method_signature,method_signature_description',
+    'breadcrumb,method_title,method_signature,method_description',
     [
         (
             'types » types.python_stds_annotated.floatType',
-            '',
-            'types.python_stds_annotated.floatType(n: Number) -> Number',
+            'types.python_stds_annotated.floatType',
+            'types.python_stds_annotated.floatType(n*: Number) -> Number',
             '',
         )
     ],
@@ -291,16 +279,12 @@ def test_types_python_stds_int_type_form(
 def test_types_python_stds_float_type_display(
     jsonrpc_page_info: t.Callable[..., Page],
     breadcrumb: str,
-    method_description: str,
+    method_title: str,
     method_signature: str,
-    method_signature_description: str,
+    method_description: str,
 ) -> None:
     jsonrpc_page_info(
-        'types.python_stds_annotated.floatType',
-        breadcrumb,
-        method_description,
-        method_signature,
-        method_signature_description,
+        'types.python_stds_annotated.floatType', breadcrumb, method_title, method_signature, method_description
     )
 
 
@@ -407,12 +391,12 @@ def test_types_python_stds_float_type_form(
 
 
 @pytest.mark.parametrize(
-    'breadcrumb,method_description,method_signature,method_signature_description',
+    'breadcrumb,method_title,method_signature,method_description',
     [
         (
             'types » types.python_stds_annotated.listType',
-            '',
-            'types.python_stds_annotated.listType(lst: Array) -> Array',
+            'types.python_stds_annotated.listType',
+            'types.python_stds_annotated.listType(lst*: Array) -> Array',
             '',
         )
     ],
@@ -420,16 +404,12 @@ def test_types_python_stds_float_type_form(
 def test_types_python_stds_list_type_display(
     jsonrpc_page_info: t.Callable[..., Page],
     breadcrumb: str,
-    method_description: str,
+    method_title: str,
     method_signature: str,
-    method_signature_description: str,
+    method_description: str,
 ) -> None:
     jsonrpc_page_info(
-        'types.python_stds_annotated.listType',
-        breadcrumb,
-        method_description,
-        method_signature,
-        method_signature_description,
+        'types.python_stds_annotated.listType', breadcrumb, method_title, method_signature, method_description
     )
 
 
@@ -520,12 +500,12 @@ def test_types_python_stds_list_type_form(
 
 
 @pytest.mark.parametrize(
-    'breadcrumb,method_description,method_signature,method_signature_description',
+    'breadcrumb,method_title,method_signature,method_description',
     [
         (
             'types » types.python_stds_annotated.dictType',
-            '',
-            'types.python_stds_annotated.dictType(d: Object) -> Object',
+            'types.python_stds_annotated.dictType',
+            'types.python_stds_annotated.dictType(d*: Object) -> Object',
             '',
         )
     ],
@@ -533,16 +513,12 @@ def test_types_python_stds_list_type_form(
 def test_types_python_stds_dict_type_display(
     jsonrpc_page_info: t.Callable[..., Page],
     breadcrumb: str,
-    method_description: str,
+    method_title: str,
     method_signature: str,
-    method_signature_description: str,
+    method_description: str,
 ) -> None:
     jsonrpc_page_info(
-        'types.python_stds_annotated.dictType',
-        breadcrumb,
-        method_description,
-        method_signature,
-        method_signature_description,
+        'types.python_stds_annotated.dictType', breadcrumb, method_title, method_signature, method_description
     )
 
 
@@ -617,12 +593,12 @@ def test_types_python_stds_dict_type_form(
 
 
 @pytest.mark.parametrize(
-    'breadcrumb,method_description,method_signature,method_signature_description',
+    'breadcrumb,method_title,method_signature,method_description',
     [
         (
             'types » types.python_stds_annotated.bytesType',
-            '',
-            'types.python_stds_annotated.bytesType(b: String) -> String',
+            'types.python_stds_annotated.bytesType',
+            'types.python_stds_annotated.bytesType(b*: String) -> String',
             '',
         )
     ],
@@ -630,16 +606,12 @@ def test_types_python_stds_dict_type_form(
 def test_types_python_bytes_type_display(
     jsonrpc_page_info: t.Callable[..., Page],
     breadcrumb: str,
-    method_description: str,
+    method_title: str,
     method_signature: str,
-    method_signature_description: str,
+    method_description: str,
 ) -> None:
     jsonrpc_page_info(
-        'types.python_stds_annotated.bytesType',
-        breadcrumb,
-        method_description,
-        method_signature,
-        method_signature_description,
+        'types.python_stds_annotated.bytesType', breadcrumb, method_title, method_signature, method_description
     )
 
 
@@ -706,12 +678,12 @@ def test_types_python_bytes_type_form(
 
 
 @pytest.mark.parametrize(
-    'breadcrumb,method_description,method_signature,method_signature_description',
+    'breadcrumb,method_title,method_signature,method_description',
     [
         (
             'types » types.python_stds_annotated.bytearrayType',
-            '',
-            'types.python_stds_annotated.bytearrayType(b: String) -> String',
+            'types.python_stds_annotated.bytearrayType',
+            'types.python_stds_annotated.bytearrayType(b*: String) -> String',
             '',
         )
     ],
@@ -719,16 +691,12 @@ def test_types_python_bytes_type_form(
 def test_types_python_bytearray_type_display(
     jsonrpc_page_info: t.Callable[..., Page],
     breadcrumb: str,
-    method_description: str,
+    method_title: str,
     method_signature: str,
-    method_signature_description: str,
+    method_description: str,
 ) -> None:
     jsonrpc_page_info(
-        'types.python_stds_annotated.bytearrayType',
-        breadcrumb,
-        method_description,
-        method_signature,
-        method_signature_description,
+        'types.python_stds_annotated.bytearrayType', breadcrumb, method_title, method_signature, method_description
     )
 
 
@@ -803,12 +771,12 @@ def test_types_python_bytearray_type_form(
 
 
 @pytest.mark.parametrize(
-    'breadcrumb,method_description,method_signature,method_signature_description',
+    'breadcrumb,method_title,method_signature,method_description',
     [
         (
             'types » types.python_stds_annotated.intEnumType',
-            '',
-            'types.python_stds_annotated.intEnumType(e: Object) -> Object',
+            'types.python_stds_annotated.intEnumType',
+            'types.python_stds_annotated.intEnumType(e*: Object) -> Object',
             '',
         )
     ],
@@ -816,16 +784,12 @@ def test_types_python_bytearray_type_form(
 def test_types_python_int_enum_type_display(
     jsonrpc_page_info: t.Callable[..., Page],
     breadcrumb: str,
-    method_description: str,
+    method_title: str,
     method_signature: str,
-    method_signature_description: str,
+    method_description: str,
 ) -> None:
     jsonrpc_page_info(
-        'types.python_stds_annotated.intEnumType',
-        breadcrumb,
-        method_description,
-        method_signature,
-        method_signature_description,
+        'types.python_stds_annotated.intEnumType', breadcrumb, method_title, method_signature, method_description
     )
 
 
@@ -874,12 +838,12 @@ def test_types_python_int_enum_type_form(
 
 
 @pytest.mark.parametrize(
-    'breadcrumb,method_description,method_signature,method_signature_description',
+    'breadcrumb,method_title,method_signature,method_description',
     [
         (
             'types » types.python_stds_annotated.decimalType',
-            '',
-            'types.python_stds_annotated.decimalType(n: Number) -> Number',
+            'types.python_stds_annotated.decimalType',
+            'types.python_stds_annotated.decimalType(n*: Number) -> Number',
             '',
         )
     ],
@@ -887,16 +851,12 @@ def test_types_python_int_enum_type_form(
 def test_types_python_decimal_type_display(
     jsonrpc_page_info: t.Callable[..., Page],
     breadcrumb: str,
-    method_description: str,
+    method_title: str,
     method_signature: str,
-    method_signature_description: str,
+    method_description: str,
 ) -> None:
     jsonrpc_page_info(
-        'types.python_stds_annotated.decimalType',
-        breadcrumb,
-        method_description,
-        method_signature,
-        method_signature_description,
+        'types.python_stds_annotated.decimalType', breadcrumb, method_title, method_signature, method_description
     )
 
 
@@ -965,12 +925,12 @@ def test_types_python_decimal_type_form(
 
 
 @pytest.mark.parametrize(
-    'breadcrumb,method_description,method_signature,method_signature_description',
+    'breadcrumb,method_title,method_signature,method_description',
     [
         (
             'types » types.python_stds_annotated.tupleType',
-            '',
-            'types.python_stds_annotated.tupleType(tn: Array) -> Array',
+            'types.python_stds_annotated.tupleType',
+            'types.python_stds_annotated.tupleType(tn*: Array) -> Array',
             '',
         )
     ],
@@ -978,16 +938,12 @@ def test_types_python_decimal_type_form(
 def test_types_python_tuple_type_display(
     jsonrpc_page_info: t.Callable[..., Page],
     breadcrumb: str,
-    method_description: str,
+    method_title: str,
     method_signature: str,
-    method_signature_description: str,
+    method_description: str,
 ) -> None:
     jsonrpc_page_info(
-        'types.python_stds_annotated.tupleType',
-        breadcrumb,
-        method_description,
-        method_signature,
-        method_signature_description,
+        'types.python_stds_annotated.tupleType', breadcrumb, method_title, method_signature, method_description
     )
 
 
@@ -1036,12 +992,12 @@ def test_types_python_tuple_type_form(
 
 
 @pytest.mark.parametrize(
-    'breadcrumb,method_description,method_signature,method_signature_description',
+    'breadcrumb,method_title,method_signature,method_description',
     [
         (
             'types » types.python_stds_annotated.namedtupleType',
-            '',
-            'types.python_stds_annotated.namedtupleType(tn: Object) -> Array',
+            'types.python_stds_annotated.namedtupleType',
+            'types.python_stds_annotated.namedtupleType(tn*: Object) -> Array',
             '',
         )
     ],
@@ -1049,16 +1005,12 @@ def test_types_python_tuple_type_form(
 def test_types_python_namedtuple_type_display(
     jsonrpc_page_info: t.Callable[..., Page],
     breadcrumb: str,
-    method_description: str,
+    method_title: str,
     method_signature: str,
-    method_signature_description: str,
+    method_description: str,
 ) -> None:
     jsonrpc_page_info(
-        'types.python_stds_annotated.namedtupleType',
-        breadcrumb,
-        method_description,
-        method_signature,
-        method_signature_description,
+        'types.python_stds_annotated.namedtupleType', breadcrumb, method_title, method_signature, method_description
     )
 
 
@@ -1131,22 +1083,25 @@ def test_types_python_namedtuple_type_form(
 
 
 @pytest.mark.parametrize(
-    'breadcrumb,method_description,method_signature,method_signature_description',
-    [('types » types.python_stds_annotated.setType', '', 'types.python_stds_annotated.setType(s: Array) -> Array', '')],
+    'breadcrumb,method_title,method_signature,method_description',
+    [
+        (
+            'types » types.python_stds_annotated.setType',
+            'types.python_stds_annotated.setType',
+            'types.python_stds_annotated.setType(s*: Array) -> Array',
+            '',
+        )
+    ],
 )
 def test_types_python_set_type_display(
     jsonrpc_page_info: t.Callable[..., Page],
     breadcrumb: str,
-    method_description: str,
+    method_title: str,
     method_signature: str,
-    method_signature_description: str,
+    method_description: str,
 ) -> None:
     jsonrpc_page_info(
-        'types.python_stds_annotated.setType',
-        breadcrumb,
-        method_description,
-        method_signature,
-        method_signature_description,
+        'types.python_stds_annotated.setType', breadcrumb, method_title, method_signature, method_description
     )
 
 
@@ -1195,12 +1150,12 @@ def test_types_python_set_type_form(
 
 
 @pytest.mark.parametrize(
-    'breadcrumb,method_description,method_signature,method_signature_description',
+    'breadcrumb,method_title,method_signature,method_description',
     [
         (
             'types » types.python_stds_annotated.sequenceType',
-            '',
-            'types.python_stds_annotated.sequenceType(s: Array) -> Array',
+            'types.python_stds_annotated.sequenceType',
+            'types.python_stds_annotated.sequenceType(s*: Array) -> Array',
             '',
         )
     ],
@@ -1208,16 +1163,12 @@ def test_types_python_set_type_form(
 def test_types_python_sequence_type_display(
     jsonrpc_page_info: t.Callable[..., Page],
     breadcrumb: str,
-    method_description: str,
+    method_title: str,
     method_signature: str,
-    method_signature_description: str,
+    method_description: str,
 ) -> None:
     jsonrpc_page_info(
-        'types.python_stds_annotated.sequenceType',
-        breadcrumb,
-        method_description,
-        method_signature,
-        method_signature_description,
+        'types.python_stds_annotated.sequenceType', breadcrumb, method_title, method_signature, method_description
     )
 
 
@@ -1284,12 +1235,12 @@ def test_types_python_sequence_type_form(
 
 
 @pytest.mark.parametrize(
-    'breadcrumb,method_description,method_signature,method_signature_description',
+    'breadcrumb,method_title,method_signature,method_description',
     [
         (
             'types » types.python_stds_annotated.typedDictType',
-            '',
-            'types.python_stds_annotated.typedDictType(user: Object) -> Object',
+            'types.python_stds_annotated.typedDictType',
+            'types.python_stds_annotated.typedDictType(user*: Object) -> Object',
             '',
         )
     ],
@@ -1297,16 +1248,12 @@ def test_types_python_sequence_type_form(
 def test_types_python_typed_dict_type_display(
     jsonrpc_page_info: t.Callable[..., Page],
     breadcrumb: str,
-    method_description: str,
+    method_title: str,
     method_signature: str,
-    method_signature_description: str,
+    method_description: str,
 ) -> None:
     jsonrpc_page_info(
-        'types.python_stds_annotated.typedDictType',
-        breadcrumb,
-        method_description,
-        method_signature,
-        method_signature_description,
+        'types.python_stds_annotated.typedDictType', breadcrumb, method_title, method_signature, method_description
     )
 
 
@@ -1379,12 +1326,12 @@ def test_types_python_typed_dict_type_form(
 
 
 @pytest.mark.parametrize(
-    'breadcrumb,method_description,method_signature,method_signature_description',
+    'breadcrumb,method_title,method_signature,method_description',
     [
         (
             'types » types.python_stds_annotated.unionWithTwoTypes',
-            '',
-            'types.python_stds_annotated.unionWithTwoTypes(n: Number) -> Number',
+            'types.python_stds_annotated.unionWithTwoTypes',
+            'types.python_stds_annotated.unionWithTwoTypes(n*: Number) -> Number',
             '',
         )
     ],
@@ -1392,16 +1339,12 @@ def test_types_python_typed_dict_type_form(
 def test_types_python_union_with_two_types_display(
     jsonrpc_page_info: t.Callable[..., Page],
     breadcrumb: str,
-    method_description: str,
+    method_title: str,
     method_signature: str,
-    method_signature_description: str,
+    method_description: str,
 ) -> None:
     jsonrpc_page_info(
-        'types.python_stds_annotated.unionWithTwoTypes',
-        breadcrumb,
-        method_description,
-        method_signature,
-        method_signature_description,
+        'types.python_stds_annotated.unionWithTwoTypes', breadcrumb, method_title, method_signature, method_description
     )
 
 
@@ -1468,12 +1411,12 @@ def test_types_python_union_with_two_types_form(
 
 
 @pytest.mark.parametrize(
-    'breadcrumb,method_description,method_signature,method_signature_description',
+    'breadcrumb,method_title,method_signature,method_description',
     [
         (
             'types » types.python_stds_annotated.literalType',
-            '',
-            'types.python_stds_annotated.literalType(x: String) -> String',
+            'types.python_stds_annotated.literalType',
+            'types.python_stds_annotated.literalType(x*: String) -> String',
             '',
         )
     ],
@@ -1481,16 +1424,12 @@ def test_types_python_union_with_two_types_form(
 def test_types_python_literal_type_display(
     jsonrpc_page_info: t.Callable[..., Page],
     breadcrumb: str,
-    method_description: str,
+    method_title: str,
     method_signature: str,
-    method_signature_description: str,
+    method_description: str,
 ) -> None:
     jsonrpc_page_info(
-        'types.python_stds_annotated.literalType',
-        breadcrumb,
-        method_description,
-        method_signature,
-        method_signature_description,
+        'types.python_stds_annotated.literalType', breadcrumb, method_title, method_signature, method_description
     )
 
 
@@ -1539,11 +1478,11 @@ def test_types_python_literal_type_form(
 
 
 @pytest.mark.parametrize(
-    'breadcrumb,method_description,method_signature,method_signature_description',
+    'breadcrumb,method_title,method_signature,method_description',
     [
         (
             'types » types.python_stds_annotated.optional',
-            '',
+            'types.python_stds_annotated.optional',
             'types.python_stds_annotated.optional(n: Number) -> Number',
             '',
         )
@@ -1552,16 +1491,12 @@ def test_types_python_literal_type_form(
 def test_types_python_optional_display(
     jsonrpc_page_info: t.Callable[..., Page],
     breadcrumb: str,
-    method_description: str,
+    method_title: str,
     method_signature: str,
-    method_signature_description: str,
+    method_description: str,
 ) -> None:
     jsonrpc_page_info(
-        'types.python_stds_annotated.optional',
-        breadcrumb,
-        method_description,
-        method_signature,
-        method_signature_description,
+        'types.python_stds_annotated.optional', breadcrumb, method_title, method_signature, method_description
     )
 
 

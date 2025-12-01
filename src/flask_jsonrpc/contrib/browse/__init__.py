@@ -88,6 +88,7 @@ class JSONRPCBrowse:
         browse.add_url_rule('/<method_name>.json', view_func=self.vf_json_method)
         browse.add_url_rule('/partials/menu_tree.html', view_func=self.vf_partials_menu_tree)
         browse.add_url_rule('/partials/dashboard.html', view_func=self.vf_partials_dashboard)
+        browse.add_url_rule('/partials/field_describe.html', view_func=self.vf_partials_field_describe)
         browse.add_url_rule('/partials/response_object.html', view_func=self.vf_partials_response_object)
 
         app.register_blueprint(browse, url_prefix=self.url_prefix)
@@ -127,6 +128,9 @@ class JSONRPCBrowse:
 
     def vf_partials_dashboard(self: Self) -> str:
         return render_template('browse/partials/dashboard.html')
+
+    def vf_partials_field_describe(self: Self) -> str:
+        return render_template('browse/partials/field_describe.html')
 
     def vf_partials_response_object(self: Self) -> str:
         return render_template('browse/partials/response_object.html')

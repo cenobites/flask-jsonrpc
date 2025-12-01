@@ -1,7 +1,34 @@
 {% raw %}
 <div class="content-main">
-    <div class="page-header method-signature"><h1>Api.welcome()</h1></div>
-    <blockquote class="method-signature-description" ng-bind-html="'Welcome to web browsable API'|markdown"></blockquote>
+  <div class="method-documentation">
+    <div class="method-header">
+      <h1 class="method-title">
+        Api.welcome
+      </h1>
+
+      <div class="method-signature">
+        <code>
+          Api.welcome() -> String
+        </code>
+      </div>
+    </div>
+
+    <div class="method-tags">
+      <span class="label label-info">Flask</span>
+      <span class="label label-info">JSON-RPC</span>
+    </div>
+
+    <div class="method-info">
+      <div class="method-summary">
+        <h3>Welcome Flask JSON-RPC</h3>
+      </div>
+
+      <div class="method-description">
+        <div>Welcome to web browsable API</div>
+      </div>
+    </div>
+  </div>
+  <div>
     <p><b>Request:</b></p>
     <div class="request-info" style="clear: both" >
         <pre class="prettyprint"><b>{{ response.config.method }}</b> {{ response.config.url }}
@@ -12,5 +39,6 @@
         <pre class="prettyprint"><div class="meta nocode"><b>HTTP {{ response.statusCode }}</b></div>
 <span ng-bind-html="responseObject|json|prettyprint" class="response-content"></span></pre>
     </div>
+  </div>
 </div>
 {% endraw %}
