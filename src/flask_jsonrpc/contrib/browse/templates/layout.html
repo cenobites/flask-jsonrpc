@@ -8,12 +8,19 @@
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Flask JSON-RPC | Web Browsable API" />
+  <meta name="description" content="{{ browse_title }} | {{ browse_description }}" />
   <meta name="author" content="Cenobit Techonologies Inc. http://cenobit.es/" />
   <meta name="robots" content="NONE,NOARCHIVE" />
   {% endblock %}
 
-  <title>{% block title %}Flask JSON-RPC{% endblock %}</title>
+  <title>{% block title %}{{ browse_title }}{% endblock %}</title>
+
+  {% block favicon %}
+  <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('urn:browse.static', filename='apple-touch-icon.png') }}">
+  <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('urn:browse.static', filename='favicon-32x32.png') }}">
+  <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('urn:browse.static', filename='favicon-16x16.png') }}">
+  <link rel="manifest" href="{{ url_for('urn:browse.static', filename='site.webmanifest') }}">
+  {% endblock %}
 
   {% block style %}
   {% block bootstrap_theme %}
@@ -23,7 +30,8 @@
   <link rel="stylesheet" type="text/css" href="{{ url_for('urn:browse.static', filename='css/prettify.css') }}"/>
   <link rel="stylesheet" type="text/css" href="{{ url_for('urn:browse.static', filename='css/loading-bar.min.css') }}"/>
   <link rel="stylesheet" type="text/css" href="{{ url_for('urn:browse.static', filename='css/codemirror.min.css') }}"/>
-  {% block include_style %}{% endblock %}
+  {% block include_style %}
+  {% endblock %}
   {% endblock %}
 
   <script type="text/javascript">
@@ -43,7 +51,7 @@
   {% block navbar %}
   <nav id="navbar-main" class="navbar navbar-default navbar-inverse navbar-static-top" role="navigation">
     <div class="navbar-header">
-      <a class='navbar-brand' href='https://github.com/cenobites/flask-jsonrpc'>Flask JSON-RPC <span class="version">{{ version }}</span></a>
+      <a class='navbar-brand' href='{{ browse_title_url }}'>{{ browse_title }}</a>
     </div>
   </nav>
   {% endblock %}

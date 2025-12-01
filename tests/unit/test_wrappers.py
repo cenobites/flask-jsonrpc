@@ -28,17 +28,14 @@ import typing as t
 import logging
 from functools import wraps
 
+# Python 3.11+
+from typing_extensions import Self
+
 import pytest
 
 from flask_jsonrpc.views import JSONRPCView
 from flask_jsonrpc.wrappers import JSONRPCDecoratorMixin
 from flask_jsonrpc.types.methods import Summary, MethodAnnotated, MethodAnnotatedType
-
-# Python 3.11+
-try:
-    from typing import Self
-except ImportError:  # pragma: no cover
-    from typing_extensions import Self
 
 
 class MockJSONRPCSite:

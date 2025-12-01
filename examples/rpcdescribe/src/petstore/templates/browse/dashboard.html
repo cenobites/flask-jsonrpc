@@ -1,0 +1,159 @@
+<div>
+  <!-- Header -->
+  <header class="dashboard-header">
+    <div class="container">
+      <div class="header-content">
+        <div class="logo">
+          <span class="logo-icon">🐾</span>
+          <h1>Petstore API</h1>
+        </div>
+        <nav class="main-nav">
+          <a href="#overview" class="nav-link active">Overview</a>
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="container">
+      <div class="hero-content">
+        <h2 class="hero-title">RPC Describe Dashboard</h2>
+        <p class="hero-description">
+          A powerful JSON-RPC 2.0 API for managing your virtual petstore.
+          Explore methods, test endpoints, and integrate seamlessly.
+        </p>
+        <div class="hero-actions">
+          <button class="btn btn-primary" onclick="scrollToSection('playground')">Try It Now</button>
+          <button class="btn btn-secondary" onclick="scrollToSection('methods')">View Documentation</button>
+        </div>
+      </div>
+      <div class="hero-stats">
+        <div class="stat-card">
+          <div class="stat-value" id="total-methods">5</div>
+          <div class="stat-label">API Methods</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="total-pets">0</div>
+          <div class="stat-label">Pets in Store</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">JSON-RPC 2.0</div>
+          <div class="stat-label">Protocol</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- API Methods Section -->
+  <section id="methods" class="methods-section">
+    <div class="container">
+      <h2 class="section-title">Available API Methods</h2>
+      <div class="methods-grid">
+        <div class="method-card" data-method="Petstore.get_pets">
+          <div class="method-header">
+            <span class="method-badge get">GET</span>
+            <h3 class="method-name">get_pets</h3>
+          </div>
+          <p class="method-description">Returns all pets from the system</p>
+          <div class="method-params">
+            <span class="param-tag">tags: list[str]?</span>
+            <span class="param-tag">limit: int?</span>
+          </div>
+          <button class="btn btn-small" onclick="testMethod('Petstore.get_pets')">Test</button>
+        </div>
+
+        <div class="method-card" data-method="Petstore.create_pet">
+          <div class="method-header">
+            <span class="method-badge post">POST</span>
+            <h3 class="method-name">create_pet</h3>
+          </div>
+          <p class="method-description">Creates a new pet in the store</p>
+          <div class="method-params">
+            <span class="param-tag">new_pet: NewPet</span>
+          </div>
+          <button class="btn btn-small" onclick="testMethod('Petstore.create_pet')">Test</button>
+        </div>
+
+        <div class="method-card" data-method="Petstore.get_pet_by_id">
+          <div class="method-header">
+            <span class="method-badge get">GET</span>
+            <h3 class="method-name">get_pet_by_id</h3>
+          </div>
+          <p class="method-description">Returns a pet based on ID</p>
+          <div class="method-params">
+            <span class="param-tag">id: int</span>
+          </div>
+          <button class="btn btn-small" onclick="testMethod('Petstore.get_pet_by_id')">Test</button>
+        </div>
+
+        <div class="method-card" data-method="Petstore.delete_pet_by_id">
+          <div class="method-header">
+            <span class="method-badge delete">DELETE</span>
+            <h3 class="method-name">delete_pet_by_id</h3>
+          </div>
+          <p class="method-description">Deletes a pet based on ID</p>
+          <div class="method-params">
+            <span class="param-tag">id: int</span>
+          </div>
+          <button class="btn btn-small" onclick="testMethod('Petstore.delete_pet_by_id')">Test</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Playground Section -->
+  <section id="playground" class="playground-section">
+    <div class="container">
+      <h2 class="section-title">API Playground</h2>
+      <div class="playground-container">
+        <div class="playground-controls">
+          <div class="form-group">
+            <label for="method-select">Select Method:</label>
+            <select id="method-select" class="form-control">
+              <option value="Petstore.get_pets">Petstore.get_pets</option>
+              <option value="Petstore.create_pet">Petstore.create_pet</option>
+              <option value="Petstore.get_pet_by_id">Petstore.get_pet_by_id</option>
+              <option value="Petstore.delete_pet_by_id">Petstore.delete_pet_by_id</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="params-input">Parameters (JSON):</label>
+            <textarea id="params-input" class="form-control" rows="6" placeholder='{&#10;  "tags": ["dog", "cat"],&#10;  "limit": 10&#10;}'></textarea>
+          </div>
+          <button class="btn btn-primary btn-block" onclick="executeRPC()">Execute Request</button>
+        </div>
+        <div class="playground-results">
+          <div class="result-tabs">
+            <button class="tab-btn active" onclick="switchTab('response')">Response</button>
+            <button class="tab-btn" onclick="switchTab('request')">Request</button>
+          </div>
+          <div id="response-tab" class="tab-content active">
+            <pre id="response-output" class="code-block"><code>// Response will appear here</code></pre>
+          </div>
+          <div id="request-tab" class="tab-content">
+            <pre id="request-output" class="code-block"><code>// Request details will appear here</code></pre>
+          </div>
+          <div class="result-status">
+            <span id="status-indicator" class="status-badge"></span>
+            <span id="status-text"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="dashboard-footer">
+    <div class="container">
+      <div class="footer-content">
+        <p>&copy; 2024 Cenobit Technologies, Inc. | Powered by Flask-JSONRPC</p>
+        <div class="footer-links">
+          <a href="https://github.com/cenobites/flask-jsonrpc" target="_blank">GitHub</a>
+          <a href="/api" target="_blank">API Endpoint</a>
+          <a href="/browse" target="_blank">Browse API</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+</div>

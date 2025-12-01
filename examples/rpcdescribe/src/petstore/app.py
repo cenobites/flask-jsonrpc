@@ -37,9 +37,43 @@ from pydantic import BaseModel
 from flask_jsonrpc import JSONRPC
 import flask_jsonrpc.types.params as tp
 import flask_jsonrpc.types.methods as tm
+from flask_jsonrpc.contrib.browse import JSONRPCBrowse
 
-app = Flask('openrpc')
-jsonrpc = JSONRPC(app, '/api', enable_web_browsable_api=True)
+# Added in version 3.11.
+
+
+class CustomJSONRPCBrowse(JSONRPCBrowse):
+    def get_browse_title(self: Self) -> str:
+        return 'Petstore API'
+
+    def get_browse_subtitle(self: Self) -> str:
+        return 'Managing pets'
+
+    def get_browse_description(self: Self) -> str:
+        return 'This is the Petstore API which allows you to manage '
+
+    'pets including creating, retrieving, and deleting pets.'
+
+    def get_browse_fork_me_button_enabled(self: Self) -> bool:
+        return False
+
+    def get_browse_media_css(self: Self) -> dict[str, list[str]]:
+        return {'all': ['css/petstore.css']}
+
+    def get_browse_media_js(self: Self) -> list[str]:
+        return ['js/petstore.js']
+
+    def get_browse_dashboard_menu_name(self: Self) -> str:
+        return 'Petstore Dashboard'
+
+    def get_browse_dashboard_template(self: Self) -> str:
+        return 'browse/dashboard.html'
+
+
+app = Flask('openrpc', template_folder='src/petstore/templates', static_folder='src/petstore/static')
+jsonrpc = JSONRPC(app, '/api', enable_web_browsable_api=False)
+browse = CustomJSONRPCBrowse(app, url_prefix='/api/browse')
+browse.register_jsonrpc_site(jsonrpc.get_jsonrpc_site())
 
 
 class PetBaseException(Exception):
@@ -84,7 +118,20 @@ def handle_pet_not_found_exc(ex: PetNotFoundException) -> dict[str, str]:
         ),
         tm.Tag('pet'),
         tm.Error(code=-32000, message='ServerError', data={'message': 'Server error'}, status_code=500),
-        tm.Example(name='default'),
+        tm.Example(
+            name='default',
+            params=[
+                tm.ExampleField(
+                    name='tags', value=['dog', 'cat'], summary='Tags to filter by', description='Tags to filter by'
+                ),
+                tm.ExampleField(
+                    name='limit',
+                    value=2,
+                    summary='Maximum number of results to return',
+                    description='Maximum number of results to return',
+                ),
+            ],
+        ),
     ],
 )
 def get_pets(
@@ -107,8 +154,13 @@ def get_pets(
         tm.Example(
             name='default',
             params=[
-                tm.ExampleField(name='tags', value='dog', summary='', description=''),
-                tm.ExampleField(name='limit', value=25, summary='', description=''),
+                tm.ExampleField(name='tags', value='dog', summary='Tags to filter by', description='Tags to filter by'),
+                tm.ExampleField(
+                    name='limit',
+                    value=25,
+                    summary='Maximum number of results to return',
+                    description='Maximum number of results to return',
+                ),
             ],
         ),
     ],
@@ -152,13 +204,18 @@ def get_pet_by_id(
     tm.MethodAnnotated[
         tm.Tag('pet'),
         tm.Error(code=-32000, message='Server error', data={'message': 'Pet not found: <pet_id>'}, status_code=500),
-        tm.Example(name='default', params=[tm.ExampleField(name='id', value=1, summary='', description='')]),
+        tm.Example(
+            name='default',
+            params=[
+                tm.ExampleField(name='id', value=1, summary='ID of pet to delete', description='ID of pet to delete')
+            ],
+        ),
     ],
 )
 def delete_pet_by_id(
     id: t.Annotated[int, tp.Summary('ID of pet to delete'), tp.Minimum(1)],
 ) -> t.Annotated[Pet, tp.Summary('pet deleted')]:
-    """deletes a single pet based on the ID supplied"""
+    """Deletes a single pet based on the ID supplied"""
     global PETS
     removed = [pet for pet in PETS if pet.id == id]
     if len(removed) == 0:

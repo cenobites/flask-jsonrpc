@@ -347,7 +347,7 @@ pre-commit = [
     { name = "pre-commit-uv" },
 ]
 security = [{ name = "bandit", marker = "python_full_version >= '3.11'" }]
-style = [{ name = "ruff", specifier = "==0.14.6" }]
+style = [{ name = "ruff", specifier = "==0.14.7" }]
 tests = [
     { name = "coverage", extras = ["toml"], specifier = "==7.12.0" },
     { name = "pytest", specifier = "==9.0.1" },

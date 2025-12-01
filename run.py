@@ -34,7 +34,7 @@ import flask_jsonrpc.types.params as tp
 import flask_jsonrpc.types.methods as tm
 
 # Flask application
-app = Flask('application')
+app = Flask('application', static_folder='static', template_folder='templates')
 
 # Flask-JSONRPC
 jsonrpc = JSONRPC(app, '/api', enable_web_browsable_api=True)
