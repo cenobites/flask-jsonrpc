@@ -34,9 +34,9 @@ from urllib.parse import urlsplit
 from typing_extensions import Self
 
 from . import typing as fjt
+from .conf import settings
 from .types import params as types_params, methods as types_methods
 from .helpers import from_python_type
-from .settings import DEFAULTS
 from .types.types import Object, propertify
 
 if t.TYPE_CHECKING:
@@ -168,8 +168,8 @@ class JSONRPCServiceDescriptor:
             method = fjt.Method(
                 name=method_name,
                 type=JSONRPC_DESCRIBE_SERVICE_METHOD_TYPE,
-                validation=method_options.get('validate', DEFAULTS['DEFAULT_JSONRPC_METHOD']['VALIDATE']),
-                notification=method_options.get('notification', DEFAULTS['DEFAULT_JSONRPC_METHOD']['NOTIFICATION']),
+                validation=method_options.get('validate', settings.DEFAULT_JSONRPC_METHOD_VALIDATE),
+                notification=method_options.get('notification', settings.DEFAULT_JSONRPC_METHOD_NOTIFICATION),
                 params=self._service_method_params_desc(view_func),
                 returns=self._service_method_returns_desc(view_func),
             )

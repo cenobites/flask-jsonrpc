@@ -5,6 +5,11 @@
 
 {% block include_style %}
 <link href="{{ url_for('urn:browse.static', filename='css/bootstrap-browse.css') }}" rel="stylesheet"/>
+{% for media, css_files in browse_media_css.items() %}
+  {% for css_file in css_files %}
+    <link href="{{ url_for('static', filename=css_file) }}" media="{{ media }}" type="text/css" rel="stylesheet"/>
+  {% endfor %}
+{% endfor %}
 {% endblock %}
 
 {% block include_script %}
@@ -13,6 +18,9 @@
 <script type="text/javascript" src="{{ url_for('urn:browse.static', filename='js/apps/browse/filters.js') }}"></script>
 <script type="text/javascript" src="{{ url_for('urn:browse.static', filename='js/apps/browse/services.js') }}"></script>
 <script type="text/javascript" src="{{ url_for('urn:browse.static', filename='js/apps/browse/controllers.js') }}"></script>
+{% for js_file in browse_media_js %}
+  <script type="text/javascript" src="{{ url_for('static', filename=js_file) }}"></script>
+{% endfor %}
 {% endblock %}
 
 {% block templates_js %}
@@ -30,15 +38,17 @@
       <div class="row">
         <div id="logo-section">
           <div id="logo-loading-box"><div id="logo-loading" ng-show="showSpinner()"></div></div>
-          <a id="logo-link" class="title" href="#/" ng-click="goToDashboard()">Web browsable API</a>
+          <a id="logo-link" class="title" href="#/" ng-click="goToDashboard()">{{ browse_subtitle }}</a>
         </div>
       </div>
+      {% if browse_fork_me_button_enabled %}
       <div id="box-subscribe" class="row box-subscribe">
         <a href="https://github.com/cenobites/flask-jsonrpc" class="btn btn-red btn-subscribe"><i class="icon icon-github icon-large"></i> Fork A Repo</a>
       </div>
+      {% endif %}
       <div id="scrollable-sections">
         <ul class="nav nav-tabs nav-stacked">
-          <li><a href="#/" ng-click="goToDashboard()" ng-class="{active:routeIs('/')}"><i class="icon icon-home"></i> Dashboard</a></li>
+          <li><a href="#/" ng-click="goToDashboard()" ng-class="{active:routeIs('/')}"><i class="icon icon-home"></i> {{ browse_dashboard_menu_name }}</a></li>
           {% raw %}
           <menu-tree node="packages" on-click="goToModule(item)"></menu-tree>
           {% endraw %}
@@ -54,7 +64,7 @@
           <div id="viewer-header">
             <div id="viewer-top-controls-container">
               <div id="viewer-top-controls">
-                <span style="color: #777777;">A look at what's new in your web browsable API</span>
+                <span style="color: #777777;">{{ browse_description }}</span>
 
                 <ul class="list-inline pull-right sparkline-box" ng-show="showToolbar">
                   <li ng-show="showToolbarPlayButton">

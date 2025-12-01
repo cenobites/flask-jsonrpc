@@ -32,6 +32,21 @@ from flask_jsonrpc.typing import Field, Method
 from flask_jsonrpc.contrib.browse import JSONRPCBrowse, build_package_tree
 
 
+def test_browse_object() -> None:
+    browse = JSONRPCBrowse()
+    assert browse.url_prefix == '/api/browse'
+    assert browse.base_url is None
+    assert browse.jsonrpc_sites == set()
+    assert browse.get_browse_title() == 'Flask JSON-RPC'
+    assert browse.get_browse_title_url() == 'https://github.com/cenobites/flask-jsonrpc'
+    assert browse.get_browse_subtitle() == 'Web browsable API'
+    assert browse.get_browse_description() == 'An interactive web browsable API for Flask JSON-RPC services'
+    assert browse.get_browse_fork_me_button_enabled() is True
+    assert browse.get_browse_media_css() == {}
+    assert browse.get_browse_media_js() == []
+    assert browse.get_browse_dashboard_template() == 'browse/partials/dashboard.html'
+
+
 def test_browse_create() -> None:
     app = Flask('test_browse', instance_relative_config=True)
     jsonrpc = JSONRPC(app, '/api', enable_web_browsable_api=True)
@@ -104,7 +119,7 @@ def test_browse_create() -> None:
         assert rv.status_code == 308
 
         rv = client.get('/api/browse/')
-        assert b'Flask JSON-RPC | Web Browsable API' in rv.data
+        assert b'Flask JSON-RPC | An interactive web browsable API for Flask JSON-RPC services' in rv.data
         assert b'/api' in rv.data
         assert rv.status_code == 200
 
@@ -211,7 +226,7 @@ def test_jsonrpc_browse_empty() -> None:
         assert rv.status_code == 404
 
         rv = client.get('/api/browse/')
-        assert b'Flask JSON-RPC | Web Browsable API' in rv.data
+        assert b'Flask JSON-RPC | An interactive web browsable API for Flask JSON-RPC services' in rv.data
         assert rv.status_code == 200
 
         rv = client.get('/api/browse/static/js/main.js')
@@ -254,7 +269,7 @@ def test_browse_create_without_register_app() -> None:
         assert rv.status_code == 200
 
         rv = client.get('/api/browse/')
-        assert b'Flask JSON-RPC | Web Browsable API' in rv.data
+        assert b'Flask JSON-RPC | An interactive web browsable API for Flask JSON-RPC services' in rv.data
         assert b'/api' in rv.data
         assert rv.status_code == 200
 
@@ -317,7 +332,7 @@ def test_browse_create_multiple_jsonrpc_versions() -> None:
         assert rv.status_code == 200
 
         rv = client.get('/api/v1/browse/')
-        assert b'Flask JSON-RPC | Web Browsable API' in rv.data
+        assert b'Flask JSON-RPC | An interactive web browsable API for Flask JSON-RPC services' in rv.data
         assert b'/api/v1' in rv.data
         assert b'/api/v2' not in rv.data
         assert rv.status_code == 200
@@ -386,7 +401,7 @@ def test_browse_create_multiple_jsonrpc_versions() -> None:
         assert rv.status_code == 404
 
         rv = client.get('/api/v2/browse/')
-        assert b'Flask JSON-RPC | Web Browsable API' in rv.data
+        assert b'Flask JSON-RPC | An interactive web browsable API for Flask JSON-RPC services' in rv.data
         assert b'/api/v2/browse' in rv.data
         assert b'/api/v2' in rv.data
         assert b'/api/v1/browse/static/' in rv.data
@@ -428,7 +443,7 @@ def test_browse_create_modular_apps() -> None:
     jsonrpc = JSONRPC(app, '/api', enable_web_browsable_api=True)
     jsonrpc.register_blueprint(app, jsonrpc_api_1, url_prefix='/b1', enable_web_browsable_api=True)
     jsonrpc.register_blueprint(app, jsonrpc_api_2, url_prefix='/b2', enable_web_browsable_api=True)
-    jsonrpc.register_blueprint(app, jsonrpc_api_3, url_prefix='/b3')
+    jsonrpc.register_blueprint(app, jsonrpc_api_3, url_prefix='/b3', enable_web_browsable_api=False)
 
     with app.test_client() as client:
         rv = client.get('/api/browse/packages.json')
@@ -485,7 +500,7 @@ def test_browse_create_modular_apps() -> None:
         assert rv.status_code == 200
 
         rv = client.get('/api/browse/')
-        assert b'Flask JSON-RPC | Web Browsable API' in rv.data
+        assert b'Flask JSON-RPC | An interactive web browsable API for Flask JSON-RPC services' in rv.data
         assert b'/api/b1' in rv.data
         assert b'/api/b2' in rv.data
         assert b'/api/b3' not in rv.data

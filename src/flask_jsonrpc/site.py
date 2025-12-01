@@ -42,8 +42,8 @@ from werkzeug.utils import cached_property
 from typeguard._utils import qualified_name
 from werkzeug.datastructures import Headers
 
+from .conf import settings
 from .helpers import get
-from .settings import settings
 from .funcutils import bindfy
 from .descriptor import JSONRPCServiceDescriptor
 from .exceptions import (
@@ -149,7 +149,7 @@ class JSONRPCSite:
 
     def handle_view_func(self: Self, view_func: t.Callable[..., t.Any], params: t.Any) -> t.Any:  # noqa: ANN401
         view_func_params = getattr(view_func, 'jsonrpc_method_params', {})
-        validate = getattr(view_func, 'jsonrpc_validate', settings.DEFAULT_JSONRPC_METHOD['VALIDATE'])
+        validate = getattr(view_func, 'jsonrpc_validate', settings.DEFAULT_JSONRPC_METHOD_VALIDATE)
         try:
             if isinstance(params, list):
                 kw_params = {}
@@ -199,7 +199,7 @@ class JSONRPCSite:
         method_name = req_json['method']
         params = req_json.get('params', {})
         view_func = self.view_funcs.get(method_name)
-        notification = getattr(view_func, 'jsonrpc_notification', settings.DEFAULT_JSONRPC_METHOD['NOTIFICATION'])
+        notification = getattr(view_func, 'jsonrpc_notification', settings.DEFAULT_JSONRPC_METHOD_NOTIFICATION)
         if not view_func:
             raise MethodNotFoundError(data={'message': f'Method not found: {method_name}'}) from None
 

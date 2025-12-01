@@ -40,7 +40,7 @@ from typing_extensions import Self
 from typeguard import typechecked
 from werkzeug.utils import cached_property
 
-from .settings import settings
+from .conf import settings
 from .types.methods import MethodAnnotatedType
 
 if t.TYPE_CHECKING:
@@ -51,8 +51,8 @@ if t.TYPE_CHECKING:
 class JSONRPCDecoratorMixin:
     def _method_options(self: Self, options: dict[str, t.Any]) -> dict[str, t.Any]:
         default_options = {
-            'validate': settings.DEFAULT_JSONRPC_METHOD['VALIDATE'],
-            'notification': settings.DEFAULT_JSONRPC_METHOD['NOTIFICATION'],
+            'validate': settings.DEFAULT_JSONRPC_METHOD_VALIDATE,
+            'notification': settings.DEFAULT_JSONRPC_METHOD_NOTIFICATION,
         }
         return {**default_options, **options}
 
@@ -170,7 +170,7 @@ class JSONRPCDecoratorMixin:
     def method(
         self: Self, name: str | None = None, annotation: MethodAnnotatedType | None = None, **options: dict[str, t.Any]
     ) -> t.Callable[..., t.Any]:
-        validate = options.get('validate', settings.DEFAULT_JSONRPC_METHOD['VALIDATE'])
+        validate = options.get('validate', settings.DEFAULT_JSONRPC_METHOD_VALIDATE)
 
         def decorator(fn: t.Callable[..., t.Any]) -> t.Callable[..., t.Any]:
             fns = self._get_function_and_wrappers(fn)

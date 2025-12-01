@@ -1,4 +1,4 @@
-# Copyright (c) 2023-2024, Cenobit Technologies, Inc. http://cenobit.es/
+# Copyright (c) 2025-2025, Cenobit Technologies, Inc. http://cenobit.es/
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -24,28 +24,21 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-import pytest
+from __future__ import annotations
 
-from flask_jsonrpc.settings import DEFAULTS, JSONRPCSettings
+DEBUG = False
 
+TESTING = False
 
-def test_settings() -> None:
-    settings = JSONRPCSettings({'setting': True})
-    assert hasattr(settings, 'setting')
-    assert settings.setting is True
+DEFAULT_JSONRPC_METHOD_VALIDATE = True
+DEFAULT_JSONRPC_METHOD_NOTIFICATION = True
 
-    settings.attr1 = 'value1'
-    assert hasattr(settings, 'attr1')
-    assert settings.attr1 == 'value1'
-
-
-def test_settings_invalid_attr() -> None:
-    settings = JSONRPCSettings({'setting': True})
-    with pytest.raises(AttributeError, match="invalid setting: 'xxx'"):
-        assert settings.xxx is None
-
-
-def test_initialization_with_default() -> None:
-    settings = JSONRPCSettings()
-    for attr, val in DEFAULTS.items():
-        assert getattr(settings, attr) == val
+BROWSE_TITLE = 'Flask JSON-RPC'
+BROWSE_TITLE_URL = 'https://github.com/cenobites/flask-jsonrpc'
+BROWSE_SUBTITLE = 'Web browsable API'
+BROWSE_DESCRIPTION = 'An interactive web browsable API for Flask JSON-RPC services'
+BROWSE_FORK_ME_BUTTON_ENABLED = True
+BROWSE_DASHBOARD_MENU_NAME = 'Dashboard'
+BROWSE_DASHBOARD_TEMPLATE = 'browse/partials/dashboard.html'
+BROWSE_MEDIA_CSS: dict[str, list[str]] = {}  # {media: [css_file, ...]}
+BROWSE_MEDIA_JS: list[str] = []

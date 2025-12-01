@@ -36,6 +36,7 @@ from typing_extensions import Self
 from flask import Flask
 from flask.logging import has_level_handler
 
+from .conf import settings
 from .globals import default_jsonrpc_site, default_jsonrpc_site_api
 from .helpers import urn
 from .wrappers import JSONRPCDecoratorMixin
@@ -55,7 +56,7 @@ class JSONRPC(JSONRPCDecoratorMixin):
         version: str = '1.0.0',
         jsonrpc_site: type[JSONRPCSite] = default_jsonrpc_site,
         jsonrpc_site_api: type[JSONRPCView] = default_jsonrpc_site_api,
-        enable_web_browsable_api: bool = False,
+        enable_web_browsable_api: bool | None = None,
     ) -> None:
         self.app = app
         self.path = path
@@ -79,6 +80,9 @@ class JSONRPC(JSONRPCDecoratorMixin):
         return self.jsonrpc_site_api
 
     def init_app(self: Self, app: Flask) -> None:
+        for setting, value in app.config.items():
+            setattr(settings, setting.upper(), value)
+
         http_host = app.config.get('SERVER_NAME')
         app_root = app.config['APPLICATION_ROOT']
         url_scheme = app.config['PREFERRED_URL_SCHEME']
@@ -106,7 +110,7 @@ class JSONRPC(JSONRPCDecoratorMixin):
             ),
         )
 
-        if app.config['DEBUG'] or self.enable_web_browsable_api:
+        if self.enable_web_browsable_api is True or (self.enable_web_browsable_api is None and app.config['DEBUG']):
             self.init_browse_app(app)
 
     def register(
@@ -122,7 +126,7 @@ class JSONRPC(JSONRPCDecoratorMixin):
         app: Flask,
         jsonrpc_app: JSONRPCBlueprint,
         url_prefix: str | None = None,
-        enable_web_browsable_api: bool = False,
+        enable_web_browsable_api: bool | None = None,
     ) -> None:
         path = ''.join([self.path, '/', url_prefix.lstrip('/')]) if url_prefix else self.path
         path_url = urlsplit(path)
@@ -142,7 +146,7 @@ class JSONRPC(JSONRPCDecoratorMixin):
 
         self.jsonrpc_apps.add(jsonrpc_app)
 
-        if app.config['DEBUG'] or enable_web_browsable_api:
+        if enable_web_browsable_api is True or (enable_web_browsable_api is None and app.config['DEBUG']):
             self.register_browse(jsonrpc_app)
 
     def init_browse_app(self: Self, app: Flask, path: str | None = None, base_url: str | None = None) -> None:
