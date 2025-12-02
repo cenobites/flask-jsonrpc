@@ -26,20 +26,59 @@
 # POSSIBILITY OF SUCH DAMAGE.
 import random
 import typing as t
+from datetime import datetime, timezone, timedelta
 
 # Added in version 3.11.
 from typing_extensions import Self
 
-from flask import Flask
+from flask import Flask, typing as ft, jsonify, request, redirect
 
 from pydantic import BaseModel
+
+from jwt import PyJWTError
+import flask_jwt_extended as flask_jwt
+from flask_jwt_extended import JWTManager, jwt_required
+from flask_jwt_extended.exceptions import JWTExtendedException
 
 from flask_jsonrpc import JSONRPC
 import flask_jsonrpc.types.params as tp
 import flask_jsonrpc.types.methods as tm
-from flask_jsonrpc.contrib.browse import JSONRPCBrowse
+from flask_jsonrpc.contrib.browse import JSONRPCBrowse, register_middleware
 
-# Added in version 3.11.
+if t.TYPE_CHECKING:
+    from flask.wrappers import Request, Response
+
+
+@register_middleware('authentication')
+def authentication_middleware(
+    request: Request,
+) -> t.Generator[ft.ResponseReturnValue | bool | None, Response, ft.ResponseReturnValue | None]:
+    if (
+        request.path.startswith('/api/browse/static')
+        or request.path.startswith('/api/browse/login')
+        or request.path.startswith('/api/browse/logout')
+    ):
+        yield False
+
+    try:
+        flask_jwt.verify_jwt_in_request()
+    except (JWTExtendedException, PyJWTError):
+        yield redirect('/api/browse/login')
+
+    response = yield
+
+    jwt = flask_jwt.get_jwt()
+    if not jwt:
+        yield redirect('/api/browse/login')
+
+    now = datetime.now(timezone.utc)
+    target_timestamp = datetime.timestamp(now + timedelta(minutes=30))
+    exp_timestamp = jwt.get('exp', target_timestamp)
+    if target_timestamp > exp_timestamp:
+        access_token = flask_jwt.create_access_token(identity=flask_jwt.get_jwt_identity())
+        flask_jwt.set_access_cookies(response, access_token)
+        yield False
+    yield redirect('/api/browse/login')
 
 
 class CustomJSONRPCBrowse(JSONRPCBrowse):
@@ -50,9 +89,7 @@ class CustomJSONRPCBrowse(JSONRPCBrowse):
         return 'Managing pets'
 
     def get_browse_description(self: Self) -> str:
-        return 'This is the Petstore API which allows you to manage '
-
-    'pets including creating, retrieving, and deleting pets.'
+        return 'This is the Petstore API which allows you to manage pets'
 
     def get_browse_fork_me_button_enabled(self: Self) -> bool:
         return False
@@ -66,11 +103,23 @@ class CustomJSONRPCBrowse(JSONRPCBrowse):
     def get_browse_dashboard_menu_name(self: Self) -> str:
         return 'Petstore Dashboard'
 
-    def get_browse_dashboard_template(self: Self) -> str:
-        return 'browse/dashboard.html'
+    def get_browse_dashboard_partial_template(self: Self) -> str:
+        return 'browse/partials/dashboard.html'
+
+    def get_browse_login_template(self) -> str:
+        return 'browse/login.html'
+
+    def get_browse_logout_template(self) -> str:
+        return 'browse/logout.html'
 
 
 app = Flask('openrpc', template_folder='src/petstore/templates', static_folder='src/petstore/static')
+app.config['JWT_COOKIE_SECURE'] = False
+app.config['JWT_TOKEN_LOCATION'] = ['cookies']
+app.config['JWT_SECRET_KEY'] = 'super-secret'
+app.config['JWT_COOKIE_CSRF_PROTECT'] = False
+app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=1)
+jwt = JWTManager(app)
 jsonrpc = JSONRPC(app, '/api', enable_web_browsable_api=False)
 browse = CustomJSONRPCBrowse(app, url_prefix='/api/browse')
 browse.register_jsonrpc_site(jsonrpc.get_jsonrpc_site())
@@ -96,6 +145,26 @@ class Pet(NewPet):
 
 
 PETS = [Pet(id=1, name='Bob', tag='dog'), Pet(id=2, name='Eve', tag='cat'), Pet(id=3, name='Alice', tag='bird')]
+
+
+@app.route('/login', methods=['POST'])
+def login() -> ft.ResponseReturnValue:
+    username = request.json.get('username', None)
+    password = request.json.get('password', None)
+    if username != 'test' or password != 'test':
+        return jsonify({'msg': 'Bad username or password'}), 401
+
+    access_token = flask_jwt.create_access_token(identity=username)
+    response = jsonify(access_token=access_token)
+    flask_jwt.set_access_cookies(response, access_token)
+    return response
+
+
+@app.route('/logout', methods=['POST'])
+def logout() -> ft.ResponseReturnValue:
+    response = jsonify({'msg': 'logout successful'})
+    flask_jwt.unset_jwt_cookies(response)
+    return response
 
 
 @jsonrpc.errorhandler(PetNotFoundException)
@@ -134,6 +203,7 @@ def handle_pet_not_found_exc(ex: PetNotFoundException) -> dict[str, str]:
         ),
     ],
 )
+@jwt_required()
 def get_pets(
     tags: t.Annotated[list[str] | None, tp.Summary('tags to filter by')] = None,
     limit: t.Annotated[int | None, tp.Summary('maximum number of results to return'), tp.Minimum(1)] = 25,
@@ -165,6 +235,7 @@ def get_pets(
         ),
     ],
 )
+@jwt_required()
 def create_pet(
     new_pet: t.Annotated[
         NewPet,
@@ -189,6 +260,7 @@ def create_pet(
         tm.Example(name='default', params=[tm.ExampleField(name='id', value=1, summary='', description='')]),
     ],
 )
+@jwt_required()
 def get_pet_by_id(
     id: t.Annotated[int, tp.Summary('ID of pet to fetch'), tp.Minimum(1)],
 ) -> t.Annotated[Pet | None, tp.Summary('pet response')]:
@@ -212,6 +284,7 @@ def get_pet_by_id(
         ),
     ],
 )
+@jwt_required()
 def delete_pet_by_id(
     id: t.Annotated[int, tp.Summary('ID of pet to delete'), tp.Minimum(1)],
 ) -> t.Annotated[Pet, tp.Summary('pet deleted')]:

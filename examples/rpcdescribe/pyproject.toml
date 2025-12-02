@@ -7,7 +7,10 @@ license = {file = "LICENSE.txt"}
 authors = [{name = "Nycholas Oliveira", email = "nycholas@cenobit.es"}]
 maintainers = [{name = "Cenobit Technologies Inc.", email = "hi@cenobit.es"}]
 requires-python = ">=3.10"
-dependencies = ["Flask-JSONRPC"]
+dependencies = [
+    "Flask-JSONRPC",
+    "flask-jwt-extended>=4.7.1",
+]
 
 [project.optional-dependencies]
 async = ["Flask[async]>=3.0.0,<4.0"]

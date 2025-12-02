@@ -60,11 +60,11 @@
     </div>
 
     <div class="method-info">
-      <div ng-if="module.summary" class="method-summary">
+      <div ng-show="module.summary" class="method-summary">
         <h3 ng-bind-html="module.summary|markdown"></h3>
       </div>
 
-      <div ng-if="module.description" class="method-description">
+      <div ng-show="module.description" class="method-description">
         <div ng-bind-html="module.description|markdown"></div>
       </div>
     </div>

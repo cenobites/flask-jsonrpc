@@ -37,9 +37,6 @@ def test_index(page: Page) -> None:
     logo_link = page.locator('#logo-link')
     expect(logo_link).to_have_text('Web browsable API')
 
-    breadcrumb_element = page.locator('#breadcrumb')
-    expect(breadcrumb_element).to_contain_text('Dashboard')
-
     method_signature_title_element = page.locator('.method-title')
     expect(method_signature_title_element).to_contain_text('Api.welcome')
 

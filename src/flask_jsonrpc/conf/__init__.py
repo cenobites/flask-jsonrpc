@@ -44,24 +44,12 @@ class LazyObject(t.Protocol):  # pragma: no cover
     def _setup(self: Self) -> None: ...
 
 
-def new_method_proxy(
-    getter: t.Callable[..., t.Any],
-    setter: t.Callable[..., None],
-    checker: t.Callable[[t.Any, str], bool],
-    fallback_settings: t.MutableMapping[str, t.Any] | None = None,
-) -> t.Callable[..., t.Any]:
+def new_method_proxy(getter: t.Callable[..., t.Any]) -> t.Callable[..., t.Any]:
     def inner(self: LazyObject, *args: t.Any) -> t.Any:  # noqa: ANN401
         _wrapped = self._wrapped
         if _wrapped is empty:
             self._setup()
             _wrapped = self._wrapped
-        if (
-            fallback_settings is not None
-            and not checker(_wrapped, *args)
-            and len(args) == 1
-            and args[0] in fallback_settings
-        ):
-            setter(_wrapped, args[0], fallback_settings[args[0]])
         return getter(_wrapped, *args)
 
     inner._mask_wrapped = False  # type: ignore[attr-defined]
@@ -69,32 +57,42 @@ def new_method_proxy(
 
 
 class Settings:
-    def __init__(self: Self) -> None:
+    def __init__(self: Self, fallback_settings: t.MutableMapping[str, t.Any] | None = None) -> None:
+        self._fallback_settings = fallback_settings
         # XXX: https://mypyc.readthedocs.io/en/latest/differences_from_python.html#monkey-patching
         for setting in dir(global_settings):
-            if setting.isupper():
+            if setting.isupper() and not setting.startswith('_'):
                 setattr(self, setting, getattr(global_settings, setting))
+
+    def __getattr__(self: Self, name: str) -> t.Any:  # noqa: ANN401
+        if self._fallback_settings is not None:
+            env_key = global_settings.CONFIG_TO_ENV(name)
+            if env_key in self._fallback_settings:
+                return self._fallback_settings[env_key]
+        raise AttributeError(f'{type(self).__name__!r} object has no attribute {name!r}')
 
 
 class LazySettings:
     _wrapped = None
+    _fallback_settings = None
 
-    def __init__(self: Self) -> None:
+    def __init__(self: Self, /, *, fallback_settings: t.MutableMapping[str, t.Any] | None = None) -> None:
         self._wrapped = empty
+        self._fallback_settings = fallback_settings
 
     def __getattribute__(self, name: str) -> t.Any:  # noqa: ANN401
-        if name == '_wrapped':
+        if name in ('_wrapped', '_fallback_settings'):
             return super().__getattribute__(name)
         value = super().__getattribute__(name)
         if not getattr(value, '_mask_wrapped', True):
             raise AttributeError
         return value
 
-    __getattr__ = new_method_proxy(getattr, setattr, hasattr, fallback_settings=os.environ)
+    __getattr__ = new_method_proxy(getattr)
 
     def __setattr__(self, name: str, value: t.Any) -> None:  # noqa: ANN401
-        if name == '_wrapped':
-            self.__dict__['_wrapped'] = value
+        if name in ('_wrapped', '_fallback_settings'):
+            self.__dict__[name] = value
         else:
             if self._wrapped is empty:
                 self._setup()
@@ -108,7 +106,7 @@ class LazySettings:
         delattr(self._wrapped, name)
 
     def _setup(self: Self) -> None:
-        self._wrapped = Settings()
+        self._wrapped = Settings(self._fallback_settings)
 
 
-settings = LazySettings()
+settings = LazySettings(fallback_settings=os.environ)

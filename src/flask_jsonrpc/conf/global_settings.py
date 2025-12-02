@@ -26,9 +26,29 @@
 # POSSIBILITY OF SUCH DAMAGE.
 from __future__ import annotations
 
-DEBUG = False
+import typing as t
 
+if t.TYPE_CHECKING:
+    from flask import typing as ft
+    from flask.wrappers import Request, Response
+
+DEBUG = False
 TESTING = False
+
+_FLASK_JSONRPC_ENV_PREFIX = 'FLASK_JSONRPC_'
+
+
+def IS_ENV_KEY(key: str) -> bool:
+    return key.upper().startswith(_FLASK_JSONRPC_ENV_PREFIX)
+
+
+def ENV_TO_CONFIG(key: str) -> str:
+    return key.replace(_FLASK_JSONRPC_ENV_PREFIX, '').upper()
+
+
+def CONFIG_TO_ENV(key: str) -> str:
+    return f'{_FLASK_JSONRPC_ENV_PREFIX}{key.upper()}'
+
 
 DEFAULT_JSONRPC_METHOD_VALIDATE = True
 DEFAULT_JSONRPC_METHOD_NOTIFICATION = True
@@ -39,6 +59,16 @@ BROWSE_SUBTITLE = 'Web browsable API'
 BROWSE_DESCRIPTION = 'An interactive web browsable API for Flask JSON-RPC services'
 BROWSE_FORK_ME_BUTTON_ENABLED = True
 BROWSE_DASHBOARD_MENU_NAME = 'Dashboard'
-BROWSE_DASHBOARD_TEMPLATE = 'browse/partials/dashboard.html'
+BROWSE_DASHBOARD_PARTIAL_TEMPLATE = 'browse/partials/dashboard.html'
+BROWSE_LOGIN_TEMPLATE: str | None = None
+BROWSE_LOGOUT_TEMPLATE: str | None = None
 BROWSE_MEDIA_CSS: dict[str, list[str]] = {}  # {media: [css_file, ...]}
 BROWSE_MEDIA_JS: list[str] = []
+BROWSE_MIDDLEWARE: list[
+    tuple[
+        str,
+        t.Callable[
+            [Request], t.Generator[ft.ResponseReturnValue | bool | None, Response, ft.ResponseReturnValue | None]
+        ],
+    ]
+] = []

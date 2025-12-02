@@ -28,16 +28,21 @@
 
 	App.adjust = function() {
         var viewPortHeight = $(window).outerHeight(true),
-            viewPortWidth = $(window).outerWidth(true),
-            viewPortMenu = viewPortHeight - $('#navbar-main').outerHeight(true) - $('#logo-section').outerHeight(true) - $('#box-subscribe').outerHeight(true),
-            viewPortContent = viewPortHeight - $('#navbar-main').outerHeight(true) - $('#viewer-header-container').outerHeight(true),
-            viewPortIframe = viewPortContent - $('#title-and-status-container').outerHeight(true);
+            viewPortMenu = (
+                viewPortHeight - ($('#navbar-main').outerHeight(true) || 0)
+                    - ($('#logo-section').outerHeight(true) || 0)
+                    - ($('#box-subscribe').outerHeight(true) || 0)
+            ),
+            viewPortContent = (
+                viewPortHeight - ($('#navbar-main').outerHeight(true) || 0)
+                    - ($('#viewer-header-container').outerHeight(true) || 0)
+            );
 
         // Menu
-    	$('#scrollable-sections').height(viewPortMenu);
+    	$('#scrollable-sections').height(Math.max(viewPortMenu, viewPortContent));
 
         // Content master
-    	$('#viewer-entries-container').height(viewPortContent);
+    	$('#viewer-entries-container').height(Math.max(viewPortMenu, viewPortContent));
     };
 
 	App.ready = function(E) {

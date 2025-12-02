@@ -1,0 +1,44 @@
+{% extends "layout.html" %}
+
+{% block title %}Logout - {{ browse_title }}{% endblock %}
+
+{% block style %}
+<link href="{{ url_for('static', filename='css/logout.css') }}" rel="stylesheet"/>
+{% endblock %}
+
+{% block script %}
+<script src="{{ url_for('static', filename='js/logout.js') }}"></script>
+{% endblock %}
+
+{% block page %}
+<div class="logout-container">
+    <div class="logout-card">
+        <div class="logout-header">
+            <h1>👋 Logout</h1>
+            <p>Sign out from {{ browse_title }}</p>
+        </div>
+
+        <div class="logout-content">
+            <div class="logout-icon">
+                <svg width="80" height="80" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M17 7L15.59 8.41L18.17 11H8V13H18.17L15.59 15.58L17 17L22 12L17 7Z" fill="currentColor"/>
+                    <path d="M4 5H12V3H4C2.9 3 2 3.9 2 5V19C2 20.1 2.9 21 4 21H12V19H4V5Z" fill="currentColor"/>
+                </svg>
+            </div>
+
+            <p class="logout-message">Are you sure you want to sign out?</p>
+
+            <form id="logoutForm" class="logout-form" action="/logout" method="post">
+                <button type="submit" class="logout-button" id="logoutButton">
+                    <span class="button-text">Sign Out</span>
+                    <span class="button-spinner" style="display: none;">⏳</span>
+                </button>
+
+                <a href="/api/browse" class="cancel-button">Cancel</a>
+            </form>
+
+            <div id="errorMessage" class="error-message" style="display: none;"></div>
+        </div>
+    </div>
+</div>
+{% endblock %}

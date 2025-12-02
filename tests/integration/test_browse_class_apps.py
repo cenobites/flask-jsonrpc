@@ -31,17 +31,13 @@ from playwright.sync_api import Page
 
 
 @pytest.mark.parametrize(
-    'breadcrumb,method_title,method_signature,method_description',
-    [('class_apps » class_apps.index', 'class_apps.index', 'class_apps.index(name: String) -> String', '')],
+    'method_title,method_signature,method_description',
+    [('class_apps.index', 'class_apps.index(name: String) -> String', '')],
 )
 def test_class_apps_index_display(
-    jsonrpc_page_info: t.Callable[..., Page],
-    breadcrumb: str,
-    method_title: str,
-    method_signature: str,
-    method_description: str,
+    jsonrpc_page_info: t.Callable[..., Page], method_title: str, method_signature: str, method_description: str
 ) -> None:
-    jsonrpc_page_info('class_apps.index', breadcrumb, method_title, method_signature, method_description)
+    jsonrpc_page_info('class_apps.index', method_title, method_signature, method_description)
 
 
 @pytest.mark.parametrize(
@@ -79,17 +75,13 @@ def test_class_apps_index_form(
 
 
 @pytest.mark.parametrize(
-    'breadcrumb,method_title,method_signature,method_description',
-    [('class_apps » class_apps.greeting', 'class_apps.greeting', 'class_apps.greeting(name: String) -> String', '')],
+    'method_title,method_signature,method_description',
+    [('class_apps.greeting', 'class_apps.greeting(name: String) -> String', '')],
 )
 def test_class_apps_greeting_display(
-    jsonrpc_page_info: t.Callable[..., Page],
-    breadcrumb: str,
-    method_title: str,
-    method_signature: str,
-    method_description: str,
+    jsonrpc_page_info: t.Callable[..., Page], method_title: str, method_signature: str, method_description: str
 ) -> None:
-    jsonrpc_page_info('class_apps.greeting', breadcrumb, method_title, method_signature, method_description)
+    jsonrpc_page_info('class_apps.greeting', method_title, method_signature, method_description)
 
 
 @pytest.mark.parametrize(
@@ -127,17 +119,13 @@ def test_class_apps_greeting_form(
 
 
 @pytest.mark.parametrize(
-    'breadcrumb,method_title,method_signature,method_description',
-    [('class_apps » class_apps.hello', 'class_apps.hello', 'class_apps.hello(name: String) -> String', '')],
+    'method_title,method_signature,method_description',
+    [('class_apps.hello', 'class_apps.hello(name: String) -> String', '')],
 )
 def test_class_apps_hello_display(
-    jsonrpc_page_info: t.Callable[..., Page],
-    breadcrumb: str,
-    method_title: str,
-    method_signature: str,
-    method_description: str,
+    jsonrpc_page_info: t.Callable[..., Page], method_title: str, method_signature: str, method_description: str
 ) -> None:
-    jsonrpc_page_info('class_apps.hello', breadcrumb, method_title, method_signature, method_description)
+    jsonrpc_page_info('class_apps.hello', method_title, method_signature, method_description)
 
 
 @pytest.mark.parametrize(
@@ -175,24 +163,13 @@ def test_class_apps_hello_form(
 
 
 @pytest.mark.parametrize(
-    'breadcrumb,method_title,method_signature,method_description',
-    [
-        (
-            'class_apps » class_apps.echo',
-            'class_apps.echo',
-            'class_apps.echo(string: String, _some: Object) -> String',
-            '',
-        )
-    ],
+    'method_title,method_signature,method_description',
+    [('class_apps.echo', 'class_apps.echo(string: String, _some: Object) -> String', '')],
 )
 def test_class_apps_echo_display(
-    jsonrpc_page_info: t.Callable[..., Page],
-    breadcrumb: str,
-    method_title: str,
-    method_signature: str,
-    method_description: str,
+    jsonrpc_page_info: t.Callable[..., Page], method_title: str, method_signature: str, method_description: str
 ) -> None:
-    jsonrpc_page_info('class_apps.echo', breadcrumb, method_title, method_signature, method_description)
+    jsonrpc_page_info('class_apps.echo', method_title, method_signature, method_description)
 
 
 @pytest.mark.parametrize(
@@ -238,17 +215,13 @@ def test_class_apps_echo_form(
 
 
 @pytest.mark.parametrize(
-    'breadcrumb,method_title,method_signature,method_description',
-    [('class_apps » class_apps.notify', 'class_apps.notify', 'class_apps.notify(_string: String) -> Null', '')],
+    'method_title,method_signature,method_description',
+    [('class_apps.notify', 'class_apps.notify(_string: String) -> Null', '')],
 )
 def test_class_apps_notify_display(
-    jsonrpc_page_info: t.Callable[..., Page],
-    breadcrumb: str,
-    method_title: str,
-    method_signature: str,
-    method_description: str,
+    jsonrpc_page_info: t.Callable[..., Page], method_title: str, method_signature: str, method_description: str
 ) -> None:
-    jsonrpc_page_info('class_apps.notify', breadcrumb, method_title, method_signature, method_description)
+    jsonrpc_page_info('class_apps.notify', method_title, method_signature, method_description)
 
 
 @pytest.mark.parametrize(
@@ -282,24 +255,13 @@ def test_class_apps_notify_form(
 
 
 @pytest.mark.parametrize(
-    'breadcrumb,method_title,method_signature,method_description',
-    [
-        (
-            'class_apps » class_apps.not_allow_notify',
-            'class_apps.not_allow_notify',
-            'class_apps.not_allow_notify(_string: String) -> String',
-            '',
-        )
-    ],
+    'method_title,method_signature,method_description',
+    [('class_apps.not_allow_notify', 'class_apps.not_allow_notify(_string: String) -> String', '')],
 )
 def test_class_apps_not_allow_notify_display(
-    jsonrpc_page_info: t.Callable[..., Page],
-    breadcrumb: str,
-    method_title: str,
-    method_signature: str,
-    method_description: str,
+    jsonrpc_page_info: t.Callable[..., Page], method_title: str, method_signature: str, method_description: str
 ) -> None:
-    jsonrpc_page_info('class_apps.not_allow_notify', breadcrumb, method_title, method_signature, method_description)
+    jsonrpc_page_info('class_apps.not_allow_notify', method_title, method_signature, method_description)
 
 
 @pytest.mark.parametrize(
@@ -337,17 +299,13 @@ def test_class_apps_not_allow_notify_form(
 
 
 @pytest.mark.parametrize(
-    'breadcrumb,method_title,method_signature,method_description',
-    [('class_apps » class_apps.fails', 'class_apps.fails', 'class_apps.fails(n: Number) -> Number', '')],
+    'method_title,method_signature,method_description',
+    [('class_apps.fails', 'class_apps.fails(n: Number) -> Number', '')],
 )
 def test_class_apps_fails_display(
-    jsonrpc_page_info: t.Callable[..., Page],
-    breadcrumb: str,
-    method_title: str,
-    method_signature: str,
-    method_description: str,
+    jsonrpc_page_info: t.Callable[..., Page], method_title: str, method_signature: str, method_description: str
 ) -> None:
-    jsonrpc_page_info('class_apps.fails', breadcrumb, method_title, method_signature, method_description)
+    jsonrpc_page_info('class_apps.fails', method_title, method_signature, method_description)
 
 
 @pytest.mark.parametrize(

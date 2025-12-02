@@ -31,10 +31,9 @@ from playwright.sync_api import Page
 
 
 @pytest.mark.parametrize(
-    'breadcrumb,method_title,method_signature,method_description',
+    'method_title,method_signature,method_description',
     [
         (
-            'error_handlers » error_handlers.failsWithCustomException',
             'error_handlers.failsWithCustomException',
             'error_handlers.failsWithCustomException(_string: String) -> Null',
             '',
@@ -42,15 +41,9 @@ from playwright.sync_api import Page
     ],
 )
 def test_error_handlers_fails_with_custom_exception_display(
-    jsonrpc_page_info: t.Callable[..., Page],
-    breadcrumb: str,
-    method_title: str,
-    method_signature: str,
-    method_description: str,
+    jsonrpc_page_info: t.Callable[..., Page], method_title: str, method_signature: str, method_description: str
 ) -> None:
-    jsonrpc_page_info(
-        'error_handlers.failsWithCustomException', breadcrumb, method_title, method_signature, method_description
-    )
+    jsonrpc_page_info('error_handlers.failsWithCustomException', method_title, method_signature, method_description)
 
 
 @pytest.mark.parametrize(
@@ -124,10 +117,9 @@ def test_error_handlers_fails_with_custom_exception_form(
 
 
 @pytest.mark.parametrize(
-    'breadcrumb,method_title,method_signature,method_description',
+    'method_title,method_signature,method_description',
     [
         (
-            'error_handlers » error_handlers.failsWithCustomExceptionNotRegistered',
             'error_handlers.failsWithCustomExceptionNotRegistered',
             'error_handlers.failsWithCustomExceptionNotRegistered(_string: String) -> Null',
             '',
@@ -135,18 +127,10 @@ def test_error_handlers_fails_with_custom_exception_form(
     ],
 )
 def test_error_handlers_fails_with_custom_exception_not_registered_display(
-    jsonrpc_page_info: t.Callable[..., Page],
-    breadcrumb: str,
-    method_title: str,
-    method_signature: str,
-    method_description: str,
+    jsonrpc_page_info: t.Callable[..., Page], method_title: str, method_signature: str, method_description: str
 ) -> None:
     jsonrpc_page_info(
-        'error_handlers.failsWithCustomExceptionNotRegistered',
-        breadcrumb,
-        method_title,
-        method_signature,
-        method_description,
+        'error_handlers.failsWithCustomExceptionNotRegistered', method_title, method_signature, method_description
     )
 
 

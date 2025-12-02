@@ -24,12 +24,28 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
+import typing as t
+from pathlib import Path
 
-from flask import Flask
+from flask import Flask, typing as ft, jsonify
+from flask.wrappers import Request, Response
+
+import pytest
+from pytest import MonkeyPatch
 
 from flask_jsonrpc import JSONRPC, JSONRPCBlueprint
+from flask_jsonrpc.conf import settings
 from flask_jsonrpc.typing import Field, Method
-from flask_jsonrpc.contrib.browse import JSONRPCBrowse, build_package_tree
+from flask_jsonrpc.contrib.browse import (
+    JSONRPCBrowse,
+    build_package_tree,
+    register_middleware,
+    _after_request_middleware,
+    _before_request_middleware,
+    _teardown_request_middleware,
+)
+
+pytestmark = pytest.mark.parallel_threads(1)
 
 
 def test_browse_object() -> None:
@@ -44,7 +60,10 @@ def test_browse_object() -> None:
     assert browse.get_browse_fork_me_button_enabled() is True
     assert browse.get_browse_media_css() == {}
     assert browse.get_browse_media_js() == []
-    assert browse.get_browse_dashboard_template() == 'browse/partials/dashboard.html'
+    assert browse.get_browse_dashboard_menu_name() == 'Dashboard'
+    assert browse.get_browse_dashboard_partial_template() == 'browse/partials/dashboard.html'
+    assert browse.get_browse_login_template() is None
+    assert browse.get_browse_logout_template() is None
 
 
 def test_browse_create() -> None:
@@ -208,6 +227,14 @@ def test_browse_create() -> None:
         rv = client.get('/api/browse/partials/response_object.html')
         assert b'module_dialog.html' in rv.data
         assert rv.status_code == 200
+
+        rv = client.get('/api/browse/login')
+        assert b'Login not configured.' in rv.data
+        assert rv.status_code == 404
+
+        rv = client.get('/api/browse/logout')
+        assert b'Logout not configured.' in rv.data
+        assert rv.status_code == 404
 
         rv = client.get('/api/browse/static/js/main.js')
         assert b'App' in rv.data
@@ -749,3 +776,530 @@ def test_build_package_tree() -> None:
         'items': [],
         'name': None,
     }
+
+
+def test_vf_login_configured(tmp_path: Path) -> None:
+    class CustomBrowse(JSONRPCBrowse):
+        def get_browse_login_template(self) -> str:
+            return 'browse/test_login.html'
+
+    template_dir = tmp_path / 'templates' / 'browse'
+    template_dir.mkdir(parents=True, exist_ok=True)
+    (template_dir / 'test_login.html').write_text('<html><body>Login Page</body></html>')
+
+    app = Flask('test_browse', instance_relative_config=True, template_folder=str(tmp_path / 'templates'))
+    jsonrpc = JSONRPC(app, '/api', enable_web_browsable_api=False)
+    browse = CustomBrowse(app)
+    browse.register_jsonrpc_site(jsonrpc.get_jsonrpc_site())
+
+    @jsonrpc.method('app.fn1')
+    def fn1(s: str) -> str:
+        return f'Foo {s}'
+
+    with app.test_client() as client:
+        rv = client.get('/api/browse/login')
+        assert rv.status_code == 200, rv.data
+        assert b'Login Page' in rv.data
+
+
+def test_get_browse_login_template_returns_none(monkeypatch: MonkeyPatch) -> None:
+    with monkeypatch.context() as m:
+        m.setattr('flask_jsonrpc.conf.settings.BROWSE_LOGIN_TEMPLATE', None)
+
+        browse = JSONRPCBrowse()
+        assert browse.get_browse_login_template() is None
+
+
+def test_vf_login_configured_by_app_config(monkeypatch: MonkeyPatch, tmp_path: Path) -> None:
+    template_dir = tmp_path / 'templates' / 'browse'
+    template_dir.mkdir(parents=True, exist_ok=True)
+    (template_dir / 'test_app_config_login.html').write_text('<html><body>Login Page</body></html>')
+
+    with monkeypatch.context() as m:
+        m.setattr('flask_jsonrpc.conf.settings.BROWSE_LOGIN_TEMPLATE', None)
+
+        app = Flask('test_browse', instance_relative_config=True, template_folder=str(tmp_path / 'templates'))
+        with app.app_context():
+            app.config['FLASK_JSONRPC_BROWSE_LOGIN_TEMPLATE'] = 'browse/test_app_config_login.html'
+            jsonrpc = JSONRPC(app, '/api', enable_web_browsable_api=True)
+
+            @jsonrpc.method('app.fn1')
+            def fn1(s: str) -> str:
+                return f'Foo {s}'
+
+            with app.test_client() as client:
+                rv = client.get('/api/browse/login')
+                assert rv.status_code == 200
+                assert b'Login Page' in rv.data
+
+
+def test_get_browse_login_template_with_setting(monkeypatch: MonkeyPatch) -> None:
+    with monkeypatch.context() as m:
+        m.setattr('flask_jsonrpc.conf.settings.BROWSE_LOGIN_TEMPLATE', 'custom/login.html')
+
+        browse = JSONRPCBrowse()
+        result = browse.get_browse_login_template()
+        assert result == 'custom/login.html'
+
+
+def test_get_browse_login_template_by_env(monkeypatch: MonkeyPatch, tmp_path: Path) -> None:
+    template_dir = tmp_path / 'templates' / 'browse'
+    template_dir.mkdir(parents=True, exist_ok=True)
+    (template_dir / 'test_env_login.html').write_text('<html><body>Login Page</body></html>')
+
+    with monkeypatch.context() as m:
+        m.setattr('flask_jsonrpc.conf.settings.BROWSE_LOGIN_TEMPLATE', 'browse/test_env_login.html')
+        m.setenv('FLASK_JSONRPC_BROWSE_LOGIN_TEMPLATE', 'browse/test_env_login.html')
+        app = Flask('test_browse', instance_relative_config=True, template_folder=str(tmp_path / 'templates'))
+        jsonrpc = JSONRPC(app, '/api', enable_web_browsable_api=True)
+
+        @jsonrpc.method('app.fn1')
+        def fn1(s: str) -> str:
+            return f'Foo {s}'
+
+        with app.test_client() as client:
+            rv = client.get('/api/browse/login')
+            assert rv.status_code == 200, rv.data
+            assert b'Login Page' in rv.data
+
+
+def test_get_browse_logout_template_returns_none(monkeypatch: MonkeyPatch) -> None:
+    with monkeypatch.context() as m:
+        m.setattr('flask_jsonrpc.conf.settings.BROWSE_LOGOUT_TEMPLATE', None)
+
+        browse = JSONRPCBrowse()
+        assert browse.get_browse_logout_template() is None
+
+
+def test_vf_logout_configured(tmp_path: Path) -> None:
+    class CustomBrowse(JSONRPCBrowse):
+        def get_browse_logout_template(self) -> str:
+            return 'browse/test_logout.html'
+
+    template_dir = tmp_path / 'templates' / 'browse'
+    template_dir.mkdir(parents=True, exist_ok=True)
+    (template_dir / 'test_logout.html').write_text('<html><body>Logout Page</body></html>')
+
+    app = Flask('test_browse', instance_relative_config=True, template_folder=str(tmp_path / 'templates'))
+    jsonrpc = JSONRPC(app, '/api', enable_web_browsable_api=False)
+    browse = CustomBrowse(app)
+    browse.register_jsonrpc_site(jsonrpc.get_jsonrpc_site())
+
+    @jsonrpc.method('app.fn1')
+    def fn1(s: str) -> str:
+        return f'Foo {s}'
+
+    with app.test_client() as client:
+        rv = client.get('/api/browse/logout')
+        assert rv.status_code == 200
+        assert b'Logout Page' in rv.data
+
+
+def test_vf_logout_configured_by_app_config(monkeypatch: MonkeyPatch, tmp_path: Path) -> None:
+    template_dir = tmp_path / 'templates' / 'browse'
+    template_dir.mkdir(parents=True, exist_ok=True)
+    (template_dir / 'test_app_config_logout.html').write_text('<html><body>Logout Page</body></html>')
+
+    with monkeypatch.context() as m:
+        m.setattr('flask_jsonrpc.conf.settings.BROWSE_LOGOUT_TEMPLATE', None)
+
+        app = Flask('test_browse', instance_relative_config=True, template_folder=str(tmp_path / 'templates'))
+        with app.app_context():
+            app.config['FLASK_JSONRPC_BROWSE_LOGOUT_TEMPLATE'] = 'browse/test_app_config_logout.html'
+            jsonrpc = JSONRPC(app, '/api', enable_web_browsable_api=True)
+
+            @jsonrpc.method('app.fn1')
+            def fn1(s: str) -> str:
+                return f'Foo {s}'
+
+            with app.test_client() as client:
+                rv = client.get('/api/browse/logout')
+                assert rv.status_code == 200
+                assert b'Logout Page' in rv.data
+
+
+def test_get_browse_logout_template_with_setting(monkeypatch: MonkeyPatch) -> None:
+    with monkeypatch.context() as m:
+        m.setattr('flask_jsonrpc.conf.settings.BROWSE_LOGOUT_TEMPLATE', 'custom/logout.html')
+
+        browse = JSONRPCBrowse()
+        result = browse.get_browse_logout_template()
+        assert result == 'custom/logout.html'
+
+
+def test_get_browse_logout_template_by_env(monkeypatch: MonkeyPatch, tmp_path: Path) -> None:
+    template_dir = tmp_path / 'templates' / 'browse'
+    template_dir.mkdir(parents=True, exist_ok=True)
+    (template_dir / 'test_env_logout.html').write_text('<html><body>Logout Page</body></html>')
+
+    with monkeypatch.context() as m:
+        m.setattr('flask_jsonrpc.conf.settings.BROWSE_LOGOUT_TEMPLATE', 'browse/test_env_logout.html')
+        m.setenv('FLASK_JSONRPC_BROWSE_LOGOUT_TEMPLATE', 'browse/test_env_logout.html')
+
+        app = Flask('test_browse', instance_relative_config=True, template_folder=str(tmp_path / 'templates'))
+        jsonrpc = JSONRPC(app, '/api', enable_web_browsable_api=True)
+
+        @jsonrpc.method('app.fn1')
+        def fn1(s: str) -> str:
+            return f'Foo {s}'
+
+        with app.test_client() as client:
+            rv = client.get('/api/browse/logout')
+            assert rv.status_code == 200, rv.data
+            assert b'Logout Page' in rv.data
+
+
+def test_custom_browse_methods() -> None:  # noqa: C901
+    class CustomBrowse(JSONRPCBrowse):
+        def get_browse_title(self) -> str:
+            return 'Custom Title'
+
+        def get_browse_title_url(self) -> str:
+            return 'https://custom.url'
+
+        def get_browse_subtitle(self) -> str:
+            return 'Custom Subtitle'
+
+        def get_browse_description(self) -> str:
+            return 'Custom Description'
+
+        def get_browse_fork_me_button_enabled(self) -> bool:
+            return False
+
+        def get_browse_media_css(self) -> dict[str, list[str]]:
+            return {'all': ['custom.css']}
+
+        def get_browse_media_js(self) -> list[str]:
+            return ['custom.js']
+
+        def get_browse_dashboard_menu_name(self) -> str:
+            return 'Custom Dashboard'
+
+        def get_browse_dashboard_partial_template(self) -> str:
+            return 'browse/custom_dashboard.html'
+
+        def get_browse_login_template(self) -> str:
+            return 'browse/test_method_login.html'
+
+        def get_browse_logout_template(self) -> str:
+            return 'browse/test_method_logout.html'
+
+    app = Flask('test_custom_browse', instance_relative_config=True)
+    jsonrpc = JSONRPC(app, '/api', enable_web_browsable_api=False)
+    browse = CustomBrowse(app)
+    browse.register_jsonrpc_site(jsonrpc.get_jsonrpc_site())
+
+    assert browse.get_browse_title() == 'Custom Title'
+    assert browse.get_browse_title_url() == 'https://custom.url'
+    assert browse.get_browse_subtitle() == 'Custom Subtitle'
+    assert browse.get_browse_description() == 'Custom Description'
+    assert browse.get_browse_fork_me_button_enabled() is False
+    assert browse.get_browse_media_css() == {'all': ['custom.css']}
+    assert browse.get_browse_media_js() == ['custom.js']
+    assert browse.get_browse_dashboard_menu_name() == 'Custom Dashboard'
+    assert browse.get_browse_dashboard_partial_template() == 'browse/custom_dashboard.html'
+    assert browse.get_browse_login_template() == 'browse/test_method_login.html'
+    assert browse.get_browse_logout_template() == 'browse/test_method_logout.html'
+
+
+def test_browse_register_middleware_valid_generator(monkeypatch: MonkeyPatch) -> None:
+    with monkeypatch.context() as m:
+        m.setattr('flask_jsonrpc.conf.settings.BROWSE_MIDDLEWARE', [])
+
+        @register_middleware('test_validator')
+        def valid_middleware(
+            request: Request,
+        ) -> t.Generator[ft.ResponseReturnValue | bool | None, Response, ft.ResponseReturnValue | None]:
+            yield True
+
+        assert len(settings.BROWSE_MIDDLEWARE) == 1
+        assert settings.BROWSE_MIDDLEWARE[0][0] == 'test_validator'
+
+
+def test_browse_register_middleware_invalid_generator(monkeypatch: MonkeyPatch) -> None:
+    with monkeypatch.context() as m:
+        m.setattr('flask_jsonrpc.conf.settings.BROWSE_MIDDLEWARE', [])
+
+        def invalid_middleware(request: Request) -> bool:
+            return True
+
+        with pytest.raises(TypeError, match='middleware function must be a generator'):
+            register_middleware('test_invalid_validator')(invalid_middleware)(None)  # type: ignore
+
+
+def test_browse_before_request_middleware_with_middleware_list_empty(monkeypatch: MonkeyPatch) -> None:
+    with monkeypatch.context() as m:
+        m.setattr('flask_jsonrpc.conf.settings.BROWSE_MIDDLEWARE', [])
+
+        app = Flask('test_browse', instance_relative_config=True)
+        with app.app_context():
+            assert _before_request_middleware() is None
+
+
+def test_browse_before_request_middleware_with_middleware_returnning_none(monkeypatch: MonkeyPatch) -> None:
+    with monkeypatch.context() as m:
+        m.setattr('flask_jsonrpc.conf.settings.BROWSE_MIDDLEWARE', [])
+
+        app = Flask('test_browse', instance_relative_config=True)
+        with app.app_context():
+            from flask import g
+
+            @register_middleware('test_validator')
+            def valid_middleware(
+                request: Request,
+            ) -> t.Generator[ft.ResponseReturnValue | bool | None, Response, ft.ResponseReturnValue | None]:
+                yield
+
+            assert _before_request_middleware() is None
+            assert g._jsonrpc_browse_mw == {}
+
+
+def test_browse_before_request_middleware_with_middleware_returnning_false(monkeypatch: MonkeyPatch) -> None:
+    with monkeypatch.context() as m:
+        m.setattr('flask_jsonrpc.conf.settings.BROWSE_MIDDLEWARE', [])
+
+        app = Flask('test_browse', instance_relative_config=True)
+        with app.app_context():
+            from flask import g
+
+            @register_middleware('test_validator')
+            def valid_middleware(
+                request: Request,
+            ) -> t.Generator[ft.ResponseReturnValue | bool | None, Response, ft.ResponseReturnValue | None]:
+                yield False
+
+            assert _before_request_middleware() is None
+            assert g._jsonrpc_browse_mw == {}
+
+
+def test_browse_before_request_middleware_with_middleware_returnning_true(monkeypatch: MonkeyPatch) -> None:
+    with monkeypatch.context() as m:
+        m.setattr('flask_jsonrpc.conf.settings.BROWSE_MIDDLEWARE', [])
+
+        app = Flask('test_browse', instance_relative_config=True)
+        with app.app_context():
+            from flask import g
+
+            @register_middleware('test_validator')
+            def valid_middleware(
+                request: Request,
+            ) -> t.Generator[ft.ResponseReturnValue | bool | None, Response, ft.ResponseReturnValue | None]:
+                yield True
+
+            assert _before_request_middleware() is None
+            assert 'test_validator' in g._jsonrpc_browse_mw
+
+
+def test_browse_before_request_middleware_with_middleware_returnning_response(monkeypatch: MonkeyPatch) -> None:
+    with monkeypatch.context() as m:
+        m.setattr('flask_jsonrpc.conf.settings.BROWSE_MIDDLEWARE', [])
+
+        app = Flask('test_browse', instance_relative_config=True)
+        with app.app_context():
+            from flask import g
+
+            response = jsonify({'Intercepted': True})
+
+            @register_middleware('test_validator')
+            def valid_middleware(
+                request: Request,
+            ) -> t.Generator[ft.ResponseReturnValue | bool | None, Response, ft.ResponseReturnValue | None]:
+                yield response, 200
+
+            assert _before_request_middleware() == (response, 200)
+            assert g._jsonrpc_browse_mw == {}
+
+
+def test_browse_after_request_middleware_with_middleware_and_g_empty(monkeypatch: MonkeyPatch) -> None:
+    with monkeypatch.context() as m:
+        m.setattr('flask_jsonrpc.conf.settings.BROWSE_MIDDLEWARE', [])
+
+        app = Flask('test_browse', instance_relative_config=True)
+        with app.app_context():
+            from flask import g
+
+            g._jsonrpc_browse_mw = {}
+            response = jsonify({'Test': True})
+
+            @register_middleware('test_validator')
+            def valid_middleware(
+                request: Request,
+            ) -> t.Generator[ft.ResponseReturnValue | bool | None, Response, ft.ResponseReturnValue | None]:
+                yield  # After request point
+                _response = yield  # Before request point
+                yield False
+
+            assert g._jsonrpc_browse_mw == {}
+            assert _after_request_middleware(response) == response
+
+
+def test_browse_after_request_middleware_with_middleware_list_empty(monkeypatch: MonkeyPatch) -> None:
+    with monkeypatch.context() as m:
+        m.setattr('flask_jsonrpc.conf.settings.BROWSE_MIDDLEWARE', [])
+
+        app = Flask('test_browse', instance_relative_config=True)
+        with app.app_context():
+            from flask import g
+
+            response = jsonify({'Test': True})
+
+            assert '_jsonrpc_browse_mw' not in g
+            assert _after_request_middleware(response) == response
+
+
+def test_browse_after_request_middleware_with_middleware_returninng_false(monkeypatch: MonkeyPatch) -> None:
+    with monkeypatch.context() as m:
+        m.setattr('flask_jsonrpc.conf.settings.BROWSE_MIDDLEWARE', [])
+
+        app = Flask('test_browse', instance_relative_config=True)
+        with app.app_context():
+            from flask import g
+
+            g._jsonrpc_browse_mw = {}
+            response = jsonify({'Test': True})
+
+            @register_middleware('test_validator')
+            def valid_middleware(
+                request: Request,
+            ) -> t.Generator[ft.ResponseReturnValue | bool | None, Response, ft.ResponseReturnValue | None]:
+                yield  # After request point
+                _response = yield  # Before request point
+                yield False
+
+            gen = settings.BROWSE_MIDDLEWARE[0][1](None)
+            next(gen)
+            g._jsonrpc_browse_mw['test_validator'] = gen
+
+            _after_request_middleware(response)
+
+            assert '_jsonrpc_browse_mw' not in g
+            assert _after_request_middleware(response) == response
+
+
+def test_browse_after_request_middleware_with_middleware_returninng_true(monkeypatch: MonkeyPatch) -> None:
+    with monkeypatch.context() as m:
+        m.setattr('flask_jsonrpc.conf.settings.BROWSE_MIDDLEWARE', [])
+
+        app = Flask('test_browse', instance_relative_config=True)
+        with app.app_context():
+            from flask import g
+
+            g._jsonrpc_browse_mw = {}
+            response = jsonify({'Test': True})
+
+            @register_middleware('test_validator')
+            def valid_middleware(
+                request: Request,
+            ) -> t.Generator[ft.ResponseReturnValue | bool | None, Response, ft.ResponseReturnValue | None]:
+                yield  # After request point
+                _response = yield  # Before request point
+                yield True
+
+            gen = settings.BROWSE_MIDDLEWARE[0][1](None)
+            next(gen)
+            g._jsonrpc_browse_mw['test_validator'] = gen
+
+            _after_request_middleware(response)
+
+            assert '_jsonrpc_browse_mw' not in g
+            assert _after_request_middleware(response) == response
+
+
+def test_browse_after_request_middleware_with_middleware_returninng_none(monkeypatch: MonkeyPatch) -> None:
+    with monkeypatch.context() as m:
+        m.setattr('flask_jsonrpc.conf.settings.BROWSE_MIDDLEWARE', [])
+
+        app = Flask('test_browse', instance_relative_config=True)
+        with app.app_context():
+            from flask import g
+
+            g._jsonrpc_browse_mw = {}
+            response = jsonify({'Test': True})
+
+            @register_middleware('test_validator')
+            def valid_middleware(
+                request: Request,
+            ) -> t.Generator[ft.ResponseReturnValue | bool | None, Response, ft.ResponseReturnValue | None]:
+                yield  # After request point
+                _response = yield  # Before request point
+                yield None
+
+            gen = settings.BROWSE_MIDDLEWARE[0][1](None)
+            next(gen)
+            g._jsonrpc_browse_mw['test_validator'] = gen
+
+            actual_response = _after_request_middleware(response)
+
+            assert '_jsonrpc_browse_mw' not in g
+            assert actual_response == response
+
+
+def test_browse_after_request_middleware_with_middleware_returninng_response(monkeypatch: MonkeyPatch) -> None:
+    with monkeypatch.context() as m:
+        m.setattr('flask_jsonrpc.conf.settings.BROWSE_MIDDLEWARE', [])
+
+        app = Flask('test_browse', instance_relative_config=True)
+        with app.app_context():
+            from flask import g
+
+            g._jsonrpc_browse_mw = {}
+            response = jsonify({'Test': True})
+            new_response = jsonify({'Modified': True})
+
+            @register_middleware('test_validator')
+            def valid_middleware(
+                request: Request,
+            ) -> t.Generator[ft.ResponseReturnValue | bool | None, Response, ft.ResponseReturnValue | None]:
+                yield  # After request point
+                _response = yield  # Before request point
+                yield new_response
+
+            gen = settings.BROWSE_MIDDLEWARE[0][1](None)
+            next(gen)
+            g._jsonrpc_browse_mw['test_validator'] = gen
+
+            actual_response = _after_request_middleware(response)
+
+            assert g._jsonrpc_browse_mw == {}
+            assert actual_response == new_response
+
+
+def test_browse_teardown_request_middleware_with_g_empty() -> None:
+    app = Flask('test_browse', instance_relative_config=True)
+    with app.app_context():
+        from flask import g
+
+        g._jsonrpc_browse_mw = {}
+
+        _teardown_request_middleware(None)
+
+        assert '_jsonrpc_browse_mw' not in g
+
+
+def test_browse_teardown_request_middleware_with_opened_and_closed_generators() -> None:
+    def empty() -> t.Generator[None, None, None]:
+        yield
+
+    app = Flask('test_browse', instance_relative_config=True)
+    with app.app_context():
+        from flask import g
+
+        pure = empty()
+        yielded = empty()
+        next(yielded)
+        closed = empty()
+        next(closed)
+        closed.close()
+
+        g._jsonrpc_browse_mw = {
+            'test_validator_pure': pure,
+            'test_validator_yielded': yielded,
+            'test_validator_closed': closed,
+        }
+
+        _teardown_request_middleware(None)
+
+        assert '_jsonrpc_browse_mw' not in g
+        pytest.raises(StopIteration, next, pure)
+        pytest.raises(StopIteration, next, yielded)
+        pytest.raises(StopIteration, next, closed)
