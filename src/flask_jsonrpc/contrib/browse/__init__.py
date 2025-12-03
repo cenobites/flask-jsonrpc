@@ -116,18 +116,17 @@ def _after_request_middleware(response: Response) -> ft.ResponseReturnValue:
         gen = gens.pop(name, None)
         if gen is None:
             continue
-        try:
-            gen.send(response)
-            rv = next(gen, None)
-            if rv is False:
-                continue
-            if rv is True:
-                continue
-            if rv is not None:
-                g._jsonrpc_browse_mw = {}
-                return t.cast(ft.ResponseReturnValue, rv)
-        finally:
+        gen.send(response)
+        rv = next(gen, None)
+        with contextlib.suppress(BaseException):
             gen.close()
+        if rv is False:
+            continue
+        if rv is True:
+            continue
+        if rv is not None:
+            g._jsonrpc_browse_mw = {}
+            return t.cast(ft.ResponseReturnValue, rv)
     return response
 
 
