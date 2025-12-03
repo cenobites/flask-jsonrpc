@@ -47,7 +47,7 @@ def extract_digits_and_decimals(value: Decimal) -> tuple[int, int]:
     # https://github.com/django/django/blob/main/django/core/validators.py#L528
     digit_tuple, exponent = value.as_tuple()[1:]
     if exponent in {'F', 'n', 'N'}:
-        raise TypeError('Ensure the value of the parameter is a number')
+        raise TypeError('ensure the value of the parameter is a number')
     exponent = int(exponent)
     if exponent >= 0:
         digits = len(digit_tuple)

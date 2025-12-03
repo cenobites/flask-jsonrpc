@@ -103,7 +103,7 @@ def type_metadata_checker(metadata: tuple[t.Any, ...], name: str, value: t.Any) 
                     value,
                     result.message
                     or (
-                        f'Ensure the value of the parameter {name!r} follows the'
+                        f'ensure the value of the parameter {name!r} follows the'
                         f' {mt.__class__.__name__} constraint rules for value {value}'
                     ),
                 ) from None
@@ -114,7 +114,7 @@ def type_metadata_checker(metadata: tuple[t.Any, ...], name: str, value: t.Any) 
                 name,
                 value,
                 (
-                    f'Cannot apply constraint {mt.__class__.__name__}'
+                    f'cannot apply constraint {mt.__class__.__name__}'
                     f' for parameter {name!r} to value {value} with type {type(value)}: {e}.'
                 ),
             ) from e
