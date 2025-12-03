@@ -24,8 +24,6 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-import typing as t
-
 import pytest
 
 from flask_jsonrpc.conf import Settings, LazySettings, empty, settings, global_settings, new_method_proxy
@@ -56,7 +54,7 @@ def test_settings_only_copies_uppercase() -> None:
     s = Settings()
 
     for setting in dir(global_settings):
-        if setting.isupper():
+        if setting.isupper() and not setting.startswith('_'):
             assert hasattr(s, setting)
             assert getattr(s, setting) == getattr(global_settings, setting)
 
@@ -215,13 +213,7 @@ def test_new_method_proxy() -> None:
             raise AttributeError
         return f'{obj}-{arg}'
 
-    def test_setter(obj: object, arg: str, any: t.Any) -> None:  # noqa: ANN401
-        pass
-
-    def test_checker(obj: object, arg: str) -> bool:
-        return arg == 'test_attr'
-
-    proxied = new_method_proxy(test_getter, test_setter, test_checker, fallback_settings={'invalid': 'fallback_value'})
+    proxied = new_method_proxy(test_getter)
     assert hasattr(proxied, '_mask_wrapped')
     assert proxied._mask_wrapped is False
 
@@ -250,23 +242,15 @@ def test_new_method_proxy_calls_setup_once() -> None:
     assert wrapped_after_first is wrapped_after_second
 
 
-@pytest.mark.parallel_threads(1)
 def test_new_method_proxy_fallback_settings() -> None:
-    import os
+    ls = LazySettings(fallback_settings={'FLASK_JSONRPC_TEST_FALLBACK_VAR': 'fallback_value'})
+    ls._setup()
 
-    os.environ['TEST_FALLBACK_VAR'] = 'fallback_value'
+    value = ls.TEST_FALLBACK_VAR
 
-    try:
-        ls = LazySettings()
-        ls._setup()
-
-        value = ls.TEST_FALLBACK_VAR
-
-        assert value == 'fallback_value'
-        assert hasattr(ls._wrapped, 'TEST_FALLBACK_VAR')
-        assert ls._wrapped.TEST_FALLBACK_VAR == 'fallback_value'
-    finally:
-        del os.environ['TEST_FALLBACK_VAR']
+    assert value == 'fallback_value'
+    assert hasattr(ls._wrapped, 'TEST_FALLBACK_VAR')
+    assert ls._wrapped.TEST_FALLBACK_VAR == 'fallback_value'
 
 
 def test_global_settings_instance() -> None:

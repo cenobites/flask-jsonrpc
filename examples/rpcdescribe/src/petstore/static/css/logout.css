@@ -1,0 +1,154 @@
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f0f2f5;
+    color: #333;
+}
+
+.logout-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.logout-card {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    width: 100%;
+    max-width: 420px;
+    overflow: hidden;
+}
+
+.logout-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 40px 30px;
+    text-align: center;
+}
+
+.logout-header h1 {
+    margin: 0 0 10px 0;
+    font-size: 2em;
+    font-weight: 700;
+}
+
+.logout-header p {
+    margin: 0;
+    opacity: 0.9;
+    font-size: 1em;
+}
+
+.logout-content {
+    padding: 40px 30px;
+    text-align: center;
+}
+
+.logout-icon {
+    margin-bottom: 24px;
+    color: #667eea;
+    display: flex;
+    justify-content: center;
+}
+
+.logout-message {
+    font-size: 1.1em;
+    color: #333;
+    margin-bottom: 32px;
+    line-height: 1.5;
+}
+
+.logout-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.logout-button {
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.05em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.logout-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+}
+
+.logout-button:active {
+    transform: translateY(0);
+}
+
+.logout-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.button-spinner {
+    display: inline-block;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.cancel-button {
+    width: 100%;
+    padding: 14px;
+    background: #f5f5f5;
+    color: #666;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.05em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+    box-sizing: border-box;
+}
+
+.cancel-button:hover {
+    background: #e8e8e8;
+    color: #333;
+}
+
+.error-message {
+    background: #fee;
+    color: #c33;
+    padding: 12px 16px;
+    border-radius: 8px;
+    margin-top: 20px;
+    border-left: 4px solid #c33;
+    font-size: 0.9em;
+    text-align: left;
+}
+
+@media (max-width: 480px) {
+    .logout-card {
+        border-radius: 0;
+        max-width: 100%;
+    }
+
+    .logout-header {
+        padding: 30px 20px;
+    }
+
+    .logout-content {
+        padding: 30px 20px;
+    }
+}

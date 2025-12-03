@@ -45,7 +45,7 @@
 </head>
 
 <body id="{% block bodyid %}{% endblock %}">
-
+  {% block page %}
   <div class="wrapper" ng-controller="ApplicationCtrl">
 
   {% block navbar %}
@@ -56,13 +56,12 @@
   </nav>
   {% endblock %}
 
-  <!-- Content -->
   <div id="content" ng-hide="showFakeIntro">
   {% block content %}{% endblock %}
   </div>
-  <!-- END Content -->
 
-  </div><!-- ./wrapper -->
+  </div>
+  {% endblock %}
 
   {% block footer %}{% endblock %}
 

@@ -81,7 +81,8 @@ class JSONRPC(JSONRPCDecoratorMixin):
 
     def init_app(self: Self, app: Flask) -> None:
         for setting, value in app.config.items():
-            setattr(settings, setting.upper(), value)
+            if settings.IS_ENV_KEY(setting):
+                setattr(settings, settings.ENV_TO_CONFIG(setting), value)
 
         http_host = app.config.get('SERVER_NAME')
         app_root = app.config['APPLICATION_ROOT']
@@ -112,6 +113,8 @@ class JSONRPC(JSONRPCDecoratorMixin):
 
         if self.enable_web_browsable_api is True or (self.enable_web_browsable_api is None and app.config['DEBUG']):
             self.init_browse_app(app)
+
+        self.app = app
 
     def register(
         self: Self,

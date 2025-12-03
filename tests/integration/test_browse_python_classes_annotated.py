@@ -31,10 +31,9 @@ from playwright.sync_api import Page
 
 
 @pytest.mark.parametrize(
-    'breadcrumb,method_title,method_signature,method_description',
+    'method_title,method_signature,method_description',
     [
         (
-            'types » types.python_classes_annotated.createColor',
             'types.python_classes_annotated.createColor',
             'types.python_classes_annotated.createColor(color*: Object) -> Object',
             '',
@@ -42,15 +41,9 @@ from playwright.sync_api import Page
     ],
 )
 def test_python_classes_create_color_display(
-    jsonrpc_page_info: t.Callable[..., Page],
-    breadcrumb: str,
-    method_title: str,
-    method_signature: str,
-    method_description: str,
+    jsonrpc_page_info: t.Callable[..., Page], method_title: str, method_signature: str, method_description: str
 ) -> None:
-    jsonrpc_page_info(
-        'types.python_classes_annotated.createColor', breadcrumb, method_title, method_signature, method_description
-    )
+    jsonrpc_page_info('types.python_classes_annotated.createColor', method_title, method_signature, method_description)
 
 
 @pytest.mark.parametrize(
@@ -125,10 +118,9 @@ def test_python_classes_create_color_form(
 
 
 @pytest.mark.parametrize(
-    'breadcrumb,method_title,method_signature,method_description',
+    'method_title,method_signature,method_description',
     [
         (
-            'types » types.python_classes_annotated.createManyColor',
             'types.python_classes_annotated.createManyColor',
             ('types.python_classes_annotated.createManyColor(colors*: Array, color: Object) -> Array'),
             '',
@@ -136,14 +128,10 @@ def test_python_classes_create_color_form(
     ],
 )
 def test_python_classes_create_many_color_display(
-    jsonrpc_page_info: t.Callable[..., Page],
-    breadcrumb: str,
-    method_title: str,
-    method_signature: str,
-    method_description: str,
+    jsonrpc_page_info: t.Callable[..., Page], method_title: str, method_signature: str, method_description: str
 ) -> None:
     jsonrpc_page_info(
-        'types.python_classes_annotated.createManyColor', breadcrumb, method_title, method_signature, method_description
+        'types.python_classes_annotated.createManyColor', method_title, method_signature, method_description
     )
 
 
@@ -266,10 +254,9 @@ def test_python_classes_create_many_color_form(
 
 
 @pytest.mark.parametrize(
-    'breadcrumb,method_title,method_signature,method_description',
+    'method_title,method_signature,method_description',
     [
         (
-            'types » types.python_classes_annotated.createManyFixColor',
             'types.python_classes_annotated.createManyFixColor',
             'types.python_classes_annotated.createManyFixColor(colors*: Object) -> Array',
             '',
@@ -277,18 +264,10 @@ def test_python_classes_create_many_color_form(
     ],
 )
 def test_python_classes_create_many_fix_color_display(
-    jsonrpc_page_info: t.Callable[..., Page],
-    breadcrumb: str,
-    method_title: str,
-    method_signature: str,
-    method_description: str,
+    jsonrpc_page_info: t.Callable[..., Page], method_title: str, method_signature: str, method_description: str
 ) -> None:
     jsonrpc_page_info(
-        'types.python_classes_annotated.createManyFixColor',
-        breadcrumb,
-        method_title,
-        method_signature,
-        method_description,
+        'types.python_classes_annotated.createManyFixColor', method_title, method_signature, method_description
     )
 
 
@@ -398,10 +377,9 @@ def test_python_classes_create_many_fix_color_form(
 
 
 @pytest.mark.parametrize(
-    'breadcrumb,method_title,method_signature,method_description',
+    'method_title,method_signature,method_description',
     [
         (
-            'types » types.python_classes_annotated.removeColor',
             'types.python_classes_annotated.removeColor',
             'types.python_classes_annotated.removeColor(color: Object) -> Object',
             '',
@@ -409,15 +387,9 @@ def test_python_classes_create_many_fix_color_form(
     ],
 )
 def test_python_classes_remove_color_display(
-    jsonrpc_page_info: t.Callable[..., Page],
-    breadcrumb: str,
-    method_title: str,
-    method_signature: str,
-    method_description: str,
+    jsonrpc_page_info: t.Callable[..., Page], method_title: str, method_signature: str, method_description: str
 ) -> None:
-    jsonrpc_page_info(
-        'types.python_classes_annotated.removeColor', breadcrumb, method_title, method_signature, method_description
-    )
+    jsonrpc_page_info('types.python_classes_annotated.removeColor', method_title, method_signature, method_description)
 
 
 @pytest.mark.parametrize(

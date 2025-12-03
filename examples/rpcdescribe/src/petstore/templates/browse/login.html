@@ -1,0 +1,64 @@
+{% extends "layout.html" %}
+
+{% block title %}Login - {{ browse_title }}{% endblock %}
+
+{% block style %}
+<link href="{{ url_for('static', filename='css/login.css') }}" rel="stylesheet"/>
+{% endblock %}
+
+{% block script %}
+<script src="{{ url_for('static', filename='js/login.js') }}"></script>
+{% endblock %}
+
+{% block page %}
+<div class="login-container">
+    <div class="login-card">
+        <div class="login-header">
+            <h1>🔐 Login</h1>
+            <p>Sign in to access the {{ browse_title }}</p>
+        </div>
+
+        <form id="loginForm" class="login-form" action="/login" method="post">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input
+                    type="text"
+                    id="username"
+                    name="username"
+                    class="form-input"
+                    placeholder="Enter your username"
+                    required
+                    autocomplete="username"
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input
+                    type="password"
+                    id="password"
+                    name="password"
+                    class="form-input"
+                    placeholder="Enter your password"
+                    required
+                    autocomplete="current-password"
+                >
+            </div>
+
+            <div id="errorMessage" class="error-message" style="display: none;"></div>
+
+            <button type="submit" class="login-button" id="loginButton">
+                <span class="button-text">Sign In</span>
+                <span class="button-spinner" style="display: none;">⏳</span>
+            </button>
+        </form>
+
+        <div class="login-footer">
+            <p class="demo-credentials">
+                <strong>Demo credentials:</strong><br>
+                Username: <code>test</code> | Password: <code>test</code>
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

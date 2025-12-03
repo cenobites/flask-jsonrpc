@@ -13,14 +13,6 @@
         return ('/'+route === $location.path());
     };
 
-    var breadcrumbs = function(name) {
-        if (name.indexOf('.') !== -1) {
-            var names = name.split('.');
-            return [names[0], name];
-        }
-        return [name];
-    };
-
     var getDefaultParamValues = function(module) {
         if (!module.examples) {
             return {};
@@ -87,7 +79,6 @@
         $scope.showToolbarPlayButton = true;
         $scope.showToolbarRerunButton = false;
         $scope.showToolbarNotifyButton = true;
-        $scope.breadcrumbs = breadcrumbs('Dashboard');
         $scope.response = responseExample;
         $scope.responseObject = responseObjectExample;
 
@@ -97,10 +88,6 @@
 
         $scope.$on('App:displayContentLoaded', function(event, display) {
             $scope.showContentLoaded = display;
-        });
-
-        $scope.$on('App:breadcrumb', function(event, breadcrumb) {
-            $scope.breadcrumbs = breadcrumbs(breadcrumb);
         });
 
         $scope.$on('App:displayToolbar', function(event, display) {
@@ -148,7 +135,6 @@
 
         $scope.goToDashboard = function() {
             $scope.$emit('App:displayToolbar', false);
-            $scope.$emit('App:breadcrumb', 'Dashboard');
             $location.path('/');
         };
 
@@ -231,7 +217,6 @@
         $scope.response = undefined;
         $scope.responseObject = undefined;
         $scope.$emit('App:displayToolbar', true);
-        $scope.$emit('App:breadcrumb', module.name);
         $scope.$emit('App:displayToolbarNotifyButton', module.notification);
 
         var RPCCall = function(module) {

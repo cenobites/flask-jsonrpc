@@ -68,12 +68,8 @@ def page_session(page: Page) -> t.Generator[t.Callable[..., Page], None, None]:
 
 @pytest.fixture(autouse=True, scope='function')
 def jsonrpc_page_info(page_session: t.Callable[..., Page]) -> t.Generator[t.Callable[..., Page], None, None]:
-    def page_info(
-        jsonrpc_method: str, breadcrumb: str, method_title: str, method_signature: str, method_description: str
-    ) -> Page:
+    def page_info(jsonrpc_method: str, method_title: str, method_signature: str, method_description: str) -> Page:
         page = page_session(jsonrpc_method)
-        breadcrumb_element = page.locator('#breadcrumb')
-        expect(breadcrumb_element).to_contain_text(breadcrumb)
 
         method_title_element = page.locator('.method-title')
         expect(method_title_element).to_contain_text(method_title)

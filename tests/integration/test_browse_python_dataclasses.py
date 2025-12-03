@@ -31,26 +31,13 @@ from playwright.sync_api import Page
 
 
 @pytest.mark.parametrize(
-    'breadcrumb,method_title,method_signature,method_description',
-    [
-        (
-            'objects » objects.python_dataclasses.createCar',
-            'objects.python_dataclasses.createCar',
-            'objects.python_dataclasses.createCar(car: Object) -> Object',
-            '',
-        )
-    ],
+    'method_title,method_signature,method_description',
+    [('objects.python_dataclasses.createCar', 'objects.python_dataclasses.createCar(car: Object) -> Object', '')],
 )
 def test_objects_python_dataclasses_create_car_display(
-    jsonrpc_page_info: t.Callable[..., Page],
-    breadcrumb: str,
-    method_title: str,
-    method_signature: str,
-    method_description: str,
+    jsonrpc_page_info: t.Callable[..., Page], method_title: str, method_signature: str, method_description: str
 ) -> None:
-    jsonrpc_page_info(
-        'objects.python_dataclasses.createCar', breadcrumb, method_title, method_signature, method_description
-    )
+    jsonrpc_page_info('objects.python_dataclasses.createCar', method_title, method_signature, method_description)
 
 
 @pytest.mark.parametrize(
@@ -125,10 +112,9 @@ def test_objects_python_dataclasses_create_car_form(
 
 
 @pytest.mark.parametrize(
-    'breadcrumb,method_title,method_signature,method_description',
+    'method_title,method_signature,method_description',
     [
         (
-            'objects » objects.python_dataclasses.createManyCar',
             'objects.python_dataclasses.createManyCar',
             'objects.python_dataclasses.createManyCar(cars: Array, car: Object) -> Array',
             '',
@@ -136,15 +122,9 @@ def test_objects_python_dataclasses_create_car_form(
     ],
 )
 def test_objects_python_dataclasses_create_many_car_display(
-    jsonrpc_page_info: t.Callable[..., Page],
-    breadcrumb: str,
-    method_title: str,
-    method_signature: str,
-    method_description: str,
+    jsonrpc_page_info: t.Callable[..., Page], method_title: str, method_signature: str, method_description: str
 ) -> None:
-    jsonrpc_page_info(
-        'objects.python_dataclasses.createManyCar', breadcrumb, method_title, method_signature, method_description
-    )
+    jsonrpc_page_info('objects.python_dataclasses.createManyCar', method_title, method_signature, method_description)
 
 
 @pytest.mark.parametrize(
@@ -249,10 +229,9 @@ def test_objects_python_dataclasses_create_many_car_form(
 
 
 @pytest.mark.parametrize(
-    'breadcrumb,method_title,method_signature,method_description',
+    'method_title,method_signature,method_description',
     [
         (
-            'objects » objects.python_dataclasses.createManyFixCar',
             'objects.python_dataclasses.createManyFixCar',
             'objects.python_dataclasses.createManyFixCar(cars: Object) -> Array',
             '',
@@ -260,15 +239,9 @@ def test_objects_python_dataclasses_create_many_car_form(
     ],
 )
 def test_objects_python_dataclasses_create_many_fix_car_display(
-    jsonrpc_page_info: t.Callable[..., Page],
-    breadcrumb: str,
-    method_title: str,
-    method_signature: str,
-    method_description: str,
+    jsonrpc_page_info: t.Callable[..., Page], method_title: str, method_signature: str, method_description: str
 ) -> None:
-    jsonrpc_page_info(
-        'objects.python_dataclasses.createManyFixCar', breadcrumb, method_title, method_signature, method_description
-    )
+    jsonrpc_page_info('objects.python_dataclasses.createManyFixCar', method_title, method_signature, method_description)
 
 
 @pytest.mark.parametrize(
@@ -363,26 +336,13 @@ def test_objects_python_dataclasses_create_many_fix_car_form(
 
 
 @pytest.mark.parametrize(
-    'breadcrumb,method_title,method_signature,method_description',
-    [
-        (
-            'objects » objects.python_dataclasses.removeCar',
-            'objects.python_dataclasses.removeCar',
-            'objects.python_dataclasses.removeCar(car: Object) -> Object',
-            '',
-        )
-    ],
+    'method_title,method_signature,method_description',
+    [('objects.python_dataclasses.removeCar', 'objects.python_dataclasses.removeCar(car: Object) -> Object', '')],
 )
 def test_objects_python_dataclasses_remove_car_display(
-    jsonrpc_page_info: t.Callable[..., Page],
-    breadcrumb: str,
-    method_title: str,
-    method_signature: str,
-    method_description: str,
+    jsonrpc_page_info: t.Callable[..., Page], method_title: str, method_signature: str, method_description: str
 ) -> None:
-    jsonrpc_page_info(
-        'objects.python_dataclasses.removeCar', breadcrumb, method_title, method_signature, method_description
-    )
+    jsonrpc_page_info('objects.python_dataclasses.removeCar', method_title, method_signature, method_description)
 
 
 @pytest.mark.parametrize(

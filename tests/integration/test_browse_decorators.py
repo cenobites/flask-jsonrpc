@@ -31,24 +31,13 @@ from playwright.sync_api import Page
 
 
 @pytest.mark.parametrize(
-    'breadcrumb,method_title,method_signature,method_description',
-    [
-        (
-            'decorators » decorators.decorator',
-            'decorators.decorator',
-            'decorators.decorator(string: String) -> String',
-            '',
-        )
-    ],
+    'method_title,method_signature,method_description',
+    [('decorators.decorator', 'decorators.decorator(string: String) -> String', '')],
 )
 def test_decorators_decorator_display(
-    jsonrpc_page_info: t.Callable[..., Page],
-    breadcrumb: str,
-    method_title: str,
-    method_signature: str,
-    method_description: str,
+    jsonrpc_page_info: t.Callable[..., Page], method_title: str, method_signature: str, method_description: str
 ) -> None:
-    jsonrpc_page_info('decorators.decorator', breadcrumb, method_title, method_signature, method_description)
+    jsonrpc_page_info('decorators.decorator', method_title, method_signature, method_description)
 
 
 @pytest.mark.parametrize(
@@ -104,24 +93,13 @@ def test_decorators_decorator_form(
 
 
 @pytest.mark.parametrize(
-    'breadcrumb,method_title,method_signature,method_description',
-    [
-        (
-            'decorators » decorators.wrappedDecorator',
-            'decorators.wrappedDecorator',
-            'decorators.wrappedDecorator(string: String) -> String',
-            '',
-        )
-    ],
+    'method_title,method_signature,method_description',
+    [('decorators.wrappedDecorator', 'decorators.wrappedDecorator(string: String) -> String', '')],
 )
 def test_decorators_wrapped_decorator_display(
-    jsonrpc_page_info: t.Callable[..., Page],
-    breadcrumb: str,
-    method_title: str,
-    method_signature: str,
-    method_description: str,
+    jsonrpc_page_info: t.Callable[..., Page], method_title: str, method_signature: str, method_description: str
 ) -> None:
-    jsonrpc_page_info('decorators.wrappedDecorator', breadcrumb, method_title, method_signature, method_description)
+    jsonrpc_page_info('decorators.wrappedDecorator', method_title, method_signature, method_description)
 
 
 @pytest.mark.parametrize(
