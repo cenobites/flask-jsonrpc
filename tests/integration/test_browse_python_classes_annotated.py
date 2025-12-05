@@ -173,8 +173,8 @@ def test_python_classes_create_many_color_display(
                     'code': -32602,
                     'data': {
                         'constraint': 'Required',
-                        'message': "Cannot apply constraint Required for parameter 'colors' to value [] with type : "
-                        "Ensure the value of the parameter 'colors' is not empty.",
+                        'message': "cannot apply constraint Required for parameter 'colors' to value [] with type : "
+                        "ensure the value of the parameter 'colors' is not empty.",
                         'param': 'colors',
                         'value': [],
                     },
@@ -303,8 +303,8 @@ def test_python_classes_create_many_fix_color_display(
                     'code': -32602,
                     'data': {
                         'constraint': 'Required',
-                        'message': "Cannot apply constraint Required for parameter 'colors' to value {} with type : "
-                        "Ensure the value of the parameter 'colors' is not empty.",
+                        'message': "cannot apply constraint Required for parameter 'colors' to value {} with type : "
+                        "ensure the value of the parameter 'colors' is not empty.",
                         'param': 'colors',
                         'value': {},
                     },

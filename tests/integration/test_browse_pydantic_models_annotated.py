@@ -170,8 +170,8 @@ def test_types_pydantic_models_create_many_pet_display(
                     'code': -32602,
                     'data': {
                         'constraint': 'Required',
-                        'message': "Cannot apply constraint Required for parameter 'pets' to value [] with type : "
-                        "Ensure the value of the parameter 'pets' is not empty.",
+                        'message': "cannot apply constraint Required for parameter 'pets' to value [] with type : "
+                        "ensure the value of the parameter 'pets' is not empty.",
                         'param': 'pets',
                         'value': [],
                     },
@@ -300,8 +300,8 @@ def test_types_pydantic_models_create_many_fix_pet_display(
                     'code': -32602,
                     'data': {
                         'constraint': 'Required',
-                        'message': "Cannot apply constraint Required for parameter 'pets' to value {} with type : "
-                        "Ensure the value of the parameter 'pets' is not empty.",
+                        'message': "cannot apply constraint Required for parameter 'pets' to value {} with type : "
+                        "ensure the value of the parameter 'pets' is not empty.",
                         'param': 'pets',
                         'value': {},
                     },
