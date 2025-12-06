@@ -34,11 +34,13 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
         if (response.ok && data.access_token) {
             // Store the JWT token
             localStorage.setItem('jwt', data.access_token);
+            localStorage.setItem('refresh_token', data.refresh_token);
 
             // Redirect to dashboard or home
             window.location.href = '/api/browse';
         } else {
             localStorage.removeItem('jwt');
+            localStorage.removeItem('refresh_token');
 
             // Show error message
             errorMessage.textContent = data.msg || 'Invalid username or password';

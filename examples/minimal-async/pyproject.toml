@@ -45,6 +45,9 @@ Flask-JSONRPC = { path = "../../", editable = true }
 pythonpath = "src/"
 testpaths = ["src/minimal_async", "tests"]
 filterwarnings = ["error"]
+markers = [
+    "parallel_threads: mark test to run in parallel threads",
+]
 
 [tool.tox]
 requires = [

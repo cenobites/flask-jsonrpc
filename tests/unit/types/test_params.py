@@ -109,7 +109,7 @@ def test_example() -> None:
 def test_required() -> None:
     required = Required()
     assert required.type_check('test', 'value') == Ok('value')
-    assert required.type_check('test', None) == Err("Ensure the value of the parameter 'test' is not empty")
+    assert required.type_check('test', None) == Err("ensure the value of the parameter 'test' is not empty")
     no_required = Required(required=False)
     assert no_required.type_check('test', None) == Ok(None)
 
@@ -124,14 +124,14 @@ def test_nullable() -> None:
     assert nullable.type_check('test', None) == Ok(None)
     assert nullable.type_check('test', 'value') == Ok('value')
     no_nullable = Nullable(nullable=False)
-    assert no_nullable.type_check('test', None) == Err("Ensure the parameter 'test' is not null")
+    assert no_nullable.type_check('test', None) == Err("ensure the parameter 'test' is not null")
 
 
 def test_maximum() -> None:
     maximum = Maximum(maximum=10)
     assert maximum.type_check('test', 10) == Ok(10)
     assert maximum.type_check('test', 5) == Ok(5)
-    assert maximum.type_check('test', 15) == Err("Ensure the value of the parameter 'test' is less than or equal to 10")
+    assert maximum.type_check('test', 15) == Err("ensure the value of the parameter 'test' is less than or equal to 10")
 
 
 def test_minimum() -> None:
@@ -139,14 +139,14 @@ def test_minimum() -> None:
     assert minimum.type_check('test', 5) == Ok(5)
     assert minimum.type_check('test', 10) == Ok(10)
     assert minimum.type_check('test', 3) == Err(
-        "Ensure the value of the parameter 'test' is greater than or equal to 5"
+        "ensure the value of the parameter 'test' is greater than or equal to 5"
     )
 
 
 def test_multiple_of() -> None:
     multiple_of = MultipleOf(multiple_of=5)
     assert multiple_of.type_check('test', 10) == Ok(10)
-    assert multiple_of.type_check('test', 7) == Err("Ensure the value of the parameter 'test' is a multiple of 5")
+    assert multiple_of.type_check('test', 7) == Err("ensure the value of the parameter 'test' is a multiple of 5")
     with pytest.raises(ValueError):
         MultipleOf(multiple_of=-1)
 
@@ -155,7 +155,7 @@ def test_max_length() -> None:
     max_length = MaxLength(max_length=5)
     assert max_length.type_check('test', 'hello') == Ok('hello')
     assert max_length.type_check('test', 'hello world') == Err(
-        "Ensure the value of the parameter 'test' is less than or equal to 5"
+        "ensure the value of the parameter 'test' is less than or equal to 5"
     )
     with pytest.raises(ValueError):
         MaxLength(max_length=0)
@@ -164,7 +164,7 @@ def test_max_length() -> None:
 def test_min_length() -> None:
     min_length = MinLength(min_length=3)
     assert min_length.type_check('test', 'hi') == Err(
-        "Ensure the value of the parameter 'test' is greater than or equal to 3"
+        "ensure the value of the parameter 'test' is greater than or equal to 3"
     )
     assert min_length.type_check('test', 'hello') == Ok('hello')
     with pytest.raises(ValueError):
@@ -175,12 +175,12 @@ def test_pattern() -> None:
     pattern = Pattern(pattern=re.compile(r'^\d{3}-\d{2}-\d{4}$'))
     assert pattern.type_check('test', '123-45-6789') == Ok('123-45-6789')
     assert pattern.type_check('test', '123-456-789') == Err(
-        "Ensure the value of the parameter 'test' matches the valid pattern re.compile('^\\\\d{3}-\\\\d{2}-\\\\d{4}$')"
+        "ensure the value of the parameter 'test' matches the valid pattern re.compile('^\\\\d{3}-\\\\d{2}-\\\\d{4}$')"
     )
     pattern_str = Pattern(pattern=r'^\d{3}-\d{2}-\d{4}$')
     assert pattern_str.type_check('test', '123-45-6789') == Ok('123-45-6789')
     assert pattern_str.type_check('test', '123-456-789') == Err(
-        "Ensure the value of the parameter 'test' matches the valid pattern '^\\\\d{3}-\\\\d{2}-\\\\d{4}$'"
+        "ensure the value of the parameter 'test' matches the valid pattern '^\\\\d{3}-\\\\d{2}-\\\\d{4}$'"
     )
 
 
@@ -188,10 +188,10 @@ def test_allow_inf_nan() -> None:
     allow_inf_nan = AllowInfNan(allow_inf_nan=False)
     assert allow_inf_nan.type_check('test', 1) == Ok(1)
     assert allow_inf_nan.type_check('test', math.inf) == Err(
-        "Ensure the value of the parameter 'test' is not infinity, negative infinity, or NaN"
+        "ensure the value of the parameter 'test' is not infinity, negative infinity, or NaN"
     )
     assert allow_inf_nan.type_check('test', math.nan) == Err(
-        "Ensure the value of the parameter 'test' is not infinity, negative infinity, or NaN"
+        "ensure the value of the parameter 'test' is not infinity, negative infinity, or NaN"
     )
 
 
@@ -202,11 +202,11 @@ def test_max_digits() -> None:
     assert max_digits.type_check('test', 1) == Ok(1)
     assert max_digits.type_check('test', '1.23') == Ok('1.23')
     assert max_digits.type_check('test', '4.08E+10') == Err(
-        "Ensure the value of the parameter 'test' has a maximum of 5 digits"
+        "ensure the value of the parameter 'test' has a maximum of 5 digits"
     )
     assert max_digits.type_check('test', '4.08E-10') == Ok('4.08E-10')
     assert max_digits.type_check('test', 123456) == Err(
-        "Ensure the value of the parameter 'test' has a maximum of 5 digits"
+        "ensure the value of the parameter 'test' has a maximum of 5 digits"
     )
     big_max_digits = MaxDigits(max_digits=100**100)
     assert big_max_digits.type_check('test', 10**10) == Ok(10**10)
@@ -227,10 +227,10 @@ def test_decimal_places() -> None:
     assert decimal_places.type_check('test', '1.23') == Ok('1.23')
     assert decimal_places.type_check('test', '4.08E+10') == Ok('4.08E+10')
     assert decimal_places.type_check('test', '4.08E-10') == Err(
-        "Ensure the value of the parameter 'test' has a maximum of 2 decimal places"
+        "ensure the value of the parameter 'test' has a maximum of 2 decimal places"
     )
     assert decimal_places.type_check('test', 12.345) == Err(
-        "Ensure the value of the parameter 'test' has a maximum of 2 decimal places"
+        "ensure the value of the parameter 'test' has a maximum of 2 decimal places"
     )
     with pytest.raises(TypeError):
         decimal_places.type_check('test', 'inf')

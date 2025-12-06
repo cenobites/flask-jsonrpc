@@ -44,7 +44,7 @@ test-cov-unit:
 
 
 test-examples: clean
-	@find examples/ -name "tox.ini" -print0 | xargs -0 -I {} -P 4 uv run tox run -e py,py-async -c {}
+	@find examples/ -name "pyproject.toml" -print0 | xargs -0 -I {} -P 4 uv run tox run -e py,py-async -c {}
 
 test-release: clean test
 	$(shell ./bin/docker-compose-test.sh)

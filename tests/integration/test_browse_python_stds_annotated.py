@@ -95,8 +95,8 @@ def test_types_python_stds_str_type_display(
                     'code': -32602,
                     'data': {
                         'constraint': 'Required',
-                        'message': "Cannot apply constraint Required for parameter 'st' to value None with type : "
-                        "Ensure the value of the parameter 'st' is not empty.",
+                        'message': "cannot apply constraint Required for parameter 'st' to value None with type : "
+                        "ensure the value of the parameter 'st' is not empty.",
                         'param': 'st',
                         'value': None,
                     },
@@ -170,8 +170,8 @@ def test_types_python_stds_int_type_display(
                     'code': -32602,
                     'data': {
                         'constraint': 'Minimum',
-                        'message': "Cannot apply constraint Minimum for parameter 'n' to value -456 with type : "
-                        "Ensure the value of the parameter 'n' is greater than or equal to 0.",
+                        'message': "cannot apply constraint Minimum for parameter 'n' to value -456 with type : "
+                        "ensure the value of the parameter 'n' is greater than or equal to 0.",
                         'param': 'n',
                         'value': -456,
                     },
@@ -199,8 +199,8 @@ def test_types_python_stds_int_type_display(
                     'code': -32602,
                     'data': {
                         'constraint': 'Minimum',
-                        'message': "Cannot apply constraint Minimum for parameter 'n' to value -99999 with type : "
-                        "Ensure the value of the parameter 'n' is greater than or equal to 0.",
+                        'message': "cannot apply constraint Minimum for parameter 'n' to value -99999 with type : "
+                        "ensure the value of the parameter 'n' is greater than or equal to 0.",
                         'param': 'n',
                         'value': -99999,
                     },
@@ -252,8 +252,8 @@ def test_types_python_stds_float_type_display(
                     'code': -32602,
                     'data': {
                         'constraint': 'DecimalPlaces',
-                        'message': "Cannot apply constraint DecimalPlaces for parameter 'n' to "
-                        "value -2.718 with type : Ensure the value of the parameter 'n' has a maximum "
+                        'message': "cannot apply constraint DecimalPlaces for parameter 'n' to "
+                        "value -2.718 with type : ensure the value of the parameter 'n' has a maximum "
                         'of 2 decimal places.',
                         'param': 'n',
                         'value': -2.718,
@@ -277,8 +277,8 @@ def test_types_python_stds_float_type_display(
                     'code': -32602,
                     'data': {
                         'constraint': 'DecimalPlaces',
-                        'message': "Cannot apply constraint DecimalPlaces for parameter 'n' to value "
-                        "1.2345678901234567 with type : Ensure the value of the parameter 'n' has a maximum "
+                        'message': "cannot apply constraint DecimalPlaces for parameter 'n' to value "
+                        "1.2345678901234567 with type : ensure the value of the parameter 'n' has a maximum "
                         'of 2 decimal places.',
                         'param': 'n',
                         'value': 1.2345678901234567,
@@ -297,8 +297,8 @@ def test_types_python_stds_float_type_display(
                     'code': -32602,
                     'data': {
                         'constraint': 'DecimalPlaces',
-                        'message': "Cannot apply constraint DecimalPlaces for parameter 'n' to value -9.876543210987654"
-                        " with type : Ensure the value of the parameter 'n' has a maximum of 2 decimal places.",
+                        'message': "cannot apply constraint DecimalPlaces for parameter 'n' to value -9.876543210987654"
+                        " with type : ensure the value of the parameter 'n' has a maximum of 2 decimal places.",
                         'param': 'n',
                         'value': -9.876543210987654,
                     },
@@ -316,8 +316,8 @@ def test_types_python_stds_float_type_display(
                     'code': -32602,
                     'data': {
                         'constraint': 'DecimalPlaces',
-                        'message': "Cannot apply constraint DecimalPlaces for parameter 'n' to value 1.0000000000000002"
-                        " with type : Ensure the value of the parameter 'n' has a maximum of 2 decimal places.",
+                        'message': "cannot apply constraint DecimalPlaces for parameter 'n' to value 1.0000000000000002"
+                        " with type : ensure the value of the parameter 'n' has a maximum of 2 decimal places.",
                         'param': 'n',
                         'value': 1.0000000000000002,
                     },
@@ -377,8 +377,8 @@ def test_types_python_stds_list_type_display(
                     'code': -32602,
                     'data': {
                         'constraint': 'Required',
-                        'message': "Cannot apply constraint Required for parameter 'lst' to value [] with type : "
-                        "Ensure the value of the parameter 'lst' is not empty.",
+                        'message': "cannot apply constraint Required for parameter 'lst' to value [] with type : "
+                        "ensure the value of the parameter 'lst' is not empty.",
                         'param': 'lst',
                         'value': [],
                     },
@@ -464,8 +464,8 @@ def test_types_python_stds_dict_type_display(
                     'code': -32602,
                     'data': {
                         'constraint': 'Required',
-                        'message': "Cannot apply constraint Required for parameter 'd' to value {} with type : "
-                        "Ensure the value of the parameter 'd' is not empty.",
+                        'message': "cannot apply constraint Required for parameter 'd' to value {} with type : "
+                        "ensure the value of the parameter 'd' is not empty.",
                         'param': 'd',
                         'value': {},
                     },
@@ -545,8 +545,8 @@ def test_types_python_bytes_type_display(
                     'code': -32602,
                     'data': {
                         'constraint': 'Required',
-                        'message': "Cannot apply constraint Required for parameter 'b' to value None with type : "
-                        "Ensure the value of the parameter 'b' is not empty.",
+                        'message': "cannot apply constraint Required for parameter 'b' to value None with type : "
+                        "ensure the value of the parameter 'b' is not empty.",
                         'param': 'b',
                         'value': None,
                     },
@@ -627,8 +627,8 @@ def test_types_python_bytearray_type_display(
                     'code': -32602,
                     'data': {
                         'constraint': 'Required',
-                        'message': "Cannot apply constraint Required for parameter 'b' to value None with type : "
-                        "Ensure the value of the parameter 'b' is not empty.",
+                        'message': "cannot apply constraint Required for parameter 'b' to value None with type : "
+                        "ensure the value of the parameter 'b' is not empty.",
                         'param': 'b',
                         'value': None,
                     },
@@ -777,8 +777,8 @@ def test_types_python_decimal_type_display(
                     'code': -32602,
                     'data': {
                         'constraint': 'DecimalPlaces',
-                        'message': "Cannot apply constraint DecimalPlaces for parameter 'n' to value "
-                        '123.456 with type : Ensure the value '
+                        'message': "cannot apply constraint DecimalPlaces for parameter 'n' to value "
+                        '123.456 with type : ensure the value '
                         "of the parameter 'n' has a maximum of 2 decimal places.",
                         'param': 'n',
                         'value': '123.456',
@@ -1023,8 +1023,8 @@ def test_types_python_sequence_type_display(
                     'code': -32602,
                     'data': {
                         'constraint': 'Required',
-                        'message': "Cannot apply constraint Required for parameter 's' to value [] with type : "
-                        "Ensure the value of the parameter 's' is not empty.",
+                        'message': "cannot apply constraint Required for parameter 's' to value [] with type : "
+                        "ensure the value of the parameter 's' is not empty.",
                         'param': 's',
                         'value': [],
                     },

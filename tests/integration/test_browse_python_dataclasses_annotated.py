@@ -172,8 +172,8 @@ def test_types_python_dataclasses_create_many_car_display(
                     'code': -32602,
                     'data': {
                         'constraint': 'Required',
-                        'message': "Cannot apply constraint Required for parameter 'cars' to value [] with type : "
-                        "Ensure the value of the parameter 'cars' is not empty.",
+                        'message': "cannot apply constraint Required for parameter 'cars' to value [] with type : "
+                        "ensure the value of the parameter 'cars' is not empty.",
                         'param': 'cars',
                         'value': [],
                     },
@@ -302,8 +302,8 @@ def test_types_python_dataclasses_create_many_fix_car_display(
                     'code': -32602,
                     'data': {
                         'constraint': 'Required',
-                        'message': "Cannot apply constraint Required for parameter 'cars' to value {} with type : "
-                        "Ensure the value of the parameter 'cars' is not empty.",
+                        'message': "cannot apply constraint Required for parameter 'cars' to value {} with type : "
+                        "ensure the value of the parameter 'cars' is not empty.",
                         'param': 'cars',
                         'value': {},
                     },

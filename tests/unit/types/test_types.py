@@ -77,7 +77,7 @@ def test_type_metadata_checker() -> None:
         assert excinfo.annotated == required
         assert excinfo.name == 'param'
         assert excinfo.value is None
-        assert excinfo.message == "Ensure the value of the parameter 'param' is not empty"
+        assert excinfo.message == "ensure the value of the parameter 'param' is not empty"
 
 
 def test_type_metadata_checker_with_not_complaint_metadata() -> None:
@@ -90,7 +90,7 @@ def test_annotated_metadata_type_error() -> None:
         required.type_check('param', None)
     except types.AnnotatedMetadataTypeError as e:
         assert isinstance(e, types.AnnotatedMetadataTypeError)
-        assert e.message == "Ensure the value of the parameter 'param' is not empty"
+        assert e.message == "ensure the value of the parameter 'param' is not empty"
         assert e.name == 'param'
         assert e.value is None
 

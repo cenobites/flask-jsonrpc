@@ -30,9 +30,6 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             if (response.ok) {
-                // Clear the JWT token
-                localStorage.removeItem('jwt');
-
                 // Redirect to login page
                 window.location.href = '/api/browse/login';
             } else {
@@ -45,6 +42,9 @@ document.addEventListener('DOMContentLoaded', () => {
             errorMessage.style.display = 'block';
             console.error('Logout error:', error);
         } finally {
+            // Clear the JWT token
+            localStorage.removeItem('jwt');
+
             // Re-enable button and hide spinner
             logoutButton.disabled = false;
             buttonText.style.display = 'inline';

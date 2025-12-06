@@ -30,8 +30,12 @@ if t.TYPE_CHECKING:
     from flask.testing import FlaskClient
 
 
-def test_get_pets(client: 'FlaskClient') -> None:
-    rv = client.post('/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'Petstore.get_pets', 'params': []})
+def test_get_pets(client: 'FlaskClient', access_token: str) -> None:
+    rv = client.post(
+        '/api',
+        json={'id': 1, 'jsonrpc': '2.0', 'method': 'Petstore.get_pets', 'params': []},
+        headers={'Authorization': f'Bearer {access_token}'},
+    )
     json_data = rv.get_json()
     assert json_data['id'] == 1
     assert json_data['jsonrpc'] == '2.0'
@@ -40,7 +44,7 @@ def test_get_pets(client: 'FlaskClient') -> None:
     assert rv.status_code == 200
 
 
-def test_create_pet(client: 'FlaskClient') -> None:
+def test_create_pet(client: 'FlaskClient', access_token: str) -> None:
     rv = client.post(
         '/api',
         json={
@@ -49,6 +53,7 @@ def test_create_pet(client: 'FlaskClient') -> None:
             'method': 'Petstore.create_pet',
             'params': {'new_pet': {'name': 'Tequila', 'tag': 'cat'}},
         },
+        headers={'Authorization': f'Bearer {access_token}'},
     )
     json_data = rv.get_json()
     assert json_data['id'] == 1
@@ -59,20 +64,51 @@ def test_create_pet(client: 'FlaskClient') -> None:
     assert rv.status_code == 200
 
 
-def test_get_by_id(client: 'FlaskClient') -> None:
-    rv = client.post('/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'Petstore.get_pet_by_id', 'params': [1]})
+def test_get_by_id(client: 'FlaskClient', access_token: str) -> None:
+    rv = client.post(
+        '/api',
+        json={'id': 1, 'jsonrpc': '2.0', 'method': 'Petstore.get_pet_by_id', 'params': [1]},
+        headers={'Authorization': f'Bearer {access_token}'},
+    )
     assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': {'id': 1, 'name': 'Bob', 'tag': 'dog'}}
     assert rv.status_code == 200
 
 
-def test_delete_by_id(client: 'FlaskClient') -> None:
-    rv = client.post('/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'Petstore.delete_pet_by_id', 'params': [2]})
+def test_get_by_id_with_invalid_token(client: 'FlaskClient') -> None:
+    rv = client.post(
+        '/api',
+        json={'id': 1, 'jsonrpc': '2.0', 'method': 'Petstore.get_pet_by_id', 'params': [1]},
+        headers={'Authorization': 'Bearer invalid_token'},
+    )
+    assert rv.json == {
+        'id': 1,
+        'jsonrpc': '2.0',
+        'error': {
+            'code': -32000,
+            'data': {'msg': 'Not enough segments'},
+            'message': 'Server error',
+            'name': 'ServerError',
+        },
+    }
+    assert rv.status_code == 401
+
+
+def test_delete_by_id(client: 'FlaskClient', access_token: str) -> None:
+    rv = client.post(
+        '/api',
+        json={'id': 1, 'jsonrpc': '2.0', 'method': 'Petstore.delete_pet_by_id', 'params': [2]},
+        headers={'Authorization': f'Bearer {access_token}'},
+    )
     assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': {'id': 2, 'name': 'Eve', 'tag': 'cat'}}
     assert rv.status_code == 200
 
 
-def test_rpc_describe(client: 'FlaskClient') -> None:
-    rv = client.post('/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'rpc.describe'})
+def test_rpc_describe(client: 'FlaskClient', access_token: str) -> None:
+    rv = client.post(
+        '/api',
+        json={'id': 1, 'jsonrpc': '2.0', 'method': 'rpc.describe'},
+        headers={'Authorization': f'Bearer {access_token}'},
+    )
     data = rv.get_json()
     assert data['id'] == 1
     assert data['jsonrpc'] == '2.0'
@@ -95,8 +131,18 @@ def test_rpc_describe(client: 'FlaskClient') -> None:
                 {
                     'name': 'default',
                     'params': [
-                        {'description': '', 'name': 'tags', 'summary': '', 'value': 'dog'},
-                        {'description': '', 'name': 'limit', 'summary': '', 'value': 25},
+                        {
+                            'description': 'Tags to filter by',
+                            'name': 'tags',
+                            'summary': 'Tags to filter by',
+                            'value': 'dog',
+                        },
+                        {
+                            'description': 'Maximum number of results to return',
+                            'name': 'limit',
+                            'summary': 'Maximum number of results to return',
+                            'value': 25,
+                        },
                     ],
                 }
             ],
@@ -128,7 +174,7 @@ def test_rpc_describe(client: 'FlaskClient') -> None:
             'validation': True,
         },
         'Petstore.delete_pet_by_id': {
-            'description': 'deletes a single pet based on the ID supplied',
+            'description': 'Deletes a single pet based on the ID supplied',
             'errors': [
                 {
                     'code': -32000,
@@ -137,7 +183,19 @@ def test_rpc_describe(client: 'FlaskClient') -> None:
                     'status_code': 500,
                 }
             ],
-            'examples': [{'name': 'default', 'params': [{'description': '', 'name': 'id', 'summary': '', 'value': 1}]}],
+            'examples': [
+                {
+                    'name': 'default',
+                    'params': [
+                        {
+                            'description': 'ID of pet to delete',
+                            'name': 'id',
+                            'summary': 'ID of pet to delete',
+                            'value': 1,
+                        }
+                    ],
+                }
+            ],
             'name': 'Petstore.delete_pet_by_id',
             'notification': True,
             'params': [{'minimum': 1, 'name': 'id', 'summary': 'ID of pet to delete', 'type': 'Number'}],
@@ -187,7 +245,25 @@ def test_rpc_describe(client: 'FlaskClient') -> None:
             'errors': [
                 {'code': -32000, 'data': {'message': 'Server error'}, 'message': 'ServerError', 'status_code': 500}
             ],
-            'examples': [{'name': 'default', 'params': []}],
+            'examples': [
+                {
+                    'name': 'default',
+                    'params': [
+                        {
+                            'description': 'Tags to filter by',
+                            'name': 'tags',
+                            'summary': 'Tags to filter by',
+                            'value': ['dog', 'cat'],
+                        },
+                        {
+                            'description': 'Maximum number of results to return',
+                            'name': 'limit',
+                            'summary': 'Maximum number of results to return',
+                            'value': 2,
+                        },
+                    ],
+                }
+            ],
             'name': 'Petstore.get_pets',
             'notification': True,
             'params': [
