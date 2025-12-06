@@ -44,3 +44,10 @@ def fixture_app() -> 't.Generator[Flask]':
 @pytest.fixture
 def client(app: 'Flask') -> 'FlaskClient':
     return app.test_client()
+
+
+@pytest.fixture
+def access_token(client: 'FlaskClient') -> str:
+    rv = client.post('/login', json={'username': 'test', 'password': 'test'})
+    json_data = rv.get_json()
+    return json_data['access_token']

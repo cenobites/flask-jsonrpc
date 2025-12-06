@@ -32,6 +32,7 @@ from datetime import datetime, timezone, timedelta
 from typing_extensions import Self
 
 from flask import Flask, typing as ft, jsonify, request, redirect
+from flask.wrappers import Request, Response
 
 from pydantic import BaseModel
 
@@ -45,16 +46,14 @@ import flask_jsonrpc.types.params as tp
 import flask_jsonrpc.types.methods as tm
 from flask_jsonrpc.contrib.browse import JSONRPCBrowse, register_middleware
 
-if t.TYPE_CHECKING:
-    from flask.wrappers import Request, Response
-
 
 @register_middleware('authentication')
 def authentication_middleware(
     request: Request,
 ) -> t.Generator[ft.ResponseReturnValue | bool | None, Response, ft.ResponseReturnValue | None]:
     if (
-        request.path.startswith('/api/browse/static')
+        request.path == '/api/browse/'
+        or request.path.startswith('/api/browse/static')
         or request.path.startswith('/api/browse/login')
         or request.path.startswith('/api/browse/logout')
     ):
@@ -98,7 +97,7 @@ class CustomJSONRPCBrowse(JSONRPCBrowse):
         return {'all': ['css/petstore.css']}
 
     def get_browse_media_js(self: Self) -> list[str]:
-        return ['js/petstore.js']
+        return ['js/services.js', 'js/petstore.js']
 
     def get_browse_dashboard_menu_name(self: Self) -> str:
         return 'Petstore Dashboard'
@@ -115,10 +114,12 @@ class CustomJSONRPCBrowse(JSONRPCBrowse):
 
 app = Flask('openrpc', template_folder='src/petstore/templates', static_folder='src/petstore/static')
 app.config['JWT_COOKIE_SECURE'] = False
-app.config['JWT_TOKEN_LOCATION'] = ['cookies']
+app.config['JWT_TOKEN_LOCATION'] = ['headers']  # 'cookies' is supported but disabled for simplicity
 app.config['JWT_SECRET_KEY'] = 'super-secret'
 app.config['JWT_COOKIE_CSRF_PROTECT'] = False
+app.config['JWT_ACCESS_CSRF_COOKIE_PATH'] = '/api'
 app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=1)
+app.config['JWT_REFRESH_TOKEN_EXPIRES'] = timedelta(days=30)
 jwt = JWTManager(app)
 jsonrpc = JSONRPC(app, '/api', enable_web_browsable_api=False)
 browse = CustomJSONRPCBrowse(app, url_prefix='/api/browse')
@@ -147,6 +148,15 @@ class Pet(NewPet):
 PETS = [Pet(id=1, name='Bob', tag='dog'), Pet(id=2, name='Eve', tag='cat'), Pet(id=3, name='Alice', tag='bird')]
 
 
+@app.route('/oauth/token/refresh', methods=['POST'])
+@jwt_required(refresh=True)
+def oauth_token_refresh() -> ft.ResponseReturnValue:
+    # https://flask-jwt-extended.readthedocs.io/en/stable/refreshing_tokens.html#explicit-refreshing-with-refresh-tokens
+    identity = flask_jwt.get_jwt_identity()
+    access_token = flask_jwt.create_access_token(identity=identity)
+    return jsonify(access_token=access_token)
+
+
 @app.route('/login', methods=['POST'])
 def login() -> ft.ResponseReturnValue:
     username = request.json.get('username', None)
@@ -155,16 +165,32 @@ def login() -> ft.ResponseReturnValue:
         return jsonify({'msg': 'Bad username or password'}), 401
 
     access_token = flask_jwt.create_access_token(identity=username)
-    response = jsonify(access_token=access_token)
-    flask_jwt.set_access_cookies(response, access_token)
+    refresh_token = flask_jwt.create_refresh_token(identity=username)
+    response = jsonify(access_token=access_token, refresh_token=refresh_token)
+    # Uncomment to use cookies: app.config['JWT_TOKEN_LOCATION'] = ['cookies']
+    # https://flask-jwt-extended.readthedocs.io/en/stable/refreshing_tokens.html#implicit-refreshing-with-cookies
+    # flask_jwt.set_access_cookies(response, access_token)
+    # flask_jwt.set_refresh_cookies(response, refresh_token)
     return response
 
 
 @app.route('/logout', methods=['POST'])
 def logout() -> ft.ResponseReturnValue:
     response = jsonify({'msg': 'logout successful'})
-    flask_jwt.unset_jwt_cookies(response)
+    # Uncomment to use cookies: app.config['JWT_TOKEN_LOCATION'] = ['cookies']
+    # https://flask-jwt-extended.readthedocs.io/en/stable/refreshing_tokens.html#implicit-refreshing-with-cookies
+    # flask_jwt.unset_jwt_cookies(response)
     return response
+
+
+@jsonrpc.errorhandler(PyJWTError)
+def handle_pyjwt_error(e: PyJWTError) -> ft.ResponseReturnValue:
+    return {'msg': str(e)}, 401
+
+
+@jsonrpc.errorhandler(JWTExtendedException)
+def handle_jwt_extended_exception(e: JWTExtendedException) -> ft.ResponseReturnValue:
+    return {'msg': str(e)}, 401
 
 
 @jsonrpc.errorhandler(PetNotFoundException)

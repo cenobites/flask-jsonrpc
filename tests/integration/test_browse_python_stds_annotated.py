@@ -253,7 +253,7 @@ def test_types_python_stds_float_type_display(
                     'data': {
                         'constraint': 'DecimalPlaces',
                         'message': "cannot apply constraint DecimalPlaces for parameter 'n' to "
-                        "value -2.718 with type : Ensure the value of the parameter 'n' has a maximum "
+                        "value -2.718 with type : ensure the value of the parameter 'n' has a maximum "
                         'of 2 decimal places.',
                         'param': 'n',
                         'value': -2.718,
@@ -278,7 +278,7 @@ def test_types_python_stds_float_type_display(
                     'data': {
                         'constraint': 'DecimalPlaces',
                         'message': "cannot apply constraint DecimalPlaces for parameter 'n' to value "
-                        "1.2345678901234567 with type : Ensure the value of the parameter 'n' has a maximum "
+                        "1.2345678901234567 with type : ensure the value of the parameter 'n' has a maximum "
                         'of 2 decimal places.',
                         'param': 'n',
                         'value': 1.2345678901234567,
@@ -298,7 +298,7 @@ def test_types_python_stds_float_type_display(
                     'data': {
                         'constraint': 'DecimalPlaces',
                         'message': "cannot apply constraint DecimalPlaces for parameter 'n' to value -9.876543210987654"
-                        " with type : Ensure the value of the parameter 'n' has a maximum of 2 decimal places.",
+                        " with type : ensure the value of the parameter 'n' has a maximum of 2 decimal places.",
                         'param': 'n',
                         'value': -9.876543210987654,
                     },
@@ -317,7 +317,7 @@ def test_types_python_stds_float_type_display(
                     'data': {
                         'constraint': 'DecimalPlaces',
                         'message': "cannot apply constraint DecimalPlaces for parameter 'n' to value 1.0000000000000002"
-                        " with type : Ensure the value of the parameter 'n' has a maximum of 2 decimal places.",
+                        " with type : ensure the value of the parameter 'n' has a maximum of 2 decimal places.",
                         'param': 'n',
                         'value': 1.0000000000000002,
                     },
@@ -778,7 +778,7 @@ def test_types_python_decimal_type_display(
                     'data': {
                         'constraint': 'DecimalPlaces',
                         'message': "cannot apply constraint DecimalPlaces for parameter 'n' to value "
-                        '123.456 with type : Ensure the value '
+                        '123.456 with type : ensure the value '
                         "of the parameter 'n' has a maximum of 2 decimal places.",
                         'param': 'n',
                         'value': '123.456',

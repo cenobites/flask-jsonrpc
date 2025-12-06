@@ -28,10 +28,9 @@ import typing as t
 
 from flask import Flask
 
-from api.user import user
-from api.article import article
-
 from flask_jsonrpc import JSONRPC
+from modular.api.user import user
+from modular.api.article import article
 
 app = Flask('modular')
 jsonrpc = JSONRPC(app, '/api', enable_web_browsable_api=True)

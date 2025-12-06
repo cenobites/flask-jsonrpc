@@ -181,9 +181,14 @@ async function executeRPC() {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('jwt')}`
       },
       body: JSON.stringify(requestBody)
     });
+
+    if (response.status === 401) {
+      window.location.href = '/api/browse/login';
+    }
 
     const endTime = performance.now();
     const duration = Math.round(endTime - startTime);
@@ -248,11 +253,20 @@ async function updatePetCount() {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('jwt')}`
       },
       body: JSON.stringify(requestBody)
     });
 
+    if (response.status === 401) {
+      window.location.href = '/api/browse/login';
+    }
+
     const data = await response.json();
+
+    if (data.error) {
+      throw new Error(data.error.message);
+    }
 
     if (data.result && Array.isArray(data.result)) {
       const totalPetsElement = document.getElementById('total-pets');

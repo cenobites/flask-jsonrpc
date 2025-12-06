@@ -247,8 +247,8 @@ def test_rpc_describe(client: 'FlaskClient') -> None:
             'validation': True,
         },
         'rpc.describe': {
-            'name': 'rpc.describe',
             'description': 'Service description for JSON-RPC 2.0',
+            'name': 'rpc.describe',
             'notification': False,
             'params': [],
             'returns': {
@@ -270,10 +270,10 @@ def test_rpc_describe(client: 'FlaskClient') -> None:
         },
         'rpc.discover': {
             'name': 'rpc.discover',
-            'notification': False,
+            'notification': True,
             'params': [],
             'returns': {'name': 'default', 'type': 'Null'},
             'type': 'method',
-            'validation': False,
+            'validation': True,
         },
     }
