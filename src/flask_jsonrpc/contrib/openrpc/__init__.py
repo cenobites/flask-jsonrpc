@@ -50,7 +50,6 @@ class OpenRPC(OpenRPCExtendSchemaDecoratorMixin):
         *,
         openrpc_schema: OpenRPCSchema | None = None,
     ) -> None:
-        self.app = app
         self.jsonrpc_app = jsonrpc_app
         self.openrpc_schema = openrpc_schema
         if app and jsonrpc_app:

@@ -1,4 +1,4 @@
-# Copyright (c) 2012-2024, Cenobit Technologies, Inc. http://cenobit.es/
+# Copyright (c) 2012-2025, Cenobit Technologies, Inc. http://cenobit.es/
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -27,18 +27,21 @@
 from pallets_sphinx_themes import ProjectLink, get_version
 
 project = 'Flask-JSONRPC'
-copyright = '2021-2024, Nycholas de Oliveira e Oliveira'
+copyright = '2021-2025, Cenobit Technologies, Inc. http://cenobit.es/'
 author = 'Nycholas de Oliveira e Oliveira'
 release, version = get_version('Flask-JSONRPC')
 
-master_doc = 'index'
 default_role = 'code'
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.extlinks',
     'sphinx.ext.intersphinx',
+    'sphinx.ext.autosummary',
+    'sphinx.ext.viewcode',
+    'sphinx.ext.napoleon',
     'sphinxcontrib.log_cabinet',
     'sphinx_tabs.tabs',
+    # 'sphinx_autodoc_typehints',
     'pallets_sphinx_themes',
 ]
 autodoc_member_order = 'bysource'
@@ -50,6 +53,7 @@ issues_github_path = 'cenobites/flask-jsonrpc'
 extlinks = {
     'issue': ('https://github.com/cenobites/flask-jsonrpc/issues/%s', '#%s'),
     'pr': ('https://github.com/cenobites/flask-jsonrpc/pull/%s', '#%s'),
+    'ghsa': ('https://github.com/cenobites/flask-jsonrpc/security/advisories/GHSA-%s', 'GHSA-%s'),
 }
 intersphinx_mapping = {
     'python': ('https://docs.python.org/3/', None),
@@ -73,9 +77,13 @@ html_sidebars = {
 }
 singlehtml_sidebars = {'index': ['project.html', 'localtoc.html', 'ethicalads.html']}
 html_static_path = ['_static']
-# html_favicon = '_static/flask-jsonrpc-icon.png'
-# html_logo = '_static/flask-jsonrpc-icon.png'
+html_favicon = '_static/flask-jsonrpc-icon.svg'
+html_logo = '_static/flask-jsonrpc-icon.svg'
 html_title = f'Flask-JSONRPC Documentation ({version})'
 html_show_sourcelink = False
 
-latex_documents = [(master_doc, f'Flask-JSONRPC-{version}.tex', html_title, author, 'manual')]
+gettext_uuid = True
+gettext_compact = False
+autosummary_generate = True
+napoleon_google_docstring = True
+add_module_names = False

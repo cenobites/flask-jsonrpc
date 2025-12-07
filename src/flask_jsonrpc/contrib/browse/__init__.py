@@ -177,7 +177,6 @@ class JSONRPCBrowse:
     def __init__(
         self: Self, app: Flask | None = None, url_prefix: str = '/api/browse', base_url: str | None = None
     ) -> None:
-        self.app = app
         self.url_prefix = url_prefix
         self.base_url = base_url
         self.jsonrpc_sites: set[JSONRPCSite] = set()
@@ -234,7 +233,6 @@ class JSONRPCBrowse:
             f'{self.url_prefix}/static/<path:filename>', 'urn:browse.static', view_func=app.send_static_file
         )
         app.teardown_appcontext(_teardown_request_middleware)
-        self.app = app
 
     def register_jsonrpc_site(self: Self, jsonrpc_site: JSONRPCSite) -> None:
         self.jsonrpc_sites.add(jsonrpc_site)

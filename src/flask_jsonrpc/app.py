@@ -58,7 +58,6 @@ class JSONRPC(JSONRPCDecoratorMixin):
         jsonrpc_site_api: type[JSONRPCView] = default_jsonrpc_site_api,
         enable_web_browsable_api: bool | None = None,
     ) -> None:
-        self.app = app
         self.path = path
         self.base_url: str | None = None
         self.version = version
@@ -113,8 +112,6 @@ class JSONRPC(JSONRPCDecoratorMixin):
 
         if self.enable_web_browsable_api is True or (self.enable_web_browsable_api is None and app.config['DEBUG']):
             self.init_browse_app(app)
-
-        self.app = app
 
     def register(
         self: Self,

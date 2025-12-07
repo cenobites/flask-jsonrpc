@@ -1,6 +1,6 @@
 [project]
 name = "Flask-JSONRPC"
-version = "4.0.0a17"
+version = "4.0.0b0"
 description = "Adds JSONRPC support to Flask."
 readme = {file = "README.md", content-type = "text/markdown"}
 license = {file = "LICENSE.txt"}
@@ -107,11 +107,14 @@ cbuild = [
     "setuptools>=77.0.0", # https://github.com/pypa/setuptools
 ]
 docs = [
-    "Sphinx==8.1.3", # https://github.com/sphinx-doc/sphinx
+    "Sphinx<8", # https://github.com/sphinx-doc/sphinx
     "sphinx-tabs==3.4.7", # https://github.com/executablebooks/sphinx-tabs
-    "sphinx-issues==5.0.1", # https://github.com/sloria/sphinx-issues
     "sphinxcontrib-log-cabinet==1.0.1", # https://github.com/davidism/sphinxcontrib-log-cabinet
     "Pallets-Sphinx-Themes==2.3.0", # https://github.com/pallets/pallets-sphinx-themes
+    "sphinx-autodoc-typehints==2.2.0", # https://github.com/tox-dev/sphinx-autodoc-typehints
+]
+docs-auto = [
+    "sphinx-autobuild", # https://github.com/sphinx-doc/sphinx-autobuild
 ]
 
 # Uncomment the following to use setuptools as the build backend for Mypyc builds.
@@ -493,7 +496,14 @@ dependency_groups = [
 ]
 no_default_groups = true
 commands = [[
-    "sphinx-build", "-W", "-b", "html", "-d", "{envtmpdir}/doctrees", "docs", "{envtmpdir}/html"
+    "sphinx-build", "-E", "-W", "-b", "html", "-d", "{envtmpdir}/doctrees", "docs", "{envtmpdir}/html"
+]]
+
+[tool.tox.env.docs-auto]
+description = "continuously rebuild docs and start a local server"
+dependency_groups = ["docs", "docs-auto"]
+commands = [[
+    "sphinx-autobuild", "-W", "-b", "dirhtml", "--watch", "src", "docs", "docs/_build/dirhtml"
 ]]
 
 [tool.tox.env.update-requirements]
