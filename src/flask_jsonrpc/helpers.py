@@ -79,6 +79,13 @@ class Node:
 def urn(name: str, *args: t.Any) -> str:  # noqa: ANN401
     """Return the URN name.
 
+    Args:
+        name (str): Name.
+        *args (mixed): Additional name parts.
+
+    Returns:
+        str: URN name.
+
     >>> urn('python')
     'urn:python'
     >>> urn('python.flask')
@@ -130,17 +137,19 @@ def from_python_type(tp: t.Any, default: JSONRPCNewType | None = Object) -> JSON
 def get(obj: t.Any, path: str, default: t.Any = None) -> t.Any:  # noqa: ANN401
     """Get the value at any depth of a nested object based on the path
     described by `path`. If path doesn't exist, `default` is returned.
+
     Args:
         obj (dict): Object to process.
-        path (str): List or ``.`` delimited string of path describing
-            path.
+        path (str): List or `.` delimited string of path describing path.
+
     Keyword Arguments:
         default (mixed): Default value to return if path doesn't exist.
-            Defaults to ``None``.
+        Defaults to ``None``.
+
     Returns:
         mixed: Value of `obj` at path.
 
-    Example:
+    Examples:
 
     >>> get(None, 'a')
 

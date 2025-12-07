@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (c) 2024-2024, Cenobit Technologies, Inc. http://cenobit.es/
+# Copyright (c) 2024-2025, Cenobit Technologies, Inc. http://cenobit.es/
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
