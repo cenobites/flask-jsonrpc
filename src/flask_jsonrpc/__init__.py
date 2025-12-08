@@ -26,8 +26,8 @@
 # POSSIBILITY OF SUCH DAMAGE.
 from __future__ import annotations
 
-from .app import JSONRPC  # noqa: F401
-from .views import JSONRPCView  # noqa: F401
-from .blueprints import JSONRPCBlueprint  # noqa: F401
+from flask_jsonrpc.app import JSONRPC  # noqa: F401
+from flask_jsonrpc.views import JSONRPCView  # noqa: F401
+from flask_jsonrpc.blueprints import JSONRPCBlueprint  # noqa: F401
 
 __all__ = ['JSONRPC', 'JSONRPCView', 'JSONRPCBlueprint']

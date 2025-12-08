@@ -42,6 +42,51 @@ from pydantic.main import BaseModel
 
 
 def serializable(obj: t.Any) -> t.Any:  # noqa: ANN401, C901
+    """Serialize an object to a JSON-serializable format.
+
+    Args:
+        obj (typing.Any): The object to serialize.
+
+    Returns:
+        typing.Any: The JSON-serializable representation of the object.
+
+    Examples:
+        >>> serializable(b'hello')
+        'hello'
+        >>>
+        >>> serializable(bytearray(b'world'))
+        'world'
+        >>>
+        >>> from enum import Enum
+        >>> class Color(Enum):
+        ...     RED = 'red'
+        ...     GREEN = 'green'
+        >>> serializable(Color.RED)
+        'red'
+        >>>
+        >>> serializable({'key': b'value', 'number': 42})
+        {'key': 'value', 'number': 42}
+        >>>
+        >>> serializable([b'item1', b'item2'])
+        ['item1', 'item2']
+        >>>
+        >>> from dataclasses import dataclass
+        >>> @dataclass
+        ... class Person:
+        ...     name: str
+        ...     age: int
+        >>> person = Person(name='Alice', age=30)
+        >>> serializable(person)
+        {'name': 'Alice', 'age': 30}
+        >>>
+        >>> from pydantic import BaseModel
+        >>> class User(BaseModel):
+        ...     id: int
+        ...     username: str
+        >>> user = User(id=1, username='bob')
+        >>> serializable(user)
+        {'id': 1, 'username': 'bob'}
+    """
     if isinstance(obj, bytes | bytearray):
         return obj.decode('utf-8')
     if isinstance(obj, Buffer):
@@ -73,4 +118,15 @@ def serializable(obj: t.Any) -> t.Any:  # noqa: ANN401, C901
 
 
 def jsonify(obj: t.Any) -> ft.ResponseValue:  # noqa: ANN401
+    """Convert an object to a JSON response.
+
+    Args:
+        obj (typing.Any): The object to convert.
+
+    Returns:
+        flask.typing.ResponseValue: The JSON response.
+
+    See Also:
+        :func:`flask_jsonrpc.encoders.serializable`
+    """
     return _jsonify(serializable(obj))

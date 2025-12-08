@@ -38,6 +38,8 @@ empty = object()
 
 
 class LazyObject(t.Protocol):  # pragma: no cover
+    """A protocol for lazy objects that defer initialization until accessed."""
+
     @property
     def _wrapped(self: Self) -> t.Any: ...  # noqa: ANN401
 
@@ -45,6 +47,15 @@ class LazyObject(t.Protocol):  # pragma: no cover
 
 
 def new_method_proxy(getter: t.Callable[..., t.Any]) -> t.Callable[..., t.Any]:
+    """Create a method proxy that initializes the lazy object on first access.
+
+    Args:
+        getter (typing.Callable[..., typing.Any]): The method to proxy.
+
+    Returns:
+        typing.Callable[..., typing.Any]: The proxied method.
+    """
+
     def inner(self: LazyObject, *args: t.Any) -> t.Any:  # noqa: ANN401
         _wrapped = self._wrapped
         if _wrapped is empty:
@@ -57,6 +68,14 @@ def new_method_proxy(getter: t.Callable[..., t.Any]) -> t.Callable[..., t.Any]:
 
 
 class Settings:
+    """Settings object that loads configuration from global settings and allows fallback settings.
+
+    If a setting is not found in the global settings, it will look for it in the provided fallback settings.
+
+    Args:
+        fallback_settings (typing.MutableMapping[str, typing.Any] | None): Optional fallback settings.
+    """
+
     def __init__(self: Self, fallback_settings: t.MutableMapping[str, t.Any] | None = None) -> None:
         self._fallback_settings = fallback_settings
         # XXX: https://mypyc.readthedocs.io/en/latest/differences_from_python.html#monkey-patching
@@ -73,6 +92,14 @@ class Settings:
 
 
 class LazySettings:
+    """A lazy settings object that initializes the settings on first access.
+
+    If a setting is not found in the global settings, it will look for it in the provided fallback settings.
+
+    Args:
+        fallback_settings (typing.MutableMapping[str, typing.Any] | None): Optional fallback settings.
+    """
+
     _wrapped = None
     _fallback_settings = None
 

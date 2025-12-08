@@ -26,8 +26,11 @@
 # POSSIBILITY OF SUCH DAMAGE.
 from __future__ import annotations
 
-from .site import JSONRPCSite
-from .views import JSONRPCView
+from flask_jsonrpc.site import JSONRPCSite
+from flask_jsonrpc.views import JSONRPCView
 
 default_jsonrpc_site: type[JSONRPCSite] = JSONRPCSite
+"""type[flask_jsonrpc.site.JSONRPCSite]: Default JSON-RPC site class."""
+
 default_jsonrpc_site_api: type[JSONRPCView] = JSONRPCView
+"""type[flask_jsonrpc.views.JSONRPCView]: Default JSON-RPC site API class."""

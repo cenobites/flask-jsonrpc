@@ -31,9 +31,20 @@ import typing as t
 # Added in version 3.11.
 from typing_extensions import Self
 
-from .utils import extend_schema
+from flask_jsonrpc.contrib.openrpc.utils import extend_schema
 
 
 class OpenRPCExtendSchemaDecoratorMixin:
+    """Mixin class to provide the `extend_schema` decorator for OpenRPC schema extension."""
+
     def extend_schema(self: Self, *args: t.Any, **kwargs: t.Any) -> t.Callable[..., t.Any]:  # noqa ANN401
+        """Decorator to extend the OpenRPC schema for a method.
+
+        Args:
+            *args (typing.Any): Positional arguments for schema extension.
+            **kwargs (typing.Any): Keyword arguments for schema extension.
+
+        Returns:
+            typing.Callable[..., typing.Any]: The decorator function to extend the schema.
+        """
         return extend_schema(*args, **kwargs)

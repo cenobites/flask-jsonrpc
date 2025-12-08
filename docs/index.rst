@@ -51,3 +51,11 @@ User's Guide
 
    testing
    deployment
+
+API Reference
+-------------
+
+.. toctree::
+   :maxdepth: 2
+
+   api

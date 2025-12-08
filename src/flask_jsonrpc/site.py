@@ -42,11 +42,11 @@ from werkzeug.utils import cached_property
 from typeguard._utils import qualified_name
 from werkzeug.datastructures import Headers
 
-from .conf import settings
-from .helpers import get
-from .funcutils import bindfy
-from .descriptor import JSONRPCServiceDescriptor
-from .exceptions import (
+from flask_jsonrpc.conf import settings
+from flask_jsonrpc.helpers import get
+from flask_jsonrpc.funcutils import bindfy
+from flask_jsonrpc.descriptor import JSONRPCServiceDescriptor
+from flask_jsonrpc.exceptions import (
     ParseError,
     ServerError,
     JSONRPCError,
@@ -54,7 +54,7 @@ from .exceptions import (
     InvalidRequestError,
     MethodNotFoundError,
 )
-from .types.types import AnnotatedMetadataTypeError, type_checker
+from flask_jsonrpc.types.types import AnnotatedMetadataTypeError, type_checker
 
 JSONRPC_VERSION_DEFAULT: str = '2.0'
 JSONRPC_DEFAULT_HTTP_HEADERS: dict[str, str] = {}
@@ -62,6 +62,31 @@ JSONRPC_DEFAULT_HTTP_STATUS_CODE: int = 200
 
 
 class JSONRPCSite:
+    """JSON-RPC site to handle JSON-RPC requests.
+
+    Args:
+        version (str): The version of the JSON-RPC API.
+        path (str | None): The URL path for the JSON-RPC site. If None, it will be set later.
+        base_url (str | None): The base URL for the JSON-RPC site. If None, it will be set later.
+
+    Attributes:
+        path (str | None): The URL path for the JSON-RPC site.
+        base_url (str | None): The base URL for the JSON-RPC site.
+        error_handlers (dict[type[Exception], typing.Callable[[typing.Any], typing.Any]]): A mapping of exception
+            types to their handlers.
+        view_funcs (collections.OrderedDict[str, typing.Callable[..., typing.Any]]): A mapping of method names to
+            their view functions.
+        uuid (uuid.UUID): A unique identifier for the JSON-RPC site.
+        name (str): The name of the JSON-RPC site.
+        version (str): The version of the JSON-RPC API.
+        describe (typing.Callable[[], dict[str, typing.Any]]): A callable that returns the service description.
+
+    Examples:
+        >>> jsonrpc_site = JSONRPCSite(
+        ...     version='2.0', path='/api', base_url='http://localhost/api'
+        ... )
+    """
+
     def __init__(self: Self, version: str, path: str | None = None, base_url: str | None = None) -> None:
         self.path = path
         self.base_url = base_url
@@ -73,12 +98,39 @@ class JSONRPCSite:
         self.describe = JSONRPCServiceDescriptor(self).describe
 
     def _is_notification_request(self: Self, req_json: dict[str, t.Any]) -> bool:
+        """Check if the request is a notification request (without an 'id' member).
+
+        Args:
+            req_json (dict[str, typing.Any]): The JSON-RPC request data.
+
+        Returns:
+            bool: True if the request is a notification request, False otherwise.
+        """
         return 'id' not in req_json
 
     def _is_batch_request(self: Self, req_json: t.Any) -> bool:  # noqa: ANN401
+        """Check if the request is a batch request.
+
+        Args:
+            req_json (typing.Any): The JSON-RPC request data.
+
+        Returns:
+            bool: True if the request is a batch request, False otherwise.
+        """
         return isinstance(req_json, list)
 
     def _find_error_handler(self: Self, exc: Exception) -> t.Callable[[t.Any], t.Any] | None:
+        """Find the appropriate error handler for the given exception.
+
+        Find the most specific error handler registered for the exception's class
+        or its base classes.
+
+        Args:
+            exc (Exception): The exception to find a handler for.
+
+        Returns:
+            typing.Callable[[typing.Any], typing.Any] | None: The error handler if found, None otherwise.
+        """
         exc_class = type(exc)
         if not self.error_handlers:
             return None
@@ -94,7 +146,11 @@ class JSONRPCSite:
         """Check if the mimetype indicates JSON data, either
         :mimetype:`application/json` or :mimetype:`application/*+json`.
 
-        https://github.com/pallets/werkzeug/blob/master/src/werkzeug/wrappers/json.py#L54
+        Note:
+            https://github.com/pallets/werkzeug/blob/master/src/werkzeug/wrappers/json.py#L54
+
+        Returns:
+            bool: True if the mimetype indicates JSON data, False otherwise.
         """
         mt = request.mimetype
         return mt in ('application/json', 'application/json-rpc', 'application/jsonrequest') or (
@@ -103,24 +159,79 @@ class JSONRPCSite:
 
     @cached_property
     def logger(self: Self) -> logging.Logger:
+        """Get the logger for the JSON-RPC site.
+
+        If the logger does not have any level handlers, a NullHandler is added.
+
+        Returns:
+            logging.Logger: The logger instance.
+        """
         logger = logging.getLogger('flask_jsonrpc')
         if not has_level_handler(logger):
             logger.addHandler(logging.NullHandler())
         return logger
 
     def set_path(self: Self, path: str) -> None:
+        """Set the URL path for the JSON-RPC site.
+
+        Args:
+            path (str): The URL path to set.
+        """
         self.path = path
 
     def set_base_url(self: Self, base_url: str | None) -> None:
+        """Set the base URL for the JSON-RPC site.
+
+        Args:
+            base_url (str | None): The base URL to set.
+        """
         self.base_url = base_url
 
     def register_error_handler(self: Self, exception: type[Exception], fn: t.Callable[[t.Any], t.Any]) -> None:
+        """Register an error handler for a specific exception type.
+
+        Args:
+            exception (type[Exception]): The exception type to register the handler for.
+            fn (typing.Callable[[typing.Any], typing.Any]): The error handler function.
+
+        Examples:
+            >>> class MyException(Exception):
+            ...     pass
+            >>>
+            >>>
+            >>> def my_error_handler(exc: MyException) -> dict[str, Any]:
+            ...     return {'message': str(exc), 'code': 1234}
+            >>>
+            >>> jsonrpc_site = JSONRPCSite(version='2.0', path='/api')
+            >>> jsonrpc_site.register_error_handler(MyException, my_error_handler)
+        """
         self.error_handlers[exception] = fn
 
     def register(self: Self, name: str, view_func: t.Callable[..., t.Any]) -> None:
+        """Register a view function with the JSON-RPC site.
+
+        Args:
+            name (str): The name of the method.
+            view_func (typing.Callable[..., typing.Any]): The view function to register.
+
+        Examples:
+            >>> def my_method(param1: int) -> str:
+            ...     return str(param1)
+            >>> jsonrpc_site = JSONRPCSite(version='2.0', path='/api')
+            >>> jsonrpc_site.register('my_method', my_method)
+        """
         self.view_funcs[name] = view_func
 
     def dispatch_request(self: Self) -> tuple[t.Any, int, Headers | dict[str, str] | tuple[str] | list[tuple[str]]]:
+        """Dispatch the JSON-RPC request.
+
+        Returns:
+            tuple[typing.Any, int, werkzeug.datastructures.Headers | dict[str, str] | tuple[str] | list[tuple[str]]]:
+                The response data, status code, and headers.
+
+        Raises:
+            flask_jsonrpc.exceptions.ParseError: If the request is not valid JSON.
+        """
         if not self.validate_request():
             raise ParseError(
                 data={
@@ -135,12 +246,28 @@ class JSONRPCSite:
         return self.handle_dispatch_except(json_data)
 
     def validate_request(self: Self) -> bool:
+        """Validate the JSON-RPC request.
+
+        Returns:
+            bool: True if the request is valid, False otherwise.
+        """
         if not self.is_json:
             self.logger.info('invalid mimetype')
             return False
         return True
 
     def to_json(self: Self, request_data: bytes) -> t.Any:  # noqa: ANN401
+        """Convert the request data to JSON.
+
+        Args:
+            request_data (bytes): The request data.
+
+        Returns:
+            typing.Any: The JSON-decoded data.
+
+        Raises:
+            flask_jsonrpc.exceptions.ParseError: If the request data is not valid JSON.
+        """
         try:
             return json.loads(request_data)
         except ValueError as e:
@@ -148,6 +275,24 @@ class JSONRPCSite:
             raise ParseError(data={'message': f'Invalid JSON: {request_data!r}'}) from e
 
     def handle_view_func(self: Self, view_func: t.Callable[..., t.Any], params: t.Any) -> t.Any:  # noqa: ANN401
+        """Handle the view function with the given parameters.
+
+        Args:
+            view_func (typing.Callable[..., typing.Any]): The view function to handle.
+            params (typing.Any): The parameters to pass to the view function.
+
+        Returns:
+            typing.Any: The result of the view function.
+
+        Raises:
+            flask_jsonrpc.exceptions.InvalidParamsError: If the parameters are invalid.
+            flask_jsonrpc.exceptions.InvalidParamsError: If there is an annotated metadata type error.
+            flask_jsonrpc.exceptions.InvalidParamsError: If there is a type checking error.
+            TypeError: If there is a type mismatch.
+
+        TODO:
+            - Enhance the checker to return the type.
+        """
         view_func_params = getattr(view_func, 'jsonrpc_method_params', {})
         validate = getattr(view_func, 'jsonrpc_validate', settings.DEFAULT_JSONRPC_METHOD_VALIDATE)
         try:
@@ -196,6 +341,19 @@ class JSONRPCSite:
     def dispatch(
         self: Self, req_json: dict[str, t.Any]
     ) -> tuple[t.Any, int, Headers | dict[str, str] | tuple[str] | list[tuple[str]]]:
+        """Dispatch the JSON-RPC request.
+
+        Args:
+            req_json (dict[str, typing.Any]): The JSON-RPC request data.
+
+        Returns:
+            tuple[typing.Any, int, werkzeug.datastructures.Headers | dict[str, str] | tuple[str] | list[tuple[str]]]:
+                The response data, status code, and headers.
+
+        Raises:
+            flask_jsonrpc.exceptions.MethodNotFoundError: If the requested method is not found.
+            flask_jsonrpc.exceptions.InvalidRequestError: If the request is invalid.
+        """
         method_name = req_json['method']
         params = req_json.get('params', {})
         view_func = self.view_funcs.get(method_name)
@@ -217,6 +375,18 @@ class JSONRPCSite:
     def handle_exception(
         self: Self, req_json: dict[str, t.Any], exc: Exception
     ) -> tuple[t.Any, int, Headers | dict[str, str] | tuple[str] | list[tuple[str]]]:
+        """Handle exceptions that occur during request dispatch.
+
+        If no specific error handler is found for the exception, a generic ServerError is used.
+
+        Args:
+            req_json (dict[str, typing.Any]): The JSON-RPC request data.
+            exc (Exception): The exception that occurred.
+
+        Returns:
+            tuple[typing.Any, int, werkzeug.datastructures.Headers | dict[str, str] | tuple[str] | list[tuple[str]]]:
+                The response data, status code, and headers.
+        """
         self.logger.info('unexpected error', exc_info=exc)
         jsonrpc_error = ServerError(data={'message': str(exc)}, original_exception=exc)
         jsonrpc_error_headers: Headers | dict[str, str] | tuple[str] | list[tuple[str]] = JSONRPC_DEFAULT_HTTP_HEADERS
@@ -245,6 +415,17 @@ class JSONRPCSite:
     def handle_dispatch_except(
         self: Self, req_json: dict[str, t.Any]
     ) -> tuple[t.Any, int, Headers | dict[str, str] | tuple[str] | list[tuple[str]]]:
+        """Handle the dispatch of the request and catch exceptions.
+
+        If an exception occurs during dispatch, it is handled appropriately.
+
+        Args:
+            req_json (dict[str, typing.Any]): The JSON-RPC request data.
+
+        Returns:
+            tuple[typing.Any, int, werkzeug.datastructures.Headers | dict[str, str] | tuple[str] | list[tuple[str]]]:
+                The response data, status code, and headers.
+        """
         try:
             if not self.validate(req_json):
                 raise InvalidRequestError(data={'message': f'Invalid JSON: {req_json!r}'}) from None
@@ -263,6 +444,20 @@ class JSONRPCSite:
     def batch_dispatch(
         self: Self, reqs_json: list[dict[str, t.Any]]
     ) -> tuple[list[t.Any], int, Headers | dict[str, str] | tuple[str] | list[tuple[str]]]:
+        """Dispatch a batch of JSON-RPC requests.
+
+        Args:
+            reqs_json (list[dict[str, typing.Any]]): The list of JSON-RPC request data.
+
+        Returns:
+            tuple[
+                list[typing.Any], int, werkzeug.datastructures.Headers | dict[str, str] | tuple[str] | list[tuple[str]]
+            ]:
+                The list of response data, status code, and headers.
+
+        Raises:
+            flask_jsonrpc.exceptions.InvalidRequestError: If the batch request is empty.
+        """
         if not reqs_json:
             raise InvalidRequestError(data={'message': 'Empty array'}) from None
 
@@ -279,6 +474,14 @@ class JSONRPCSite:
         return resp_views, status_code, headers
 
     def validate(self: Self, req_json: dict[str, t.Any]) -> bool:
+        """Validate the JSON-RPC request structure.
+
+        Args:
+            req_json (dict[str, typing.Any]): The JSON-RPC request data.
+
+        Returns:
+            bool: True if the request is valid, False otherwise.
+        """
         return isinstance(req_json, dict) and 'method' in req_json
 
     def unpack_tuple_returns(
@@ -287,6 +490,21 @@ class JSONRPCSite:
         default_status_code: int = JSONRPC_DEFAULT_HTTP_STATUS_CODE,
         default_headers: Headers | dict[str, str] | tuple[str] | list[tuple[str]] = JSONRPC_DEFAULT_HTTP_HEADERS,
     ) -> tuple[t.Any, int, Headers | dict[str, str] | tuple[str] | list[tuple[str]]]:
+        """Unpack the response tuple returned by a view function.
+
+        Note:
+            https://github.com/pallets/flask/blob/d091bb00c0358e9f30006a064f3dbb671b99aeae/src/flask/app.py#L1981
+
+        Args:
+            resp_view (typing.Any): The response returned by the view function.
+            default_status_code (int): The default HTTP status code to use if not specified.
+            default_headers (werkzeug.datastructures.Headers | dict[str, str] | tuple[str] | list[tuple[str]]):
+                The default HTTP headers to use if not specified.
+
+        Returns:
+            tuple[typing.Any, int, werkzeug.datastructures.Headers | dict[str, str] | tuple[str] | list[tuple[str]]]:
+                The unpacked response body, status code, and headers.
+        """
         # https://github.com/pallets/flask/blob/d091bb00c0358e9f30006a064f3dbb671b99aeae/src/flask/app.py#L1981
         if isinstance(resp_view, tuple):
             len_resp_view = len(resp_view)
@@ -316,6 +534,16 @@ class JSONRPCSite:
         req_json: dict[str, t.Any],
         resp_view: t.Any,  # noqa: ANN401
     ) -> tuple[t.Any, int, Headers | dict[str, str] | tuple[str] | list[tuple[str]]]:
+        """Make a JSON-RPC response.
+
+        Args:
+            req_json (dict[str, typing.Any]): The JSON-RPC request data.
+            resp_view (typing.Any): The response returned by the view function.
+
+        Returns:
+            tuple[typing.Any, int, werkzeug.datastructures.Headers | dict[str, str] | tuple[str] | list[tuple[str]]]:
+                The response data, status code, and headers.
+        """
         rv, status_code, headers = self.unpack_tuple_returns(resp_view)
         if self._is_notification_request(req_json):
             return None, 204, headers

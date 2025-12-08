@@ -44,15 +44,29 @@ except (ImportError, NameError):
 
 
 class JSONRPCError(Exception):
-    """Error class based on the JSON-RPC 2.0 specs
-    https://www.jsonrpc.org/specification
+    """Error class based on the `JSON-RPC 2.0 specs`_.
 
-      message - string
-      code    - number
-      data    - object
+    Args:
+        message (str | None, optional): Error message. Defaults to `None`.
+        code (int | None, optional): Error code. Defaults to `0`.
+        data (typing.Any | None, optional): Additional error data. Defaults to `None`.
+        status_code (int | None, optional): HTTP status code. Defaults to `400`.
 
-      status_code - number    from https://www.jsonrpc.org/specification_v1#a2.2JSON-RPCoverHTTP
-                              JSON-RPC over HTTP Errors section
+    Examples:
+        >>> error = JSONRPCError(
+        ...     message='An error occurred', code=1234, data={'info': 'details'}
+        ... )
+        >>> assert error.jsonrpc_format == {
+        ...     'name': 'JSONRPCError',
+        ...     'code': 1234,
+        ...     'message': 'An error occurred',
+        ...     'data': {'info': 'details'},
+        ... }
+
+    .. _JSON-RPC 2.0 specs:
+        https://www.jsonrpc.org/specification
+    .. _JSON-RPC Errors:
+        https://www.jsonrpc.org/specification_v1#a2.2JSON-RPCoverHTTP
     """
 
     message: str | None = None
@@ -76,7 +90,22 @@ class JSONRPCError(Exception):
 
     @property
     def jsonrpc_format(self: Self) -> dict[str, t.Any]:
-        """Return the Exception data in a format for JSON-RPC"""
+        """Return the Exception data in a format for JSON-RPC
+
+        Returns:
+            dict[str, typing.Any]: The error data formatted for JSON-RPC
+
+        Examples:
+            >>> error = JSONRPCError(
+            ...     message='An error occurred', code=1234, data={'info': 'details'}
+            ... )
+            >>> assert error.jsonrpc_format == {
+            ...     'name': 'JSONRPCError',
+            ...     'code': 1234,
+            ...     'message': 'An error occurred',
+            ...     'data': {'info': 'details'},
+            ... }
+        """
         error = {'name': self.__class__.__name__, 'code': self.code, 'message': self.message, 'data': self.data}
 
         # RuntimeError: Working outside of application context.
@@ -168,7 +197,29 @@ class InternalError(JSONRPCError):
 class ServerError(JSONRPCError):
     """Reserved for implementation-defined server-errors.
 
-    code: -32000 to -32099 Server error.
+    Args:
+        message (str | None, optional): Error message. Defaults to 'Server error'.
+        code (int | None, optional): Error code. Defaults to -32000.
+        data (typing.Any | None, optional): Additional error data. Defaults to `None`.
+        status_code (int | None, optional): HTTP status code. Defaults to `500`.
+        original_exception (BaseException | None, optional): The original exception that caused this error.
+            Defaults to `None`.
+
+    Notes:
+        code: -32000 to -32099 Server error.
+
+    Examples:
+        >>> try:
+        ...     1 / 0
+        ... except ZeroDivisionError as e:
+        ...     error = ServerError(original_exception=e)
+        >>> assert error.jsonrpc_format == {
+        ...     'name': 'ServerError',
+        ...     'code': -32000,
+        ...     'message': 'Server error',
+        ...     'data': None,
+        ... }
+        >>> assert isinstance(error.original_exception, ZeroDivisionError)
     """
 
     def __init__(

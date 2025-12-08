@@ -31,7 +31,7 @@ import typing as t
 from pydantic import ConfigDict
 from pydantic.main import BaseModel as PydanticModel
 
-from . import typing as st
+from flask_jsonrpc.contrib.openrpc import typing as st
 
 
 class BaseModel(PydanticModel):
@@ -71,6 +71,28 @@ def extend_schema(
     examples: list[st.ExamplePairing] | None = None,
     x_security: dict[str, list[str]] | None = None,
 ) -> t.Callable[..., t.Any]:
+    """Decorator to extend the schema of a JSON-RPC method.
+
+    Args:
+        name (str | None): The name of the method.
+        params (list[flask_jsonrpc.contrib.openrpc.typing.ContentDescriptor] | None): The list of parameter descriptors.
+        tags (list[flask_jsonrpc.contrib.openrpc.typing.Tag] | None): The list of tags.
+        summary (str | None): The summary of the method.
+        description (str | None): The description of the method.
+        external_docs (flask_jsonrpc.contrib.openrpc.typing.ExternalDocumentation | None): The external documentation.
+        result (flask_jsonrpc.contrib.openrpc.typing.ContentDescriptor | None): The result descriptor.
+        deprecated (bool | None): Whether the method is deprecated.
+        servers (list[flask_jsonrpc.contrib.openrpc.typing.Server] | None): The list of servers.
+        errors (list[flask_jsonrpc.contrib.openrpc.typing.Error] | None): The list of errors.
+        links (list[flask_jsonrpc.contrib.openrpc.typing.Link] | None): The list of links.
+        param_structure (flask_jsonrpc.contrib.openrpc.typing.ParamStructure | None): The parameter structure.
+        examples (list[flask_jsonrpc.contrib.openrpc.typing.ExamplePairing] | None): The list of example pairings.
+        x_security (dict[str, list[str]] | None): The security requirements.
+
+    Returns:
+        typing.Callable[..., typing.Any]: The decorator function.
+    """
+
     def decorator(fn: t.Callable[..., t.Any]) -> t.Callable[..., t.Any]:
         method_schema = MethodExtendSchema(
             name=name,

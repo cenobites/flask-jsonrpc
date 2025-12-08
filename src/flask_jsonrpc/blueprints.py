@@ -31,15 +31,45 @@ import typing as t
 # Added in version 3.11.
 from typing_extensions import Self
 
-from .globals import default_jsonrpc_site, default_jsonrpc_site_api
-from .wrappers import JSONRPCDecoratorMixin
+from flask_jsonrpc.globals import default_jsonrpc_site, default_jsonrpc_site_api
+from flask_jsonrpc.wrappers import JSONRPCDecoratorMixin
 
 if t.TYPE_CHECKING:
-    from .site import JSONRPCSite
-    from .views import JSONRPCView
+    from flask_jsonrpc.site import JSONRPCSite
+    from flask_jsonrpc.views import JSONRPCView
 
 
 class JSONRPCBlueprint(JSONRPCDecoratorMixin):
+    """JSON-RPC blueprint for Flask applications.
+
+    Args:
+        name (str): The name of the blueprint.
+        import_name (str): The import name of the blueprint.
+        version (str): The version of the JSON-RPC API. Default is '1.0.0'.
+        jsonrpc_site (type[flask_jsonrpc.site.JSONRPCSite]): The JSON-RPC site class to use.
+            Default is `flask_jsonrpc.globals.default_jsonrpc_site`.
+        jsonrpc_site_api (type[flask_jsonrpc.views.JSONRPCView]): The JSON-RPC site API class to use.
+            Default is `flask_jsonrpc.globals.default_jsonrpc_site_api`.
+
+    Attributes:
+        name (str): The name of the blueprint.
+        import_name (str): The import name of the blueprint.
+        version (str): The version of the JSON-RPC API.
+        jsonrpc_site (flask_jsonrpc.site.JSONRPCSite): The JSON-RPC site instance.
+        jsonrpc_site_api (type[flask_jsonrpc.views.JSONRPCView]): The JSON-RPC site API class.
+
+    Examples:
+        >>> from flask_jsonrpc import JSONRPCBlueprint
+        >>>
+        >>> jsonrpc_bp = JSONRPCBlueprint('api', __name__, version='1.0.0')
+        >>>
+        >>> # Disable automatic validation for typechecking limitations with doctests
+        >>> # We always recommend to use validation in real applications
+        >>> @jsonrpc_bp.method('my_method', validate=False)
+        ... def my_method(param1: int) -> str:
+        ...     return str(param1)
+    """
+
     def __init__(
         self: Self,
         name: str,
@@ -55,9 +85,19 @@ class JSONRPCBlueprint(JSONRPCDecoratorMixin):
         self.jsonrpc_site_api = jsonrpc_site_api
 
     def get_jsonrpc_site(self: Self) -> JSONRPCSite:
+        """Get the JSON-RPC site instance.
+
+        Returns:
+            flask_jsonrpc.site.JSONRPCSite: The JSON-RPC site instance.
+        """
         return self.jsonrpc_site
 
     def get_jsonrpc_site_api(self: Self) -> type[JSONRPCView]:
+        """Get the JSON-RPC site API class.
+
+        Returns:
+            type[flask_jsonrpc.views.JSONRPCView]: The JSON-RPC site API class.
+        """
         return self.jsonrpc_site_api
 
     def register(
@@ -66,4 +106,23 @@ class JSONRPCBlueprint(JSONRPCDecoratorMixin):
         name: str | None = None,
         **options: t.Any,  # noqa: ANN401
     ) -> None:
+        """Register a view function with the JSON-RPC blueprint.
+
+        Args:
+            view_func (typing.Callable[..., typing.Any]): The view function to register.
+            name (str | None): The name of the method. If None, the function's __name__ is used.
+            **options (typing.Any): Additional options for the method registration.
+
+        Examples:
+            >>> from flask_jsonrpc import JSONRPCBlueprint
+            >>>
+            >>> jsonrpc_bp = JSONRPCBlueprint('api', __name__, version='1.0.0')
+            >>>
+            ... def my_method(param1: int) -> str:
+            ...     return str(param1)
+            >>>
+            >>> # Disable automatic validation for typechecking limitations with doctests
+            >>> # We always recommend to use validation in real applications
+            >>> jsonrpc_bp.register(my_method, name='my_method', validate=False)
+        """
         self.register_view_function(view_func, name, **options)

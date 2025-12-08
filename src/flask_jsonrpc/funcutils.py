@@ -40,11 +40,42 @@ from typing_extensions import Buffer
 from pydantic import ValidationError
 from pydantic.main import BaseModel, create_model
 
-from .types import types as jsonrpc_types
-from .helpers import from_python_type
+from flask_jsonrpc.types import types as jsonrpc_types
+from flask_jsonrpc.helpers import from_python_type
 
 
 def loads(param_type: t.Any, param_value: t.Any) -> t.Any:  # noqa: ANN401, C901
+    """Deserialize a JSON-RPC parameter value to the specified type.
+
+    Args:
+        param_type (typing.Any): The type to deserialize to.
+        param_value (typing.Any): The parameter value to deserialize.
+
+    Returns:
+        typing.Any: The deserialized parameter value.
+
+    Raises:
+        TypeError: If the parameter value cannot be deserialized to the specified type.
+        TypeError: If an unsupported union type is provided.
+
+    Examples:
+        >>> loads(int, 42)
+        42
+        >>> loads(list[int], [1, 2, 3])
+        [1, 2, 3]
+        >>> from enum import Enum
+        >>> class Color(Enum):
+        ...     RED = 'red'
+        ...     GREEN = 'green'
+        >>> loads(Color, 'red')
+        <Color.RED: 'red'>
+        >>> from pydantic import BaseModel
+        >>> class User(BaseModel):
+        ...     id: int
+        ...     name: str
+        >>> loads(User, {'id': 1, 'name': 'Alice'})
+        User(id=1, name='Alice')
+    """
     if param_value is None:
         return param_value
 
@@ -142,6 +173,18 @@ def loads(param_type: t.Any, param_value: t.Any) -> t.Any:  # noqa: ANN401, C901
 
 
 def bindfy(view_func: t.Callable[..., t.Any], params: dict[str, t.Any]) -> dict[str, t.Any]:  # noqa: ANN401
+    """Bind JSON-RPC parameters to a view function's parameters with type deserialization.
+
+    Args:
+        view_func (typing.Callable[..., typing.Any]): The view function to bind parameters to.
+        params (dict[str, typing.Any]): The JSON-RPC parameters to bind.
+
+    Returns:
+        dict[str, typing.Any]: The bound parameters with deserialized values.
+
+    See Also:
+        :func:`flask_jsonrpc.funcutils.loads`
+    """
     binded_params = {}
     view_func_params = getattr(view_func, 'jsonrpc_method_params', {})
     view_func_default_params = getattr(view_func, 'jsonrpc_method_default_params', {})

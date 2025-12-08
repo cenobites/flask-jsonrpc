@@ -34,36 +34,102 @@ from dataclasses import field, asdict, dataclass
 # Added in version 3.11.
 from typing_extensions import Self
 
-from .types.types import Types, Object
+from flask_jsonrpc.types.types import Types, Object
 
 if t.TYPE_CHECKING:
-    from .types.types import JSONRPCNewType
+    from flask_jsonrpc.types.types import JSONRPCNewType
 
 
 @dataclass
 class Node:
+    """A node in a tree structure.
+
+    Args:
+        name (str | None): Name of the node.
+        items (list[dict[str, typing.Any]]): List of items in the node.
+        children (list[Node]): List of child nodes.
+
+    Attributes:
+        name (str | None): Name of the node.
+        items (list[dict[str, typing.Any]]): List of items in the node.
+        children (list[Node]): List of child nodes.
+
+    Examples:
+        >>> root = Node(name='root')
+        >>> child1 = Node(name='child1')
+        >>> child2 = Node(name='child2')
+        >>> root.add_child(child1)
+        >>> root.add_child(child2)
+        >>> child1.insert_item({'name': 'item1'})
+        >>> child2.insert_item({'name': 'item2'})
+        >>> assert root.to_dict() == {
+        ...     'name': 'root',
+        ...     'items': [],
+        ...     'children': [
+        ...         {'name': 'child1', 'items': [{'name': 'item1'}], 'children': []},
+        ...         {'name': 'child2', 'items': [{'name': 'item2'}], 'children': []},
+        ...     ],
+        ... }
+        >>> root.find_child('child1').to_dict()
+        {'name': 'child1', 'items': [{'name': 'item1'}], 'children': []}
+        >>>
+        >>> root.find_child('child3') is None
+        True
+        >>> root.clean()
+        >>> root.sort()
+        >>> assert root.to_dict() == {
+        ...     'name': 'root',
+        ...     'items': [],
+        ...     'children': [
+        ...         {'name': 'child1', 'items': [{'name': 'item1'}], 'children': []},
+        ...         {'name': 'child2', 'items': [{'name': 'item2'}], 'children': []},
+        ...     ],
+        ... }
+    """
+
     name: str | None
     items: list[dict[str, t.Any]] = field(default_factory=list)
     children: list[Node] = field(default_factory=list)
 
     def find_child(self: Self, name: str) -> Node | None:
+        """Find a child node by name.
+
+        Args:
+            name (str): Name of the child node to find.
+
+        Returns:
+            Node | None: The child node if found, otherwise `None`.
+        """
         for child in self.children:
             if child.name == name:
                 return child
         return None
 
     def add_child(self: Self, node: Node) -> None:
+        """Add a child node.
+
+        Args:
+            node (Node): Child node to add.
+        """
         self.children.append(node)
 
     def insert_item(self: Self, val: dict[str, t.Any]) -> None:
+        """Insert an item into the node.
+
+        Args:
+            val (dict[str, typing.Any]): Item to insert.
+        """
         self.items.append(val)
 
     def clean(self: Self) -> None:
+        """Clean the node by removing empty children."""
         for child in self.children:
             child.clean()
         self.children = [child for child in self.children if child.items or child.children]
 
     def sort(self: Self) -> None:
+        """Sort the node's children and items by name."""
+
         def sort_by_name(n: Node) -> str:
             return n.name or ''
 
@@ -73,6 +139,11 @@ class Node:
             child.sort()
 
     def to_dict(self: Self) -> dict[str, t.Any]:
+        """Convert the node to a dictionary.
+
+        Returns:
+            dict[str, typing.Any]: Dictionary representation of the node.
+        """
         return asdict(self)
 
 
@@ -81,27 +152,28 @@ def urn(name: str, *args: t.Any) -> str:  # noqa: ANN401
 
     Args:
         name (str): Name.
-        *args (mixed): Additional name parts.
+        *args (typing.Any): Additional name parts.
 
     Returns:
         str: URN name.
 
-    >>> urn('python')
-    'urn:python'
-    >>> urn('python.flask')
-    'urn:python:flask'
-    >>> urn('python', 'Flask', 'JsonRPC')
-    'urn:python:flask:jsonrpc'
-    >>> urn('python', '/api/browse')
-    'urn:python:api:browse'
-    >>> urn(None)
-    Traceback (most recent call last):
-        ...
-    ValueError: name is required
-    >>> urn('')
-    Traceback (most recent call last):
-        ...
-    ValueError: name is required
+    Examples:
+        >>> urn('python')
+        'urn:python'
+        >>> urn('python.flask')
+        'urn:python:flask'
+        >>> urn('python', 'Flask', 'JsonRPC')
+        'urn:python:flask:jsonrpc'
+        >>> urn('python', '/api/browse')
+        'urn:python:api:browse'
+        >>> urn(None)
+        Traceback (most recent call last):
+            ...
+        ValueError: name is required
+        >>> urn('')
+        Traceback (most recent call last):
+            ...
+        ValueError: name is required
     """
     if not name:
         raise ValueError('name is required') from None
@@ -113,20 +185,29 @@ def urn(name: str, *args: t.Any) -> str:  # noqa: ANN401
 def from_python_type(tp: t.Any, default: JSONRPCNewType | None = Object) -> JSONRPCNewType | None:  # noqa: ANN401
     """Convert Python type to JSONRPCNewType.
 
-    >>> str(from_python_type(str))
-    'String'
-    >>> str(from_python_type(int))
-    'Number'
-    >>> str(from_python_type(dict))
-    'Object'
-    >>> str(from_python_type(list))
-    'Array'
-    >>> str(from_python_type(bool))
-    'Boolean'
-    >>> str(from_python_type(None))
-    'Null'
-    >>> str(from_python_type(t.NoReturn))
-    'Null'
+    Args:
+        tp (typing.Any): Python type.
+        default (flask_jsonrpc.types.types.JSONRPCNewType | None, optional): Default type if no match is found.
+            Defaults to Object.
+
+    Returns:
+        flask_jsonrpc.types.types.JSONRPCNewType | None: Corresponding JSONRPCNewType or `default`.
+
+    Examples:
+        >>> str(from_python_type(str))
+        'String'
+        >>> str(from_python_type(int))
+        'Number'
+        >>> str(from_python_type(dict))
+        'Object'
+        >>> str(from_python_type(list))
+        'Array'
+        >>> str(from_python_type(bool))
+        'Boolean'
+        >>> str(from_python_type(None))
+        'Null'
+        >>> str(from_python_type(t.NoReturn))
+        'Null'
     """
     for typ in Types:
         if typ.check_type(tp):
@@ -143,33 +224,32 @@ def get(obj: t.Any, path: str, default: t.Any = None) -> t.Any:  # noqa: ANN401
         path (str): List or `.` delimited string of path describing path.
 
     Keyword Arguments:
-        default (mixed): Default value to return if path doesn't exist.
+        default (typing.Any): Default value to return if path doesn't exist.
         Defaults to ``None``.
 
     Returns:
-        mixed: Value of `obj` at path.
+        typing.Any: Value of `obj` at path.
 
     Examples:
+        >>> get(None, 'a')
 
-    >>> get(None, 'a')
+        >>> get(None, 'a', 'default')
+        'default'
+        >>> get('a', 'a.b.c', 'default')
+        'default'
+        >>> get({'a': 1}, 'a')
+        1
+        >>> get({'a': 1}, 'b')
 
-    >>> get(None, 'a', 'default')
-    'default'
-    >>> get('a', 'a.b.c', 'default')
-    'default'
-    >>> get({'a': 1}, 'a')
-    1
-    >>> get({'a': 1}, 'b')
+        >>> get({'a': 1}, 'b', 'default')
+        'default'
+        >>> get({'a': {'b': {'c': 1}}}, 'a.b.c')
+        1
+        >>> get({}, 'a.b.c')
 
-    >>> get({'a': 1}, 'b', 'default')
-    'default'
-    >>> get({'a': {'b': {'c': 1}}}, 'a.b.c')
-    1
-    >>> get({}, 'a.b.c')
+        >>> get([], 'a.b.c')
 
-    >>> get([], 'a.b.c')
-
-    >>> get([], 'a.b.c', None)
+        >>> get([], 'a.b.c', None)
 
     """
     if obj is None:
@@ -187,9 +267,3 @@ def get(obj: t.Any, path: str, default: t.Any = None) -> t.Any:  # noqa: ANN401
     except (TypeError, KeyError):
         return default
     return obj_val
-
-
-if __name__ == '__main__':
-    import doctest
-
-    doctest.testmod()

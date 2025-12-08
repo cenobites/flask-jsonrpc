@@ -39,6 +39,7 @@ extensions = [
     'sphinx.ext.autosummary',
     'sphinx.ext.viewcode',
     'sphinx.ext.napoleon',
+    'sphinx.ext.todo',
     'sphinxcontrib.log_cabinet',
     'sphinx_tabs.tabs',
     # 'sphinx_autodoc_typehints',

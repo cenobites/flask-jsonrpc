@@ -50,6 +50,9 @@ test-release: clean test
 	$(shell ./bin/docker-compose-test.sh)
 	$(shell ./bin/docker-compose-it.sh)
 
+apidoc:
+	sphinx-apidoc -o docs/api src/flask_jsonrpc
+
 release: test
 	@uv build
 	@uv tool run twine check --strict dist/*
