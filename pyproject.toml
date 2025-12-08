@@ -58,7 +58,7 @@ pre-commit = [
     "pre-commit-uv", # https://github.com/tox-dev/pre-commit-uv
 ]
 tests = [
-    "pytest==9.0.1", # https://github.com/pytest-dev/pytest
+    "pytest==9.0.2", # https://github.com/pytest-dev/pytest
     "pytest-cov==7.0.0", # https://github.com/pytest-dev/pytest-cov
     "pytest-xdist==3.8.0", # https://github.com/pytest-dev/pytest-xdist
     "pytest-sugar==1.1.1", # https://github.com/Frozenball/pytest-sugar
@@ -97,7 +97,7 @@ security = [
     "bandit;python_version>='3.11'", # https://github.com/PyCQA/bandit
 ]
 build = [
-    "hatch==1.16.1", # https://github.com/pypa/hatch
+    "hatch==1.16.2", # https://github.com/pypa/hatch
 ]
 cbuild = [
     "cibuildwheel==3.2.0;python_version>='3.11'", # https://github.com/pypa/cibuildwheel
