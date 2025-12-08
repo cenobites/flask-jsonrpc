@@ -32,7 +32,7 @@ jobs:
       - uses: github/codeql-action/init@v4
         with:
           languages: ${{ matrix.language }}
-      - uses: astral-sh/setup-uv@v7.1.4
+      - uses: astral-sh/setup-uv@v7.1.5
         if: ${{ matrix.language == 'python' }}
         with:
           enable-cache: true
