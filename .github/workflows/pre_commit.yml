@@ -24,7 +24,7 @@ jobs:
         python-version: ["3.14"]
     steps:
       - uses: actions/checkout@v6
-      - uses: astral-sh/setup-uv@v7.1.4
+      - uses: astral-sh/setup-uv@v7.1.5
         with:
           enable-cache: true
           prune-cache: false
