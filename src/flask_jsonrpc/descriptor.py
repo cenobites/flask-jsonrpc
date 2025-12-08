@@ -326,7 +326,7 @@ class JSONRPCServiceDescriptor:
         Returns:
             flask_jsonrpc.typing.ServiceDescribe: Service description.
         """
-        from flask_jsonrpc import site
+        from flask_jsonrpc.site import JSONRPCSite
 
         serv_desc = fjt.ServiceDescribe(
             id=f'urn:uuid:{self.jsonrpc_site.uuid}',
@@ -337,7 +337,7 @@ class JSONRPCServiceDescriptor:
         )
         # mypyc: pydantic optional value
         serv_desc.description = (
-            self.jsonrpc_site.__doc__ if self.jsonrpc_site.__doc__ != site.JSONRPCSite.__doc__ else None
+            self.jsonrpc_site.__doc__ if self.jsonrpc_site.__doc__ != getattr(JSONRPCSite, '__doc__', None) else None
         )
         return serv_desc
 
