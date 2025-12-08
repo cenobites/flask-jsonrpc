@@ -31,18 +31,30 @@ import typing as t
 # Added in version 3.11.
 from typing_extensions import Self
 
-from .methods import OPENRPC_DISCOVER_METHOD_NAME, openrpc_discover_method
-from .wrappers import OpenRPCExtendSchemaDecoratorMixin
+from flask_jsonrpc.contrib.openrpc.methods import OPENRPC_DISCOVER_METHOD_NAME, openrpc_discover_method
+from flask_jsonrpc.contrib.openrpc.wrappers import OpenRPCExtendSchemaDecoratorMixin
 
 if t.TYPE_CHECKING:
     from flask import Flask
 
     from flask_jsonrpc.app import JSONRPC
-
-    from .typing import OpenRPCSchema
+    from flask_jsonrpc.contrib.openrpc.typing import OpenRPCSchema
 
 
 class OpenRPC(OpenRPCExtendSchemaDecoratorMixin):
+    """Flask-JSONRPC OpenRPC contrib extension.
+
+    Args:
+        app (flask.Flask | None): The Flask application instance. Defaults to None.
+        jsonrpc_app (flask_jsonrpc.app.JSONRPC | None): The JSON-RPC application instance. Defaults to None.
+        openrpc_schema (flask_jsonrpc.contrib.openrpc.typing.OpenRPCSchema | None): The OpenRPC schema instance.
+            Defaults to None.
+
+    Attributes:
+        jsonrpc_app (flask_jsonrpc.app.JSONRPC | None): The JSON-RPC application instance.
+        openrpc_schema (flask_jsonrpc.contrib.openrpc.typing.OpenRPCSchema | None): The OpenRPC schema instance.
+    """
+
     def __init__(
         self: Self,
         app: Flask | None = None,
@@ -56,6 +68,14 @@ class OpenRPC(OpenRPCExtendSchemaDecoratorMixin):
             self.init_app(app, jsonrpc_app)
 
     def init_app(self: Self, app: Flask, jsonrpc_app: JSONRPC) -> None:
+        """Initialize the OpenRPC extension with the Flask and JSON-RPC application instances.
+
+        Registers the OpenRPC discover method to the JSON-RPC site.
+
+        Args:
+            app (flask.Flask): The Flask application instance.
+            jsonrpc_app (flask_jsonrpc.app.JSONRPC): The JSON-RPC application instance.
+        """
         jsonrpc_site = jsonrpc_app.get_jsonrpc_site()
         jsonrpc_sites = [japp.get_jsonrpc_site() for japp in jsonrpc_app.jsonrpc_apps]
         jsonrpc_app.get_jsonrpc_site().register(

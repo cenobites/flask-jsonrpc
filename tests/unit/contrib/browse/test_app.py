@@ -1051,7 +1051,7 @@ def test_browse_before_request_middleware_with_middleware_returnning_none(monkey
                 yield
 
             assert _before_request_middleware() is None
-            assert g._jsonrpc_browse_mw == {}
+            assert 'test_validator' in g._jsonrpc_browse_mw
 
 
 def test_browse_before_request_middleware_with_middleware_returnning_false(monkeypatch: MonkeyPatch) -> None:

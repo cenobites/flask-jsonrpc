@@ -34,19 +34,36 @@ from typing_extensions import Self
 from flask import typing as ft, make_response
 from flask.views import MethodView
 
-from .site import JSONRPC_VERSION_DEFAULT, JSONRPC_DEFAULT_HTTP_HEADERS
-from .encoders import jsonify
-from .exceptions import JSONRPCError
+from flask_jsonrpc.site import JSONRPC_VERSION_DEFAULT, JSONRPC_DEFAULT_HTTP_HEADERS
+from flask_jsonrpc.encoders import jsonify
+from flask_jsonrpc.exceptions import JSONRPCError
 
 if t.TYPE_CHECKING:
-    from .site import JSONRPCSite
+    from flask_jsonrpc.site import JSONRPCSite
 
 
 class JSONRPCView(MethodView):
+    """JSON-RPC view to handle JSON-RPC requests.
+
+    Args:
+        jsonrpc_site (flask_jsonrpc.site.JSONRPCSite): The JSON-RPC site instance.
+
+    Attributes:
+        jsonrpc_site (flask_jsonrpc.site.JSONRPCSite): The JSON-RPC site instance.
+    """
+
     def __init__(self: Self, jsonrpc_site: JSONRPCSite) -> None:
         self.jsonrpc_site = jsonrpc_site
 
     def post(self: Self) -> ft.ResponseReturnValue:
+        """Handle POST requests for JSON-RPC.
+
+        If the request is successful, returns a JSON response with the result.
+        If there is a JSON-RPC error, returns a JSON response with the error details.
+
+        Returns:
+            flask.typing.ResponseReturnValue: The Flask response object.
+        """
         try:
             response, status_code, headers = self.jsonrpc_site.dispatch_request()
             if status_code == 204:

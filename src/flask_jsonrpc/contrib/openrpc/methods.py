@@ -31,9 +31,8 @@ from functools import lru_cache
 from collections import OrderedDict
 
 from flask_jsonrpc.encoders import serializable
-
-from . import typing as st
-from .utils import MethodExtendSchema, extend_schema
+from flask_jsonrpc.contrib.openrpc import typing as st
+from flask_jsonrpc.contrib.openrpc.utils import MethodExtendSchema, extend_schema
 
 if t.TYPE_CHECKING:
     from flask_jsonrpc.site import JSONRPCSite
@@ -45,6 +44,16 @@ OPENRPC_DISCOVER_SERVICE_METHOD_TYPE: str = 'method'
 def _openrpc_discover_method(
     jsonrpc_sites: list[JSONRPCSite], *, openrpc_schema: st.OpenRPCSchema
 ) -> t.Callable[..., st.OpenRPCSchema]:
+    """Create a cached OpenRPC discover method.
+
+    Args:
+        jsonrpc_sites (list[flask_jsonrpc.site.JSONRPCSite]): List of JSON-RPC site instances.
+        openrpc_schema (flask_jsonrpc.contrib.openrpc.typing.OpenRPCSchema): The OpenRPC schema instance.
+
+    Returns:
+        typing.Callable[..., flask_jsonrpc.contrib.openrpc.typing.OpenRPCSchema]: The cached OpenRPC discover method.
+    """
+
     @lru_cache
     @extend_schema(
         name=OPENRPC_DISCOVER_METHOD_NAME,
@@ -106,13 +115,24 @@ def _openrpc_discover_method(
 def openrpc_discover_method(
     jsonrpc_sites: list[JSONRPCSite], *, openrpc_schema: st.OpenRPCSchema | None = None
 ) -> t.Callable[..., st.OpenRPCSchema]:
+    """Create an OpenRPC discover method.
+
+    Args:
+        jsonrpc_sites (list[flask_jsonrpc.site.JSONRPCSite]): List of JSON-RPC site instances.
+        openrpc_schema (flask_jsonrpc.contrib.openrpc.typing.OpenRPCSchema | None): The OpenRPC schema instance.
+            If None, a default schema will be created.
+
+    Returns:
+        typing.Callable[..., flask_jsonrpc.contrib.openrpc.typing.OpenRPCSchema]: The OpenRPC discover method.
+
+    See Also:
+        :func:`flask_jsonrpc.contrib.openrpc._openrpc_discover_method`
+    """
     if openrpc_schema is None:
         jsonrpc_site = jsonrpc_sites[0]
         jsonrpc_service_describe = jsonrpc_site.describe()
         openrpc_schema = st.OpenRPCSchema(
-            info=st.Info(
-                title=jsonrpc_service_describe.name, version='0.0.1', description=jsonrpc_service_describe.description
-            ),
+            info=st.Info(title=jsonrpc_service_describe.name, version='0.0.1'),
             servers=st.Server(name='default', url=jsonrpc_service_describe.servers[0].url),
         )
     return _openrpc_discover_method(jsonrpc_sites, openrpc_schema=openrpc_schema)

@@ -37,7 +37,7 @@ import annotated_types
 # Added in version 3.11.
 from typing_extensions import Self
 
-from ..utils import trait
+from flask_jsonrpc.utils import trait
 
 SLOTS = {'slots': True}
 EMPTY_VALUES: tuple[t.Any, ...] = (None, '', [], (), {})
@@ -71,16 +71,22 @@ def extract_digits_and_decimals(value: Decimal) -> tuple[int, int]:
 
 @dataclass
 class Ok:
+    """A successful type check result."""
+
     value: t.Any
 
 
 @dataclass
 class Err:
+    """An unsuccessful type check result."""
+
     message: str
 
 
 @trait
 class BaseAnnotatedMetadata:
+    """Base class for annotated metadata used in type checking."""
+
     __slots__ = ()
 
     def type_check(self: Self, name: str, value: t.Any) -> Ok | Err:  # noqa: ANN401
@@ -88,7 +94,10 @@ class BaseAnnotatedMetadata:
 
 
 class DefaultTypeCheckMixin:
+    """Mixin class that provides a default type check implementation."""
+
     def type_check(self: Self, name: str, value: t.Any) -> Ok | Err:  # noqa: ANN401
+        """Perform a default type check that always succeeds."""
         return Ok(value)
 
 

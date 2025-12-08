@@ -57,6 +57,42 @@ def register_middleware(
     [t.Callable[[Request], t.Generator[ft.ResponseReturnValue | bool | None, Response, ft.ResponseReturnValue | None]]],
     t.Callable[[Request], t.Generator[ft.ResponseReturnValue | bool | None, Response, ft.ResponseReturnValue | None]],
 ]:
+    """Register a browse middleware.
+
+    If a middleware returns:
+        - True: the middleware will be kept for after_request and teardown_request processing.
+        - False: the middleware will be skipped for after_request and teardown_request processing.
+        - A Response: the response will be returned immediately, skipping further processing.
+
+    Args:
+        name (str): The name of the middleware.
+
+    Returns:
+        typing.Callable: The middleware decorator.
+
+    Examples:
+        Inject a custom header into the response using a middleware:
+
+        >>> import pytest
+        >>> pytest.skip('The global context causes issues with testing.')
+        >>>
+        >>> from flask import Flask, Response
+        >>> from flask_jsonrpc.contrib.browse import JSONRPCBrowse, register_middleware
+        >>>
+        >>> app = Flask(__name__)
+        >>> browse = JSONRPCBrowse(app)
+        >>>
+        >>> @register_middleware('example_middleware')
+        ... def example_middleware(request):
+        ...     response = yield
+        ...     response.headers['X-Example'] = 'Value'
+        ...     yield response
+        >>>
+        >>> with app.test_client() as client:
+        ...     response = client.get('/api/browse/')
+        ...     assert response.headers.get('X-Example') == 'Value'
+    """
+
     def decorator(
         fn: t.Callable[
             [Request], t.Generator[ft.ResponseReturnValue | bool | None, Response, ft.ResponseReturnValue | None]
@@ -80,6 +116,40 @@ def register_middleware(
 
 
 def _before_request_middleware() -> ft.ResponseReturnValue | None:
+    """Execute before request middlewares.
+
+    If a middleware returns:
+        - True: the middleware will be kept for after_request and teardown_request processing.
+        - False: the middleware will be skipped for after_request and teardown_request processing.
+        - A Response: the response will be returned immediately, skipping further processing.
+
+    Returns:
+        flask.typing.ResponseReturnValue | None: The response if a middleware returns a response, otherwise None.
+
+    Examples:
+        >>> import pytest
+        >>> pytest.skip('The global context causes issues with testing.')
+        >>>
+        >>> from flask import Flask, Response
+        >>> from flask_jsonrpc.contrib.browse import JSONRPCBrowse, register_middleware
+        >>>
+        >>> app = Flask(__name__)
+        >>> browse = JSONRPCBrowse(app)
+        >>>
+        >>> @register_middleware('example_middleware')
+        ... def example_middleware(request):
+        ...     # Perform some checks before processing the request
+        ...     if not request.headers.get('X-Allowed'):
+        ...         yield Response('Forbidden', status=403)
+        ...     yield False  # Continue processing the request
+        >>>
+        >>> with app.test_client() as client:
+        ...     response = client.get('/api/browse/')
+        ...     assert response.status_code == 403
+        ...
+        ...     response = client.get('/api/browse/', headers={'X-Allowed': '1'})
+        ...     assert response.status_code == 200
+    """
     middlewares: list[
         tuple[
             str,
@@ -99,10 +169,44 @@ def _before_request_middleware() -> ft.ResponseReturnValue | None:
             continue
         if rv is not None:
             return rv
+        g._jsonrpc_browse_mw[name] = gen
     return None
 
 
 def _after_request_middleware(response: Response) -> ft.ResponseReturnValue:
+    """Execute after request middlewares.
+
+    If a middleware returns:
+        - True: the middleware will be kept for teardown_request processing.
+        - False: the middleware will be skipped for teardown_request processing.
+        - A Response: the response will be returned immediately, skipping further processing.
+
+    Args:
+        response (flask.wrappers.Response): The response object.
+
+    Returns:
+        flask.typing.ResponseReturnValue: The modified response object.
+
+    Examples:
+        >>> import pytest
+        >>> pytest.skip('The global context causes issues with testing.')
+        >>>
+        >>> from flask import Flask, Response
+        >>> from flask_jsonrpc.contrib.browse import JSONRPCBrowse, register_middleware
+        >>>
+        >>> app = Flask(__name__)
+        >>> browse = JSONRPCBrowse(app)
+        >>>
+        >>> @register_middleware('example_middleware')
+        ... def example_middleware(request):
+        ...     response = yield
+        ...     response.headers['X-Example'] = 'Value'
+        ...     yield response
+        >>>
+        >>> with app.test_client() as client:
+        ...     response = client.get('/api/browse/#/')
+        ...     assert response.headers.get('X-Example') == 'Value', response.headers
+    """
     middlewares: list[
         tuple[
             str,
@@ -131,6 +235,11 @@ def _after_request_middleware(response: Response) -> ft.ResponseReturnValue:
 
 
 def _teardown_request_middleware(exception: BaseException | None) -> None:
+    """Execute teardown request middlewares.
+
+    Args:
+        exception (BaseException | None): The exception if any occurred during request processing.
+    """
     gens = g.pop('_jsonrpc_browse_mw', {})
     for gen in gens.values():
         with contextlib.suppress(BaseException):
@@ -138,6 +247,14 @@ def _teardown_request_middleware(exception: BaseException | None) -> None:
 
 
 def build_package_tree(service_methods: dict[str, Method]) -> dict[str, t.Any]:
+    """Build a package tree from service methods.
+
+    Args:
+        service_methods (dict[str, flask_jsonrpc.typing.Method]): The service methods.
+
+    Returns:
+        dict[str, typing.Any]: The package tree as a dictionary.
+    """
     package_tree = Node(name=None)
     for package, service_method in service_methods.items():
         default_package_name = package.split('.')[0]
@@ -160,6 +277,18 @@ def build_package_tree(service_methods: dict[str, Method]) -> dict[str, t.Any]:
 
 
 class JSONRPCBrowseTemplateLoader(BaseLoader):
+    """Custom Jinja2 template loader that tries to load templates from the application first,
+    then falls back to the browse templates.
+
+    Args:
+        app_jinja_loader (jinja2.BaseLoader): The application's Jinja2 template loader.
+        browse_jinja_loader (jinja2.BaseLoader): The browse's Jinja2 template loader.
+
+    Attributes:
+        app_jinja_loader (jinja2.BaseLoader): The application's Jinja2 template loader.
+        browse_jinja_loader (jinja2.BaseLoader): The browse's Jinja2 template loader.
+    """
+
     def __init__(self, app_jinja_loader: BaseLoader, browse_jinja_loader: BaseLoader) -> None:
         self.app_jinja_loader = app_jinja_loader
         self.browse_jinja_loader = browse_jinja_loader
@@ -167,6 +296,17 @@ class JSONRPCBrowseTemplateLoader(BaseLoader):
     def get_source(
         self, environment: Environment, template: str
     ) -> tuple[str, str | None, t.Callable[[], bool] | None]:
+        """Get the source of a template.
+
+        If the template is not found in the application loader, it tries to load it from the browse loader.
+
+        Args:
+            environment (jinja2.Environment): The Jinja2 environment.
+            template (str): The name of the template.
+
+        Returns:
+            tuple[str, str | None, typing.Callable[[], bool] | None]: The template source
+        """
         try:
             return self.app_jinja_loader.get_source(environment, template)
         except TemplateNotFound:
@@ -174,6 +314,29 @@ class JSONRPCBrowseTemplateLoader(BaseLoader):
 
 
 class JSONRPCBrowse:
+    """JSON-RPC Browse extension for Flask applications.
+
+    Args:
+        app (Flask | None): The Flask application to initialize the extension with.
+        url_prefix (str): The URL prefix for the browse interface.
+        base_url (str | None): The base URL for the browse interface.
+
+    Attributes:
+        url_prefix (str): The URL prefix for the browse interface.
+        base_url (str | None): The base URL for the browse interface.
+        jsonrpc_sites (set[flask_jsonrpc.site.JSONRPCSite]): The set of registered JSON-RPC sites
+
+    Examples:
+        >>> from flask import Flask
+        >>> from flask_jsonrpc import JSONRPCBlueprint
+        >>> from flask_jsonrpc.contrib.browse import JSONRPCBrowse
+        >>>
+        >>> app = Flask(__name__)
+        >>> jsonrpc = JSONRPCBlueprint('example', __name__)
+        >>> browse = JSONRPCBrowse(app, url_prefix='/api/browse')
+        >>> browse.register_jsonrpc_site(jsonrpc)
+    """
+
     def __init__(
         self: Self, app: Flask | None = None, url_prefix: str = '/api/browse', base_url: str | None = None
     ) -> None:
@@ -184,9 +347,19 @@ class JSONRPCBrowse:
             self.init_app(app)
 
     def _service_methods_desc(self: Self) -> dict[str, Method]:
+        """Get the service methods description from all registered JSON-RPC sites.
+
+        Returns:
+            dict[str, flask_jsonrpc.typing.Method]: The service methods description.
+        """
         return dict(ChainMap(*[site.describe().methods for site in self.jsonrpc_sites]))
 
     def _base_template_context(self: Self) -> dict[str, t.Any]:
+        """Get the base template context for rendering templates.
+
+        Returns:
+            dict[str, typing.Any]: The base template context.
+        """
         server_urls: dict[str, str] = {}
         service_describes = [site.describe() for site in self.jsonrpc_sites]
         for service_describe in service_describes:
@@ -209,6 +382,21 @@ class JSONRPCBrowse:
         return context
 
     def init_app(self: Self, app: Flask) -> None:
+        """Initialize the JSON-RPC Browse extension with a Flask application.
+
+        Middlewares for before_request, after_request, and teardown_request are registered.
+
+        Args:
+            app (flask.Flask): The Flask application.
+
+        Examples:
+            >>> from flask import Flask
+            >>> from flask_jsonrpc.contrib.browse import JSONRPCBrowse
+            >>>
+            >>> app = Flask(__name__)
+            >>> browse = JSONRPCBrowse()
+            >>> browse.init_app(app)
+        """
         name = urn('browse', app.name, self.url_prefix)
         browse = Blueprint(name, __name__, template_folder='templates', static_folder='static')
         browse.jinja_loader = JSONRPCBrowseTemplateLoader(
@@ -235,49 +423,152 @@ class JSONRPCBrowse:
         app.teardown_appcontext(_teardown_request_middleware)
 
     def register_jsonrpc_site(self: Self, jsonrpc_site: JSONRPCSite) -> None:
+        """Register a JSON-RPC site with the browse extension.
+
+        Args:
+            jsonrpc_site (flask_jsonrpc.site.JSONRPCSite): The JSON-RPC site to register.
+        """
         self.jsonrpc_sites.add(jsonrpc_site)
 
     def get_browse_title(self: Self) -> str:
+        """Get the browse title.
+
+        Register a custom title by setting BROWSE_TITLE in your settings
+        or overriding this method.
+
+        Returns:
+            str: The browse title.
+        """
         return t.cast(str, settings.BROWSE_TITLE)
 
     def get_browse_title_url(self: Self) -> str:
+        """Get the browse title URL.
+
+        Register a custom title URL by setting BROWSE_TITLE_URL in your settings
+        or overriding this method.
+
+        Returns:
+            str: The browse title URL.
+        """
         return t.cast(str, settings.BROWSE_TITLE_URL)
 
     def get_browse_subtitle(self: Self) -> str:
+        """Get the browse subtitle.
+
+        Register a custom subtitle by setting BROWSE_SUBTITLE in your settings
+        or overriding this method.
+
+        Returns:
+            str: The browse subtitle.
+        """
         return t.cast(str, settings.BROWSE_SUBTITLE)
 
     def get_browse_description(self: Self) -> str:
+        """Get the browse description.
+
+        Register a custom description by setting BROWSE_DESCRIPTION in your settings
+        or overriding this method.
+
+        Returns:
+            str: The browse description.
+        """
         return t.cast(str, settings.BROWSE_DESCRIPTION)
 
     def get_browse_fork_me_button_enabled(self: Self) -> bool:
+        """Check if the "Fork me on GitHub" button is enabled.
+
+        Register the button state by setting BROWSE_FORK_ME_BUTTON_ENABLED in your settings
+        or overriding this method.
+
+        Returns:
+            bool: True if the "Fork me on GitHub" button is enabled, False otherwise.
+        """
         return t.cast(bool, settings.BROWSE_FORK_ME_BUTTON_ENABLED)
 
     def get_browse_media_css(self: Self) -> dict[str, list[str]]:
+        """Get the browse media CSS files.
+
+        Register custom CSS files by setting BROWSE_MEDIA_CSS in your settings
+        or overriding this method.
+
+        Returns:
+            dict[str, list[str]]: The browse media CSS files.
+        """
         return t.cast(dict[str, list[str]], settings.BROWSE_MEDIA_CSS)
 
     def get_browse_media_js(self: Self) -> list[str]:
+        """Get the browse media JS files.
+
+        Register custom JS files by setting BROWSE_MEDIA_JS in your settings
+        or overriding this method.
+
+        Returns:
+            list[str]: The browse media JS files.
+        """
         return t.cast(list[str], settings.BROWSE_MEDIA_JS)
 
     def get_browse_dashboard_menu_name(self: Self) -> str:
+        """Get the browse dashboard menu name.
+
+        Register a custom dashboard menu name by setting BROWSE_DASHBOARD_MENU_NAME in your settings
+        or overriding this method.
+
+        Returns:
+            str: The browse dashboard menu name.
+        """
         return t.cast(str, settings.BROWSE_DASHBOARD_MENU_NAME)
 
     def get_browse_dashboard_partial_template(self: Self) -> str:
+        """Get the browse dashboard partial template.
+
+        Register a custom dashboard partial template by setting BROWSE_DASHBOARD_PARTIAL_TEMPLATE in your settings
+        or overriding this method.
+
+        Returns:
+            str: The browse dashboard partial template.
+        """
         return t.cast(str, settings.BROWSE_DASHBOARD_PARTIAL_TEMPLATE)
 
     def get_browse_login_template(self: Self) -> str | None:
+        """Get the browse login template.
+
+        Register a custom login template by setting BROWSE_LOGIN_TEMPLATE in your settings
+        or overriding this method.
+
+        Returns:
+            str | None: The browse login template or None if not configured.
+        """
         if settings.BROWSE_LOGIN_TEMPLATE is None:
             return None
         return t.cast(str, settings.BROWSE_LOGIN_TEMPLATE)
 
     def get_browse_logout_template(self: Self) -> str | None:
+        """Get the browse logout template.
+
+        Register a custom logout template by setting BROWSE_LOGOUT_TEMPLATE in your settings
+        or overriding this method.
+
+        Returns:
+            str | None: The browse logout template or None if not configured.
+        """
         if settings.BROWSE_LOGOUT_TEMPLATE is None:
             return None
         return t.cast(str, settings.BROWSE_LOGOUT_TEMPLATE)
 
     def vf_index(self: Self) -> str:
+        """Render the index page.
+
+        Returns:
+            str: The rendered index page.
+        """
         return render_template('browse/index.html', **self._base_template_context())
 
     def vf_login(self: Self) -> str | tuple[str, int]:
+        """Render the login page.
+
+        Returns:
+            str | tuple[str, int]: The rendered login page or an error message with status code if not configured.
+        """
         login_template = self.get_browse_login_template()
         if login_template is None:
             return (
@@ -288,6 +579,11 @@ class JSONRPCBrowse:
         return render_template(login_template, **self._base_template_context())
 
     def vf_logout(self: Self) -> str | tuple[str, int]:
+        """Render the logout page.
+
+        Returns:
+            str | tuple[str, int]: The rendered logout page or an error message with status code if not configured.
+        """
         logout_template = self.get_browse_logout_template()
         if logout_template is None:
             return (
@@ -298,6 +594,13 @@ class JSONRPCBrowse:
         return render_template(logout_template, **self._base_template_context())
 
     def vf_json_packages(self: Self) -> ft.ResponseReturnValue:
+        """Get the JSON representation of the package tree.
+
+        Ignores methods starting with 'rpc.' as they are reserved for JSON-RPC 2.0 specification system extensions.
+
+        Returns:
+            flask.typing.ResponseReturnValue: The JSON representation of the package tree.
+        """
         service_methods = {
             name: method
             for name, method in self._service_methods_desc().items()
@@ -308,19 +611,47 @@ class JSONRPCBrowse:
         return jsonify(build_package_tree(service_methods))
 
     def vf_json_method(self: Self, method_name: str) -> ft.ResponseReturnValue:
+        """Get the JSON representation of a specific method.
+
+        Args:
+            method_name (str): The name of the method.
+
+        Returns:
+            flask.typing.ResponseReturnValue: The JSON representation of the method or a 404 error if not found.
+        """
         service_procedures = self._service_methods_desc()
         if method_name not in service_procedures:
             return jsonify({'message': 'Not found'}), 404
         return jsonify({'name': method_name, **serializable(service_procedures[method_name])})
 
     def vf_partials_menu_tree(self: Self) -> str:
+        """Render the menu tree partial template.
+
+        Returns:
+            str: The rendered menu tree partial template.
+        """
         return render_template('browse/partials/menu_tree.html')
 
     def vf_partials_dashboard(self: Self) -> str:
+        """Render the dashboard partial template.
+
+        Returns:
+            str: The rendered dashboard partial template.
+        """
         return render_template(self.get_browse_dashboard_partial_template())
 
     def vf_partials_field_describe(self: Self) -> str:
+        """Render the field describe partial template.
+
+        Returns:
+            str: The rendered field describe partial template.
+        """
         return render_template('browse/partials/field_describe.html')
 
     def vf_partials_response_object(self: Self) -> str:
+        """Render the response object partial template.
+
+        Returns:
+            str: The rendered response object partial template.
+        """
         return render_template('browse/partials/response_object.html')

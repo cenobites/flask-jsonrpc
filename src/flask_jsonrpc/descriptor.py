@@ -33,28 +33,57 @@ from urllib.parse import urlsplit
 # Added in version 3.11.
 from typing_extensions import Self
 
-from . import typing as fjt
-from .conf import settings
-from .types import params as types_params, methods as types_methods
-from .helpers import from_python_type
-from .types.types import Object, propertify
+from flask_jsonrpc import typing as fjt
+from flask_jsonrpc.conf import settings
+from flask_jsonrpc.types import params as types_params, methods as types_methods
+from flask_jsonrpc.helpers import from_python_type
+from flask_jsonrpc.types.types import Object, propertify
 
 if t.TYPE_CHECKING:
-    from .site import JSONRPCSite
+    from flask_jsonrpc.site import JSONRPCSite
 
 JSONRPC_DESCRIBE_METHOD_NAME: str = 'rpc.describe'
 JSONRPC_DESCRIBE_SERVICE_METHOD_TYPE: str = 'method'
 
 
 class JSONRPCServiceDescriptor:
+    """JSON-RPC Service Descriptor for JSON-RPC 2.0.
+
+    It provides a detailed description of the JSON-RPC service, including its methods,
+    parameters, return types, and other metadata.
+
+    Args:
+        jsonrpc_site (flask_jsonrpc.site.JSONRPCSite): JSON-RPC site instance.
+
+    Attributes:
+        jsonrpc_site (flask_jsonrpc.site.JSONRPCSite): JSON-RPC site instance.
+    """
+
     def __init__(self: Self, jsonrpc_site: JSONRPCSite) -> None:
         self.jsonrpc_site = jsonrpc_site
         self.register(jsonrpc_site)
 
     def _python_type_name(self: Self, pytype: t.Any) -> str:  # noqa: ANN401
+        """Get the JSON-RPC type name for a given Python type.
+
+        Args:
+            pytype (typing.Any): Python type.
+
+        Returns:
+            str: JSON-RPC type name.
+        """
         return str(from_python_type(pytype))
 
     def _build_field_desc(self: Self, field: fjt.Field, annotations: t.Annotated[t.Any, ...]) -> fjt.Field:  # noqa: ANN401, C901
+        """Build a field description from annotations.
+
+        Args:
+            field (flask_jsonrpc.typing.Field): Field instance.
+            annotations (typing.Annotated[typing.Any, ...]): Annotations for the field.
+
+        Returns:
+            flask_jsonrpc.typing.Field: Field instance with updated description.
+        """
         for annotation in annotations:
             if isinstance(annotation, types_params.Summary):
                 field.summary = annotation.summary
@@ -115,6 +144,14 @@ class JSONRPCServiceDescriptor:
     def _properties_to_fields(
         self: Self, annotations: dict[str, t.Annotated[t.Any, ...] | t.Any]
     ) -> dict[str, fjt.Field] | None:
+        """Convert properties annotations to field descriptions.
+
+        Args:
+            annotations (dict[str, typing.Annotated[typing.Any, ...] | typing.Any]): Annotations for the properties.
+
+        Returns:
+            dict[str, flask_jsonrpc.typing.Field] | None: Field descriptions for the properties.
+        """
         fields = {}
         for name, annotation in annotations.items():
             if isinstance(annotation, types_params.Properties):
@@ -131,6 +168,15 @@ class JSONRPCServiceDescriptor:
         return fields
 
     def _build_service_field_desc(self: Self, name: str, obj: t.Any) -> fjt.Field:  # noqa: ANN401, C901
+        """Build a service field description from a Python type.
+
+        Args:
+            name (str): Field name.
+            obj (typing.Any): Python type.
+
+        Returns:
+            flask_jsonrpc.typing.Field: Field description.
+        """
         annotations = getattr(obj, '__metadata__', ())
         obj_type = getattr(obj, '__origin__', obj) if t.get_origin(obj) is t.Annotated else obj
         field_type = self._python_type_name(obj_type)
@@ -144,6 +190,14 @@ class JSONRPCServiceDescriptor:
         return self._build_field_desc(field, annotations)
 
     def _service_method_params_desc(self: Self, view_func: t.Callable[..., t.Any]) -> list[fjt.Field]:
+        """Get the service method parameters description.
+
+        Args:
+            view_func (typing.Callable[..., typing.Any]): The view function.
+
+        Returns:
+            list[flask_jsonrpc.typing.Field]: List of field descriptions.
+        """
         view_func_params = getattr(view_func, 'jsonrpc_method_params', {})
         fields = []
         for param_name, param_type in view_func_params.items():
@@ -151,10 +205,23 @@ class JSONRPCServiceDescriptor:
         return fields
 
     def _service_method_returns_desc(self: Self, view_func: t.Callable[..., t.Any]) -> fjt.Field:
+        """Get the service method return description.
+
+        Args:
+            view_func (typing.Callable[..., typing.Any]): The view function.
+
+        Returns:
+            flask_jsonrpc.typing.Field: Field description.
+        """
         view_func_return_type = getattr(view_func, 'jsonrpc_method_return', type(None))
         return self._build_service_field_desc('default', view_func_return_type)
 
     def _service_methods_desc(self: Self) -> t.OrderedDict[str, fjt.Method]:  # noqa: C901
+        """Get the service methods description.
+
+        Returns:
+            OrderedDict[str, flask_jsonrpc.typing.Method]: Ordered dictionary of method descriptions.
+        """
         methods: t.OrderedDict[str, fjt.Method] = OrderedDict()
         for name, view_func in self.jsonrpc_site.view_funcs.items():
             method_name = getattr(view_func, 'jsonrpc_method_name', name)
@@ -241,6 +308,11 @@ class JSONRPCServiceDescriptor:
         return methods
 
     def _service_server_url(self: Self) -> str:
+        """Get the service server URL.
+
+        Returns:
+            str: Service server URL.
+        """
         url = urlsplit(self.jsonrpc_site.base_url or self.jsonrpc_site.path or '')
         return (
             f'{url.scheme}://{url.netloc}/{(self.jsonrpc_site.path or "").lstrip("/")}'
@@ -249,6 +321,13 @@ class JSONRPCServiceDescriptor:
         )
 
     def service_describe(self: Self) -> fjt.ServiceDescribe:
+        """Get the service description.
+
+        Returns:
+            flask_jsonrpc.typing.ServiceDescribe: Service description.
+        """
+        from flask_jsonrpc import site
+
         serv_desc = fjt.ServiceDescribe(
             id=f'urn:uuid:{self.jsonrpc_site.uuid}',
             version=self.jsonrpc_site.version,
@@ -257,10 +336,28 @@ class JSONRPCServiceDescriptor:
             methods=self._service_methods_desc(),
         )
         # mypyc: pydantic optional value
-        serv_desc.description = self.jsonrpc_site.__doc__
+        serv_desc.description = (
+            self.jsonrpc_site.__doc__ if self.jsonrpc_site.__doc__ != site.JSONRPCSite.__doc__ else None
+        )
         return serv_desc
 
     def register(self: Self, jsonrpc_site: JSONRPCSite) -> None:
+        """Register the service description method.
+
+        The 'rpc.describe' is automatically registered to provide service description.
+
+        Args:
+            jsonrpc_site (flask_jsonrpc.site.JSONRPCSite): JSON-RPC site instance.
+
+        Examples:
+            >>> from flask import Flask
+            >>> from flask_jsonrpc import JSONRPC
+            >>>
+            >>> app = Flask(__name__)
+            >>> jsonrpc = JSONRPC(app, path='/api', version='1.0.0')
+            >>> assert 'rpc.describe' in jsonrpc.get_jsonrpc_site().view_funcs
+        """
+
         def describe() -> fjt.ServiceDescribe:
             return self.service_describe()
 

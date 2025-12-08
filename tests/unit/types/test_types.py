@@ -36,7 +36,8 @@ from pydantic import BaseModel
 
 import pytest
 
-from flask_jsonrpc import types, typing as fjt
+from flask_jsonrpc import typing as fjt
+from flask_jsonrpc.types import types
 from flask_jsonrpc.types.params import Summary, Required, Properties
 
 

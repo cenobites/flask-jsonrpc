@@ -36,8 +36,8 @@ import pytest
 from werkzeug.datastructures import Headers
 
 from flask_jsonrpc.site import JSONRPCSite
-from flask_jsonrpc.types import AnnotatedMetadataTypeError
 from flask_jsonrpc.exceptions import ParseError, ServerError, InvalidRequestError
+from flask_jsonrpc.types.types import AnnotatedMetadataTypeError
 
 logger_lock = Lock()
 
