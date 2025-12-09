@@ -283,7 +283,7 @@ cbuild = [
     { name = "setuptools", specifier = ">=77.0.0" },
 ]
 ci-tests = [
-    { name = "coverage", extras = ["toml"], specifier = "==7.12.0" },
+    { name = "coverage", extras = ["toml"], specifier = "==7.13.0" },
     { name = "pytest", specifier = "==9.0.2" },
     { name = "pytest-clarity", specifier = "==1.0.1" },
     { name = "pytest-cov", specifier = "==7.0.0" },
@@ -311,7 +311,7 @@ docs = [
 ]
 docs-auto = [{ name = "sphinx-autobuild" }]
 integration-tests = [
-    { name = "coverage", extras = ["toml"], specifier = "==7.12.0" },
+    { name = "coverage", extras = ["toml"], specifier = "==7.13.0" },
     { name = "playwright", specifier = "==1.56.0" },
     { name = "pytest", specifier = "==9.0.2" },
     { name = "pytest-clarity", specifier = "==1.0.1" },
@@ -328,7 +328,7 @@ integration-tests = [
     { name = "typeguard", specifier = "==4.4.4" },
 ]
 parallel-tests = [
-    { name = "coverage", extras = ["toml"], specifier = "==7.12.0" },
+    { name = "coverage", extras = ["toml"], specifier = "==7.13.0" },
     { name = "pytest", specifier = "==9.0.2" },
     { name = "pytest-clarity", specifier = "==1.0.1" },
     { name = "pytest-cov", specifier = "==7.0.0" },
@@ -350,7 +350,7 @@ pre-commit = [
 security = [{ name = "bandit", marker = "python_full_version >= '3.11'" }]
 style = [{ name = "ruff", specifier = "==0.14.8" }]
 tests = [
-    { name = "coverage", extras = ["toml"], specifier = "==7.12.0" },
+    { name = "coverage", extras = ["toml"], specifier = "==7.13.0" },
     { name = "pytest", specifier = "==9.0.2" },
     { name = "pytest-clarity", specifier = "==1.0.1" },
     { name = "pytest-cov", specifier = "==7.0.0" },
