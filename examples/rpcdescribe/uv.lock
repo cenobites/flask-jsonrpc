@@ -247,7 +247,7 @@ async = [
 
 [[package]]
 name = "flask-jsonrpc"
-version = "4.0.0b0"
+version = "4.0.0"
 source = { editable = "../../" }
 dependencies = [
     { name = "annotated-types" },
