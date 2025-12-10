@@ -52,10 +52,35 @@ User's Guide
    testing
    deployment
 
+
+How-to guides
+-------------
+
+Practical guides covering common tasks and problems.
+
+.. toctree::
+   :maxdepth: 2
+
+   howto/index
+
+
 API Reference
 -------------
+
+If you are looking for information on a specific function, class or
+method, this part of the documentation is for you.
 
 .. toctree::
    :maxdepth: 2
 
    api
+
+
+Additional Notes
+----------------
+
+.. toctree::
+   :maxdepth: 2
+
+   license
+   changes

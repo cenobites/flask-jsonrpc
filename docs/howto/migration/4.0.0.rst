@@ -1,0 +1,709 @@
+=====================================
+Flask JSON-RPC v4.0.0 Migration Guide
+=====================================
+
+This guide covers the breaking changes and migration steps required to upgrade from Flask JSON-RPC v3.0.1 to v4.0.0.
+
+.. contents:: Table of Contents
+   :depth: 3
+   :local:
+   :backlinks: none
+
+--------
+Overview
+--------
+
+Flask JSON-RPC v4.0.0 is a major release with significant architectural improvements, enhanced type safety, better Pydantic integration, and a modernized codebase. This release introduces several breaking changes that require code modifications when upgrading from v3.0.1.
+
+**Key Highlights:**
+
+- Dropped support for Python 3.8 and 3.9
+- Major dependency updates (typeguard 2.x → 4.x)
+- New Pydantic integration for validation
+- Restructured types module
+- Enhanced error handling
+- New configuration system
+- Improved web browsable API
+
+----------------
+Breaking Changes
+----------------
+
+Python Version Support
+======================
+
+**Breaking Change:** Minimum Python version increased from 3.8 to 3.10
+
+v3.0.1
+------
+
+.. code-block:: python
+
+    # Supported Python versions
+    requires-python = ">=3.8"
+
+v4.0.0
+------
+
+.. code-block:: python
+
+    # Supported Python versions
+    requires-python = ">=3.10"
+
+**Action Required:**
+
+- Upgrade your Python runtime to 3.10 or higher
+- Update your CI/CD pipelines
+- Update Docker base images if using containers
+
+Dependencies
+============
+
+**Breaking Changes:**
+
+1. **typeguard**: Upgraded from 2.13.3 to 4.4.4 (major version change with API breaking changes)
+2. **New required dependencies:**
+
+   - ``pydantic>=1.7.4,!=1.8,!=1.8.1,!=2.0.0,!=2.0.1,!=2.1.0,<3.0.0``
+   - ``eval-type-backport==0.3.1``
+   - ``annotated-types==0.7.0``
+
+v3.0.1
+------
+
+.. code-block:: toml
+
+    dependencies = [
+        "Flask>=3.0.0,<4.0",
+        "typeguard==2.13.3",
+        "typing_extensions>=4.3.0",
+        "typing_inspect==0.9.0",
+    ]
+
+v4.0.0
+------
+
+.. code-block:: toml
+
+    dependencies = [
+        "Flask>=3.0.0,<4.0",
+        "typeguard==4.4.4",
+        "typing-extensions>=4.3.0",
+        "typing-inspect==0.9.0",
+        "pydantic>=1.7.4,!=1.8,!=1.8.1,!=2.0.0,!=2.0.1,!=2.1.0,<3.0.0",
+        "eval-type-backport==0.3.1",
+        "annotated-types==0.7.0",
+    ]
+
+**Action Required:**
+
+- Update your ``requirements.txt`` or ``pyproject.toml``
+- Review any direct usage of ``typeguard`` API (version 4.x has different APIs)
+- Test thoroughly as the new typeguard version has stricter validation
+
+API Changes
+===========
+
+1. JSONRPC Constructor Parameters
+----------------------------------
+
+**Breaking Change:** Parameter renamed from ``service_url`` to ``path``
+
+v3.0.1
+^^^^^^
+
+.. code-block:: python
+
+    from flask import Flask
+    from flask_jsonrpc import JSONRPC
+
+    app = Flask(__name__)
+    jsonrpc = JSONRPC(app, service_url='/api')
+
+v4.0.0
+^^^^^^
+
+.. code-block:: python
+
+    from flask import Flask
+    from flask_jsonrpc import JSONRPC
+
+    app = Flask(__name__)
+    jsonrpc = JSONRPC(app, path='/api', version='1.0.0')
+
+**Changes:**
+
+- ``service_url`` → ``path``
+- New required parameter: ``version`` (defaults to '1.0.0')
+- ``enable_web_browsable_api`` now accepts ``bool | None`` (enables in debug mode if None)
+
+**Action Required:**
+
+.. code-block:: python
+
+    # Update all JSONRPC instantiations
+    # Old:
+    jsonrpc = JSONRPC(app, service_url='/api', enable_web_browsable_api=True)
+
+    # New:
+    jsonrpc = JSONRPC(app, path='/api', version='1.0.0', enable_web_browsable_api=True)
+
+2. Import Changes
+-----------------
+
+**Breaking Change:** More explicit imports
+
+v3.0.1
+^^^^^^
+
+.. code-block:: python
+
+    from flask_jsonrpc import JSONRPC
+
+v4.0.0
+^^^^^^
+
+.. code-block:: python
+
+    # Explicit imports with __all__ defined
+    from flask_jsonrpc import JSONRPC, JSONRPCView, JSONRPCBlueprint
+
+**Changes:**
+
+- Package now defines explicit ``__all__`` exports
+- Internal imports changed from relative to absolute
+
+**Action Required:**
+
+- Review your imports - they should still work but are now more explicit
+- Update if you were importing internal modules directly
+
+Types Module Restructure
+=========================
+
+**Breaking Change:** Complete restructure of the types module
+
+v3.0.1
+------
+
+.. code-block:: python
+
+    # Single types.py file
+    from flask_jsonrpc.types import JSONRPCNewType, String, Number, Object, Array, Boolean, Null
+
+v4.0.0
+------
+
+.. code-block:: python
+
+    # Types module now split into submodules
+    from flask_jsonrpc.types.types import (
+        JSONRPCNewType, String, Number, Object, Array, Boolean, Null
+    )
+    from flask_jsonrpc.types.methods import (
+        Summary, Description, Validate, Notification, Deprecated,
+        Tag, Error, Example, ExampleField
+    )
+    from flask_jsonrpc.types.params import (
+        # Parameter type definitions
+    )
+
+**Changes:**
+
+- ``flask_jsonrpc/types.py`` → ``flask_jsonrpc/types/`` (directory)
+- New submodules: ``types.py``, ``methods.py``, ``params.py``
+- ``JSONRPCNewType`` moved to ``types/types.py``
+- New method annotation types added
+
+**Action Required:**
+
+.. code-block:: python
+
+    # Update imports
+    # Old:
+    from flask_jsonrpc.types import String, Number, Object
+
+    # New:
+    from flask_jsonrpc.types.types import String, Number, Object
+
+Exception Handling
+==================
+
+**Breaking Change:** Exception initialization and default values
+
+v3.0.1
+------
+
+.. code-block:: python
+
+    class JSONRPCError(Exception):
+        code: int = 0
+        message: Optional[str] = None
+        data: Optional[Any] = None
+        status_code: int = 400
+
+        def __init__(self, message=None, code=None, data=None, status_code=None):
+            super().__init__()
+            if message is not None:
+                self.message = message
+            # ... conditional assignments
+
+v4.0.0
+------
+
+.. code-block:: python
+
+    class JSONRPCError(Exception):
+        message: str | None = None
+        code: int = 0
+        data: Any | None = None
+        status_code: int = 400
+
+        def __init__(self, message=None, code=None, data=None, status_code=None):
+            super().__init__(message)  # Message passed to base Exception
+            self.message = message or self.message
+            self.code = code or self.code
+            # ... using 'or' for defaults
+
+**Changes:**
+
+1. Error message now passed to base ``Exception.__init__()``
+2. Default assignment logic changed from conditional to ``or`` operator
+3. Built-in error classes now have explicit ``__init__`` methods
+4. ``ServerError`` has new ``original_exception`` parameter
+
+Built-in Exceptions Changes
+----------------------------
+
+v3.0.1
+^^^^^^
+
+.. code-block:: python
+
+    class ParseError(JSONRPCError):
+        code = -32700
+        message = _('Parse error')
+
+v4.0.0
+^^^^^^
+
+.. code-block:: python
+
+    class ParseError(JSONRPCError):
+        def __init__(
+            self,
+            message: str | None = _('Parse error'),
+            code: int | None = -32700,
+            data: Any | None = None,
+            status_code: int | None = 400,
+        ):
+            super().__init__(message, code, data, status_code)
+
+ServerError has new parameter
+------------------------------
+
+.. code-block:: python
+
+    # v4.0.0
+    class ServerError(JSONRPCError):
+        def __init__(
+            self,
+            message: str | None = _('Server error'),
+            code: int | None = -32000,
+            data: Any | None = None,
+            status_code: int | None = 500,
+            original_exception: BaseException | None = None,  # NEW
+        ):
+            self.original_exception = original_exception
+            super().__init__(message, code, data, status_code)
+
+**Action Required:**
+
+.. code-block:: python
+
+    # Update exception handling to use new ServerError parameter
+    try:
+        # Some operation
+        pass
+    except Exception as e:
+        # Old:
+        raise ServerError("Operation failed")
+
+        # New: Can capture original exception
+        raise ServerError("Operation failed", original_exception=e)
+
+Configuration
+=============
+
+**Breaking Change:** New configuration system with settings module
+
+v4.0.0
+------
+
+New configuration system introduced:
+
+.. code-block:: python
+
+    from flask_jsonrpc.conf import settings
+
+    # Configuration now managed through settings
+    # Flask app config keys with 'FLASK_JSONRPC_' prefix are auto-loaded
+    app.config['FLASK_JSONRPC_SOME_SETTING'] = 'value'
+
+**Changes:**
+
+- New ``flask_jsonrpc.conf`` module added
+- Settings can be overridden via Flask app config with ``FLASK_JSONRPC_`` prefix
+- Settings are loaded automatically during ``init_app()``
+
+**Action Required:**
+
+- Review if you were using any undocumented configuration
+- Migrate to new settings system if needed
+
+------------
+New Features
+------------
+
+1. Method Annotations
+=====================
+
+New type-safe method annotations for better API documentation:
+
+.. code-block:: python
+
+    from flask_jsonrpc.types.methods import (
+        Summary, Description, Tag, Deprecated, Example, ExampleField
+    )
+    from typing import Annotated
+
+    @jsonrpc.method('math.add')
+    def add(
+        a: Annotated[int, Summary("First number")],
+        b: Annotated[int, Summary("Second number")]
+    ) -> Annotated[int, Description("Sum of a and b")]:
+        return a + b
+
+2. Enhanced Browse API
+======================
+
+- Improved web browsable API interface
+- Support for rich text in method documentation
+- JSON editor for complex objects
+- Tag-based directory navigation
+- Auto-fill default parameter values
+- Interactive method execution
+
+3. OpenRPC Support
+==================
+
+New OpenRPC contrib module:
+
+.. code-block:: python
+
+    from flask_jsonrpc.contrib.openrpc import OpenRPC
+
+    openrpc = OpenRPC(app, path='/api/openrpc')
+
+4. Improved Pydantic Integration
+=================================
+
+Native support for Pydantic models:
+
+.. code-block:: python
+
+    from pydantic import BaseModel
+
+    class User(BaseModel):
+        name: str
+        age: int
+
+    @jsonrpc.method('user.create')
+    def create_user(user: User) -> User:
+        return user
+
+5. Error Handler System
+=======================
+
+Enhanced error handler mechanism:
+
+.. code-block:: python
+
+    @jsonrpc.errorhandler(ValueError)
+    def handle_value_error(error: ValueError):
+        return JSONRPCError(message=str(error), code=-32000)
+
+----------------
+Migration Steps
+----------------
+
+Step 1: Update Python Version
+==============================
+
+.. code-block:: bash
+
+    # Update your environment
+    pyenv install 3.10  # or higher
+    pyenv local 3.10
+
+    # Or with Docker
+    # FROM python:3.8  # Old
+    FROM python:3.10   # New
+
+Step 2: Update Dependencies
+============================
+
+.. code-block:: bash
+
+    # If using pip
+    pip install --upgrade "Flask JSON-RPC>=4.0.0"
+
+    # If using poetry
+    poetry add "Flask JSON-RPC@^4.0.0"
+
+    # If using uv (recommended)
+    uv add "Flask JSON-RPC>=4.0.0"
+
+Step 3: Update Code
+===================
+
+Update JSONRPC Initialization
+------------------------------
+
+.. code-block:: python
+
+    # Old
+    jsonrpc = JSONRPC(app, service_url='/api')
+
+    # New
+    jsonrpc = JSONRPC(app, path='/api', version='1.0.0')
+
+Update Type Imports
+-------------------
+
+.. code-block:: python
+
+    # Old
+    from flask_jsonrpc.types import String, Number
+
+    # New
+    from flask_jsonrpc.types.types import String, Number
+
+Update Exception Handling
+--------------------------
+
+.. code-block:: python
+
+    # Review all custom exception handling
+    # Consider using the new original_exception parameter
+
+    try:
+        risky_operation()
+    except Exception as e:
+        raise ServerError(
+            "Operation failed",
+            original_exception=e  # New feature
+        )
+
+Step 4: Test Thoroughly
+=======================
+
+.. code-block:: bash
+
+    # Run your test suite
+    pytest
+
+    # Check for deprecation warnings
+    python -W default your_app.py
+
+    # Test with the new typeguard (stricter validation)
+    # Some previously passing code may now fail validation
+
+Step 5: Update Configuration
+=============================
+
+.. code-block:: python
+
+    # If you had custom configuration, migrate to new system
+    app.config['FLASK_JSONRPC_CUSTOM_SETTING'] = 'value'
+
+--------
+Examples
+--------
+
+Complete Migration Example
+==========================
+
+Before (v3.0.1)
+---------------
+
+.. code-block:: python
+
+    from flask import Flask
+    from flask_jsonrpc import JSONRPC
+    from flask_jsonrpc.types import Number
+
+    app = Flask(__name__)
+    jsonrpc = JSONRPC(app, service_url='/api', enable_web_browsable_api=True)
+
+    @jsonrpc.method('math.add')
+    def add(a: Number, b: Number) -> Number:
+        """Add two numbers."""
+        return a + b
+
+    if __name__ == '__main__':
+        app.run(debug=True)
+
+After (v4.0.0)
+--------------
+
+.. code-block:: python
+
+    from flask import Flask
+    from flask_jsonrpc import JSONRPC
+    from flask_jsonrpc.types.types import Number
+    from flask_jsonrpc.types.methods import Summary, Description
+    from typing import Annotated
+
+    app = Flask(__name__)
+    jsonrpc = JSONRPC(
+        app,
+        path='/api',
+        version='1.0.0',
+        enable_web_browsable_api=True
+    )
+
+    @jsonrpc.method('math.add')
+    def add(
+        a: Annotated[Number, Summary("First number")],
+        b: Annotated[Number, Summary("Second number")]
+    ) -> Annotated[Number, Description("Sum of the two numbers")]:
+        """Add two numbers with enhanced documentation."""
+        return a + b
+
+    if __name__ == '__main__':
+        app.run(debug=True)
+
+Blueprint Migration Example
+===========================
+
+Before (v3.0.1)
+---------------
+
+.. code-block:: python
+
+    from flask_jsonrpc import JSONRPCBlueprint
+
+    math_api = JSONRPCBlueprint('math', __name__)
+
+    @math_api.method('multiply')
+    def multiply(a: int, b: int) -> int:
+        return a * b
+
+    # In main app
+    jsonrpc.register_blueprint(app, math_api, url_prefix='/math')
+
+After (v4.0.0)
+--------------
+
+.. code-block:: python
+
+    from flask_jsonrpc import JSONRPCBlueprint
+    from flask_jsonrpc.types.methods import Tag
+
+    math_api = JSONRPCBlueprint('math', __name__)
+
+    @math_api.method('multiply')
+    def multiply(
+        a: Annotated[int, Tag(name="math", summary="Math operations")],
+        b: Annotated[int, Tag(name="math")]
+    ) -> int:
+        """Multiply two numbers."""
+        return a * b
+
+    # In main app (same as before, but with optional enable_web_browsable_api)
+    jsonrpc.register_blueprint(
+        app,
+        math_api,
+        url_prefix='/math',
+        enable_web_browsable_api=True  # Can now be None to inherit from debug mode
+    )
+
+-----------------------
+Testing Your Migration
+-----------------------
+
+Checklist
+=========
+
+- ☐ Python version upgraded to 3.10+
+- ☐ All dependencies updated
+- ☐ ``service_url`` → ``path`` parameter renamed
+- ☐ ``version`` parameter added to JSONRPC initialization
+- ☐ Type imports updated (``flask_jsonrpc.types`` → ``flask_jsonrpc.types.types``)
+- ☐ Exception handling reviewed
+- ☐ All tests passing
+- ☐ No deprecation warnings
+- ☐ Web browsable API working (if enabled)
+- ☐ Type validation working correctly with new typeguard
+
+Common Issues
+=============
+
+1. Import Errors
+----------------
+
+.. code-block:: text
+
+    ImportError: cannot import name 'String' from 'flask_jsonrpc.types'
+
+**Solution:** Update import to ``from flask_jsonrpc.types.types import String``
+
+2. Type Validation Failures
+----------------------------
+
+.. code-block:: text
+
+    TypeCheckError: ...
+
+**Solution:** The new typeguard 4.x is stricter. Review type annotations and ensure they're correct.
+
+3. Missing version parameter
+-----------------------------
+
+.. code-block:: text
+
+    TypeError: __init__() missing 1 required positional argument: 'version'
+
+**Solution:** Add ``version='1.0.0'`` parameter to JSONRPC initialization.
+
+---------
+Resources
+---------
+
+- `Flask JSON-RPC Documentation <https://flask-jsonrpc.readthedocs.io/>`_
+- `JSON-RPC 2.0 Specification <https://www.jsonrpc.org/specification>`_
+- `Changelog <https://github.com/cenobites/flask-jsonrpc/blob/master/CHANGELOG.md>`_
+- `Examples <https://github.com/cenobites/flask-jsonrpc/tree/master/examples>`_
+- `Live Demo <https://flask-jsonrpc.cenobit.es/api/browse/#/>`_
+
+-------
+Support
+-------
+
+If you encounter issues during migration:
+
+1. Check the `GitHub Issues <https://github.com/cenobites/flask-jsonrpc/issues>`_
+2. Review the `examples directory <https://github.com/cenobites/flask-jsonrpc/tree/master/examples>`_
+3. Open a new issue with:
+
+   - Your v3.0.1 code
+   - Error messages
+   - Python version
+   - Flask JSON-RPC version
+
+----
+
+**Last Updated:** December 10, 2025
+
+**Flask JSON-RPC Version:** 4.0.0

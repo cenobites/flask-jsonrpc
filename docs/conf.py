@@ -78,8 +78,8 @@ html_sidebars = {
 }
 singlehtml_sidebars = {'index': ['project.html', 'localtoc.html', 'ethicalads.html']}
 html_static_path = ['_static']
-html_favicon = '_static/flask-jsonrpc-icon.svg'
-html_logo = '_static/flask-jsonrpc-icon.svg'
+html_favicon = '_static/flask-jsonrpc-icon.png'
+html_logo = '_static/flask-jsonrpc-icon.png'
 html_title = f'Flask-JSONRPC Documentation ({version})'
 html_show_sourcelink = False
 
