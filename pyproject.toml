@@ -1,6 +1,6 @@
 [project]
 name = "Flask-JSONRPC"
-version = "4.0.0"
+version = "4.1.0a1"
 description = "Adds JSONRPC support to Flask."
 readme = {file = "README.md", content-type = "text/markdown"}
 license = {file = "LICENSE.txt"}
@@ -82,7 +82,7 @@ parallel-tests = [
 integration-tests = [
     {include-group = "ci-tests"},
     "pytest-playwright==0.7.2", # https://github.com/microsoft/playwright-python
-    "playwright==1.56.0", # https://github.com/microsoft/playwright-python
+    "playwright==1.57.0", # https://github.com/microsoft/playwright-python
 ]
 style = [
     "ruff==0.14.8", # https://github.com/astral-sh/ruff
