@@ -24,7 +24,7 @@ jobs:
         python-version: ["3.14"]
     steps:
       - uses: actions/checkout@v6
-      - uses: astral-sh/setup-uv@v7.1.5
+      - uses: astral-sh/setup-uv@v7.1.6
         with:
           enable-cache: true
           prune-cache: false
@@ -32,7 +32,7 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           allow-prereleases: true
-      - uses: actions/cache@v4.3.0
+      - uses: actions/cache@v5.0.1
         with:
           path: ~/.cache/pre-commit
           key: pre-commit|${{ hashFiles('pyproject.toml', '.pre-commit-config.yaml') }}
