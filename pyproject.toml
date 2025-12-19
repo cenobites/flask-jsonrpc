@@ -85,7 +85,7 @@ integration-tests = [
     "playwright==1.57.0", # https://github.com/microsoft/playwright-python
 ]
 style = [
-    "ruff==0.14.9", # https://github.com/astral-sh/ruff
+    "ruff==0.14.10", # https://github.com/astral-sh/ruff
 ]
 typing = [
     "mypy==1.18.2;python_version>='3.11'", # https://github.com/python/mypy
