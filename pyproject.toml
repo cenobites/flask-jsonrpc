@@ -77,7 +77,7 @@ ci-tests = [
 ]
 parallel-tests = [
     {include-group = "ci-tests"},
-    "pytest-run-parallel==0.8.0", # https://github.com/Quansight-Labs/pytest-run-parallel
+    "pytest-run-parallel==0.8.1", # https://github.com/Quansight-Labs/pytest-run-parallel
 ]
 integration-tests = [
     {include-group = "ci-tests"},
@@ -85,11 +85,11 @@ integration-tests = [
     "playwright==1.57.0", # https://github.com/microsoft/playwright-python
 ]
 style = [
-    "ruff==0.14.9", # https://github.com/astral-sh/ruff
+    "ruff==0.14.10", # https://github.com/astral-sh/ruff
 ]
 typing = [
     "mypy==1.18.2;python_version>='3.11'", # https://github.com/python/mypy
-    "types_setuptools==80.9.0.20250822", # https://github.com/python/typeshed
+    "types_setuptools==80.9.0.20251223", # https://github.com/python/typeshed
     "typeguard==4.4.4", # https://github.com/agronholm/typeguard
     "pyright==1.1.407;python_version>='3.11'", # https://github.com/microsoft/pyright
 ]
