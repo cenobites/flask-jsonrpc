@@ -100,7 +100,7 @@ build = [
     "hatch==1.16.2", # https://github.com/pypa/hatch
 ]
 cbuild = [
-    "cibuildwheel==3.2.0;python_version>='3.11'", # https://github.com/pypa/cibuildwheel
+    "cibuildwheel==3.3.1;python_version>='3.11'", # https://github.com/pypa/cibuildwheel
     "hatch-mypyc==0.16.0", # https://github.com/ofek/hatch-mypyc
     "mypy[mypyc]==1.18.2", # https://github.com/python/mypy
     "mypy-extensions==1.1.0", # https://github.com/python/mypy_extensions

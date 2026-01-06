@@ -418,7 +418,7 @@ wheels = [
 
 [[package]]
 name = "cibuildwheel"
-version = "3.2.0"
+version = "3.3.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "bashlex", marker = "python_full_version >= '3.11'" },
@@ -434,9 +434,9 @@ dependencies = [
     { name = "pyelftools", marker = "python_full_version >= '3.11'" },
     { name = "wheel", marker = "python_full_version >= '3.11'" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/42/33/c3e5884a4f996d9138ace03464d0396752ec8c81adada549421bc68d185f/cibuildwheel-3.2.0.tar.gz", hash = "sha256:03ceab277255dc6c6451b25aad78844f4c07b03e410ee7411e9045b20ef6466f", size = 354877, upload-time = "2025-09-22T20:46:24.522Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/cb/8c/61b0cca8be7eef6af32b0c0e62f78dc8c91572ea8870bc6c4d061f259832/cibuildwheel-3.3.1.tar.gz", hash = "sha256:ae6eafe6f7ed3bab38919e08bf3eb92085f6387c5f7a746b40cc4775a8462f9a", size = 358374, upload-time = "2026-01-05T19:58:17.606Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/52/b0/cbf2260b9cc2fea23abd2fac607b4d3692dfd250062fba3523b8008847bd/cibuildwheel-3.2.0-py3-none-any.whl", hash = "sha256:5349f85b89ed63d53bf79315996adb9d4e507c4b69dacb480c1eef7fddde21e1", size = 126344, upload-time = "2025-09-22T20:46:22.157Z" },
+    { url = "https://files.pythonhosted.org/packages/73/5c/3b6689ae5c8a720c275f9832c2d1611a2a1f445bfb16701a13f5f604af5c/cibuildwheel-3.3.1-py3-none-any.whl", hash = "sha256:6d3c387e77c5850819294863eeee4e57fb7e8ecdf87b7412e763222c16e26424", size = 127164, upload-time = "2026-01-05T19:58:16.338Z" },
 ]
 
 [[package]]
@@ -867,7 +867,7 @@ provides-extras = ["async", "dotenv"]
 [package.metadata.requires-dev]
 build = [{ name = "hatch", specifier = "==1.16.2" }]
 cbuild = [
-    { name = "cibuildwheel", marker = "python_full_version >= '3.11'", specifier = "==3.2.0" },
+    { name = "cibuildwheel", marker = "python_full_version >= '3.11'", specifier = "==3.3.1" },
     { name = "hatch-mypyc", specifier = "==0.16.0" },
     { name = "mypy", extras = ["mypyc"], specifier = "==1.18.2" },
     { name = "mypy-extensions", specifier = "==1.1.0" },
