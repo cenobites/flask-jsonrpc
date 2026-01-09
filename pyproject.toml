@@ -85,13 +85,13 @@ integration-tests = [
     "playwright==1.57.0", # https://github.com/microsoft/playwright-python
 ]
 style = [
-    "ruff==0.14.10", # https://github.com/astral-sh/ruff
+    "ruff==0.14.11", # https://github.com/astral-sh/ruff
 ]
 typing = [
     "mypy==1.18.2;python_version>='3.11'", # https://github.com/python/mypy
     "types_setuptools==80.9.0.20251223", # https://github.com/python/typeshed
     "typeguard==4.4.4", # https://github.com/agronholm/typeguard
-    "pyright==1.1.407;python_version>='3.11'", # https://github.com/microsoft/pyright
+    "pyright==1.1.408;python_version>='3.11'", # https://github.com/microsoft/pyright
 ]
 security = [
     "bandit;python_version>='3.11'", # https://github.com/PyCQA/bandit
