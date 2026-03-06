@@ -24,6 +24,7 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
+import os
 import random
 import typing as t
 from datetime import datetime, timezone, timedelta
@@ -115,7 +116,7 @@ class CustomJSONRPCBrowse(JSONRPCBrowse):
 app = Flask('openrpc', template_folder='src/petstore/templates', static_folder='src/petstore/static')
 app.config['JWT_COOKIE_SECURE'] = False
 app.config['JWT_TOKEN_LOCATION'] = ['headers']  # 'cookies' is supported but disabled for simplicity
-app.config['JWT_SECRET_KEY'] = 'super-secret'
+app.config['JWT_SECRET_KEY'] = str(os.urandom(16))
 app.config['JWT_COOKIE_CSRF_PROTECT'] = False
 app.config['JWT_ACCESS_CSRF_COOKIE_PATH'] = '/api'
 app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=1)

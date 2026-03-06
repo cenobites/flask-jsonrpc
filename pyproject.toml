@@ -1,6 +1,6 @@
 [project]
 name = "Flask-JSONRPC"
-version = "4.1.0a1"
+version = "4.1.0a2"
 description = "Adds JSONRPC support to Flask."
 readme = {file = "README.md", content-type = "text/markdown"}
 license = {file = "LICENSE.txt"}
@@ -28,7 +28,7 @@ classifiers = [
 requires-python = ">=3.10"
 dependencies = [
     "Flask>=3.0.0,<4.0", # https://github.com/pallets/flask
-    "typeguard==4.4.4", # https://github.com/agronholm/typeguard
+    "typeguard==4.5.1", # https://github.com/agronholm/typeguard
     "typing-extensions>=4.3.0", # https://github.com/python/typing/blob/master/typing_extensions/README.rst
     "typing-inspect==0.9.0", # https://github.com/ilevkivskyi/typing_inspect
     "pydantic>=1.7.4,!=1.8,!=1.8.1,!=2.0.0,!=2.0.1,!=2.1.0,<3.0.0", # https://github.com/pydantic/pydantic
@@ -50,7 +50,7 @@ Website = "https://flask-jsonrpc.readthedocs.io/"
 [dependency-groups]
 dev = [
     "ipdb", # https://github.com/gotcha/ipdb
-    "tox<4.30", # https://github.com/tox-dev/tox
+    "tox", # https://github.com/tox-dev/tox
     "tox-uv", # https://github.com/tox-dev/tox-uv
 ]
 pre-commit = [
@@ -62,10 +62,10 @@ tests = [
     "pytest-cov==7.0.0", # https://github.com/pytest-dev/pytest-cov
     "pytest-xdist==3.8.0", # https://github.com/pytest-dev/pytest-xdist
     "pytest-sugar==1.1.1", # https://github.com/Frozenball/pytest-sugar
-    "pytest-env==1.2.0", # https://github.com/MobileDynasty/pytest-env
+    "pytest-env==1.5.0", # https://github.com/MobileDynasty/pytest-env
     "pytest-clarity==1.0.1", # https://github.com/darrenburns/pytest-clarity
-    "typeguard==4.4.4", # https://github.com/agronholm/typeguard
-    "coverage[toml]==7.13.1", # https://github.com/nedbat/coveragepy
+    "typeguard==4.5.1", # https://github.com/agronholm/typeguard
+    "coverage[toml]==7.13.4", # https://github.com/nedbat/coveragepy
     "requests==2.32.5", # https://github.com/psf/requests
 ]
 ci-tests = [
@@ -82,27 +82,27 @@ parallel-tests = [
 integration-tests = [
     {include-group = "ci-tests"},
     "pytest-playwright==0.7.2", # https://github.com/microsoft/playwright-python
-    "playwright==1.57.0", # https://github.com/microsoft/playwright-python
+    "playwright==1.58.0", # https://github.com/microsoft/playwright-python
 ]
 style = [
-    "ruff==0.14.11", # https://github.com/astral-sh/ruff
+    "ruff==0.15.5", # https://github.com/astral-sh/ruff
 ]
 typing = [
-    "mypy==1.18.2;python_version>='3.11'", # https://github.com/python/mypy
-    "types_setuptools==80.9.0.20251223", # https://github.com/python/typeshed
-    "typeguard==4.4.4", # https://github.com/agronholm/typeguard
+    "mypy==1.19.1;python_version>='3.11'", # https://github.com/python/mypy
+    "types_setuptools==82.0.0.20260210", # https://github.com/python/typeshed
+    "typeguard==4.5.1", # https://github.com/agronholm/typeguard
     "pyright==1.1.408;python_version>='3.11'", # https://github.com/microsoft/pyright
 ]
 security = [
     "bandit;python_version>='3.11'", # https://github.com/PyCQA/bandit
 ]
 build = [
-    "hatch==1.16.2", # https://github.com/pypa/hatch
+    "hatch==1.16.5", # https://github.com/pypa/hatch
 ]
 cbuild = [
     "cibuildwheel==3.2.0;python_version>='3.11'", # https://github.com/pypa/cibuildwheel
     "hatch-mypyc==0.16.0", # https://github.com/ofek/hatch-mypyc
-    "mypy[mypyc]==1.18.2", # https://github.com/python/mypy
+    "mypy[mypyc]==1.19.1", # https://github.com/python/mypy
     "mypy-extensions==1.1.0", # https://github.com/python/mypy_extensions
     "setuptools>=77.0.0", # https://github.com/pypa/setuptools
 ]
@@ -323,7 +323,7 @@ required_plugins = [
     "pytest-cov==7.0.0",
     "pytest-xdist==3.8.0",
     "pytest-sugar==1.1.1",
-    "pytest-env==1.2.0",
+    "pytest-env==1.5.0",
     "pytest-clarity==1.0.1",
 ]
 
@@ -406,8 +406,8 @@ typeCheckingMode = "basic"
 
 [tool.tox]
 requires = [
-    "tox<4.30", # tox-dev issue: #3602
-    "tox-uv>=1.26.1"
+    "tox>=4.30",
+    "tox-uv>=1.33.1"
 ]
 env_list = [
     "py3.14", "py3.14t", "py3.13", "py3.12", "py3.11", "py3.10",
