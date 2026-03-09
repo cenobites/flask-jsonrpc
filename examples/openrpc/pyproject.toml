@@ -15,14 +15,14 @@ async = ["Flask[async]>=3.0.0,<4.0"]
 [dependency-groups]
 dev = [
     "tox>=4.30",
-    "tox-uv>=1.26.1"
+    "tox-uv>=1.33.1"
 ]
 tests = [
     "pytest==9.0.2",
     "pytest-cov==7.0.0",
     "pytest-xdist==3.8.0",
     "pytest-sugar==1.1.1",
-    "pytest-env==1.2.0"
+    "pytest-env==1.5.0"
 ]
 
 [build-system]
@@ -50,7 +50,7 @@ filterwarnings = ["error"]
 [tool.tox]
 requires = [
     "tox>=4.30",
-    "tox-uv>=1.26.1"
+    "tox-uv>=1.33.1"
 ]
 env_list = [
     "py3.14", "py3.14t", "py3.13", "py3.12", "py3.11", "py3.10",
