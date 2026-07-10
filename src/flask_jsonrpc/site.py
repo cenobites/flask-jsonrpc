@@ -310,20 +310,6 @@ class JSONRPCSite:
 
             if validate:
                 binded_params = type_checker(view_func, binded_params)
-
-            resp_view = current_app.ensure_sync(view_func)(**binded_params)
-
-            # TODO: Enhance the checker to return the type
-            view_fun_annotations = t.get_type_hints(view_func) if validate else {}
-            view_fun_return: t.Any | None = view_fun_annotations.pop('return', type(None))
-            if validate and resp_view is not None and view_fun_return is type(None):
-                resp_view_qn = qualified_name(resp_view)
-                view_fun_return_qn = qualified_name(view_fun_return)
-                raise TypeError(
-                    f'return type of {resp_view_qn} must be a type; got {view_fun_return_qn} instead'
-                ) from None
-
-            return resp_view
         except AnnotatedMetadataTypeError as e:
             self.logger.info('invalid annotated type checked for: %s', view_func.__name__, exc_info=e)
             raise InvalidParamsError(
@@ -337,6 +323,27 @@ class JSONRPCSite:
         except (TypeError, TypeCheckError) as e:
             self.logger.info('invalid type checked for: %s', getattr(view_func, '__name__', view_func), exc_info=e)
             raise InvalidParamsError(data={'message': str(e)}) from e
+
+        try:
+            resp_view = current_app.ensure_sync(view_func)(**binded_params)
+        except TypeCheckError as e:
+            # Only the argument type checking performed by typeguard while calling the view is an
+            # Invalid params error; a TypeError raised by the view's own logic is left to propagate
+            # so that it is reported as a Server error instead.
+            self.logger.info('invalid type checked for: %s', getattr(view_func, '__name__', view_func), exc_info=e)
+            raise InvalidParamsError(data={'message': str(e)}) from e
+
+        # TODO: Enhance the checker to return the type
+        view_fun_annotations = t.get_type_hints(view_func) if validate else {}
+        view_fun_return: t.Any | None = view_fun_annotations.pop('return', type(None))
+        if validate and resp_view is not None and view_fun_return is type(None):
+            resp_view_qn = qualified_name(resp_view)
+            view_fun_return_qn = qualified_name(view_fun_return)
+            raise InvalidParamsError(
+                data={'message': f'return type of {resp_view_qn} must be a type; got {view_fun_return_qn} instead'}
+            ) from None
+
+        return resp_view
 
     def dispatch(
         self: Self, req_json: dict[str, t.Any]

@@ -843,6 +843,36 @@ def test_site_with_view_func_return_raises_exc() -> None:
         assert headers == {}
 
 
+def test_site_with_view_func_raising_type_error() -> None:
+    def view_func(name: str) -> str:
+        raise TypeError('some runtime error')
+
+    view_func.jsonrpc_validate = True
+    view_func.jsonrpc_method_params = {'name': str}
+    view_func.jsonrpc_method_return = str
+
+    app = Flask('site')
+    jsonrpc_site = JSONRPCSite(version='1.0.0', path='/path', base_url='/base')
+    jsonrpc_site.register('app.view_func', view_func=view_func)
+
+    with app.test_request_context(
+        '/base/path', method='POST', json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.view_func', 'params': ['Lou']}
+    ):
+        rv, status_code, headers = jsonrpc_site.dispatch_request()
+        assert rv == {
+            'id': 1,
+            'jsonrpc': '2.0',
+            'error': {
+                'code': -32000,
+                'data': {'message': 'some runtime error'},
+                'message': 'Server error',
+                'name': 'ServerError',
+            },
+        }
+        assert status_code == 500
+        assert headers == {}
+
+
 def test_site_with_view_func_return_annotated_raises_exc() -> None:
     def view_func(
         name: t.Annotated[str, 'documentation of name parameter'],
