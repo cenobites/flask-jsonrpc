@@ -309,3 +309,14 @@ def test_bindfy() -> None:
     setattr(view_func, 'jsonrpc_method_params', fn_annotations)  # noqa: B010
 
     bindfy(view_func, {'name': 'Eve'})
+
+
+@pytest.mark.parametrize(('params', 'expected'), [({}, 'default'), ({'name': None}, None), ({'name': 'Eve'}, 'Eve')])
+def test_bindfy_with_default_and_nullable_parameter(params: dict[str, t.Any], expected: str | None) -> None:
+    def view_func(name: str | None = 'default') -> str | None:
+        return name
+
+    setattr(view_func, 'jsonrpc_method_params', {'name': str | None})  # noqa: B010
+    setattr(view_func, 'jsonrpc_method_default_params', {'name': 'default'})  # noqa: B010
+
+    assert bindfy(view_func, params) == {'name': expected}

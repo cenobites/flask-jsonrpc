@@ -87,6 +87,75 @@ class CustomException(Exception):
         self.data = data
 
 
+@pytest.mark.parametrize(
+    ('params', 'expected'),
+    [
+        ({}, ['default', 'suffix']),
+        ([], ['default', 'suffix']),
+        ({'name': None}, [None, 'suffix']),
+        ([None], [None, 'suffix']),
+        ({'name': None, 'suffix': None}, [None, None]),
+        ([None, None], [None, None]),
+        (['Eve'], ['Eve', 'suffix']),
+        (['Eve', None], ['Eve', None]),
+        ({'suffix': None}, ['default', None]),
+        (['Eve', 'tail', 'ignored'], ['Eve', 'tail']),
+        ({'name': 'Eve', 'extra': 'ignored'}, ['Eve', 'suffix']),
+    ],
+)
+def test_app_with_nullable_parameter_defaults(
+    params: dict[str, t.Any] | list[t.Any], expected: list[str | None]
+) -> None:
+    app = Flask('test_app')
+    jsonrpc = JSONRPC(app, '/api')
+
+    @jsonrpc.method('app.echo')
+    def echo(name: str | None = 'default', suffix: str | None = 'suffix') -> list[str | None]:
+        return [name, suffix]
+
+    with app.test_client() as client:
+        rv = client.post('/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.echo', 'params': params})
+
+    assert rv.status_code == 200
+    assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': expected}
+
+
+@pytest.mark.parametrize('params', [{'name': None}, [None]])
+def test_app_rejects_null_for_nonnullable_parameter_with_default(params: dict[str, t.Any] | list[t.Any]) -> None:
+    app = Flask('test_app')
+    jsonrpc = JSONRPC(app, '/api')
+    called = False
+
+    @jsonrpc.method('app.echo')
+    def echo(name: str = 'default') -> str:
+        nonlocal called
+        called = True
+        return name
+
+    with app.test_client() as client:
+        rv = client.post('/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.echo', 'params': params})
+
+    assert rv.status_code == 400
+    assert rv.json['error']['code'] == -32602
+    assert called is False
+
+
+@pytest.mark.parametrize('params', [{'name': None}, [None]])
+def test_app_preserves_null_when_validation_is_disabled(params: dict[str, t.Any] | list[t.Any]) -> None:
+    app = Flask('test_app')
+    jsonrpc = JSONRPC(app, '/api')
+
+    @jsonrpc.method('app.echo', validate=False)
+    def echo(name: str = 'default') -> bool:
+        return name is None
+
+    with app.test_client() as client:
+        rv = client.post('/api', json={'id': 1, 'jsonrpc': '2.0', 'method': 'app.echo', 'params': params})
+
+    assert rv.status_code == 200
+    assert rv.json == {'id': 1, 'jsonrpc': '2.0', 'result': True}
+
+
 def test_app_create() -> None:
     app = Flask('test_app', instance_relative_config=True)
     jsonrpc = JSONRPC(app, '/api', enable_web_browsable_api=True)
