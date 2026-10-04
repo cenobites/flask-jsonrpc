@@ -189,7 +189,6 @@ def bindfy(view_func: t.Callable[..., t.Any], params: dict[str, t.Any]) -> dict[
     view_func_params = getattr(view_func, 'jsonrpc_method_params', {})
     view_func_default_params = getattr(view_func, 'jsonrpc_method_default_params', {})
     for param_name, param_type in view_func_params.items():
-        param_value = params.get(param_name)
-        param_default_value = view_func_default_params.get(param_name, None)
-        binded_params[param_name] = loads(param_type, param_value if param_value is not None else param_default_value)
+        param_value = params.get(param_name, view_func_default_params.get(param_name))
+        binded_params[param_name] = loads(param_type, param_value)
     return binded_params

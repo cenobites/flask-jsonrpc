@@ -297,9 +297,7 @@ class JSONRPCSite:
         validate = getattr(view_func, 'jsonrpc_validate', settings.DEFAULT_JSONRPC_METHOD_VALIDATE)
         try:
             if isinstance(params, list):
-                kw_params = {}
-                for i, (param_name, _param_type) in enumerate(view_func_params.items()):
-                    kw_params[param_name] = (params[i : i + 1] or [None])[0]
+                kw_params = dict(zip(view_func_params, params, strict=False))
                 binded_params = bindfy(view_func, kw_params)
             elif isinstance(params, dict):
                 binded_params = bindfy(view_func, params)
